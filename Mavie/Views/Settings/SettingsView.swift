@@ -6,7 +6,6 @@ struct SettingsView: View {
     @Query private var entries: [CycleEntry]
     @Environment(\.modelContext) private var modelContext
 
-    @State private var showingThemePicker = false
     @State private var showingFirstDayPicker = false
     @State private var showingResetOnboardingConfirm = false
     @State private var showingDeleteFirst = false
@@ -35,15 +34,6 @@ struct SettingsView: View {
             .background(MavieColor.backgroundCream.ignoresSafeArea())
             .navigationTitle("Settings")
         }
-        .sheet(isPresented: $showingThemePicker) {
-            if let profile {
-                ThemePickerSheet(
-                    selection: themeBinding(profile: profile),
-                    isPresented: $showingThemePicker
-                )
-                .presentationDetents([.medium])
-            }
-        }
         .sheet(isPresented: $showingFirstDayPicker) {
             if let profile {
                 FirstDayOfWeekPickerSheet(
@@ -68,7 +58,16 @@ struct SettingsView: View {
             isPresented: $showingDeleteFirst,
             titleVisibility: .visible
         ) {
-            Button("Continue", role: .destructive) { showingDeleteSecond = true }
+            Button("Continue", role: .destructive) {
+                // Delay so SwiftUI fully dismisses this dialog before
+                // attempting to present the second one. Without the gap,
+                // the second confirmation occasionally fails to appear on
+                // some iOS builds.
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(400))
+                    showingDeleteSecond = true
+                }
+            }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This permanently removes every cycle entry, your profile, and any settings. This cannot be undone.")
@@ -178,14 +177,6 @@ struct SettingsView: View {
     private var appSection: some View {
         SettingsSectionCard(title: "App") {
             SettingsRow(
-                icon: themeIcon,
-                iconColor: MavieColor.primaryPlum,
-                title: "Theme",
-                detail: profile?.theme.displayName ?? "System",
-                action: { showingThemePicker = true }
-            )
-            SettingsDivider()
-            SettingsRow(
                 icon: "calendar",
                 iconColor: MavieColor.primaryPlum,
                 title: "First day of week",
@@ -276,13 +267,6 @@ struct SettingsView: View {
         )
     }
 
-    private func themeBinding(profile: UserProfile) -> Binding<AppTheme> {
-        Binding(
-            get: { profile.theme },
-            set: { profile.theme = $0; try? modelContext.save() }
-        )
-    }
-
     private func firstDayBinding(profile: UserProfile) -> Binding<Int> {
         Binding(
             get: { profile.firstDayOfWeek },
@@ -291,14 +275,6 @@ struct SettingsView: View {
     }
 
     // MARK: - Computed labels
-
-    private var themeIcon: String {
-        switch profile?.theme ?? .system {
-        case .system: return "circle.lefthalf.filled"
-        case .light:  return "sun.max"
-        case .dark:   return "moon.stars"
-        }
-    }
 
     private var firstDayLabel: String {
         switch profile?.firstDayOfWeek ?? 1 {

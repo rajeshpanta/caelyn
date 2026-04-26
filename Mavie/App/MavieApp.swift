@@ -16,18 +16,11 @@ struct MavieApp: App {
 }
 
 private struct ApplyMavieThemeModifier: ViewModifier {
-    @Query private var profiles: [UserProfile]
-
     func body(content: Content) -> some View {
-        content.preferredColorScheme(colorScheme)
-    }
-
-    private var colorScheme: ColorScheme? {
-        switch profiles.first?.theme ?? .system {
-        case .system: return nil
-        case .light:  return .light
-        case .dark:   return .dark
-        }
+        // Locked to light mode until Phase 17 ships dark-variant tokens for the
+        // cream/blush/lavender palette. The AppTheme enum and picker remain
+        // wired so we can flip this on without re-plumbing.
+        content.preferredColorScheme(.light)
     }
 }
 

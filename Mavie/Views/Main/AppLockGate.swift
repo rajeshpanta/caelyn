@@ -39,9 +39,11 @@ struct AppLockGate<Content: View>: View {
             if newPhase == .background {
                 isUnlocked = false
                 errorMessage = nil
-            } else if newPhase == .active && lockEnabled && !isUnlocked && !attemptingAuth {
-                Task { await tryUnlock() }
             }
+            // Foreground resume shows the lock screen; the user taps the
+            // Unlock button to authenticate. This avoids a re-prompt loop
+            // when the user has already cancelled Face ID once. The initial
+            // cold-launch auto-prompt still fires via .task(id: lockEnabled).
         }
     }
 
