@@ -6,6 +6,13 @@ struct HomeMoodCheckIn: View {
 
     private let moods: [Mood] = [.calm, .happy, .energetic, .tired, .sensitive, .moody, .anxious, .focused]
 
+    private var subtitle: String {
+        if let selectedMood {
+            return "You logged feeling \(selectedMood.displayName.lowercased()) today."
+        }
+        return "Tap a mood to log a quick check-in."
+    }
+
     var body: some View {
         MavieCard {
             VStack(alignment: .leading, spacing: MavieSpacing.md) {
@@ -13,9 +20,7 @@ struct HomeMoodCheckIn: View {
                     Text("How are you feeling today?")
                         .font(MavieFont.headline)
                         .foregroundStyle(MavieColor.deepPlumText)
-                    Text(selectedMood == nil
-                         ? "Tap a mood to log a quick check-in."
-                         : "You logged feeling \(selectedMood!.displayName.lowercased()) today.")
+                    Text(subtitle)
                         .font(MavieFont.subheadline)
                         .foregroundStyle(MavieColor.deepPlumText.opacity(0.6))
                 }

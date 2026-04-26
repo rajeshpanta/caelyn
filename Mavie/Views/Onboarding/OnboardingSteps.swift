@@ -205,7 +205,6 @@ struct CycleLengthStep: View {
                 )
         }
         .buttonStyle(.plain)
-        .scaleEffect(selected ? 1.0 : 1.0)
     }
 }
 
