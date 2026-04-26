@@ -8,6 +8,11 @@ final class MavieUITests: XCTestCase {
     func testAppLaunches() throws {
         let app = XCUIApplication()
         app.launch()
-        XCTAssertTrue(app.staticTexts["Mavie"].waitForExistence(timeout: 5))
+        let onboardingHero = app.staticTexts["Meet Mavie"]
+        let mainHomeTab = app.tabBars.buttons["Home"]
+        XCTAssertTrue(
+            onboardingHero.waitForExistence(timeout: 5) || mainHomeTab.waitForExistence(timeout: 5),
+            "Expected either onboarding welcome (first launch) or main tab bar (already onboarded) to appear."
+        )
     }
 }
