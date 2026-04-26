@@ -300,6 +300,27 @@ struct SettingsView: View {
                 Spacer(minLength: 0)
             }
             .padding(MavieSpacing.md)
+
+            Rectangle()
+                .fill(MavieColor.deepPlumText.opacity(0.07))
+                .frame(height: 1)
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 6) {
+                    Image(systemName: "stethoscope")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(MavieColor.deepPlumText.opacity(0.55))
+                    Text("Health disclaimer")
+                        .font(MavieFont.caption.weight(.semibold))
+                        .foregroundStyle(MavieColor.deepPlumText.opacity(0.55))
+                        .tracking(0.4)
+                }
+                Text("Mavie is a personal cycle tracker, not a medical device. Predictions and patterns are estimates based on your logs and shouldn't be used to diagnose, treat, or prevent any condition. For medical concerns, please consult a healthcare provider.")
+                    .font(MavieFont.caption)
+                    .foregroundStyle(MavieColor.deepPlumText.opacity(0.7))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(MavieSpacing.md)
         }
     }
 
@@ -403,6 +424,10 @@ struct SettingsView: View {
         for entry in entries { modelContext.delete(entry) }
         for profile in profiles { modelContext.delete(profile) }
         try? modelContext.save()
+        // Pending local notifications would still fire and reference data
+        // that no longer exists — cancel them as part of the wipe.
+        NotificationService.cancelAll()
+        Haptics.warning()
     }
 }
 

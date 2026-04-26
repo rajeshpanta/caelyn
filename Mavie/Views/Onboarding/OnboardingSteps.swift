@@ -68,6 +68,12 @@ struct PrivacyStep: View {
                 privacyRow(icon: "faceid", title: "Face ID lock available", body: "Optional, but built in for when you want it.")
                 privacyRow(icon: "hand.raised.slash.fill", title: "No ads or selling data", body: "Mavie has no third-party trackers.")
                 privacyRow(icon: "square.and.arrow.up", title: "Export or delete anytime", body: "It's your data. Take it with you, or wipe it.")
+
+                Text("Mavie is a personal cycle tracker, not a medical device. Predictions are estimates based on your logs. For medical concerns, please consult a healthcare provider.")
+                    .font(MavieFont.caption)
+                    .foregroundStyle(MavieColor.deepPlumText.opacity(0.55))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, MavieSpacing.xs)
             }
         } footer: {
             MavieButton(title: "Continue", variant: .primary) { vm.next() }
