@@ -91,7 +91,7 @@ private struct HealthKitConnectForm: View {
                 whatRow("sparkles", "Symptoms", "Bloating, fatigue, cramps, and more")
             }
             MavieButton(
-                title: isAuthorizing ? "Connecting…" : "Connect Apple Health",
+                title: isAuthorizing ? "Connecting…" : (HealthKitService.isAvailable ? "Connect Apple Health" : "Coming soon"),
                 variant: .primary,
                 icon: "heart.text.square"
             ) {
@@ -99,9 +99,10 @@ private struct HealthKitConnectForm: View {
             }
             .disabled(isAuthorizing || !HealthKitService.isAvailable)
             if !HealthKitService.isAvailable {
-                Text("Apple Health isn't available on this device.")
+                Text("Apple Health sync isn't enabled in this build of Mavie. We'll turn it on in an upcoming release.")
                     .font(MavieFont.subheadline)
-                    .foregroundStyle(MavieColor.alertRose)
+                    .foregroundStyle(MavieColor.deepPlumText.opacity(0.55))
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
@@ -150,7 +151,7 @@ private struct HealthKitConnectForm: View {
                 )
                 ToggleCard(
                     title: "Read symptoms from Health",
-                    subtitle: "Coming soon — symptom import lands in Phase 17.",
+                    subtitle: "Symptom import from Health is coming in a future update.",
                     icon: "sparkle",
                     isOn: bind(\.hkReadSymptoms)
                 )

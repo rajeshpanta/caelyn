@@ -18,8 +18,14 @@ struct PaywallView: View {
                         hero
                         titleBlock
                         featureSection
-                        tierCards
-                        ctaButton
+                        if productsAreReady {
+                            tierCards
+                            ctaButton
+                        } else if purchase.isLoadingProducts {
+                            loadingState
+                        } else {
+                            unavailableState
+                        }
                         footerLinks
                         trustCopy
                     }
@@ -269,6 +275,41 @@ struct PaywallView: View {
         .foregroundStyle(MavieColor.deepPlumText.opacity(0.5))
         .multilineTextAlignment(.center)
         .padding(.top, MavieSpacing.xs)
+    }
+
+    // MARK: - Empty / loading states
+
+    private var productsAreReady: Bool {
+        purchase.monthlyProduct != nil && purchase.yearlyProduct != nil
+    }
+
+    private var loadingState: some View {
+        MavieCard(padding: MavieSpacing.lg) {
+            HStack(spacing: MavieSpacing.sm) {
+                ProgressView().tint(MavieColor.primaryPlum)
+                Text("Loading subscription options…")
+                    .font(MavieFont.body)
+                    .foregroundStyle(MavieColor.deepPlumText.opacity(0.7))
+            }
+        }
+    }
+
+    private var unavailableState: some View {
+        MavieCard(padding: MavieSpacing.lg) {
+            VStack(alignment: .leading, spacing: MavieSpacing.sm) {
+                HStack(spacing: 8) {
+                    Image(systemName: "sparkles")
+                        .foregroundStyle(MavieColor.primaryPlum)
+                    Text("Subscriptions are setting up")
+                        .font(MavieFont.headline)
+                        .foregroundStyle(MavieColor.deepPlumText)
+                }
+                Text("Mavie Pro will be available soon. Free features keep working — your cycle, calendar, and gentle reminders are all yours either way.")
+                    .font(MavieFont.subheadline)
+                    .foregroundStyle(MavieColor.deepPlumText.opacity(0.7))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 
     // MARK: - Computed

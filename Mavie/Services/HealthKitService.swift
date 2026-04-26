@@ -75,8 +75,15 @@ enum HealthKitService {
 
     // MARK: - Availability + Auth
 
+    /// True only if BOTH the device supports HealthKit AND this build is configured
+    /// for it (entitlement + privacy strings present). Without the privacy string,
+    /// requestAuthorization will fail at runtime — better to disable the entry point.
     static var isAvailable: Bool {
-        HKHealthStore.isHealthDataAvailable()
+        guard HKHealthStore.isHealthDataAvailable() else { return false }
+        let info = Bundle.main.infoDictionary
+        let hasShareString = info?["NSHealthShareUsageDescription"] != nil
+        let hasUpdateString = info?["NSHealthUpdateUsageDescription"] != nil
+        return hasShareString && hasUpdateString
     }
 
     /// Trigger the iOS permission dialog for Mavie's HK types.
