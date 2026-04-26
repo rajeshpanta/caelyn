@@ -13,6 +13,7 @@
 		08834D5BE72AD81107AC523D /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2FAEC87B355A27323A83A03 /* Typography.swift */; };
 		0AFF5E82E22E04452B6633B2 /* HomeHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DE84D0AD1B04048AB1C0842 /* HomeHeader.swift */; };
 		0B40924D0D9DF43BCBC7DB97 /* HomeCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD05238A7AD209486A30662D /* HomeCopy.swift */; };
+		0B9B55F2BC10E29211EDD933 /* BiometricService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26606241B2914FBE068E6002 /* BiometricService.swift */; };
 		198B7E22DB3A58343EB2D3C0 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3CD687DB1AC6131378EF3DC /* LogView.swift */; };
 		1F6234B85934E61698BF4E68 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44E800768FA8204832859E9A /* RootView.swift */; };
 		2A4BB93F918444539A3B01A1 /* ComponentGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9183829E797CC4BEAE95061 /* ComponentGallery.swift */; };
@@ -25,12 +26,15 @@
 		45EA5E1DAD1E30EC034E1BC0 /* CalendarMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ED8E1D3A229086BE8813FAD /* CalendarMath.swift */; };
 		4C092D945F327C03C6426BB0 /* Color+Mavie.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31FF6283E1CE2DD13A41DF46 /* Color+Mavie.swift */; };
 		4E0C83CCB74D665F80475A8C /* OnboardingSteps.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5F664294EAD5BF7CFC26C6 /* OnboardingSteps.swift */; };
+		502C3344BF9CAEC3CF42BD49 /* InsightsEmptyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C75D242FD2D79475FA2835 /* InsightsEmptyState.swift */; };
+		51F8193991427516CEA5327A /* CycleAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAFFE66B273791B6D826CE8D /* CycleAnalytics.swift */; };
 		53949058014DA82FA20F19C3 /* PrivacyChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85EF104E047040EC1BBAA3C8 /* PrivacyChip.swift */; };
 		58F6A6353A5EDF5FD78E8F0F /* OnboardingScaffold.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11C1D6C927E425BE4612398E /* OnboardingScaffold.swift */; };
 		5C623D6823E032C726D6BAC8 /* MavieUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7D00CBB5BED5E785D3F7E4 /* MavieUITestsLaunchTests.swift */; };
 		6508C8A74EDAC8CA6C3182A1 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 840FBF404E79FB7133C28F75 /* Preview Assets.xcassets */; };
 		676720948A6A7AC975A3AE79 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 575356844F919041CEB44D0F /* PreviewData.swift */; };
 		681DA71411F9796A44E47898 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA4187B2D16D4E7DE702A118 /* Persistence.swift */; };
+		68B217909671B764AE8429D0 /* InsightsStatsGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB4681DB74D57344061D83B /* InsightsStatsGrid.swift */; };
 		6CDD34CF5017F8AE9AB7E888 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4E2D88EED0D79168C31BCE /* MainTabView.swift */; };
 		6D48EB0EDFD50598E8CE7A78 /* CyclePrediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002483BC085427902C2AB2BE /* CyclePrediction.swift */; };
 		6FBAAAB4A2D320622BCE0D4F /* HomePatternInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = A436A0450A271AB8E02419C1 /* HomePatternInsight.swift */; };
@@ -38,10 +42,12 @@
 		7A01E0C7CC40562B806BC63D /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 765AF33518462963C82DE99A /* OnboardingFlow.swift */; };
 		7BC8CC2F29842B1A0EDC08BD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85AF89F806C692616AD960CA /* Assets.xcassets */; };
 		7EBA398ABBDB4F5C035F4441 /* StatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71CD706D6BD0819CA6AE9576 /* StatCard.swift */; };
+		83842B1418ACA8F2D4645D9D /* InsightsCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507DF43DC9E0D7C333EE6280 /* InsightsCharts.swift */; };
 		85531C3D34B34A203159743A /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C1A2028CDB8963CD70BBFA /* DayCell.swift */; };
 		89EE30D8EC7CAC1BC5F46D94 /* CycleRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D6BD1125D3A805280B15260 /* CycleRingView.swift */; };
 		8C90317322F11F52A9C25898 /* PredictionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B0FC088D00A5CF6F48FCD0 /* PredictionEngine.swift */; };
 		96C6EFD5759A72F2BD0DCB0A /* HomeComingUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CAB837E0BA0588707912B64 /* HomeComingUp.swift */; };
+		99DECCDF9FF07135EB5852A9 /* SettingsRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214533C61864DDE91565D435 /* SettingsRows.swift */; };
 		A056CC329EF6A45B592ABFBC /* Spacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1053C1456A57FD6FD09246A /* Spacing.swift */; };
 		A240153389B2A93818F41C22 /* SymptomChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04126DC43B3ACC481A709D11 /* SymptomChip.swift */; };
 		A3EEE399D4872830C5552B6D /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A2DAC53E8C6D68C4D21150 /* InsightsView.swift */; };
@@ -49,8 +55,10 @@
 		ADE38D413E77AD678D4DBA55 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E79A7D076E653EFAFAB50101 /* CalendarView.swift */; };
 		AE1A89B71B1CF72B0A6A453D /* DailyLogForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E504DB3C093E1B88F5E43D4 /* DailyLogForm.swift */; };
 		AE4D240BD55F5040E00CE48B /* Shadows.swift in Sources */ = {isa = PBXBuildFile; fileRef = C59D90DF27B3A6FD3B4BE169 /* Shadows.swift */; };
+		AF53105B85323BEED6820B8B /* PatternsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88212A52417AA4D3A899191 /* PatternsSection.swift */; };
 		BB31F1F5F7D4D8B2A29E7167 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B193899A08FED788979FF16 /* OnboardingStep.swift */; };
 		BCB5334AF18B6FE93F8C1759 /* DesignSystemPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A9ADCC85A4152BCD1CF311 /* DesignSystemPreview.swift */; };
+		BFEE1409B28D8A4EBBC1A20C /* AppLockGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E0EF53086EBCF43BEE9B62 /* AppLockGate.swift */; };
 		C1CF6333DD10E5DEF1FA6D82 /* QuickActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33EC866AF98FC19A3CA8B5D6 /* QuickActionButton.swift */; };
 		C3D626E4FAB5BBB33F904443 /* HomeMoodCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A6B8DF8A37700CAFE9A6C2 /* HomeMoodCheckIn.swift */; };
 		C5A0B2888BEDDF40B5003C5A /* MavieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65B417F556FED2CD6972F463 /* MavieApp.swift */; };
@@ -58,12 +66,14 @@
 		D0217AA7F30EBE2446F7A584 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4680291850944DF9C8578C5F /* HomeView.swift */; };
 		D14C0F5D49064AE0854762E3 /* MonthGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EF44766FC445126F3636148 /* MonthGridView.swift */; };
 		D5DECA26FC1778F5BAC89C39 /* CycleEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26616A0A691A426301B6AA72 /* CycleEntry.swift */; };
+		DC22E9EDFEA3C4C2115AF5BA /* AppPreviewMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25FC9F8863E5B674C0198BE /* AppPreviewMask.swift */; };
 		E0E74177EF81D7F9981C9C03 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 394E0DD42256B3EF7A08CB4A /* SettingsView.swift */; };
 		E2E8EC5B8A34730696421AEA /* MavieCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45670FDCE91C197F219F4B7B /* MavieCard.swift */; };
 		E8C5969AA3DD5BC287C4BA97 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F9F926F2511FF38817F76A0 /* ContentView.swift */; };
 		ED331023DBD9BB944BF46C26 /* GoalCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C252748BC88D9AA4FA55C037 /* GoalCard.swift */; };
 		ED537FE4D941015C9F96B602 /* MavieButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7FF15AAC8249353DAD172F9 /* MavieButton.swift */; };
 		F1AC176F9D56639C5C0752AF /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D3CF9944AEB0891FA3D6F5 /* Enums.swift */; };
+		F3B040269A3D6123E711C7F3 /* SettingsPickerSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C9C34EA57C79D360872196 /* SettingsPickerSheets.swift */; };
 		F96CBF5DD48C4566EC44B9F2 /* Shapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48057FC309D4D76408AE86EC /* Shapes.swift */; };
 		F97405DAB4D2D9562FD3D64C /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E21643CDD09AE69FDDA3AD02 /* OnboardingViewModel.swift */; };
 		FDAD947F31FD8C2D2F06B37A /* HomeHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 805B7ECF8E9379F65B8465EF /* HomeHeroCard.swift */; };
@@ -95,7 +105,9 @@
 		089BC6CCEE6DABB46946823E /* DayDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailSheet.swift; sourceTree = "<group>"; };
 		0F55493705D1592BAB54DE3F /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		11C1D6C927E425BE4612398E /* OnboardingScaffold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScaffold.swift; sourceTree = "<group>"; };
+		214533C61864DDE91565D435 /* SettingsRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRows.swift; sourceTree = "<group>"; };
 		2392C1DAB594A25CF078DBFF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		26606241B2914FBE068E6002 /* BiometricService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricService.swift; sourceTree = "<group>"; };
 		26616A0A691A426301B6AA72 /* CycleEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleEntry.swift; sourceTree = "<group>"; };
 		2B193899A08FED788979FF16 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
 		2D6BD1125D3A805280B15260 /* CycleRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleRingView.swift; sourceTree = "<group>"; };
@@ -116,6 +128,7 @@
 		48057FC309D4D76408AE86EC /* Shapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shapes.swift; sourceTree = "<group>"; };
 		485DCE66F7CA99BF79A6ED74 /* InsightCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightCard.swift; sourceTree = "<group>"; };
 		4B0C46A6E83BAF5E37D2EC16 /* MavieUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MavieUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		507DF43DC9E0D7C333EE6280 /* InsightsCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsCharts.swift; sourceTree = "<group>"; };
 		575356844F919041CEB44D0F /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
 		579DA9A9B90B604B6C347A04 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		5CF5CFA1345EC46B455E2E60 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -124,6 +137,7 @@
 		5F640251E18D1113EAC4C59D /* MavieTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MavieTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6082C91E8D26535106119306 /* MavieTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieTests.swift; sourceTree = "<group>"; };
 		65B417F556FED2CD6972F463 /* MavieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieApp.swift; sourceTree = "<group>"; };
+		66C9C34EA57C79D360872196 /* SettingsPickerSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPickerSheets.swift; sourceTree = "<group>"; };
 		6B4741BB77F7F27DC460613E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		6E504DB3C093E1B88F5E43D4 /* DailyLogForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyLogForm.swift; sourceTree = "<group>"; };
 		71CD706D6BD0819CA6AE9576 /* StatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatCard.swift; sourceTree = "<group>"; };
@@ -141,10 +155,15 @@
 		A436A0450A271AB8E02419C1 /* HomePatternInsight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePatternInsight.swift; sourceTree = "<group>"; };
 		AD4A8E05406767D814921FD9 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		B8342950B727588C93394B12 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		B8E0EF53086EBCF43BEE9B62 /* AppLockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockGate.swift; sourceTree = "<group>"; };
+		BAFFE66B273791B6D826CE8D /* CycleAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleAnalytics.swift; sourceTree = "<group>"; };
+		BBB4681DB74D57344061D83B /* InsightsStatsGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsStatsGrid.swift; sourceTree = "<group>"; };
 		BC5C272BAC9997C05D909092 /* MavieUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieUITests.swift; sourceTree = "<group>"; };
 		C252748BC88D9AA4FA55C037 /* GoalCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalCard.swift; sourceTree = "<group>"; };
+		C25FC9F8863E5B674C0198BE /* AppPreviewMask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPreviewMask.swift; sourceTree = "<group>"; };
 		C59D90DF27B3A6FD3B4BE169 /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
 		C7FF15AAC8249353DAD172F9 /* MavieButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieButton.swift; sourceTree = "<group>"; };
+		C88212A52417AA4D3A899191 /* PatternsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternsSection.swift; sourceTree = "<group>"; };
 		D9E44CEFBE94981ED7EA867F /* Mavie.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Mavie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD05238A7AD209486A30662D /* HomeCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCopy.swift; sourceTree = "<group>"; };
 		E21643CDD09AE69FDDA3AD02 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
@@ -159,6 +178,7 @@
 		F39E4458FB99A11167E6B80A /* MonthSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthSummaryCard.swift; sourceTree = "<group>"; };
 		F5BE37F05C92D23805C5D294 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		F5D3CF9944AEB0891FA3D6F5 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
+		F7C75D242FD2D79475FA2835 /* InsightsEmptyState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsEmptyState.swift; sourceTree = "<group>"; };
 		F9183829E797CC4BEAE95061 /* ComponentGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentGallery.swift; sourceTree = "<group>"; };
 		FA7D00CBB5BED5E785D3F7E4 /* MavieUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		FC08912DC52B2FAF1747F884 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -233,6 +253,7 @@
 				3F5FBE0248070F8F719B81F1 /* Home */,
 				BC09B657FF27E0351BA33D9B /* Insights */,
 				9FBA6F2806CFD763CE4B2A69 /* Log */,
+				AFA654FD3B2AA67BE910E4C9 /* Main */,
 				9063907F6FFE0A9333044A92 /* Onboarding */,
 				A39D149A47627E546941E51A /* Premium */,
 				B86B0D94EA2558B1CD27C9E5 /* Settings */,
@@ -303,6 +324,8 @@
 			isa = PBXGroup;
 			children = (
 				6B4741BB77F7F27DC460613E /* .gitkeep */,
+				26606241B2914FBE068E6002 /* BiometricService.swift */,
+				BAFFE66B273791B6D826CE8D /* CycleAnalytics.swift */,
 				EA4187B2D16D4E7DE702A118 /* Persistence.swift */,
 				47B0FC088D00A5CF6F48FCD0 /* PredictionEngine.swift */,
 			);
@@ -340,10 +363,21 @@
 			path = Premium;
 			sourceTree = "<group>";
 		};
+		AFA654FD3B2AA67BE910E4C9 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				B8E0EF53086EBCF43BEE9B62 /* AppLockGate.swift */,
+				C25FC9F8863E5B674C0198BE /* AppPreviewMask.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
 		B86B0D94EA2558B1CD27C9E5 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
 				AD4A8E05406767D814921FD9 /* .gitkeep */,
+				66C9C34EA57C79D360872196 /* SettingsPickerSheets.swift */,
+				214533C61864DDE91565D435 /* SettingsRows.swift */,
 				394E0DD42256B3EF7A08CB4A /* SettingsView.swift */,
 			);
 			path = Settings;
@@ -353,7 +387,11 @@
 			isa = PBXGroup;
 			children = (
 				5CF5CFA1345EC46B455E2E60 /* .gitkeep */,
+				507DF43DC9E0D7C333EE6280 /* InsightsCharts.swift */,
+				F7C75D242FD2D79475FA2835 /* InsightsEmptyState.swift */,
+				BBB4681DB74D57344061D83B /* InsightsStatsGrid.swift */,
 				33A2DAC53E8C6D68C4D21150 /* InsightsView.swift */,
+				C88212A52417AA4D3A899191 /* PatternsSection.swift */,
 			);
 			path = Insights;
 			sourceTree = "<group>";
@@ -547,11 +585,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFEE1409B28D8A4EBBC1A20C /* AppLockGate.swift in Sources */,
+				DC22E9EDFEA3C4C2115AF5BA /* AppPreviewMask.swift in Sources */,
+				0B9B55F2BC10E29211EDD933 /* BiometricService.swift in Sources */,
 				45EA5E1DAD1E30EC034E1BC0 /* CalendarMath.swift in Sources */,
 				ADE38D413E77AD678D4DBA55 /* CalendarView.swift in Sources */,
 				4C092D945F327C03C6426BB0 /* Color+Mavie.swift in Sources */,
 				2A4BB93F918444539A3B01A1 /* ComponentGallery.swift in Sources */,
 				E8C5969AA3DD5BC287C4BA97 /* ContentView.swift in Sources */,
+				51F8193991427516CEA5327A /* CycleAnalytics.swift in Sources */,
 				D5DECA26FC1778F5BAC89C39 /* CycleEntry.swift in Sources */,
 				6D48EB0EDFD50598E8CE7A78 /* CyclePrediction.swift in Sources */,
 				89EE30D8EC7CAC1BC5F46D94 /* CycleRingView.swift in Sources */,
@@ -571,6 +613,9 @@
 				3E93B665D826FA168B8594BA /* HomeQuickActions.swift in Sources */,
 				D0217AA7F30EBE2446F7A584 /* HomeView.swift in Sources */,
 				07D04D470825EE40D29D7EEC /* InsightCard.swift in Sources */,
+				83842B1418ACA8F2D4645D9D /* InsightsCharts.swift in Sources */,
+				502C3344BF9CAEC3CF42BD49 /* InsightsEmptyState.swift in Sources */,
+				68B217909671B764AE8429D0 /* InsightsStatsGrid.swift in Sources */,
 				A3EEE399D4872830C5552B6D /* InsightsView.swift in Sources */,
 				198B7E22DB3A58343EB2D3C0 /* LogView.swift in Sources */,
 				6CDD34CF5017F8AE9AB7E888 /* MainTabView.swift in Sources */,
@@ -586,6 +631,7 @@
 				BB31F1F5F7D4D8B2A29E7167 /* OnboardingStep.swift in Sources */,
 				4E0C83CCB74D665F80475A8C /* OnboardingSteps.swift in Sources */,
 				F97405DAB4D2D9562FD3D64C /* OnboardingViewModel.swift in Sources */,
+				AF53105B85323BEED6820B8B /* PatternsSection.swift in Sources */,
 				681DA71411F9796A44E47898 /* Persistence.swift in Sources */,
 				8C90317322F11F52A9C25898 /* PredictionEngine.swift in Sources */,
 				676720948A6A7AC975A3AE79 /* PreviewData.swift in Sources */,
@@ -593,6 +639,8 @@
 				C1CF6333DD10E5DEF1FA6D82 /* QuickActionButton.swift in Sources */,
 				1F6234B85934E61698BF4E68 /* RootView.swift in Sources */,
 				03F97E81AFE517A81CDD3508 /* SectionHeader.swift in Sources */,
+				F3B040269A3D6123E711C7F3 /* SettingsPickerSheets.swift in Sources */,
+				99DECCDF9FF07135EB5852A9 /* SettingsRows.swift in Sources */,
 				E0E74177EF81D7F9981C9C03 /* SettingsView.swift in Sources */,
 				AE4D240BD55F5040E00CE48B /* Shadows.swift in Sources */,
 				F96CBF5DD48C4566EC44B9F2 /* Shapes.swift in Sources */,
@@ -689,6 +737,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Mavie/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Mavie uses Face ID to keep your cycle data private.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -833,6 +882,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Mavie/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Mavie uses Face ID to keep your cycle data private.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

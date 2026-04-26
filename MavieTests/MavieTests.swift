@@ -216,4 +216,87 @@ final class MavieTests: XCTestCase {
             XCTAssertFalse(phase.icon.isEmpty)
         }
     }
+
+    // MARK: - Phase 11: CycleAnalytics
+
+    func testSymptomFrequencyIsSortedDescending() {
+        let entries: [CycleEntry] = [
+            CycleEntry(date: .now, symptoms: [.cramps, .fatigue, .bloating]),
+            CycleEntry(date: .now, symptoms: [.cramps, .bloating]),
+            CycleEntry(date: .now, symptoms: [.cramps])
+        ]
+        let result = CycleAnalytics.symptomFrequency(in: entries, limit: 6)
+        XCTAssertEqual(result.first?.symptom, .cramps)
+        XCTAssertEqual(result.first?.count, 3)
+        XCTAssertEqual(result.last?.count, 1)
+        XCTAssertEqual(result.count, 3)
+    }
+
+    func testMoodFrequencyIgnoresNilMoods() {
+        let entries: [CycleEntry] = [
+            CycleEntry(date: .now, mood: .calm),
+            CycleEntry(date: .now, mood: .calm),
+            CycleEntry(date: .now, mood: nil),
+            CycleEntry(date: .now, mood: .happy)
+        ]
+        let result = CycleAnalytics.moodFrequency(in: entries)
+        XCTAssertEqual(result.first?.mood, .calm)
+        XCTAssertEqual(result.first?.count, 2)
+    }
+
+    func testPainSeriesIsSortedAscending() {
+        let cal = Calendar.current
+        let day1 = cal.date(byAdding: .day, value: -3, to: .now)!
+        let day2 = cal.date(byAdding: .day, value: -1, to: .now)!
+        let entries: [CycleEntry] = [
+            CycleEntry(date: day2, pain: 5),
+            CycleEntry(date: day1, pain: 2)
+        ]
+        let series = CycleAnalytics.painSeries(in: entries)
+        XCTAssertEqual(series.count, 2)
+        XCTAssertLessThan(series[0].date, series[1].date)
+    }
+
+    func testDaysLoggedRespectsLookback() {
+        let cal = Calendar.current
+        let recent = cal.date(byAdding: .day, value: -5, to: .now)!
+        let old = cal.date(byAdding: .day, value: -45, to: .now)!
+        let entries: [CycleEntry] = [
+            CycleEntry(date: recent, mood: .calm),
+            CycleEntry(date: old, mood: .calm)
+        ]
+        let result = CycleAnalytics.daysLogged(in: entries, lookbackDays: 30)
+        XCTAssertEqual(result, 1)
+    }
+
+    // MARK: - Phase 10/11: CalendarMath
+
+    func testDaysGridIs42Long() {
+        let grid = CalendarMath.daysGrid(for: .now)
+        XCTAssertEqual(grid.count, 42)
+    }
+
+    func testWeekdaySymbolsRotateByFirstDayOfWeek() {
+        let sunday = CalendarMath.weekdaySymbols(firstDayOfWeek: 1)
+        let monday = CalendarMath.weekdaySymbols(firstDayOfWeek: 2)
+        XCTAssertEqual(sunday.count, 7)
+        XCTAssertEqual(monday.count, 7)
+        XCTAssertNotEqual(sunday.first, monday.first)
+    }
+
+    // MARK: - Phase 12: BiometricService
+
+    func testBiometricKindHasIcon() {
+        XCTAssertFalse(BiometricKind.faceID.icon.isEmpty)
+        XCTAssertFalse(BiometricKind.touchID.icon.isEmpty)
+        XCTAssertFalse(BiometricKind.opticID.icon.isEmpty)
+        XCTAssertFalse(BiometricKind.none.icon.isEmpty)
+    }
+
+    func testBiometricServiceAvailableKindReturnsValue() {
+        // On the Simulator this is typically .none; on a device it could be any.
+        // We just assert the API doesn't crash and returns a defined value.
+        let kind = BiometricService.availableKind()
+        XCTAssertTrue([.none, .faceID, .touchID, .opticID].contains(kind))
+    }
 }

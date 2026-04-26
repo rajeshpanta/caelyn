@@ -1,37 +1,76 @@
 import SwiftUI
+import SwiftData
 
 struct InsightsView: View {
+    @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
+    @Query private var profiles: [UserProfile]
+
+    private var profile: UserProfile? { profiles.first }
+
+    private var cycles: [Cycle] {
+        PredictionEngine.cycles(from: entries)
+    }
+
+    private var avgCycleLength: Int {
+        PredictionEngine.averageCycleLength(of: cycles, fallback: profile?.averageCycleLength ?? 28)
+    }
+
+    private var avgPeriodLength: Int {
+        PredictionEngine.averagePeriodLength(of: cycles, fallback: profile?.averagePeriodLength ?? 5)
+    }
+
+    private var cycleVariation: Int {
+        PredictionEngine.cycleLengthVariation(of: cycles)
+    }
+
+    private var confidence: Confidence {
+        PredictionEngine.confidence(cycleCount: cycles.count)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: MavieSpacing.lg) {
-                    placeholderStats
-                    InsightCard(
-                        title: "Coming next",
-                        message: "Phase 11 brings cycle averages, symptom patterns, and trend charts based on your logs.",
-                        icon: "chart.line.uptrend.xyaxis"
-                    )
+                    if cycles.count < 3 {
+                        InsightsEmptyState(cyclesLogged: cycles.count, confidence: confidence)
+                    } else {
+                        loadedContent
+                    }
                 }
-                .padding(MavieSpacing.lg)
+                .padding(.horizontal, MavieSpacing.lg)
+                .padding(.top, MavieSpacing.md)
+                .padding(.bottom, MavieSpacing.xl)
             }
             .background(MavieColor.backgroundCream.ignoresSafeArea())
             .navigationTitle("Insights")
         }
     }
 
-    private var placeholderStats: some View {
-        VStack(alignment: .leading, spacing: MavieSpacing.md) {
-            SectionHeader(title: "Your patterns", subtitle: "Based on your last cycles")
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: MavieSpacing.sm) {
-                StatCard(value: "—", label: "Avg cycle", unit: "days")
-                StatCard(value: "—", label: "Avg period", unit: "days")
-                StatCard(value: "—", label: "Variation", unit: "days")
-                StatCard(value: "—", label: "Most common")
-            }
-        }
+    @ViewBuilder
+    private var loadedContent: some View {
+        InsightsStatsGrid(
+            avgCycleLength: avgCycleLength,
+            avgPeriodLength: avgPeriodLength,
+            cycleVariation: cycleVariation,
+            daysLoggedRecent: CycleAnalytics.daysLogged(in: entries)
+        )
+
+        PatternsSection(
+            cycles: cycles,
+            mostCommonEarlyPeriodSymptom: CycleAnalytics.mostCommonEarlyPeriodSymptom(entries: entries, cycles: cycles),
+            averagePeriodPain: CycleAnalytics.averagePeriodPain(entries: entries, cycles: cycles),
+            cycleVariation: cycleVariation
+        )
+
+        CycleLengthChart(series: CycleAnalytics.cycleLengthSeries(from: cycles))
+        PeriodLengthChart(series: CycleAnalytics.periodLengthSeries(from: cycles))
+        SymptomFrequencyChart(counts: CycleAnalytics.symptomFrequency(in: entries))
+        MoodPatternChart(counts: CycleAnalytics.moodFrequency(in: entries))
+        PainTrendChart(series: CycleAnalytics.painSeries(in: entries))
     }
 }
 
 #Preview {
     InsightsView()
+        .modelContainer(Persistence.preview)
 }
