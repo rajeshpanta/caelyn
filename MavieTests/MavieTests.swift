@@ -92,4 +92,128 @@ final class MavieTests: XCTestCase {
         let startOfDay = Calendar.current.startOfDay(for: messyDate)
         XCTAssertEqual(entry.date, startOfDay)
     }
+
+    // MARK: - Phase 7: PredictionEngine
+
+    func testPhaseClassification() {
+        // 5-day period, 29-day cycle
+        XCTAssertEqual(PredictionEngine.phase(forCycleDay: 1, periodLength: 5, cycleLength: 29), .menstrual)
+        XCTAssertEqual(PredictionEngine.phase(forCycleDay: 5, periodLength: 5, cycleLength: 29), .menstrual)
+        XCTAssertEqual(PredictionEngine.phase(forCycleDay: 7, periodLength: 5, cycleLength: 29), .follicular)
+        XCTAssertEqual(PredictionEngine.phase(forCycleDay: 15, periodLength: 5, cycleLength: 29), .ovulation)
+        XCTAssertEqual(PredictionEngine.phase(forCycleDay: 20, periodLength: 5, cycleLength: 29), .luteal)
+        XCTAssertEqual(PredictionEngine.phase(forCycleDay: 26, periodLength: 5, cycleLength: 29), .pms)
+        XCTAssertEqual(PredictionEngine.phase(forCycleDay: 29, periodLength: 5, cycleLength: 29), .pms)
+    }
+
+    func testPhaseClassificationDegenerateCycle() {
+        XCTAssertEqual(PredictionEngine.phase(forCycleDay: 1, periodLength: 5, cycleLength: 0), .unknown)
+    }
+
+    func testCurrentCycleDayWraps() {
+        let lastPeriod = Calendar.current.date(byAdding: .day, value: -45, to: .now)!
+        let day = PredictionEngine.currentCycleDay(lastPeriodStart: lastPeriod, cycleLength: 28)
+        XCTAssertGreaterThanOrEqual(day, 1)
+        XCTAssertLessThanOrEqual(day, 28)
+    }
+
+    func testCurrentCycleDaySameDay() {
+        let day = PredictionEngine.currentCycleDay(lastPeriodStart: .now, cycleLength: 28)
+        XCTAssertEqual(day, 1)
+    }
+
+    func testNextPeriodStartProjectsForward() {
+        let lastPeriod = Calendar.current.date(byAdding: .day, value: -40, to: .now)!
+        let next = PredictionEngine.nextPeriodStart(lastPeriodStart: lastPeriod, cycleLength: 28)
+        XCTAssertGreaterThan(next, .now)
+    }
+
+    func testPredictedPeriodWindow() {
+        let nextStart = Calendar.current.date(byAdding: .day, value: 10, to: .now)!
+        let window = PredictionEngine.predictedPeriodWindow(nextPeriodStart: nextStart, periodLength: 5)
+        let span = Calendar.current.dateComponents([.day], from: window.lowerBound, to: window.upperBound).day ?? 0
+        XCTAssertEqual(span, 4)
+    }
+
+    func testOvulationEstimateIs14DaysBefore() {
+        let nextStart = Date()
+        let ovulation = PredictionEngine.ovulationEstimate(nextPeriodStart: nextStart)
+        let diff = Calendar.current.dateComponents([.day], from: ovulation, to: nextStart).day ?? 0
+        XCTAssertEqual(diff, 14)
+    }
+
+    func testPmsWindowIsFiveDaysEndingDayBeforeNextPeriod() {
+        let nextStart = Date()
+        let window = PredictionEngine.pmsWindow(nextPeriodStart: nextStart)
+        let endDiff = Calendar.current.dateComponents([.day], from: window.upperBound, to: nextStart).day ?? 0
+        let span = Calendar.current.dateComponents([.day], from: window.lowerBound, to: window.upperBound).day ?? 0
+        XCTAssertEqual(endDiff, 1)
+        XCTAssertEqual(span, 4)
+    }
+
+    func testConfidenceLevels() {
+        XCTAssertEqual(PredictionEngine.confidence(cycleCount: 0), .low)
+        XCTAssertEqual(PredictionEngine.confidence(cycleCount: 2), .low)
+        XCTAssertEqual(PredictionEngine.confidence(cycleCount: 3), .medium)
+        XCTAssertEqual(PredictionEngine.confidence(cycleCount: 5), .medium)
+        XCTAssertEqual(PredictionEngine.confidence(cycleCount: 6), .high)
+        XCTAssertEqual(PredictionEngine.confidence(cycleCount: 100), .high)
+    }
+
+    func testAverageCycleLengthFallsBackWhenInsufficientData() {
+        let cycles: [Cycle] = [
+            Cycle(start: .now, length: 28, periodLength: 5)
+        ]
+        XCTAssertEqual(PredictionEngine.averageCycleLength(of: cycles, fallback: 30), 30)
+    }
+
+    func testAverageCycleLengthAveragesRecent() {
+        let now = Date()
+        let cycles: [Cycle] = [
+            Cycle(start: now, length: 30, periodLength: 5),
+            Cycle(start: now, length: 28, periodLength: 5),
+            Cycle(start: now, length: 29, periodLength: 5)
+        ]
+        XCTAssertEqual(PredictionEngine.averageCycleLength(of: cycles, fallback: 0), 29)
+    }
+
+    func testCyclesReconstructionFromEntries() throws {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let cycle1Start = cal.date(byAdding: .day, value: -57, to: today)!
+        let cycle2Start = cal.date(byAdding: .day, value: -29, to: today)!
+
+        let entries: [CycleEntry] = [
+            CycleEntry(date: cycle1Start, flow: .medium),
+            CycleEntry(date: cal.date(byAdding: .day, value: 1, to: cycle1Start)!, flow: .medium),
+            CycleEntry(date: cal.date(byAdding: .day, value: 2, to: cycle1Start)!, flow: .light),
+            CycleEntry(date: cycle2Start, flow: .medium),
+            CycleEntry(date: cal.date(byAdding: .day, value: 1, to: cycle2Start)!, flow: .medium)
+        ]
+
+        let cycles = PredictionEngine.cycles(from: entries, today: today)
+        XCTAssertEqual(cycles.count, 1, "Two flow streaks should produce one completed cycle")
+        XCTAssertEqual(cycles[0].length, 28)
+        XCTAssertEqual(cycles[0].periodLength, 3)
+    }
+
+    func testMostFrequentSymptom() {
+        let entries: [CycleEntry] = [
+            CycleEntry(date: .now, symptoms: [.cramps, .fatigue]),
+            CycleEntry(date: .now, symptoms: [.cramps]),
+            CycleEntry(date: .now, symptoms: [.bloating])
+        ]
+        let result = PredictionEngine.mostFrequentSymptom(in: entries)
+        XCTAssertEqual(result?.0, .cramps)
+        XCTAssertEqual(result?.1, 2)
+    }
+
+    func testCyclePhaseHasDistinctAccentForEveryPhase() {
+        let phases: [CyclePhase] = [.menstrual, .follicular, .ovulation, .luteal, .pms]
+        for phase in phases {
+            XCTAssertFalse(phase.displayName.isEmpty)
+            XCTAssertFalse(phase.hint.isEmpty)
+            XCTAssertFalse(phase.icon.isEmpty)
+        }
+    }
 }

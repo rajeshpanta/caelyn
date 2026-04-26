@@ -68,6 +68,10 @@ final class OnboardingViewModel {
     }
 
     func complete(in modelContext: ModelContext) {
+        if let existing = try? modelContext.fetch(FetchDescriptor<UserProfile>()),
+           !existing.isEmpty {
+            return
+        }
         let profile = UserProfile(
             averageCycleLength: cycleLength,
             averagePeriodLength: periodLength,
