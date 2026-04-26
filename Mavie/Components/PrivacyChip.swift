@@ -14,6 +14,8 @@ struct PrivacyChip: View {
         .padding(.horizontal, MavieSpacing.sm)
         .padding(.vertical, 6)
         .background(MavieColor.lavender, in: Capsule())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(text)
     }
 }
 

@@ -48,6 +48,7 @@
 		7A01E0C7CC40562B806BC63D /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 765AF33518462963C82DE99A /* OnboardingFlow.swift */; };
 		7BC8CC2F29842B1A0EDC08BD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85AF89F806C692616AD960CA /* Assets.xcassets */; };
 		7EBA398ABBDB4F5C035F4441 /* StatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71CD706D6BD0819CA6AE9576 /* StatCard.swift */; };
+		800D7BC19141C9CAA890F8DF /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64129D0EE1699871EB3FC284 /* Haptics.swift */; };
 		8375873C187A4BC918E6AFD2 /* HealthKitConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A4E16E9D3C9A2FAEF8EE74 /* HealthKitConnectView.swift */; };
 		83842B1418ACA8F2D4645D9D /* InsightsCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507DF43DC9E0D7C333EE6280 /* InsightsCharts.swift */; };
 		843C55FD77761EEFF9CB2F21 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9022390D9EA5BAC63E700631 /* ExportService.swift */; };
@@ -80,6 +81,7 @@
 		DC22E9EDFEA3C4C2115AF5BA /* AppPreviewMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25FC9F8863E5B674C0198BE /* AppPreviewMask.swift */; };
 		E0E74177EF81D7F9981C9C03 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 394E0DD42256B3EF7A08CB4A /* SettingsView.swift */; };
 		E2E8EC5B8A34730696421AEA /* MavieCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45670FDCE91C197F219F4B7B /* MavieCard.swift */; };
+		E6871978DBE9992FDCDDE4C5 /* ProUpsellCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2B6B9B677BAE8CC8DA0624 /* ProUpsellCard.swift */; };
 		E8C5969AA3DD5BC287C4BA97 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F9F926F2511FF38817F76A0 /* ContentView.swift */; };
 		ED331023DBD9BB944BF46C26 /* GoalCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C252748BC88D9AA4FA55C037 /* GoalCard.swift */; };
 		ED537FE4D941015C9F96B602 /* MavieButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7FF15AAC8249353DAD172F9 /* MavieButton.swift */; };
@@ -127,6 +129,7 @@
 		2D6BD1125D3A805280B15260 /* CycleRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleRingView.swift; sourceTree = "<group>"; };
 		2ED8E1D3A229086BE8813FAD /* CalendarMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMath.swift; sourceTree = "<group>"; };
 		2EF44766FC445126F3636148 /* MonthGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthGridView.swift; sourceTree = "<group>"; };
+		2F2B6B9B677BAE8CC8DA0624 /* ProUpsellCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProUpsellCard.swift; sourceTree = "<group>"; };
 		2F9F926F2511FF38817F76A0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		31FF6283E1CE2DD13A41DF46 /* Color+Mavie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Mavie.swift"; sourceTree = "<group>"; };
 		33A2DAC53E8C6D68C4D21150 /* InsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsView.swift; sourceTree = "<group>"; };
@@ -152,6 +155,7 @@
 		5F640251E18D1113EAC4C59D /* MavieTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MavieTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6082C91E8D26535106119306 /* MavieTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieTests.swift; sourceTree = "<group>"; };
 		619FF8757898C4792FB6AC0F /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
+		64129D0EE1699871EB3FC284 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		65B417F556FED2CD6972F463 /* MavieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieApp.swift; sourceTree = "<group>"; };
 		65F1372EF6BFC9AE2E0B6C87 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		66C9C34EA57C79D360872196 /* SettingsPickerSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPickerSheets.swift; sourceTree = "<group>"; };
@@ -391,6 +395,7 @@
 				579DA9A9B90B604B6C347A04 /* .gitkeep */,
 				8D75446990E0C623E1502BE3 /* PaywallTierCard.swift */,
 				65F1372EF6BFC9AE2E0B6C87 /* PaywallView.swift */,
+				2F2B6B9B677BAE8CC8DA0624 /* ProUpsellCard.swift */,
 			);
 			path = Premium;
 			sourceTree = "<group>";
@@ -474,6 +479,7 @@
 				F9183829E797CC4BEAE95061 /* ComponentGallery.swift */,
 				2D6BD1125D3A805280B15260 /* CycleRingView.swift */,
 				A0692964E06D6CF3B761E4C5 /* DataStatusCard.swift */,
+				64129D0EE1699871EB3FC284 /* Haptics.swift */,
 				485DCE66F7CA99BF79A6ED74 /* InsightCard.swift */,
 				C7FF15AAC8249353DAD172F9 /* MavieButton.swift */,
 				45670FDCE91C197F219F4B7B /* MavieCard.swift */,
@@ -642,6 +648,7 @@
 				843C55FD77761EEFF9CB2F21 /* ExportService.swift in Sources */,
 				C969E67EA95464BE37BF5B84 /* ExportView.swift in Sources */,
 				ED331023DBD9BB944BF46C26 /* GoalCard.swift in Sources */,
+				800D7BC19141C9CAA890F8DF /* Haptics.swift in Sources */,
 				8375873C187A4BC918E6AFD2 /* HealthKitConnectView.swift in Sources */,
 				B4B3492B3A1CD0A287B1501B /* HealthKitService.swift in Sources */,
 				085A35DC2C555E5D4A018A55 /* HealthKitSync.swift in Sources */,
@@ -680,6 +687,7 @@
 				8C90317322F11F52A9C25898 /* PredictionEngine.swift in Sources */,
 				676720948A6A7AC975A3AE79 /* PreviewData.swift in Sources */,
 				53949058014DA82FA20F19C3 /* PrivacyChip.swift in Sources */,
+				E6871978DBE9992FDCDDE4C5 /* ProUpsellCard.swift in Sources */,
 				0A776B090B3DB1A73576E0DD /* PurchaseService.swift in Sources */,
 				C1CF6333DD10E5DEF1FA6D82 /* QuickActionButton.swift in Sources */,
 				16EB808CFA34132806842110 /* RemindersView.swift in Sources */,

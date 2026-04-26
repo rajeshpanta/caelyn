@@ -6,11 +6,13 @@ struct ExportView: View {
     @Query private var profiles: [UserProfile]
     @Environment(\.dismiss) private var dismiss
 
+    @State private var purchase = PurchaseService.shared
     @State private var range: ExportRange = .last3Months
     @State private var format: ExportFormat = .csv
     @State private var includeNotes: Bool = true
     @State private var generatedURL: URL?
     @State private var generationError: String?
+    @State private var showingPaywall = false
 
     private var profile: UserProfile? { profiles.first }
     private var filteredEntries: [CycleEntry] {
@@ -45,6 +47,7 @@ struct ExportView: View {
             .onChange(of: format) { _, _ in resetGeneration() }
             .onChange(of: includeNotes) { _, _ in resetGeneration() }
         }
+        .sheet(isPresented: $showingPaywall) { PaywallView() }
     }
 
     // MARK: - Sections
@@ -124,16 +127,41 @@ struct ExportView: View {
     }
 
     private func formatChip(_ option: ExportFormat) -> some View {
-        Button {
-            format = option
+        let locked = (option == .pdf) && !purchase.isPro
+        return Button {
+            if locked {
+                showingPaywall = true
+            } else {
+                format = option
+                Haptics.selection()
+            }
         } label: {
             VStack(spacing: 6) {
-                Image(systemName: option.systemIcon)
-                    .font(.system(size: 22, weight: .medium))
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: option.systemIcon)
+                        .font(.system(size: 22, weight: .medium))
+                    if locked {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(4)
+                            .background(MavieColor.primaryPlum, in: Circle())
+                            .offset(x: 14, y: -10)
+                    }
+                }
                 Text(option.displayName)
                     .font(MavieFont.callout.weight(.semibold))
+                if locked {
+                    Text("PRO")
+                        .font(MavieFont.caption.weight(.bold))
+                        .tracking(0.5)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .foregroundStyle(.white)
+                        .background(MavieColor.primaryPlum, in: Capsule())
+                }
             }
-            .frame(maxWidth: .infinity, minHeight: 88)
+            .frame(maxWidth: .infinity, minHeight: 96)
             .foregroundStyle(format == option ? .white : MavieColor.primaryPlum)
             .background(
                 format == option ? MavieColor.primaryPlum : MavieColor.cardWhite,

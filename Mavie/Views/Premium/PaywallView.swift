@@ -348,10 +348,12 @@ struct PaywallView: View {
         let outcome = await purchase.purchase(product)
         switch outcome {
         case .success:
+            Haptics.success()
             dismiss()
         case .cancelled, .pending:
             break
         case .failed(let message):
+            Haptics.warning()
             purchaseError = message
         }
     }

@@ -7,6 +7,9 @@ struct CycleRingView: View {
     var thickness: CGFloat = 14
     var size: CGFloat = 220
 
+    @State private var hasAppeared = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private var ovulationDay: Int { max(1, cycleLength - 14) }
     private var pmsStart: Int { max(1, cycleLength - 4) }
 
@@ -34,6 +37,14 @@ struct CycleRingView: View {
             }
         }
         .frame(width: size, height: size)
+        .scaleEffect(hasAppeared || reduceMotion ? 1.0 : 0.88)
+        .opacity(hasAppeared || reduceMotion ? 1.0 : 0)
+        .onAppear {
+            guard !reduceMotion else { hasAppeared = true; return }
+            withAnimation(.spring(response: 0.55, dampingFraction: 0.78).delay(0.05)) {
+                hasAppeared = true
+            }
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Cycle day \(cycleDay) of \(cycleLength)")
     }

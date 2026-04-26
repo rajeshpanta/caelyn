@@ -28,6 +28,11 @@ final class UserProfile {
     var remindMedication: Bool
     var remindOvulation: Bool
 
+    var dailyCheckInHour: Int = 20
+    var dailyCheckInMinute: Int = 0
+    var medicationHour: Int = 9
+    var medicationMinute: Int = 0
+
     var isPro: Bool
     var createdAt: Date
 

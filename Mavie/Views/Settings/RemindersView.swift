@@ -44,18 +44,36 @@ private struct RemindersForm: View {
                     icon: "drop.fill",
                     isOn: bind(\.remindPeriodStart)
                 )
-                ToggleCard(
-                    title: "Daily check-in",
-                    subtitle: "A soft prompt at 8 PM.",
-                    icon: "checkmark.circle",
-                    isOn: bind(\.remindDailyCheckIn)
-                )
-                ToggleCard(
-                    title: "Medication",
-                    subtitle: "Daily at 9 AM.",
-                    icon: "pills",
-                    isOn: bind(\.remindMedication)
-                )
+                VStack(spacing: 0) {
+                    ToggleCard(
+                        title: "Daily check-in",
+                        subtitle: "A soft prompt to log how you're feeling.",
+                        icon: "checkmark.circle",
+                        isOn: bind(\.remindDailyCheckIn)
+                    )
+                    if profile.remindDailyCheckIn {
+                        timePickerRow(
+                            label: "Check-in time",
+                            hour: bindHour(\.dailyCheckInHour, \.dailyCheckInMinute),
+                            note: nil
+                        )
+                    }
+                }
+                VStack(spacing: 0) {
+                    ToggleCard(
+                        title: "Medication",
+                        subtitle: "A daily reminder to log medications you track.",
+                        icon: "pills",
+                        isOn: bind(\.remindMedication)
+                    )
+                    if profile.remindMedication {
+                        timePickerRow(
+                            label: "Medication time",
+                            hour: bindHour(\.medicationHour, \.medicationMinute),
+                            note: nil
+                        )
+                    }
+                }
                 ToggleCard(
                     title: "Ovulation window",
                     subtitle: "An estimate, not a fertility prediction.",
@@ -116,6 +134,27 @@ private struct RemindersForm: View {
         }
     }
 
+    // MARK: - Time picker
+
+    private func timePickerRow(label: String, hour: Binding<Date>, note: String?) -> some View {
+        MavieCard(padding: MavieSpacing.md) {
+            HStack(spacing: MavieSpacing.sm) {
+                Image(systemName: "clock")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(MavieColor.primaryPlum)
+                    .frame(width: 24)
+                Text(label)
+                    .font(MavieFont.body)
+                    .foregroundStyle(MavieColor.deepPlumText)
+                Spacer(minLength: 0)
+                DatePicker("", selection: hour, displayedComponents: .hourAndMinute)
+                    .labelsHidden()
+                    .tint(MavieColor.primaryPlum)
+            }
+        }
+        .padding(.top, 4)
+    }
+
     // MARK: - Bindings + side effects
 
     private func bind(_ keyPath: ReferenceWritableKeyPath<UserProfile, Bool>) -> Binding<Bool> {
@@ -124,7 +163,31 @@ private struct RemindersForm: View {
             set: { newValue in
                 profile[keyPath: keyPath] = newValue
                 try? modelContext.save()
+                Haptics.selection()
                 Task { await handleToggle(turningOn: newValue) }
+            }
+        )
+    }
+
+    /// Two Int columns (hour + minute) presented as a single Date binding for the
+    /// system DatePicker. Date's other components are ignored.
+    private func bindHour(
+        _ hourPath: ReferenceWritableKeyPath<UserProfile, Int>,
+        _ minutePath: ReferenceWritableKeyPath<UserProfile, Int>
+    ) -> Binding<Date> {
+        Binding(
+            get: {
+                var components = DateComponents()
+                components.hour = profile[keyPath: hourPath]
+                components.minute = profile[keyPath: minutePath]
+                return Calendar.current.date(from: components) ?? .now
+            },
+            set: { newDate in
+                let components = Calendar.current.dateComponents([.hour, .minute], from: newDate)
+                profile[keyPath: hourPath] = components.hour ?? 0
+                profile[keyPath: minutePath] = components.minute ?? 0
+                try? modelContext.save()
+                Task { await NotificationService.syncFromLiveStore() }
             }
         )
     }

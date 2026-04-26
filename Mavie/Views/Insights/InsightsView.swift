@@ -5,6 +5,9 @@ struct InsightsView: View {
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
     @Query private var profiles: [UserProfile]
 
+    @State private var purchase = PurchaseService.shared
+    @State private var showingPaywall = false
+
     private var profile: UserProfile? { profiles.first }
 
     private var cycles: [Cycle] {
@@ -44,6 +47,7 @@ struct InsightsView: View {
             .background(MavieColor.backgroundCream.ignoresSafeArea())
             .navigationTitle("Insights")
         }
+        .sheet(isPresented: $showingPaywall) { PaywallView() }
     }
 
     @ViewBuilder
@@ -62,11 +66,27 @@ struct InsightsView: View {
             cycleVariation: cycleVariation
         )
 
-        CycleLengthChart(series: CycleAnalytics.cycleLengthSeries(from: cycles))
-        PeriodLengthChart(series: CycleAnalytics.periodLengthSeries(from: cycles))
-        SymptomFrequencyChart(counts: CycleAnalytics.symptomFrequency(in: entries))
-        MoodPatternChart(counts: CycleAnalytics.moodFrequency(in: entries))
-        PainTrendChart(series: CycleAnalytics.painSeries(in: entries))
+        if purchase.isPro {
+            CycleLengthChart(series: CycleAnalytics.cycleLengthSeries(from: cycles))
+            PeriodLengthChart(series: CycleAnalytics.periodLengthSeries(from: cycles))
+            SymptomFrequencyChart(counts: CycleAnalytics.symptomFrequency(in: entries))
+            MoodPatternChart(counts: CycleAnalytics.moodFrequency(in: entries))
+            PainTrendChart(series: CycleAnalytics.painSeries(in: entries))
+        } else {
+            ProUpsellCard(
+                title: "Unlock advanced charts",
+                subtitle: "See how your cycle length, symptoms, mood, and pain change over time.",
+                icon: "chart.line.uptrend.xyaxis",
+                highlights: [
+                    "Cycle & period length trends",
+                    "Symptom frequency patterns",
+                    "Mood distribution",
+                    "Pain levels over time"
+                ]
+            ) {
+                showingPaywall = true
+            }
+        }
     }
 }
 

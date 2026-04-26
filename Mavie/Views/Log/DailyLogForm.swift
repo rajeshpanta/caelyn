@@ -62,6 +62,7 @@ struct DailyLogForm: View {
     private func flowPill(_ flow: FlowLevel?, label: String) -> some View {
         let isSelected = entry?.flow == flow
         return Button {
+            Haptics.selection()
             withEntry { $0.flow = flow }
         } label: {
             VStack(spacing: 6) {

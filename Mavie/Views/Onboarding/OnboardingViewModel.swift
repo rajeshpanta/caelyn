@@ -31,12 +31,14 @@ final class OnboardingViewModel {
         guard let next = OnboardingStep(rawValue: step.rawValue + 1) else { return }
         navigationDirection = .forward
         step = next
+        Haptics.selection()
     }
 
     func back() {
         guard let prev = OnboardingStep(rawValue: step.rawValue - 1) else { return }
         navigationDirection = .backward
         step = prev
+        Haptics.selection()
     }
 
     func toggleGoal(_ goal: TrackingGoal) {

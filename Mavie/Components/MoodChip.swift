@@ -6,7 +6,10 @@ struct MoodChip: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button {
+            Haptics.selection()
+            action()
+        } label: {
             Text(label)
                 .font(MavieFont.callout.weight(.medium))
                 .padding(.horizontal, MavieSpacing.md)

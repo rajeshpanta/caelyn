@@ -90,10 +90,20 @@ enum NotificationService {
             )
         }
         if profile.remindDailyCheckIn {
-            await scheduleDaily(category: .dailyCheckIn, isPrivate: isPrivate, hour: 20, minute: 0)
+            await scheduleDaily(
+                category: .dailyCheckIn,
+                isPrivate: isPrivate,
+                hour: profile.dailyCheckInHour,
+                minute: profile.dailyCheckInMinute
+            )
         }
         if profile.remindMedication {
-            await scheduleDaily(category: .medication, isPrivate: isPrivate, hour: 9, minute: 0)
+            await scheduleDaily(
+                category: .medication,
+                isPrivate: isPrivate,
+                hour: profile.medicationHour,
+                minute: profile.medicationMinute
+            )
         }
         if profile.remindOvulation, let ovulation = predictedOvulation {
             await scheduleOneShot(

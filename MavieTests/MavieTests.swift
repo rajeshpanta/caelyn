@@ -461,4 +461,27 @@ final class MavieTests: XCTestCase {
         XCTAssertEqual(PurchaseOutcome.failed("x"), .failed("x"))
         XCTAssertNotEqual(PurchaseOutcome.failed("x"), .failed("y"))
     }
+
+    // MARK: - Phase 17: Polish — UserProfile schema additions
+
+    func testUserProfileNewReminderTimeDefaults() throws {
+        context.insert(UserProfile())
+        try context.save()
+        let stored = try XCTUnwrap(try context.fetch(FetchDescriptor<UserProfile>()).first)
+        XCTAssertEqual(stored.dailyCheckInHour, 20)
+        XCTAssertEqual(stored.dailyCheckInMinute, 0)
+        XCTAssertEqual(stored.medicationHour, 9)
+        XCTAssertEqual(stored.medicationMinute, 0)
+    }
+
+    func testUserProfileHKDefaultsAreOff() throws {
+        context.insert(UserProfile())
+        try context.save()
+        let stored = try XCTUnwrap(try context.fetch(FetchDescriptor<UserProfile>()).first)
+        XCTAssertFalse(stored.hkReadFlow)
+        XCTAssertFalse(stored.hkWriteFlow)
+        XCTAssertFalse(stored.hkReadSymptoms)
+        XCTAssertFalse(stored.hkWriteSymptoms)
+        XCTAssertFalse(stored.healthKitConnected)
+    }
 }

@@ -8,7 +8,10 @@ struct QuickActionButton: View {
     var action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button {
+            Haptics.light()
+            action()
+        } label: {
             VStack(spacing: 8) {
                 ZStack {
                     Circle()
@@ -27,6 +30,8 @@ struct QuickActionButton: View {
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(title)
+        .accessibilityAddTraits(.isButton)
     }
 }
 
