@@ -3,6 +3,8 @@ import SwiftData
 
 @main
 struct MavieApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some Scene {
         WindowGroup {
             AppLockGate {
@@ -12,6 +14,11 @@ struct MavieApp: App {
             .applyMavieTheme()
         }
         .modelContainer(Persistence.live)
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                Task { await NotificationService.syncFromLiveStore() }
+            }
+        }
     }
 }
 

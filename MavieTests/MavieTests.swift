@@ -299,4 +299,92 @@ final class MavieTests: XCTestCase {
         let kind = BiometricService.availableKind()
         XCTAssertTrue([.none, .faceID, .touchID, .opticID].contains(kind))
     }
+
+    // MARK: - Phase 13: NotificationService
+
+    func testNotificationContentIsPrivateByDefault() {
+        let priv = NotificationService.content(for: .periodUpcoming, isPrivate: true)
+        XCTAssertEqual(priv.title, "Mavie reminder")
+        XCTAssertFalse(priv.body.lowercased().contains("period"))
+    }
+
+    func testNotificationContentDescriptiveWhenNotPrivate() {
+        let pub = NotificationService.content(for: .periodUpcoming, isPrivate: false)
+        XCTAssertNotEqual(pub.title, "Mavie reminder")
+        XCTAssertTrue(pub.title.lowercased().contains("period"))
+    }
+
+    func testNotificationContentDiffersByCategory() {
+        let titles = NotificationService.Category.allCases.map {
+            NotificationService.content(for: $0, isPrivate: false).title
+        }
+        XCTAssertEqual(Set(titles).count, NotificationService.Category.allCases.count)
+    }
+
+    func testNotificationCategoryIdentifiersAreNamespaced() {
+        for category in NotificationService.Category.allCases {
+            XCTAssertTrue(category.rawValue.hasPrefix("mavie."))
+        }
+    }
+
+    // MARK: - Phase 15: ExportService
+
+    func testCSVHeaderRowMatchesIncludeNotes() {
+        let withNotes = ExportService.generateCSV(entries: [], includeNotes: true)
+        let withoutNotes = ExportService.generateCSV(entries: [], includeNotes: false)
+        XCTAssertTrue(withNotes.split(separator: "\n").first?.contains("note") ?? false)
+        XCTAssertFalse(withoutNotes.split(separator: "\n").first?.contains("note") ?? true)
+    }
+
+    func testCSVRowsMatchEntryCount() {
+        let entries: [CycleEntry] = [
+            CycleEntry(date: Date(), flow: .light, mood: .calm),
+            CycleEntry(date: Calendar.current.date(byAdding: .day, value: -1, to: .now)!, flow: .medium)
+        ]
+        let csv = ExportService.generateCSV(entries: entries, includeNotes: false)
+        let lines = csv.split(separator: "\n")
+        XCTAssertEqual(lines.count, 3, "Expected 1 header + 2 entry rows")
+    }
+
+    func testCSVEscapesCommasInNotes() {
+        let entry = CycleEntry(date: Date(), note: "Hello, world")
+        let csv = ExportService.generateCSV(entries: [entry], includeNotes: true)
+        XCTAssertTrue(csv.contains("\"Hello, world\""))
+    }
+
+    func testCSVEscapesQuotesInNotes() {
+        let entry = CycleEntry(date: Date(), note: "She said \"hi\"")
+        let csv = ExportService.generateCSV(entries: [entry], includeNotes: true)
+        XCTAssertTrue(csv.contains("\"She said \"\"hi\"\"\""))
+    }
+
+    func testFilterEntriesByRangeCutoff() {
+        let cal = Calendar.current
+        let recent = cal.date(byAdding: .day, value: -30, to: .now)!
+        let old = cal.date(byAdding: .day, value: -200, to: .now)!
+        let entries: [CycleEntry] = [
+            CycleEntry(date: recent, mood: .calm),
+            CycleEntry(date: old, mood: .calm)
+        ]
+        let last3Months = ExportService.filterEntries(entries, range: .last3Months)
+        XCTAssertEqual(last3Months.count, 1)
+        let allTime = ExportService.filterEntries(entries, range: .all)
+        XCTAssertEqual(allTime.count, 2)
+    }
+
+    func testPDFGenerationProducesData() {
+        let entry = CycleEntry(date: Date(), flow: .medium, pain: 4, symptoms: [.cramps], mood: .tired, note: "test note")
+        let data = ExportService.generatePDF(entries: [entry], profile: nil, range: .last3Months, includeNotes: true)
+        XCTAssertGreaterThan(data.count, 100)
+        // PDF files start with "%PDF-"
+        let prefix = data.prefix(5)
+        XCTAssertEqual(String(data: Data(prefix), encoding: .ascii), "%PDF-")
+    }
+
+    func testExportRangeLookbackDays() {
+        XCTAssertEqual(ExportRange.last3Months.lookbackDays, 90)
+        XCTAssertEqual(ExportRange.last6Months.lookbackDays, 180)
+        XCTAssertEqual(ExportRange.last12Months.lookbackDays, 365)
+        XCTAssertNil(ExportRange.all.lookbackDays)
+    }
 }

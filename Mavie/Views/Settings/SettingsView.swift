@@ -10,6 +10,8 @@ struct SettingsView: View {
     @State private var showingResetOnboardingConfirm = false
     @State private var showingDeleteFirst = false
     @State private var showingDeleteSecond = false
+    @State private var showingExportSheet = false
+    @State private var showingReminders = false
 
     @State private var lockToggleError: String?
 
@@ -32,6 +34,12 @@ struct SettingsView: View {
             }
             .background(MavieColor.backgroundCream.ignoresSafeArea())
             .navigationTitle("Settings")
+            .navigationDestination(isPresented: $showingReminders) {
+                RemindersView()
+            }
+        }
+        .sheet(isPresented: $showingExportSheet) {
+            ExportView()
         }
         .sheet(isPresented: $showingFirstDayPicker) {
             if let profile {
@@ -129,6 +137,14 @@ struct SettingsView: View {
     private var dataSection: some View {
         SettingsSectionCard(title: "Data") {
             SettingsRow(
+                icon: "square.and.arrow.up",
+                iconColor: MavieColor.primaryPlum,
+                title: "Export data",
+                detail: nil,
+                action: { showingExportSheet = true }
+            )
+            SettingsDivider()
+            SettingsRow(
                 icon: "trash",
                 iconColor: MavieColor.alertRose,
                 title: "Delete all data",
@@ -150,7 +166,22 @@ struct SettingsView: View {
                 detail: firstDayLabel,
                 action: { showingFirstDayPicker = true }
             )
+            SettingsDivider()
+            SettingsRow(
+                icon: "bell",
+                iconColor: MavieColor.primaryPlum,
+                title: "Reminders",
+                detail: remindersDetail,
+                action: { showingReminders = true }
+            )
         }
+    }
+
+    private var remindersDetail: String {
+        guard let profile else { return "Off" }
+        let count = [profile.remindPeriodStart, profile.remindDailyCheckIn, profile.remindMedication, profile.remindOvulation]
+            .filter { $0 }.count
+        return count == 0 ? "Off" : "\(count) on"
     }
 
     // MARK: - About
