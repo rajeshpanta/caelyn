@@ -42,7 +42,8 @@ enum BiometricError: Error, LocalizedError {
 @MainActor
 enum BiometricService {
 
-    /// Detect what biometric kind is enrolled on this device.
+    /// Detect what biometric kind (if any) is enrolled on this device.
+    /// Used for icon/label only — not for gating the lock feature.
     static func availableKind() -> BiometricKind {
         let context = LAContext()
         var error: NSError?
@@ -58,21 +59,28 @@ enum BiometricService {
         }
     }
 
-    /// Whether the device can perform any biometric auth right now.
-    static var isAvailable: Bool { availableKind() != .none }
+    /// True when the device has *any* form of authentication (biometrics or passcode).
+    /// This is what gates the lock toggle — using only biometrics-only would lock users out
+    /// if they later un-enroll Face ID at the iOS level.
+    static var canAuthenticate: Bool {
+        let context = LAContext()
+        var error: NSError?
+        return context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error)
+    }
 
-    /// Prompt the user with their device's biometric. Returns success or throws.
+    /// Prompt the user. Uses .deviceOwnerAuthentication so iOS automatically falls back
+    /// to the device passcode if biometrics are unavailable or fail too many times. This
+    /// guarantees the user can always recover access to their data.
     static func authenticate(reason: String = "Unlock Mavie") async throws {
         let context = LAContext()
-        context.localizedFallbackTitle = ""
 
         var error: NSError?
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+        guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
             throw BiometricError.notAvailable
         }
 
         do {
-            let success = try await context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason)
+            let success = try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason)
             if !success { throw BiometricError.failed("Authentication failed.") }
         } catch let laError as LAError where laError.code == .userCancel || laError.code == .systemCancel || laError.code == .appCancel {
             throw BiometricError.userCancelled

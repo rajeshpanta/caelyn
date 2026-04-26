@@ -326,7 +326,7 @@ struct DailyLogForm: View {
                 Image(systemName: "thermometer.medium")
                     .foregroundStyle(MavieColor.primaryPlum)
                     .frame(width: 24)
-                TextField("Basal temperature (°F)", text: $basalTempDraft)
+                TextField("Basal temperature", text: $basalTempDraft)
                     .font(MavieFont.body)
                     .foregroundStyle(MavieColor.deepPlumText)
                     .keyboardType(.decimalPad)

@@ -26,6 +26,18 @@ struct MonthGridView: View {
                 legend
             }
         }
+        .gesture(swipeGesture)
+    }
+
+    private var swipeGesture: some Gesture {
+        DragGesture(minimumDistance: 24, coordinateSpace: .local)
+            .onEnded { value in
+                let dx = value.translation.width
+                let dy = value.translation.height
+                guard abs(dx) > abs(dy) else { return }  // ignore vertical scrolls
+                if dx < -40 { onNext() }
+                else if dx > 40 { onPrev() }
+            }
     }
 
     private var navHeader: some View {

@@ -44,13 +44,37 @@ struct DayDetailSheet: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(titleLabel)
-                .font(.system(.title2, design: .rounded).weight(.semibold))
-                .foregroundStyle(MavieColor.deepPlumText)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(titleLabel)
+                    .font(.system(.title2, design: .rounded).weight(.semibold))
+                    .foregroundStyle(MavieColor.deepPlumText)
+                Spacer()
+                if isFuture {
+                    futureBadge
+                }
+            }
             Text(relativeLabel)
                 .font(MavieFont.subheadline)
                 .foregroundStyle(MavieColor.deepPlumText.opacity(0.6))
         }
+    }
+
+    private var isFuture: Bool {
+        Calendar.current.startOfDay(for: date) > Calendar.current.startOfDay(for: .now)
+    }
+
+    private var futureBadge: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "clock.arrow.circlepath")
+                .font(.system(size: 10, weight: .semibold))
+            Text("Future")
+                .font(MavieFont.caption.weight(.semibold))
+                .tracking(0.3)
+        }
+        .foregroundStyle(MavieColor.primaryPlum)
+        .padding(.horizontal, MavieSpacing.sm)
+        .padding(.vertical, 4)
+        .background(MavieColor.lavender, in: Capsule())
     }
 }

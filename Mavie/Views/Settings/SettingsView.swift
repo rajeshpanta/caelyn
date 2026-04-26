@@ -21,7 +21,6 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: MavieSpacing.lg) {
                     privacySection
-                    healthSection
                     dataSection
                     appSection
                     aboutSection
@@ -98,14 +97,12 @@ struct SettingsView: View {
         SettingsSectionCard(title: "Privacy") {
             if let profile {
                 SettingsToggleRow(
-                    icon: BiometricService.availableKind().icon,
+                    icon: lockIcon,
                     iconColor: MavieColor.primaryPlum,
-                    title: BiometricService.availableKind() == .none ? "App lock" : "\(BiometricService.availableKind().displayName) lock",
-                    subtitle: BiometricService.availableKind() == .none
-                        ? "Set up biometrics in iOS Settings to enable."
-                        : "Mavie locks when backgrounded.",
+                    title: lockTitle,
+                    subtitle: lockSubtitle,
                     isOn: lockBinding(profile: profile),
-                    disabled: BiometricService.availableKind() == .none
+                    disabled: !BiometricService.canAuthenticate
                 )
                 SettingsDivider()
                 SettingsToggleRow(
@@ -127,40 +124,10 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Health section
-
-    private var healthSection: some View {
-        SettingsSectionCard(title: "Health") {
-            SettingsRow(
-                icon: "heart.text.square",
-                iconColor: MavieColor.alertRose,
-                title: "Apple Health",
-                detail: "Phase 14",
-                action: {}
-            )
-        }
-    }
-
     // MARK: - Data section
 
     private var dataSection: some View {
         SettingsSectionCard(title: "Data") {
-            SettingsRow(
-                icon: "icloud",
-                iconColor: MavieColor.primaryPlum,
-                title: "iCloud backup",
-                detail: "Phase 14+",
-                action: {}
-            )
-            SettingsDivider()
-            SettingsRow(
-                icon: "square.and.arrow.up",
-                iconColor: MavieColor.primaryPlum,
-                title: "Export data",
-                detail: "Phase 15",
-                action: {}
-            )
-            SettingsDivider()
             SettingsRow(
                 icon: "trash",
                 iconColor: MavieColor.alertRose,
@@ -182,14 +149,6 @@ struct SettingsView: View {
                 title: "First day of week",
                 detail: firstDayLabel,
                 action: { showingFirstDayPicker = true }
-            )
-            SettingsDivider()
-            SettingsRow(
-                icon: "bell",
-                iconColor: MavieColor.primaryPlum,
-                title: "Reminders",
-                detail: "Phase 13",
-                action: {}
             )
         }
     }
@@ -243,14 +202,37 @@ struct SettingsView: View {
         Binding(
             get: { profile.lockEnabled },
             set: { newValue in
-                if newValue && !BiometricService.isAvailable {
-                    lockToggleError = "Biometric authentication isn't available on this device. Enable Face ID or Touch ID in iOS Settings, then try again."
+                if newValue && !BiometricService.canAuthenticate {
+                    lockToggleError = "This device has no passcode or biometrics set up. Add one in iOS Settings, then try again."
                     return
                 }
                 profile.lockEnabled = newValue
                 try? modelContext.save()
             }
         )
+    }
+
+    // MARK: - Lock copy
+
+    private var lockIcon: String {
+        let kind = BiometricService.availableKind()
+        return kind == .none ? "lock" : kind.icon
+    }
+
+    private var lockTitle: String {
+        let kind = BiometricService.availableKind()
+        return kind == .none ? "App lock" : "\(kind.displayName) lock"
+    }
+
+    private var lockSubtitle: String {
+        if !BiometricService.canAuthenticate {
+            return "Add a passcode in iOS Settings to enable lock."
+        }
+        let kind = BiometricService.availableKind()
+        if kind == .none {
+            return "Mavie locks when backgrounded — unlock with your passcode."
+        }
+        return "Mavie locks when backgrounded — \(kind.displayName) or passcode unlocks."
     }
 
     private func hidePreviewBinding(profile: UserProfile) -> Binding<Bool> {

@@ -23,6 +23,7 @@ struct AppLockGate<Content: View>: View {
             if showLockScreen {
                 LockScreen(
                     biometricKind: BiometricService.availableKind(),
+                    canAuthenticate: BiometricService.canAuthenticate,
                     errorMessage: errorMessage,
                     isAuthenticating: attemptingAuth,
                     onUnlock: { Task { await tryUnlock() } }
@@ -32,8 +33,19 @@ struct AppLockGate<Content: View>: View {
         }
         .animation(.easeInOut(duration: 0.25), value: showLockScreen)
         .task(id: lockEnabled) {
-            if !lockEnabled { isUnlocked = true }
-            else if isUnlocked == false { await tryUnlock() }
+            // If lockEnabled is false, no need to do anything: showLockScreen already
+            // returns false when lockEnabled is false, regardless of isUnlocked.
+            //
+            // We deliberately do NOT set isUnlocked = true on the false branch. That
+            // would create a race on cold launch: @Query may briefly return [] before
+            // the profile loads, lockEnabled reads as false, isUnlocked flips to true,
+            // and when the profile loads with lockEnabled=true the auto-prompt branch
+            // is skipped — leaving the user inside the app without authenticating.
+            //
+            // Authentication is the only path that sets isUnlocked = true.
+            if lockEnabled && isUnlocked == false {
+                await tryUnlock()
+            }
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background {
@@ -71,9 +83,18 @@ struct AppLockGate<Content: View>: View {
 
 private struct LockScreen: View {
     let biometricKind: BiometricKind
+    let canAuthenticate: Bool
     let errorMessage: String?
     let isAuthenticating: Bool
     let onUnlock: () -> Void
+
+    private var primaryIcon: String {
+        biometricKind == .none ? "lock.fill" : biometricKind.icon
+    }
+
+    private var primaryLabel: String {
+        biometricKind == .none ? "Passcode" : biometricKind.displayName
+    }
 
     var body: some View {
         ZStack {
@@ -88,7 +109,7 @@ private struct LockScreen: View {
                 Spacer()
                 ZStack {
                     Circle().fill(MavieColor.lavender).frame(width: 140, height: 140)
-                    Image(systemName: biometricKind.icon)
+                    Image(systemName: primaryIcon)
                         .font(.system(size: 56, weight: .light))
                         .foregroundStyle(MavieColor.primaryPlum)
                 }
@@ -97,7 +118,9 @@ private struct LockScreen: View {
                     Text("Mavie is locked")
                         .font(.system(.title, design: .rounded).weight(.semibold))
                         .foregroundStyle(MavieColor.deepPlumText)
-                    Text("Unlock with \(biometricKind.displayName) to continue.")
+                    Text(canAuthenticate
+                         ? "Unlock with \(primaryLabel) to continue."
+                         : "This device has no passcode set up. Add one in iOS Settings to access Mavie.")
                         .font(MavieFont.body)
                         .foregroundStyle(MavieColor.deepPlumText.opacity(0.65))
                         .multilineTextAlignment(.center)
@@ -115,13 +138,13 @@ private struct LockScreen: View {
                 Spacer()
 
                 MavieButton(
-                    title: isAuthenticating ? "Unlocking…" : "Unlock with \(biometricKind.displayName)",
+                    title: isAuthenticating ? "Unlocking…" : "Unlock with \(primaryLabel)",
                     variant: .primary,
-                    icon: biometricKind.icon
+                    icon: primaryIcon
                 ) {
                     onUnlock()
                 }
-                .disabled(isAuthenticating || biometricKind == .none)
+                .disabled(isAuthenticating || !canAuthenticate)
                 .padding(.horizontal, MavieSpacing.lg)
                 .padding(.bottom, MavieSpacing.lg)
             }

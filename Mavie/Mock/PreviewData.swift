@@ -19,7 +19,9 @@ enum PreviewData {
             (daysAgo: 17,  cycleLength: 29, periodLength: 5, isCurrent: true),
             (daysAgo: 46,  cycleLength: 28, periodLength: 5, isCurrent: false),
             (daysAgo: 76,  cycleLength: 30, periodLength: 6, isCurrent: false),
-            (daysAgo: 103, cycleLength: 27, periodLength: 4, isCurrent: false)
+            (daysAgo: 103, cycleLength: 27, periodLength: 4, isCurrent: false),
+            (daysAgo: 132, cycleLength: 29, periodLength: 5, isCurrent: false),
+            (daysAgo: 160, cycleLength: 28, periodLength: 5, isCurrent: false)
         ]
 
         for spec in cycleSpecs {
