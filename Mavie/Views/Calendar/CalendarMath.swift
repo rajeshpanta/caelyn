@@ -153,13 +153,16 @@ enum CalendarMath {
             .sorted()
         guard !flowDates.isEmpty else { return nil }
 
-        // Find the start of the most recent contiguous flow streak.
+        // Find the start of the most recent flow streak. We tolerate gaps of
+        // up to 1 unlogged day (diff <= 2) so that "logged Day 1, skipped Day 2,
+        // logged Day 3" is treated as one continuous period — not two streaks.
+        // This is the difference between forgiving the user and punishing them.
         var streakStart = flowDates.last!
         for i in stride(from: flowDates.count - 2, through: 0, by: -1) {
             let prev = flowDates[i]
             let next = flowDates[i + 1]
             let diff = calendar.dateComponents([.day], from: prev, to: next).day ?? 0
-            if diff <= 1 {
+            if diff <= 2 {
                 streakStart = prev
             } else {
                 break

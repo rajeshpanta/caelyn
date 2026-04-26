@@ -541,12 +541,32 @@ final class MavieTests: XCTestCase {
         let today = cal.startOfDay(for: .now)
         let firstDay = cal.date(byAdding: .day, value: -7, to: today)!
         let secondDay = cal.date(byAdding: .day, value: -1, to: today)!
-        // Two flow days, gap > 1 day → second day is its own streak.
+        // Two flow days, large gap → second day is its own streak.
         let entries: [CycleEntry] = [
             CycleEntry(date: firstDay, flow: .light),
             CycleEntry(date: secondDay, flow: .light)
         ]
         let window = CalendarMath.activePeriodWindow(in: entries, periodLength: 5, today: today)
-        XCTAssertEqual(window?.lowerBound, secondDay, "Most recent streak start should win when there's a gap")
+        XCTAssertEqual(window?.lowerBound, secondDay, "Most recent streak start should win when there's a wide gap")
+    }
+
+    /// Real-world scenario: user logs Day 1, forgets Day 2, logs Day 3.
+    /// We tolerate 1-day gaps so this still counts as one streak starting Day 1.
+    func testActivePeriodWindowToleratesOneMissedDay() {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let day1 = cal.date(byAdding: .day, value: -2, to: today)!
+        // day2 (yesterday) intentionally not logged
+        let day3 = today
+        let entries: [CycleEntry] = [
+            CycleEntry(date: day1, flow: .light),
+            CycleEntry(date: day3, flow: .medium)
+        ]
+        let window = CalendarMath.activePeriodWindow(in: entries, periodLength: 5, today: today)
+        XCTAssertEqual(
+            window?.lowerBound,
+            day1,
+            "1-day gap (logged Day 1, skipped Day 2, logged Day 3) should still be one streak starting Day 1"
+        )
     }
 }

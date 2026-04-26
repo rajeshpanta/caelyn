@@ -104,9 +104,7 @@ struct HomeView: View {
                     onAddNote: {}
                 )
 
-                if isInActivePeriodWindow && todayEntry?.flow == nil {
-                    activePeriodPrompt
-                }
+                periodStatePrompt
 
                 HomeMoodCheckIn(
                     selectedMood: todayEntry?.mood,
@@ -166,15 +164,81 @@ struct HomeView: View {
     }
 
     private var isPeriodLate: Bool {
-        guard let lastPeriodStart, let nextStart = nextStart else { return false }
-        // Late if today >= predicted start AND nothing logged in the active window.
-        return today >= nextStart && activePeriodWindow == nil
+        guard lastPeriodStart != nil, let next = nextStart else { return false }
+        // Late if today is past predicted start AND nothing in active window.
+        return today > next && activePeriodWindow == nil
     }
 
     private var daysLate: Int {
-        guard let lastPeriodStart, let nextStart = nextStart else { return 0 }
-        let diff = Calendar.current.dateComponents([.day], from: nextStart, to: today).day ?? 0
+        guard lastPeriodStart != nil, let next = nextStart else { return 0 }
+        let diff = Calendar.current.dateComponents([.day], from: next, to: today).day ?? 0
         return max(0, diff)
+    }
+
+    @ViewBuilder
+    private var periodStatePrompt: some View {
+        if isInActivePeriodWindow && todayEntry?.flow == nil {
+            activePeriodPrompt
+        } else if isPeriodLate, daysLate >= 1 {
+            latePeriodPrompt
+        }
+    }
+
+    private var latePeriodPrompt: some View {
+        Button {
+            logPeriodToday()
+        } label: {
+            HStack(spacing: MavieSpacing.sm) {
+                ZStack {
+                    Circle().fill(MavieColor.lavender).frame(width: 36, height: 36)
+                    Image(systemName: "clock.arrow.circlepath")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(MavieColor.primaryPlum)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(latePromptTitle)
+                        .font(MavieFont.headline)
+                        .foregroundStyle(MavieColor.deepPlumText)
+                    Text(latePromptSubtitle)
+                        .font(MavieFont.subheadline)
+                        .foregroundStyle(MavieColor.deepPlumText.opacity(0.6))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "drop.fill")
+                    .font(.system(size: 18, weight: .regular))
+                    .foregroundStyle(MavieColor.alertRose.opacity(0.6))
+            }
+            .padding(MavieSpacing.md)
+            .background(
+                RoundedRectangle(cornerRadius: MavieRadius.card, style: .continuous)
+                    .fill(MavieColor.lavender.opacity(0.55))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: MavieRadius.card, style: .continuous)
+                    .stroke(MavieColor.primaryPlum.opacity(0.2), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(latePromptTitle). \(latePromptSubtitle).")
+    }
+
+    private var latePromptTitle: String {
+        switch daysLate {
+        case 0:       return "Your period may start any day now"
+        case 1:       return "Your period might be a day late"
+        case 2...3:   return "Your period might be \(daysLate) days late"
+        case 4...14:  return "Your period is \(daysLate) days late"
+        case 15...30: return "It's been \(daysLate) days since your expected period"
+        default:      return "Mavie hasn't seen your period this cycle"
+        }
+    }
+
+    private var latePromptSubtitle: String {
+        if daysLate <= 14 {
+            return "Tap to mark today as your first day."
+        }
+        return "Cycles can vary. Tap when it starts, or update your cycle settings."
     }
 
     private var activePeriodPrompt: some View {
@@ -237,14 +301,26 @@ struct HomeView: View {
             modelContext.insert(target)
         }
 
-        // If yesterday has no flow, this is a cycle start.
+        // Decide whether to update profile.lastPeriodStart to today.
+        // We only override if today truly looks like a NEW cycle start —
+        // not if the profile already records a recent period start
+        // (e.g. user said "my last period was 3 days ago" during onboarding,
+        // then taps Log Period today; we shouldn't lose that info).
         let cal = Calendar.current
         let yesterday = cal.date(byAdding: .day, value: -1, to: today) ?? today
         let yesterdayHasFlow = entries.contains {
             cal.isDate($0.date, inSameDayAs: yesterday) && $0.flow != nil
         }
         if !yesterdayHasFlow {
-            profile?.lastPeriodStart = today
+            let periodLen = profile?.averagePeriodLength ?? 5
+            let recentlyStarted: Bool = {
+                guard let existing = profile?.lastPeriodStart else { return false }
+                let daysSince = cal.dateComponents([.day], from: existing, to: today).day ?? Int.max
+                return daysSince >= 0 && daysSince <= periodLen
+            }()
+            if !recentlyStarted {
+                profile?.lastPeriodStart = today
+            }
         }
 
         try? modelContext.save()
