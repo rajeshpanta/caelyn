@@ -451,8 +451,8 @@ final class MavieTests: XCTestCase {
     }
 
     func testProductIDRawValuesAreNamespaced() {
-        XCTAssertEqual(PurchaseService.ProductID.monthly.rawValue, "com.mavie.Mavie.pro.monthly")
-        XCTAssertEqual(PurchaseService.ProductID.yearly.rawValue, "com.mavie.Mavie.pro.yearly")
+        XCTAssertEqual(PurchaseService.ProductID.monthly.rawValue, "com.smile.Mavie.pro.monthly")
+        XCTAssertEqual(PurchaseService.ProductID.yearly.rawValue, "com.smile.Mavie.pro.yearly")
     }
 
     func testPurchaseOutcomeEquality() {

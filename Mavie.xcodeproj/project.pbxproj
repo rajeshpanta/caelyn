@@ -79,6 +79,7 @@
 		D14C0F5D49064AE0854762E3 /* MonthGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EF44766FC445126F3636148 /* MonthGridView.swift */; };
 		D5DECA26FC1778F5BAC89C39 /* CycleEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26616A0A691A426301B6AA72 /* CycleEntry.swift */; };
 		DC22E9EDFEA3C4C2115AF5BA /* AppPreviewMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25FC9F8863E5B674C0198BE /* AppPreviewMask.swift */; };
+		DC8252C241F76E4AB4640ABE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2EDF1CCF70D6714E808CEBC0 /* PrivacyInfo.xcprivacy */; };
 		E0E74177EF81D7F9981C9C03 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 394E0DD42256B3EF7A08CB4A /* SettingsView.swift */; };
 		E2E8EC5B8A34730696421AEA /* MavieCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45670FDCE91C197F219F4B7B /* MavieCard.swift */; };
 		E6871978DBE9992FDCDDE4C5 /* ProUpsellCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2B6B9B677BAE8CC8DA0624 /* ProUpsellCard.swift */; };
@@ -128,6 +129,7 @@
 		2B193899A08FED788979FF16 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
 		2D6BD1125D3A805280B15260 /* CycleRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleRingView.swift; sourceTree = "<group>"; };
 		2ED8E1D3A229086BE8813FAD /* CalendarMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMath.swift; sourceTree = "<group>"; };
+		2EDF1CCF70D6714E808CEBC0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		2EF44766FC445126F3636148 /* MonthGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthGridView.swift; sourceTree = "<group>"; };
 		2F2B6B9B677BAE8CC8DA0624 /* ProUpsellCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProUpsellCard.swift; sourceTree = "<group>"; };
 		2F9F926F2511FF38817F76A0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -242,6 +244,7 @@
 			children = (
 				85AF89F806C692616AD960CA /* Assets.xcassets */,
 				DA03A26EA8705041E5E0E527 /* Mavie.storekit */,
+				2EDF1CCF70D6714E808CEBC0 /* PrivacyInfo.xcprivacy */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -598,6 +601,7 @@
 				7BC8CC2F29842B1A0EDC08BD /* Assets.xcassets in Resources */,
 				8A65A463A80DCB92346BEDF3 /* Mavie.storekit in Resources */,
 				6508C8A74EDAC8CA6C3182A1 /* Preview Assets.xcassets in Resources */,
+				DC8252C241F76E4AB4640ABE /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

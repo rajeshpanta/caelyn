@@ -35,7 +35,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.mavie.Mavie.pro.monthly",
+          "productID" : "com.smile.Mavie.pro.monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Mavie Pro Monthly",
           "subscriptionGroupID" : "21525751",
@@ -56,7 +56,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.mavie.Mavie.pro.yearly",
+          "productID" : "com.smile.Mavie.pro.yearly",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Mavie Pro Yearly",
           "subscriptionGroupID" : "21525751",
