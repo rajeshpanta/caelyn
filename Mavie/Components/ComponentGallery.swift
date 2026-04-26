@@ -19,6 +19,7 @@ struct ComponentGallery: View {
         ScrollView {
             VStack(alignment: .leading, spacing: MavieSpacing.lg) {
                 header
+                DataStatusCard()
                 ringSection
                 quickActionsSection
                 cardsSection
@@ -42,7 +43,7 @@ struct ComponentGallery: View {
                 Spacer()
                 PrivacyChip()
             }
-            Text("Components · Phase 2")
+            Text("Components · Phases 2–4")
                 .font(MavieFont.subheadline)
                 .foregroundStyle(MavieColor.deepPlumText.opacity(0.6))
         }
@@ -223,4 +224,5 @@ struct ComponentGallery: View {
 
 #Preview {
     ComponentGallery()
+        .modelContainer(Persistence.preview)
 }

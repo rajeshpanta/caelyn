@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct MavieApp: App {
@@ -6,5 +7,6 @@ struct MavieApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(Persistence.live)
     }
 }
