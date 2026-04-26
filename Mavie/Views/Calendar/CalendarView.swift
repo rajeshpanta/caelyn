@@ -1,64 +1,90 @@
 import SwiftUI
+import SwiftData
 
 struct CalendarView: View {
+    @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
+    @Query private var profiles: [UserProfile]
+
+    @State private var visibleMonth: Date = Calendar.current.startOfDay(for: .now)
+    @State private var selectedDay: Date?
+
+    private var profile: UserProfile? { profiles.first }
+    private var firstDayOfWeek: Int { profile?.firstDayOfWeek ?? Calendar.current.firstWeekday }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: MavieSpacing.lg) {
-                    monthGridSkeleton
-                    InsightCard(
-                        title: "Coming next",
-                        message: "Phase 10 brings the full month grid with logged days, predictions, and per-day editing.",
-                        icon: "calendar"
+                    MonthGridView(
+                        month: visibleMonth,
+                        entries: entries,
+                        profile: profile,
+                        firstDayOfWeek: firstDayOfWeek,
+                        onPrev: prev,
+                        onNext: next,
+                        onDayTap: { date in selectedDay = date }
                     )
+
+                    MonthSummaryCard(month: visibleMonth, entries: entries)
                 }
-                .padding(MavieSpacing.lg)
+                .padding(.horizontal, MavieSpacing.lg)
+                .padding(.top, MavieSpacing.md)
+                .padding(.bottom, MavieSpacing.xl)
             }
             .background(MavieColor.backgroundCream.ignoresSafeArea())
             .navigationTitle("Calendar")
-        }
-    }
-
-    private var monthGridSkeleton: some View {
-        MavieCard {
-            VStack(spacing: MavieSpacing.md) {
-                HStack {
-                    Text(monthLabel)
-                        .font(MavieFont.title3)
-                        .foregroundStyle(MavieColor.deepPlumText)
-                    Spacer()
-                }
-                weekdayRow
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 7), spacing: 6) {
-                    ForEach(1...30, id: \.self) { day in
-                        Text("\(day)")
-                            .font(MavieFont.callout)
-                            .foregroundStyle(MavieColor.deepPlumText.opacity(0.5))
-                            .frame(maxWidth: .infinity, minHeight: 36)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                if !Calendar.current.isDate(visibleMonth, equalTo: .now, toGranularity: .month) {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Today") { jumpToToday() }
+                            .font(MavieFont.body.weight(.semibold))
+                            .foregroundStyle(MavieColor.primaryPlum)
                     }
                 }
             }
         }
-    }
-
-    private var weekdayRow: some View {
-        HStack {
-            ForEach(["S", "M", "T", "W", "T", "F", "S"], id: \.self) { day in
-                Text(day)
-                    .font(MavieFont.caption.weight(.semibold))
-                    .foregroundStyle(MavieColor.deepPlumText.opacity(0.4))
-                    .frame(maxWidth: .infinity)
-            }
+        .sheet(item: Binding<DateID?>(
+            get: { selectedDay.map { DateID(date: $0) } },
+            set: { selectedDay = $0?.date }
+        )) { wrapper in
+            DayDetailSheet(
+                date: wrapper.date,
+                isPresented: Binding(
+                    get: { selectedDay != nil },
+                    set: { if !$0 { selectedDay = nil } }
+                )
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
     }
 
-    private var monthLabel: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
-        return formatter.string(from: .now)
+    private func prev() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+            visibleMonth = Calendar.current.date(byAdding: .month, value: -1, to: visibleMonth) ?? visibleMonth
+        }
     }
+
+    private func next() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+            visibleMonth = Calendar.current.date(byAdding: .month, value: 1, to: visibleMonth) ?? visibleMonth
+        }
+    }
+
+    private func jumpToToday() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+            visibleMonth = Calendar.current.startOfDay(for: .now)
+        }
+    }
+}
+
+private struct DateID: Identifiable {
+    let date: Date
+    var id: Date { date }
 }
 
 #Preview {
     CalendarView()
+        .modelContainer(Persistence.preview)
 }

@@ -1,49 +1,63 @@
 import SwiftUI
+import SwiftData
 
 struct LogView: View {
+    @Query private var profiles: [UserProfile]
+
+    private var todayLabel: String {
+        let f = DateFormatter()
+        f.dateFormat = "EEEE, MMM d"
+        return f.string(from: .now)
+    }
+
+    private var cycleDay: Int {
+        guard let profile = profiles.first, let lastPeriod = profile.lastPeriodStart else { return 1 }
+        return PredictionEngine.currentCycleDay(
+            lastPeriodStart: lastPeriod,
+            cycleLength: profile.averageCycleLength
+        )
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: MavieSpacing.lg) {
-                    todayCard
-                    InsightCard(
-                        title: "Coming next",
-                        message: "Phase 9 brings flow, pain, symptoms, mood, and notes — all in under 10 seconds.",
-                        icon: "square.and.pencil"
-                    )
+                    header
+                    DailyLogForm(date: .now)
                 }
-                .padding(MavieSpacing.lg)
+                .padding(.horizontal, MavieSpacing.lg)
+                .padding(.top, MavieSpacing.md)
+                .padding(.bottom, MavieSpacing.xl)
             }
             .background(MavieColor.backgroundCream.ignoresSafeArea())
-            .navigationTitle("Log")
-        }
-    }
-
-    private var todayCard: some View {
-        MavieCard {
-            VStack(alignment: .leading, spacing: MavieSpacing.xs) {
-                Text(today.uppercased())
-                    .font(MavieFont.caption.weight(.semibold))
-                    .foregroundStyle(MavieColor.deepPlumText.opacity(0.5))
-                    .tracking(0.5)
-                Text("Today's check-in")
-                    .font(MavieFont.title2)
-                    .foregroundStyle(MavieColor.deepPlumText)
-                Text("Log your flow, mood, and how you're feeling — fast.")
-                    .font(MavieFont.body)
-                    .foregroundStyle(MavieColor.deepPlumText.opacity(0.6))
-                    .fixedSize(horizontal: false, vertical: true)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Log")
+                        .font(MavieFont.headline)
+                        .foregroundStyle(MavieColor.deepPlumText)
+                }
             }
         }
     }
 
-    private var today: String {
-        let f = DateFormatter()
-        f.dateFormat = "EEEE, MMM d"
-        return f.string(from: .now)
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(todayLabel)
+                .font(.system(.title2, design: .rounded).weight(.semibold))
+                .foregroundStyle(MavieColor.deepPlumText)
+            HStack(spacing: 6) {
+                Text("Today's check-in")
+                Text("·")
+                Text("Cycle day \(cycleDay)")
+            }
+            .font(MavieFont.subheadline)
+            .foregroundStyle(MavieColor.deepPlumText.opacity(0.6))
+        }
     }
 }
 
 #Preview {
     LogView()
+        .modelContainer(Persistence.preview)
 }

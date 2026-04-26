@@ -18,9 +18,11 @@
 		2A4BB93F918444539A3B01A1 /* ComponentGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9183829E797CC4BEAE95061 /* ComponentGallery.swift */; };
 		32BFF0721D36CD13D71CCF8F /* MavieUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC5C272BAC9997C05D909092 /* MavieUITests.swift */; };
 		3476CC0389BC9297748686F6 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048E217F28A9577E6CA1BB25 /* UserProfile.swift */; };
+		375EEFBD1CDD62C33DDB0E10 /* DayDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 089BC6CCEE6DABB46946823E /* DayDetailSheet.swift */; };
 		3E59FBF6D573DDE96568B53B /* MoodChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB77D121C6C53A9441CA458 /* MoodChip.swift */; };
 		3E93B665D826FA168B8594BA /* HomeQuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB3CE13B04414D1A5B09E01 /* HomeQuickActions.swift */; };
 		413505EF38142E0539A8D714 /* MavieTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6082C91E8D26535106119306 /* MavieTests.swift */; };
+		45EA5E1DAD1E30EC034E1BC0 /* CalendarMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ED8E1D3A229086BE8813FAD /* CalendarMath.swift */; };
 		4C092D945F327C03C6426BB0 /* Color+Mavie.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31FF6283E1CE2DD13A41DF46 /* Color+Mavie.swift */; };
 		4E0C83CCB74D665F80475A8C /* OnboardingSteps.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5F664294EAD5BF7CFC26C6 /* OnboardingSteps.swift */; };
 		53949058014DA82FA20F19C3 /* PrivacyChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85EF104E047040EC1BBAA3C8 /* PrivacyChip.swift */; };
@@ -32,9 +34,11 @@
 		6CDD34CF5017F8AE9AB7E888 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4E2D88EED0D79168C31BCE /* MainTabView.swift */; };
 		6D48EB0EDFD50598E8CE7A78 /* CyclePrediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002483BC085427902C2AB2BE /* CyclePrediction.swift */; };
 		6FBAAAB4A2D320622BCE0D4F /* HomePatternInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = A436A0450A271AB8E02419C1 /* HomePatternInsight.swift */; };
+		73D5B9153EA62104867398FA /* MonthSummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F39E4458FB99A11167E6B80A /* MonthSummaryCard.swift */; };
 		7A01E0C7CC40562B806BC63D /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 765AF33518462963C82DE99A /* OnboardingFlow.swift */; };
 		7BC8CC2F29842B1A0EDC08BD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85AF89F806C692616AD960CA /* Assets.xcassets */; };
 		7EBA398ABBDB4F5C035F4441 /* StatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71CD706D6BD0819CA6AE9576 /* StatCard.swift */; };
+		85531C3D34B34A203159743A /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C1A2028CDB8963CD70BBFA /* DayCell.swift */; };
 		89EE30D8EC7CAC1BC5F46D94 /* CycleRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D6BD1125D3A805280B15260 /* CycleRingView.swift */; };
 		8C90317322F11F52A9C25898 /* PredictionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B0FC088D00A5CF6F48FCD0 /* PredictionEngine.swift */; };
 		96C6EFD5759A72F2BD0DCB0A /* HomeComingUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CAB837E0BA0588707912B64 /* HomeComingUp.swift */; };
@@ -43,6 +47,7 @@
 		A3EEE399D4872830C5552B6D /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A2DAC53E8C6D68C4D21150 /* InsightsView.swift */; };
 		ABE98E43F15622C7B392202F /* ToggleCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91BE5AC5136439A7607B7248 /* ToggleCard.swift */; };
 		ADE38D413E77AD678D4DBA55 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E79A7D076E653EFAFAB50101 /* CalendarView.swift */; };
+		AE1A89B71B1CF72B0A6A453D /* DailyLogForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E504DB3C093E1B88F5E43D4 /* DailyLogForm.swift */; };
 		AE4D240BD55F5040E00CE48B /* Shadows.swift in Sources */ = {isa = PBXBuildFile; fileRef = C59D90DF27B3A6FD3B4BE169 /* Shadows.swift */; };
 		BB31F1F5F7D4D8B2A29E7167 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B193899A08FED788979FF16 /* OnboardingStep.swift */; };
 		BCB5334AF18B6FE93F8C1759 /* DesignSystemPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A9ADCC85A4152BCD1CF311 /* DesignSystemPreview.swift */; };
@@ -51,6 +56,7 @@
 		C5A0B2888BEDDF40B5003C5A /* MavieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65B417F556FED2CD6972F463 /* MavieApp.swift */; };
 		CB1C845FA11F838E8DBCD2CF /* DataStatusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0692964E06D6CF3B761E4C5 /* DataStatusCard.swift */; };
 		D0217AA7F30EBE2446F7A584 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4680291850944DF9C8578C5F /* HomeView.swift */; };
+		D14C0F5D49064AE0854762E3 /* MonthGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EF44766FC445126F3636148 /* MonthGridView.swift */; };
 		D5DECA26FC1778F5BAC89C39 /* CycleEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26616A0A691A426301B6AA72 /* CycleEntry.swift */; };
 		E0E74177EF81D7F9981C9C03 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 394E0DD42256B3EF7A08CB4A /* SettingsView.swift */; };
 		E2E8EC5B8A34730696421AEA /* MavieCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45670FDCE91C197F219F4B7B /* MavieCard.swift */; };
@@ -83,14 +89,18 @@
 /* Begin PBXFileReference section */
 		002483BC085427902C2AB2BE /* CyclePrediction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclePrediction.swift; sourceTree = "<group>"; };
 		01A9ADCC85A4152BCD1CF311 /* DesignSystemPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystemPreview.swift; sourceTree = "<group>"; };
+		03C1A2028CDB8963CD70BBFA /* DayCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayCell.swift; sourceTree = "<group>"; };
 		04126DC43B3ACC481A709D11 /* SymptomChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomChip.swift; sourceTree = "<group>"; };
 		048E217F28A9577E6CA1BB25 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
+		089BC6CCEE6DABB46946823E /* DayDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailSheet.swift; sourceTree = "<group>"; };
 		0F55493705D1592BAB54DE3F /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		11C1D6C927E425BE4612398E /* OnboardingScaffold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScaffold.swift; sourceTree = "<group>"; };
 		2392C1DAB594A25CF078DBFF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		26616A0A691A426301B6AA72 /* CycleEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleEntry.swift; sourceTree = "<group>"; };
 		2B193899A08FED788979FF16 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
 		2D6BD1125D3A805280B15260 /* CycleRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleRingView.swift; sourceTree = "<group>"; };
+		2ED8E1D3A229086BE8813FAD /* CalendarMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMath.swift; sourceTree = "<group>"; };
+		2EF44766FC445126F3636148 /* MonthGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthGridView.swift; sourceTree = "<group>"; };
 		2F9F926F2511FF38817F76A0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		31FF6283E1CE2DD13A41DF46 /* Color+Mavie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Mavie.swift"; sourceTree = "<group>"; };
 		33A2DAC53E8C6D68C4D21150 /* InsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsView.swift; sourceTree = "<group>"; };
@@ -115,6 +125,7 @@
 		6082C91E8D26535106119306 /* MavieTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieTests.swift; sourceTree = "<group>"; };
 		65B417F556FED2CD6972F463 /* MavieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieApp.swift; sourceTree = "<group>"; };
 		6B4741BB77F7F27DC460613E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		6E504DB3C093E1B88F5E43D4 /* DailyLogForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyLogForm.swift; sourceTree = "<group>"; };
 		71CD706D6BD0819CA6AE9576 /* StatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatCard.swift; sourceTree = "<group>"; };
 		765AF33518462963C82DE99A /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
 		7AB77D121C6C53A9441CA458 /* MoodChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodChip.swift; sourceTree = "<group>"; };
@@ -145,6 +156,7 @@
 		F08C058AF44DDE420D846911 /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
 		F1053C1456A57FD6FD09246A /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
 		F2FAEC87B355A27323A83A03 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		F39E4458FB99A11167E6B80A /* MonthSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthSummaryCard.swift; sourceTree = "<group>"; };
 		F5BE37F05C92D23805C5D294 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		F5D3CF9944AEB0891FA3D6F5 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		F9183829E797CC4BEAE95061 /* ComponentGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentGallery.swift; sourceTree = "<group>"; };
@@ -169,7 +181,12 @@
 			isa = PBXGroup;
 			children = (
 				F5BE37F05C92D23805C5D294 /* .gitkeep */,
+				2ED8E1D3A229086BE8813FAD /* CalendarMath.swift */,
 				E79A7D076E653EFAFAB50101 /* CalendarView.swift */,
+				03C1A2028CDB8963CD70BBFA /* DayCell.swift */,
+				089BC6CCEE6DABB46946823E /* DayDetailSheet.swift */,
+				2EF44766FC445126F3636148 /* MonthGridView.swift */,
+				F39E4458FB99A11167E6B80A /* MonthSummaryCard.swift */,
 			);
 			path = Calendar;
 			sourceTree = "<group>";
@@ -309,6 +326,7 @@
 			isa = PBXGroup;
 			children = (
 				FC08912DC52B2FAF1747F884 /* .gitkeep */,
+				6E504DB3C093E1B88F5E43D4 /* DailyLogForm.swift */,
 				A3CD687DB1AC6131378EF3DC /* LogView.swift */,
 			);
 			path = Log;
@@ -529,6 +547,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				45EA5E1DAD1E30EC034E1BC0 /* CalendarMath.swift in Sources */,
 				ADE38D413E77AD678D4DBA55 /* CalendarView.swift in Sources */,
 				4C092D945F327C03C6426BB0 /* Color+Mavie.swift in Sources */,
 				2A4BB93F918444539A3B01A1 /* ComponentGallery.swift in Sources */,
@@ -536,7 +555,10 @@
 				D5DECA26FC1778F5BAC89C39 /* CycleEntry.swift in Sources */,
 				6D48EB0EDFD50598E8CE7A78 /* CyclePrediction.swift in Sources */,
 				89EE30D8EC7CAC1BC5F46D94 /* CycleRingView.swift in Sources */,
+				AE1A89B71B1CF72B0A6A453D /* DailyLogForm.swift in Sources */,
 				CB1C845FA11F838E8DBCD2CF /* DataStatusCard.swift in Sources */,
+				85531C3D34B34A203159743A /* DayCell.swift in Sources */,
+				375EEFBD1CDD62C33DDB0E10 /* DayDetailSheet.swift in Sources */,
 				BCB5334AF18B6FE93F8C1759 /* DesignSystemPreview.swift in Sources */,
 				F1AC176F9D56639C5C0752AF /* Enums.swift in Sources */,
 				ED331023DBD9BB944BF46C26 /* GoalCard.swift in Sources */,
@@ -555,6 +577,8 @@
 				C5A0B2888BEDDF40B5003C5A /* MavieApp.swift in Sources */,
 				ED537FE4D941015C9F96B602 /* MavieButton.swift in Sources */,
 				E2E8EC5B8A34730696421AEA /* MavieCard.swift in Sources */,
+				D14C0F5D49064AE0854762E3 /* MonthGridView.swift in Sources */,
+				73D5B9153EA62104867398FA /* MonthSummaryCard.swift in Sources */,
 				3E59FBF6D573DDE96568B53B /* MoodChip.swift in Sources */,
 				7A01E0C7CC40562B806BC63D /* OnboardingFlow.swift in Sources */,
 				05035087CC00535EAB9AB450 /* OnboardingProgress.swift in Sources */,
