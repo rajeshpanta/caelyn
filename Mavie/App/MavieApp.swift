@@ -12,6 +12,14 @@ struct MavieApp: App {
                     .appPreviewMask()
             }
             .applyMavieTheme()
+            .task {
+                // Run on first appearance so PurchaseService.shared is created
+                // and its Transaction.updates listener starts as early as
+                // possible. Also primes Product.products(for:) and reads
+                // Transaction.currentEntitlements before the user can reach
+                // the paywall / Insights / Export.
+                await PurchaseService.shared.loadProducts()
+            }
         }
         .modelContainer(Persistence.live)
         .onChange(of: scenePhase) { _, newPhase in

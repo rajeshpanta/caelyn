@@ -54,7 +54,6 @@
 		843C55FD77761EEFF9CB2F21 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9022390D9EA5BAC63E700631 /* ExportService.swift */; };
 		85531C3D34B34A203159743A /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C1A2028CDB8963CD70BBFA /* DayCell.swift */; };
 		89EE30D8EC7CAC1BC5F46D94 /* CycleRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D6BD1125D3A805280B15260 /* CycleRingView.swift */; };
-		8A65A463A80DCB92346BEDF3 /* Mavie.storekit in Resources */ = {isa = PBXBuildFile; fileRef = DA03A26EA8705041E5E0E527 /* Mavie.storekit */; };
 		8C90317322F11F52A9C25898 /* PredictionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B0FC088D00A5CF6F48FCD0 /* PredictionEngine.swift */; };
 		96C6EFD5759A72F2BD0DCB0A /* HomeComingUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CAB837E0BA0588707912B64 /* HomeComingUp.swift */; };
 		99DECCDF9FF07135EB5852A9 /* SettingsRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214533C61864DDE91565D435 /* SettingsRows.swift */; };
@@ -118,18 +117,18 @@
 		048E217F28A9577E6CA1BB25 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		06CFC5E48284BB29C5336F61 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
 		089BC6CCEE6DABB46946823E /* DayDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailSheet.swift; sourceTree = "<group>"; };
-		0F55493705D1592BAB54DE3F /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		0F55493705D1592BAB54DE3F /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		11C1D6C927E425BE4612398E /* OnboardingScaffold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScaffold.swift; sourceTree = "<group>"; };
 		166EA79A5EA2AD2337466652 /* HealthKitSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitSync.swift; sourceTree = "<group>"; };
 		214533C61864DDE91565D435 /* SettingsRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRows.swift; sourceTree = "<group>"; };
-		2392C1DAB594A25CF078DBFF /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		2392C1DAB594A25CF078DBFF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		2562FD1AA6A2028CCFFD5FCD /* PurchaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseService.swift; sourceTree = "<group>"; };
 		26606241B2914FBE068E6002 /* BiometricService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricService.swift; sourceTree = "<group>"; };
 		26616A0A691A426301B6AA72 /* CycleEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleEntry.swift; sourceTree = "<group>"; };
 		2B193899A08FED788979FF16 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
 		2D6BD1125D3A805280B15260 /* CycleRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleRingView.swift; sourceTree = "<group>"; };
 		2ED8E1D3A229086BE8813FAD /* CalendarMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMath.swift; sourceTree = "<group>"; };
-		2EDF1CCF70D6714E808CEBC0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		2EDF1CCF70D6714E808CEBC0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		2EF44766FC445126F3636148 /* MonthGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthGridView.swift; sourceTree = "<group>"; };
 		2F2B6B9B677BAE8CC8DA0624 /* ProUpsellCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProUpsellCard.swift; sourceTree = "<group>"; };
 		2F9F926F2511FF38817F76A0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -138,8 +137,8 @@
 		33EC866AF98FC19A3CA8B5D6 /* QuickActionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionButton.swift; sourceTree = "<group>"; };
 		394E0DD42256B3EF7A08CB4A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3CAB837E0BA0588707912B64 /* HomeComingUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeComingUp.swift; sourceTree = "<group>"; };
-		3CAFCF46D8C7EEC639A3FEF6 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
-		3EBA0266F75BB4050BB17761 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		3CAFCF46D8C7EEC639A3FEF6 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		3EBA0266F75BB4050BB17761 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		44E800768FA8204832859E9A /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		45670FDCE91C197F219F4B7B /* MavieCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieCard.swift; sourceTree = "<group>"; };
 		4680291850944DF9C8578C5F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -150,8 +149,8 @@
 		507DF43DC9E0D7C333EE6280 /* InsightsCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsCharts.swift; sourceTree = "<group>"; };
 		55A4E16E9D3C9A2FAEF8EE74 /* HealthKitConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitConnectView.swift; sourceTree = "<group>"; };
 		575356844F919041CEB44D0F /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
-		579DA9A9B90B604B6C347A04 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
-		5CF5CFA1345EC46B455E2E60 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		579DA9A9B90B604B6C347A04 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		5CF5CFA1345EC46B455E2E60 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		5D4E2D88EED0D79168C31BCE /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		5DE84D0AD1B04048AB1C0842 /* HomeHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeHeader.swift; sourceTree = "<group>"; };
 		5F640251E18D1113EAC4C59D /* MavieTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MavieTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -161,7 +160,7 @@
 		65B417F556FED2CD6972F463 /* MavieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieApp.swift; sourceTree = "<group>"; };
 		65F1372EF6BFC9AE2E0B6C87 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		66C9C34EA57C79D360872196 /* SettingsPickerSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPickerSheets.swift; sourceTree = "<group>"; };
-		6B4741BB77F7F27DC460613E /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		6B4741BB77F7F27DC460613E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		6E504DB3C093E1B88F5E43D4 /* DailyLogForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyLogForm.swift; sourceTree = "<group>"; };
 		71CD706D6BD0819CA6AE9576 /* StatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatCard.swift; sourceTree = "<group>"; };
 		765AF33518462963C82DE99A /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
@@ -179,8 +178,8 @@
 		A3A6B8DF8A37700CAFE9A6C2 /* HomeMoodCheckIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeMoodCheckIn.swift; sourceTree = "<group>"; };
 		A3CD687DB1AC6131378EF3DC /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
 		A436A0450A271AB8E02419C1 /* HomePatternInsight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePatternInsight.swift; sourceTree = "<group>"; };
-		AD4A8E05406767D814921FD9 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
-		B8342950B727588C93394B12 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		AD4A8E05406767D814921FD9 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		B8342950B727588C93394B12 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		B8E0EF53086EBCF43BEE9B62 /* AppLockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockGate.swift; sourceTree = "<group>"; };
 		BAFFE66B273791B6D826CE8D /* CycleAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleAnalytics.swift; sourceTree = "<group>"; };
 		BBB4681DB74D57344061D83B /* InsightsStatsGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsStatsGrid.swift; sourceTree = "<group>"; };
@@ -190,13 +189,12 @@
 		C59D90DF27B3A6FD3B4BE169 /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
 		C7FF15AAC8249353DAD172F9 /* MavieButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieButton.swift; sourceTree = "<group>"; };
 		C88212A52417AA4D3A899191 /* PatternsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternsSection.swift; sourceTree = "<group>"; };
-		D9E44CEFBE94981ED7EA867F /* Mavie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mavie.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		DA03A26EA8705041E5E0E527 /* Mavie.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Mavie.storekit; sourceTree = "<group>"; };
+		D9E44CEFBE94981ED7EA867F /* Mavie.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Mavie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD05238A7AD209486A30662D /* HomeCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCopy.swift; sourceTree = "<group>"; };
 		E21643CDD09AE69FDDA3AD02 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		E3C7451CCA4F2D1404F339E0 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		E79A7D076E653EFAFAB50101 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
-		E9FBC458919B7A5DF91703F7 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		E9FBC458919B7A5DF91703F7 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		EA4187B2D16D4E7DE702A118 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		EC5F664294EAD5BF7CFC26C6 /* OnboardingSteps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSteps.swift; sourceTree = "<group>"; };
 		EE5CC4617D123212BF2C2471 /* OnboardingProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingProgress.swift; sourceTree = "<group>"; };
@@ -204,12 +202,12 @@
 		F1053C1456A57FD6FD09246A /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
 		F2FAEC87B355A27323A83A03 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		F39E4458FB99A11167E6B80A /* MonthSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthSummaryCard.swift; sourceTree = "<group>"; };
-		F5BE37F05C92D23805C5D294 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		F5BE37F05C92D23805C5D294 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		F5D3CF9944AEB0891FA3D6F5 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		F7C75D242FD2D79475FA2835 /* InsightsEmptyState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsEmptyState.swift; sourceTree = "<group>"; };
 		F9183829E797CC4BEAE95061 /* ComponentGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentGallery.swift; sourceTree = "<group>"; };
 		FA7D00CBB5BED5E785D3F7E4 /* MavieUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		FC08912DC52B2FAF1747F884 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		FC08912DC52B2FAF1747F884 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -243,7 +241,6 @@
 			isa = PBXGroup;
 			children = (
 				85AF89F806C692616AD960CA /* Assets.xcassets */,
-				DA03A26EA8705041E5E0E527 /* Mavie.storekit */,
 				2EDF1CCF70D6714E808CEBC0 /* PrivacyInfo.xcprivacy */,
 			);
 			path = Resources;
@@ -563,6 +560,9 @@
 					35E7738CAC7DE3772CF95EF0 = {
 						DevelopmentTeam = "";
 					};
+					410CE2C3EBA2ABF395139BB7 = {
+						DevelopmentTeam = "";
+					};
 					F5CDDA7A36EF0D0CB783F995 = {
 						DevelopmentTeam = "";
 						TestTargetID = 410CE2C3EBA2ABF395139BB7;
@@ -596,7 +596,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				7BC8CC2F29842B1A0EDC08BD /* Assets.xcassets in Resources */,
-				8A65A463A80DCB92346BEDF3 /* Mavie.storekit in Resources */,
 				6508C8A74EDAC8CA6C3182A1 /* Preview Assets.xcassets in Resources */,
 				DC8252C241F76E4AB4640ABE /* PrivacyInfo.xcprivacy in Resources */,
 			);
@@ -788,7 +787,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_ASSET_PATHS = "\"Mavie/Preview Content\"";
-				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Mavie uses Face ID to keep your cycle data private.";
@@ -934,7 +932,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_ASSET_PATHS = "\"Mavie/Preview Content\"";
-				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Mavie uses Face ID to keep your cycle data private.";

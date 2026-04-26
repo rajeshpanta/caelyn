@@ -99,6 +99,10 @@ schemes:
         - MavieUITests
     run:
       config: Debug
-      storeKitConfiguration: Mavie/Resources/Mavie.storekit
+      # The .storekit lives at the project root, OUTSIDE the source path,
+      # so it is NOT bundled into Release/TestFlight builds. It is used only
+      # when running locally from Xcode against the Simulator. Release and
+      # TestFlight always talk to real App Store / Sandbox StoreKit.
+      storeKitConfiguration: Mavie.storekit
     archive:
       config: Release

@@ -109,6 +109,11 @@ struct PaywallView: View {
 
     // MARK: - Features
 
+    /// Comparison only lists features that ship in this build AND are
+    /// truthfully enforced. "Custom themes", "Yearly summary", "iCloud
+    /// backup", and "Widgets" are deliberately omitted — they aren't
+    /// implemented yet, and listing aspirational features in a paid-IAP
+    /// comparison is a misrepresentation Apple Review will flag.
     private var featureSection: some View {
         MavieCard(padding: MavieSpacing.md) {
             VStack(spacing: 0) {
@@ -122,17 +127,13 @@ struct PaywallView: View {
                 featureDivider
                 featureRow("Beautiful calendar", inFree: true, inPro: true)
                 featureDivider
-                featureRow("Apple Health sync", inFree: true, inPro: true)
-                featureDivider
                 featureRow("Gentle reminders", inFree: true, inPro: true)
+                featureDivider
+                featureRow("CSV export", inFree: true, inPro: true)
                 featureDivider
                 featureRow("Advanced pattern insights", inFree: false, inPro: true)
                 featureDivider
                 featureRow("PDF cycle reports", inFree: false, inPro: true)
-                featureDivider
-                featureRow("Custom themes", inFree: false, inPro: true)
-                featureDivider
-                featureRow("Yearly summary", inFree: false, inPro: true)
             }
         }
     }
@@ -294,20 +295,35 @@ struct PaywallView: View {
         }
     }
 
+    /// Transient error state — shown only when StoreKit failed to load real
+    /// App Store products. NOT a "feature unavailable" state. Subscribed
+    /// users on this device can still tap Restore Purchases (in the footer)
+    /// to recover their entitlement without needing products to load first.
     private var unavailableState: some View {
         MavieCard(padding: MavieSpacing.lg) {
             VStack(alignment: .leading, spacing: MavieSpacing.sm) {
                 HStack(spacing: 8) {
-                    Image(systemName: "sparkles")
-                        .foregroundStyle(MavieColor.primaryPlum)
-                    Text("Subscriptions are setting up")
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundStyle(MavieColor.alertRose)
+                    Text("Couldn't load subscription options")
                         .font(MavieFont.headline)
                         .foregroundStyle(MavieColor.deepPlumText)
                 }
-                Text("Mavie Pro will be available soon. Free features keep working — your cycle, calendar, and gentle reminders are all yours either way.")
+                Text("Check your internet connection and try again. If you've already subscribed on another device, tap Restore purchases below.")
                     .font(MavieFont.subheadline)
                     .foregroundStyle(MavieColor.deepPlumText.opacity(0.7))
                     .fixedSize(horizontal: false, vertical: true)
+                Button {
+                    Task { await purchase.loadProducts() }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.clockwise")
+                        Text("Try again")
+                    }
+                    .font(MavieFont.body.weight(.semibold))
+                    .foregroundStyle(MavieColor.primaryPlum)
+                }
+                .padding(.top, 4)
             }
         }
     }

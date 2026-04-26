@@ -81,7 +81,8 @@ struct InsightsView: View {
                     "Cycle & period length trends",
                     "Symptom frequency patterns",
                     "Mood distribution",
-                    "Pain levels over time"
+                    "Pain levels over time",
+                    "PDF cycle reports for your doctor"
                 ]
             ) {
                 showingPaywall = true
