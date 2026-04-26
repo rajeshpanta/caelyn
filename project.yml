@@ -1,6 +1,9 @@
 name: Mavie
 options:
-  bundleIdPrefix: com.mavie
+  # Bundle ID prefix — needs to be unique to your Apple Developer team.
+  # If you're on a paid Apple Developer Program, you can use your own
+  # reverse-domain (e.g. com.yourdomain).
+  bundleIdPrefix: com.smile
   deploymentTarget:
     iOS: "17.0"
   developmentLanguage: en
@@ -20,14 +23,22 @@ targets:
     platform: iOS
     sources:
       - path: Mavie
-    entitlements:
-      path: Mavie/Mavie.entitlements
-      properties:
-        com.apple.developer.healthkit: true
-        com.apple.developer.healthkit.access: []
+    # HealthKit capability disabled by default because it requires:
+    #   1. A paid Apple Developer Program membership ($99/year)
+    #   2. The App ID registered in developer.apple.com with HealthKit enabled
+    #   3. A provisioning profile that includes the HealthKit entitlement
+    # When you're ready, uncomment the `entitlements:` block below and
+    # uncomment the two NSHealth* INFOPLIST keys further down. The
+    # HealthKit code in Services/ stays in place either way.
+    #
+    # entitlements:
+    #   path: Mavie/Mavie.entitlements
+    #   properties:
+    #     com.apple.developer.healthkit: true
+    #     com.apple.developer.healthkit.access: []
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.mavie.Mavie
+        PRODUCT_BUNDLE_IDENTIFIER: com.smile.Mavie
         DEVELOPMENT_ASSET_PATHS: '"Mavie/Preview Content"'
         ENABLE_PREVIEWS: YES
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -42,8 +53,9 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_NSFaceIDUsageDescription: "Mavie uses Face ID to keep your cycle data private."
-        INFOPLIST_KEY_NSHealthShareUsageDescription: "Mavie reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync."
-        INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Mavie writes your menstrual flow and symptoms to Apple Health when you choose to."
+        # HealthKit usage strings — uncomment when re-enabling HealthKit:
+        # INFOPLIST_KEY_NSHealthShareUsageDescription: "Mavie reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync."
+        # INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Mavie writes your menstrual flow and symptoms to Apple Health when you choose to."
         SWIFT_EMIT_LOC_STRINGS: YES
 
   MavieTests:
@@ -53,7 +65,7 @@ targets:
       - path: MavieTests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.mavie.MavieTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.smile.MavieTests
         BUNDLE_LOADER: "$(TEST_HOST)"
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Mavie.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Mavie"
         GENERATE_INFOPLIST_FILE: YES
@@ -67,7 +79,7 @@ targets:
       - path: MavieUITests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.mavie.MavieUITests
+        PRODUCT_BUNDLE_IDENTIFIER: com.smile.MavieUITests
         TEST_TARGET_NAME: Mavie
         GENERATE_INFOPLIST_FILE: YES
     dependencies:
