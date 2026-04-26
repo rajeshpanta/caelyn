@@ -1,0 +1,693 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		32BFF0721D36CD13D71CCF8F /* MavieUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC5C272BAC9997C05D909092 /* MavieUITests.swift */; };
+		413505EF38142E0539A8D714 /* MavieTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6082C91E8D26535106119306 /* MavieTests.swift */; };
+		5C623D6823E032C726D6BAC8 /* MavieUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7D00CBB5BED5E785D3F7E4 /* MavieUITestsLaunchTests.swift */; };
+		6508C8A74EDAC8CA6C3182A1 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 840FBF404E79FB7133C28F75 /* Preview Assets.xcassets */; };
+		7BC8CC2F29842B1A0EDC08BD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85AF89F806C692616AD960CA /* Assets.xcassets */; };
+		C5A0B2888BEDDF40B5003C5A /* MavieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65B417F556FED2CD6972F463 /* MavieApp.swift */; };
+		E8C5969AA3DD5BC287C4BA97 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F9F926F2511FF38817F76A0 /* ContentView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		628BA96CF53DFF583A9E7EB2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F5D3D9430000A02B51A96D8A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 410CE2C3EBA2ABF395139BB7;
+			remoteInfo = Mavie;
+		};
+		AA93A44B4C01CF1A82EBA6C1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F5D3D9430000A02B51A96D8A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 410CE2C3EBA2ABF395139BB7;
+			remoteInfo = Mavie;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0F55493705D1592BAB54DE3F /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		2392C1DAB594A25CF078DBFF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		2F9F926F2511FF38817F76A0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		3CAFCF46D8C7EEC639A3FEF6 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		3EBA0266F75BB4050BB17761 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		4B0C46A6E83BAF5E37D2EC16 /* MavieUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MavieUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		579DA9A9B90B604B6C347A04 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		5CF5CFA1345EC46B455E2E60 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		5F640251E18D1113EAC4C59D /* MavieTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MavieTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6082C91E8D26535106119306 /* MavieTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieTests.swift; sourceTree = "<group>"; };
+		65B417F556FED2CD6972F463 /* MavieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieApp.swift; sourceTree = "<group>"; };
+		6B4741BB77F7F27DC460613E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		840FBF404E79FB7133C28F75 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		85AF89F806C692616AD960CA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AD4A8E05406767D814921FD9 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		B8342950B727588C93394B12 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		BC5C272BAC9997C05D909092 /* MavieUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieUITests.swift; sourceTree = "<group>"; };
+		D9E44CEFBE94981ED7EA867F /* Mavie.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Mavie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E9FBC458919B7A5DF91703F7 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		F5BE37F05C92D23805C5D294 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		FA7D00CBB5BED5E785D3F7E4 /* MavieUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		FC08912DC52B2FAF1747F884 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		15959B2A19A6E6CD9EF9557B /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0F55493705D1592BAB54DE3F /* .gitkeep */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		3BCD9B560F5C5E06769BAD87 /* Calendar */ = {
+			isa = PBXGroup;
+			children = (
+				F5BE37F05C92D23805C5D294 /* .gitkeep */,
+			);
+			path = Calendar;
+			sourceTree = "<group>";
+		};
+		3DADA631DB301A904DD2648D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				85AF89F806C692616AD960CA /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		3F5FBE0248070F8F719B81F1 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				E9FBC458919B7A5DF91703F7 /* .gitkeep */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		52FAD539FA86D1BB48231720 /* MavieUITests */ = {
+			isa = PBXGroup;
+			children = (
+				BC5C272BAC9997C05D909092 /* MavieUITests.swift */,
+				FA7D00CBB5BED5E785D3F7E4 /* MavieUITestsLaunchTests.swift */,
+			);
+			path = MavieUITests;
+			sourceTree = "<group>";
+		};
+		54253F6E011EC145B4E5960E /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3BCD9B560F5C5E06769BAD87 /* Calendar */,
+				3F5FBE0248070F8F719B81F1 /* Home */,
+				BC09B657FF27E0351BA33D9B /* Insights */,
+				9FBA6F2806CFD763CE4B2A69 /* Log */,
+				9063907F6FFE0A9333044A92 /* Onboarding */,
+				A39D149A47627E546941E51A /* Premium */,
+				B86B0D94EA2558B1CD27C9E5 /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		5E608DE9809659B2ADEDC78B /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				840FBF404E79FB7133C28F75 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		692CA7E79C2DFB623ED3F545 /* Mavie */ = {
+			isa = PBXGroup;
+			children = (
+				C985BCD5ACB109ACC081F8A0 /* App */,
+				D582AE5C4E8CACC703C250D6 /* Components */,
+				CDCFA4C8F547A72EA194AD24 /* Mock */,
+				15959B2A19A6E6CD9EF9557B /* Models */,
+				5E608DE9809659B2ADEDC78B /* Preview Content */,
+				3DADA631DB301A904DD2648D /* Resources */,
+				8EBADF444AA2C97C12B4DBCE /* Services */,
+				80EC2C065FFDA30BCF1F5D43 /* Theme */,
+				54253F6E011EC145B4E5960E /* Views */,
+			);
+			path = Mavie;
+			sourceTree = "<group>";
+		};
+		80EC2C065FFDA30BCF1F5D43 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				3EBA0266F75BB4050BB17761 /* .gitkeep */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		8A64BD2D8C66374E1FF29895 = {
+			isa = PBXGroup;
+			children = (
+				692CA7E79C2DFB623ED3F545 /* Mavie */,
+				D1C394A934DEFA37FB6C24C5 /* MavieTests */,
+				52FAD539FA86D1BB48231720 /* MavieUITests */,
+				D2F32C7800F4D93E81CC2AB7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		8EBADF444AA2C97C12B4DBCE /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				6B4741BB77F7F27DC460613E /* .gitkeep */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		9063907F6FFE0A9333044A92 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				2392C1DAB594A25CF078DBFF /* .gitkeep */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		9FBA6F2806CFD763CE4B2A69 /* Log */ = {
+			isa = PBXGroup;
+			children = (
+				FC08912DC52B2FAF1747F884 /* .gitkeep */,
+			);
+			path = Log;
+			sourceTree = "<group>";
+		};
+		A39D149A47627E546941E51A /* Premium */ = {
+			isa = PBXGroup;
+			children = (
+				579DA9A9B90B604B6C347A04 /* .gitkeep */,
+			);
+			path = Premium;
+			sourceTree = "<group>";
+		};
+		B86B0D94EA2558B1CD27C9E5 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				AD4A8E05406767D814921FD9 /* .gitkeep */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		BC09B657FF27E0351BA33D9B /* Insights */ = {
+			isa = PBXGroup;
+			children = (
+				5CF5CFA1345EC46B455E2E60 /* .gitkeep */,
+			);
+			path = Insights;
+			sourceTree = "<group>";
+		};
+		C985BCD5ACB109ACC081F8A0 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				2F9F926F2511FF38817F76A0 /* ContentView.swift */,
+				65B417F556FED2CD6972F463 /* MavieApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		CDCFA4C8F547A72EA194AD24 /* Mock */ = {
+			isa = PBXGroup;
+			children = (
+				3CAFCF46D8C7EEC639A3FEF6 /* .gitkeep */,
+			);
+			path = Mock;
+			sourceTree = "<group>";
+		};
+		D1C394A934DEFA37FB6C24C5 /* MavieTests */ = {
+			isa = PBXGroup;
+			children = (
+				6082C91E8D26535106119306 /* MavieTests.swift */,
+			);
+			path = MavieTests;
+			sourceTree = "<group>";
+		};
+		D2F32C7800F4D93E81CC2AB7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D9E44CEFBE94981ED7EA867F /* Mavie.app */,
+				5F640251E18D1113EAC4C59D /* MavieTests.xctest */,
+				4B0C46A6E83BAF5E37D2EC16 /* MavieUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D582AE5C4E8CACC703C250D6 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				B8342950B727588C93394B12 /* .gitkeep */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		35E7738CAC7DE3772CF95EF0 /* MavieTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 007BB227A9D1BFBE61A6C4AE /* Build configuration list for PBXNativeTarget "MavieTests" */;
+			buildPhases = (
+				305D5F4E5D57595588A2E01B /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6F6A735488D31F5C0D7CB06E /* PBXTargetDependency */,
+			);
+			name = MavieTests;
+			packageProductDependencies = (
+			);
+			productName = MavieTests;
+			productReference = 5F640251E18D1113EAC4C59D /* MavieTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		410CE2C3EBA2ABF395139BB7 /* Mavie */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CB5294845A8B92C74907E08B /* Build configuration list for PBXNativeTarget "Mavie" */;
+			buildPhases = (
+				892271A4A6449514EC7C0C19 /* Sources */,
+				FC9BAB5D054038D97C27FFAE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Mavie;
+			packageProductDependencies = (
+			);
+			productName = Mavie;
+			productReference = D9E44CEFBE94981ED7EA867F /* Mavie.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F5CDDA7A36EF0D0CB783F995 /* MavieUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9E93ACFF6FACE4F541ADEC08 /* Build configuration list for PBXNativeTarget "MavieUITests" */;
+			buildPhases = (
+				7751DEBFA8FFB4218EB63917 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5C86C4B286450DBF174235B8 /* PBXTargetDependency */,
+			);
+			name = MavieUITests;
+			packageProductDependencies = (
+			);
+			productName = MavieUITests;
+			productReference = 4B0C46A6E83BAF5E37D2EC16 /* MavieUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F5D3D9430000A02B51A96D8A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					35E7738CAC7DE3772CF95EF0 = {
+						DevelopmentTeam = "";
+					};
+					410CE2C3EBA2ABF395139BB7 = {
+						DevelopmentTeam = "";
+					};
+					F5CDDA7A36EF0D0CB783F995 = {
+						DevelopmentTeam = "";
+						TestTargetID = 410CE2C3EBA2ABF395139BB7;
+					};
+				};
+			};
+			buildConfigurationList = AF3BCC58FD452CA3F01645B6 /* Build configuration list for PBXProject "Mavie" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 8A64BD2D8C66374E1FF29895;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D2F32C7800F4D93E81CC2AB7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				410CE2C3EBA2ABF395139BB7 /* Mavie */,
+				35E7738CAC7DE3772CF95EF0 /* MavieTests */,
+				F5CDDA7A36EF0D0CB783F995 /* MavieUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FC9BAB5D054038D97C27FFAE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7BC8CC2F29842B1A0EDC08BD /* Assets.xcassets in Resources */,
+				6508C8A74EDAC8CA6C3182A1 /* Preview Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		305D5F4E5D57595588A2E01B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				413505EF38142E0539A8D714 /* MavieTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7751DEBFA8FFB4218EB63917 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				32BFF0721D36CD13D71CCF8F /* MavieUITests.swift in Sources */,
+				5C623D6823E032C726D6BAC8 /* MavieUITestsLaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		892271A4A6449514EC7C0C19 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8C5969AA3DD5BC287C4BA97 /* ContentView.swift in Sources */,
+				C5A0B2888BEDDF40B5003C5A /* MavieApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5C86C4B286450DBF174235B8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 410CE2C3EBA2ABF395139BB7 /* Mavie */;
+			targetProxy = 628BA96CF53DFF583A9E7EB2 /* PBXContainerItemProxy */;
+		};
+		6F6A735488D31F5C0D7CB06E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 410CE2C3EBA2ABF395139BB7 /* Mavie */;
+			targetProxy = AA93A44B4C01CF1A82EBA6C1 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0AEC2C45317848551F0FD11A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		4DC0B36E7DAB7C6531445588 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_ASSET_PATHS = "\"Mavie/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mavie.Mavie;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7608BEB1334DD9829DB12167 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mavie.MavieUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Mavie;
+			};
+			name = Release;
+		};
+		8D0B9337D61735222436FF0F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mavie.MavieUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Mavie;
+			};
+			name = Debug;
+		};
+		9A49831789AFFA96609585D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mavie.MavieTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Mavie.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Mavie";
+			};
+			name = Release;
+		};
+		C2EA8268F918179FB387B49A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D3CFAEE4AA86045432DDB848 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_ASSET_PATHS = "\"Mavie/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mavie.Mavie;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		DF89331276472D82B232F528 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.mavie.MavieTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Mavie.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Mavie";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		007BB227A9D1BFBE61A6C4AE /* Build configuration list for PBXNativeTarget "MavieTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DF89331276472D82B232F528 /* Debug */,
+				9A49831789AFFA96609585D0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9E93ACFF6FACE4F541ADEC08 /* Build configuration list for PBXNativeTarget "MavieUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D0B9337D61735222436FF0F /* Debug */,
+				7608BEB1334DD9829DB12167 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AF3BCC58FD452CA3F01645B6 /* Build configuration list for PBXProject "Mavie" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C2EA8268F918179FB387B49A /* Debug */,
+				0AEC2C45317848551F0FD11A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CB5294845A8B92C74907E08B /* Build configuration list for PBXNativeTarget "Mavie" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4DC0B36E7DAB7C6531445588 /* Debug */,
+				D3CFAEE4AA86045432DDB848 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F5D3D9430000A02B51A96D8A /* Project object */;
+}
