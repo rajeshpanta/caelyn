@@ -10,6 +10,7 @@
 		03F97E81AFE517A81CDD3508 /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08C058AF44DDE420D846911 /* SectionHeader.swift */; };
 		05035087CC00535EAB9AB450 /* OnboardingProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE5CC4617D123212BF2C2471 /* OnboardingProgress.swift */; };
 		07D04D470825EE40D29D7EEC /* InsightCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485DCE66F7CA99BF79A6ED74 /* InsightCard.swift */; };
+		085A35DC2C555E5D4A018A55 /* HealthKitSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166EA79A5EA2AD2337466652 /* HealthKitSync.swift */; };
 		08834D5BE72AD81107AC523D /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2FAEC87B355A27323A83A03 /* Typography.swift */; };
 		0AFF5E82E22E04452B6633B2 /* HomeHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DE84D0AD1B04048AB1C0842 /* HomeHeader.swift */; };
 		0B40924D0D9DF43BCBC7DB97 /* HomeCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD05238A7AD209486A30662D /* HomeCopy.swift */; };
@@ -44,6 +45,7 @@
 		7A01E0C7CC40562B806BC63D /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 765AF33518462963C82DE99A /* OnboardingFlow.swift */; };
 		7BC8CC2F29842B1A0EDC08BD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85AF89F806C692616AD960CA /* Assets.xcassets */; };
 		7EBA398ABBDB4F5C035F4441 /* StatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71CD706D6BD0819CA6AE9576 /* StatCard.swift */; };
+		8375873C187A4BC918E6AFD2 /* HealthKitConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A4E16E9D3C9A2FAEF8EE74 /* HealthKitConnectView.swift */; };
 		83842B1418ACA8F2D4645D9D /* InsightsCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507DF43DC9E0D7C333EE6280 /* InsightsCharts.swift */; };
 		843C55FD77761EEFF9CB2F21 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9022390D9EA5BAC63E700631 /* ExportService.swift */; };
 		85531C3D34B34A203159743A /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C1A2028CDB8963CD70BBFA /* DayCell.swift */; };
@@ -59,6 +61,7 @@
 		AE1A89B71B1CF72B0A6A453D /* DailyLogForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E504DB3C093E1B88F5E43D4 /* DailyLogForm.swift */; };
 		AE4D240BD55F5040E00CE48B /* Shadows.swift in Sources */ = {isa = PBXBuildFile; fileRef = C59D90DF27B3A6FD3B4BE169 /* Shadows.swift */; };
 		AF53105B85323BEED6820B8B /* PatternsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88212A52417AA4D3A899191 /* PatternsSection.swift */; };
+		B4B3492B3A1CD0A287B1501B /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 619FF8757898C4792FB6AC0F /* HealthKitService.swift */; };
 		BB31F1F5F7D4D8B2A29E7167 /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B193899A08FED788979FF16 /* OnboardingStep.swift */; };
 		BCB5334AF18B6FE93F8C1759 /* DesignSystemPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A9ADCC85A4152BCD1CF311 /* DesignSystemPreview.swift */; };
 		BFEE1409B28D8A4EBBC1A20C /* AppLockGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E0EF53086EBCF43BEE9B62 /* AppLockGate.swift */; };
@@ -110,6 +113,7 @@
 		089BC6CCEE6DABB46946823E /* DayDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailSheet.swift; sourceTree = "<group>"; };
 		0F55493705D1592BAB54DE3F /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		11C1D6C927E425BE4612398E /* OnboardingScaffold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScaffold.swift; sourceTree = "<group>"; };
+		166EA79A5EA2AD2337466652 /* HealthKitSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitSync.swift; sourceTree = "<group>"; };
 		214533C61864DDE91565D435 /* SettingsRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRows.swift; sourceTree = "<group>"; };
 		2392C1DAB594A25CF078DBFF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		26606241B2914FBE068E6002 /* BiometricService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricService.swift; sourceTree = "<group>"; };
@@ -134,6 +138,7 @@
 		485DCE66F7CA99BF79A6ED74 /* InsightCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightCard.swift; sourceTree = "<group>"; };
 		4B0C46A6E83BAF5E37D2EC16 /* MavieUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MavieUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		507DF43DC9E0D7C333EE6280 /* InsightsCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsCharts.swift; sourceTree = "<group>"; };
+		55A4E16E9D3C9A2FAEF8EE74 /* HealthKitConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitConnectView.swift; sourceTree = "<group>"; };
 		575356844F919041CEB44D0F /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
 		579DA9A9B90B604B6C347A04 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		5CF5CFA1345EC46B455E2E60 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -141,6 +146,7 @@
 		5DE84D0AD1B04048AB1C0842 /* HomeHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeHeader.swift; sourceTree = "<group>"; };
 		5F640251E18D1113EAC4C59D /* MavieTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MavieTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6082C91E8D26535106119306 /* MavieTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieTests.swift; sourceTree = "<group>"; };
+		619FF8757898C4792FB6AC0F /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
 		65B417F556FED2CD6972F463 /* MavieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieApp.swift; sourceTree = "<group>"; };
 		66C9C34EA57C79D360872196 /* SettingsPickerSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPickerSheets.swift; sourceTree = "<group>"; };
 		6B4741BB77F7F27DC460613E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -160,6 +166,7 @@
 		A3A6B8DF8A37700CAFE9A6C2 /* HomeMoodCheckIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeMoodCheckIn.swift; sourceTree = "<group>"; };
 		A3CD687DB1AC6131378EF3DC /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
 		A436A0450A271AB8E02419C1 /* HomePatternInsight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePatternInsight.swift; sourceTree = "<group>"; };
+		AC05A76E6181C4578C123B2D /* Mavie.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Mavie.entitlements; sourceTree = "<group>"; };
 		AD4A8E05406767D814921FD9 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		B8342950B727588C93394B12 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		B8E0EF53086EBCF43BEE9B62 /* AppLockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockGate.swift; sourceTree = "<group>"; };
@@ -291,6 +298,7 @@
 		692CA7E79C2DFB623ED3F545 /* Mavie */ = {
 			isa = PBXGroup;
 			children = (
+				AC05A76E6181C4578C123B2D /* Mavie.entitlements */,
 				C985BCD5ACB109ACC081F8A0 /* App */,
 				D582AE5C4E8CACC703C250D6 /* Components */,
 				CDCFA4C8F547A72EA194AD24 /* Mock */,
@@ -335,6 +343,8 @@
 				26606241B2914FBE068E6002 /* BiometricService.swift */,
 				BAFFE66B273791B6D826CE8D /* CycleAnalytics.swift */,
 				9022390D9EA5BAC63E700631 /* ExportService.swift */,
+				619FF8757898C4792FB6AC0F /* HealthKitService.swift */,
+				166EA79A5EA2AD2337466652 /* HealthKitSync.swift */,
 				E3C7451CCA4F2D1404F339E0 /* NotificationService.swift */,
 				EA4187B2D16D4E7DE702A118 /* Persistence.swift */,
 				47B0FC088D00A5CF6F48FCD0 /* PredictionEngine.swift */,
@@ -387,6 +397,7 @@
 			children = (
 				AD4A8E05406767D814921FD9 /* .gitkeep */,
 				06CFC5E48284BB29C5336F61 /* ExportView.swift */,
+				55A4E16E9D3C9A2FAEF8EE74 /* HealthKitConnectView.swift */,
 				8C3BE2863A48DDAADADBB41A /* RemindersView.swift */,
 				66C9C34EA57C79D360872196 /* SettingsPickerSheets.swift */,
 				214533C61864DDE91565D435 /* SettingsRows.swift */,
@@ -618,6 +629,9 @@
 				843C55FD77761EEFF9CB2F21 /* ExportService.swift in Sources */,
 				C969E67EA95464BE37BF5B84 /* ExportView.swift in Sources */,
 				ED331023DBD9BB944BF46C26 /* GoalCard.swift in Sources */,
+				8375873C187A4BC918E6AFD2 /* HealthKitConnectView.swift in Sources */,
+				B4B3492B3A1CD0A287B1501B /* HealthKitService.swift in Sources */,
+				085A35DC2C555E5D4A018A55 /* HealthKitSync.swift in Sources */,
 				96C6EFD5759A72F2BD0DCB0A /* HomeComingUp.swift in Sources */,
 				0B40924D0D9DF43BCBC7DB97 /* HomeCopy.swift in Sources */,
 				0AFF5E82E22E04452B6633B2 /* HomeHeader.swift in Sources */,
@@ -749,11 +763,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Mavie/Mavie.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_ASSET_PATHS = "\"Mavie/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Mavie uses Face ID to keep your cycle data private.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Mavie reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Mavie writes your menstrual flow and symptoms to Apple Health when you choose to.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -894,11 +911,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Mavie/Mavie.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_ASSET_PATHS = "\"Mavie/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Mavie uses Face ID to keep your cycle data private.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Mavie reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Mavie writes your menstrual flow and symptoms to Apple Health when you choose to.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

@@ -389,6 +389,11 @@ struct DailyLogForm: View {
         mutate(target)
         target.updatedAt = .now
         try? modelContext.save()
+
+        // Fire-and-forget HealthKit sync. Service no-ops if not connected.
+        let snapshotEntries = allEntries
+        let captured = target
+        Task { await HealthKitSync.syncIfConnected(captured, in: snapshotEntries, modelContext: modelContext) }
     }
 
     private func toggleSymptom(_ symptom: Symptom) {

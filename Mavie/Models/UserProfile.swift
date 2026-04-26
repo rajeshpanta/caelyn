@@ -12,6 +12,11 @@ final class UserProfile {
     var privateNotifications: Bool
     var healthKitConnected: Bool
 
+    var hkReadFlow: Bool = false
+    var hkWriteFlow: Bool = false
+    var hkReadSymptoms: Bool = false
+    var hkWriteSymptoms: Bool = false
+
     var firstDayOfWeek: Int
     var theme: AppTheme
 

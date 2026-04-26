@@ -20,6 +20,11 @@ targets:
     platform: iOS
     sources:
       - path: Mavie
+    entitlements:
+      path: Mavie/Mavie.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mavie.Mavie
@@ -37,6 +42,8 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_NSFaceIDUsageDescription: "Mavie uses Face ID to keep your cycle data private."
+        INFOPLIST_KEY_NSHealthShareUsageDescription: "Mavie reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync."
+        INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Mavie writes your menstrual flow and symptoms to Apple Health when you choose to."
         SWIFT_EMIT_LOC_STRINGS: YES
 
   MavieTests:

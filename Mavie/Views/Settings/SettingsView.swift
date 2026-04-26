@@ -12,6 +12,7 @@ struct SettingsView: View {
     @State private var showingDeleteSecond = false
     @State private var showingExportSheet = false
     @State private var showingReminders = false
+    @State private var showingHealthKit = false
 
     @State private var lockToggleError: String?
 
@@ -23,6 +24,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: MavieSpacing.lg) {
                     privacySection
+                    healthSection
                     dataSection
                     appSection
                     aboutSection
@@ -36,6 +38,9 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .navigationDestination(isPresented: $showingReminders) {
                 RemindersView()
+            }
+            .navigationDestination(isPresented: $showingHealthKit) {
+                HealthKitConnectView()
             }
         }
         .sheet(isPresented: $showingExportSheet) {
@@ -129,6 +134,20 @@ struct SettingsView: View {
                     isOn: privateNotificationsBinding(profile: profile)
                 )
             }
+        }
+    }
+
+    // MARK: - Health section
+
+    private var healthSection: some View {
+        SettingsSectionCard(title: "Health") {
+            SettingsRow(
+                icon: "heart.text.square",
+                iconColor: MavieColor.alertRose,
+                title: "Apple Health",
+                detail: profile?.healthKitConnected == true ? "Connected" : nil,
+                action: { showingHealthKit = true }
+            )
         }
     }
 

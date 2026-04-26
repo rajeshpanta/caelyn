@@ -1,5 +1,6 @@
 import XCTest
 import SwiftData
+import HealthKit
 @testable import Mavie
 
 @MainActor
@@ -386,5 +387,42 @@ final class MavieTests: XCTestCase {
         XCTAssertEqual(ExportRange.last6Months.lookbackDays, 180)
         XCTAssertEqual(ExportRange.last12Months.lookbackDays, 365)
         XCTAssertNil(ExportRange.all.lookbackDays)
+    }
+
+    // MARK: - Phase 14: HealthKitService
+
+    func testHealthKitSymptomMapHasSomeEntries() {
+        XCTAssertFalse(HealthKitService.symptomCategoryMap.isEmpty)
+        XCTAssertNotNil(HealthKitService.symptomCategoryMap[.bloating])
+        XCTAssertNotNil(HealthKitService.symptomCategoryMap[.fatigue])
+    }
+
+    func testHealthKitPainMapCoversAllPainTypes() {
+        for pain in PainType.allCases {
+            XCTAssertNotNil(
+                HealthKitService.painCategoryMap[pain],
+                "Missing HK mapping for pain type \(pain)"
+            )
+        }
+    }
+
+    func testHealthKitSeverityFromPain() {
+        XCTAssertEqual(HealthKitService.severity(forPain: 0), .notPresent)
+        XCTAssertEqual(HealthKitService.severity(forPain: 1), .mild)
+        XCTAssertEqual(HealthKitService.severity(forPain: 3), .mild)
+        XCTAssertEqual(HealthKitService.severity(forPain: 4), .moderate)
+        XCTAssertEqual(HealthKitService.severity(forPain: 6), .moderate)
+        XCTAssertEqual(HealthKitService.severity(forPain: 7), .severe)
+        XCTAssertEqual(HealthKitService.severity(forPain: 10), .severe)
+    }
+
+    func testHealthKitWritableTypesIncludesMenstrualFlow() {
+        let writable = HealthKitService.allWritableTypes
+        XCTAssertTrue(writable.contains(HealthKitService.menstrualFlowType))
+    }
+
+    func testHealthKitMakeFlowSampleEmbedsCycleStartMetadata() {
+        let sample = HealthKitService.makeFlowSample(date: .now, flow: .medium, isCycleStart: true)
+        XCTAssertEqual(sample.metadata?[HKMetadataKeyMenstrualCycleStart] as? Bool, true)
     }
 }

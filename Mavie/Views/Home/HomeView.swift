@@ -142,14 +142,22 @@ struct HomeView: View {
     }
 
     private func logMood(_ mood: Mood) {
+        let target: CycleEntry
         if let existing = todayEntry {
             existing.mood = mood
             existing.updatedAt = .now
+            target = existing
         } else {
-            let entry = CycleEntry(date: today, mood: mood)
-            modelContext.insert(entry)
+            target = CycleEntry(date: today, mood: mood)
+            modelContext.insert(target)
         }
         try? modelContext.save()
+
+        // Fire-and-forget HealthKit sync. Mood doesn't sync today, but if the
+        // user later updates this entry with flow/symptoms via the log form,
+        // the sync hook there will pick it up.
+        let snapshot = entries
+        Task { await HealthKitSync.syncIfConnected(target, in: snapshot, modelContext: modelContext) }
     }
 }
 
