@@ -484,4 +484,69 @@ final class MavieTests: XCTestCase {
         XCTAssertFalse(stored.hkWriteSymptoms)
         XCTAssertFalse(stored.healthKitConnected)
     }
+
+    // MARK: - Active period window detection
+
+    func testActivePeriodWindowFromSingleLoggedDay() {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let entries: [CycleEntry] = [
+            CycleEntry(date: today, flow: .medium)
+        ]
+        let window = CalendarMath.activePeriodWindow(in: entries, periodLength: 5, today: today)
+        let unwrappedWindow = try? XCTUnwrap(window)
+        XCTAssertNotNil(unwrappedWindow)
+        XCTAssertEqual(unwrappedWindow?.lowerBound, today)
+        XCTAssertEqual(
+            unwrappedWindow?.upperBound,
+            cal.date(byAdding: .day, value: 4, to: today)
+        )
+    }
+
+    func testActivePeriodWindowSpansFromStreakStart() {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let day1 = cal.date(byAdding: .day, value: -2, to: today)!
+        let day2 = cal.date(byAdding: .day, value: -1, to: today)!
+        let entries: [CycleEntry] = [
+            CycleEntry(date: day1, flow: .light),
+            CycleEntry(date: day2, flow: .heavy)
+        ]
+        let window = CalendarMath.activePeriodWindow(in: entries, periodLength: 5, today: today)
+        XCTAssertEqual(window?.lowerBound, day1)
+        XCTAssertEqual(window?.upperBound, cal.date(byAdding: .day, value: 4, to: day1))
+    }
+
+    func testActivePeriodWindowReturnsNilWhenStreakIsOld() {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let oldFlow = cal.date(byAdding: .day, value: -20, to: today)!
+        let entries: [CycleEntry] = [
+            CycleEntry(date: oldFlow, flow: .medium)
+        ]
+        let window = CalendarMath.activePeriodWindow(in: entries, periodLength: 5, today: today)
+        XCTAssertNil(window)
+    }
+
+    func testActivePeriodWindowReturnsNilWhenNoFlowLogged() {
+        let entries: [CycleEntry] = [
+            CycleEntry(date: .now, mood: .calm)  // mood logged, no flow
+        ]
+        let window = CalendarMath.activePeriodWindow(in: entries, periodLength: 5)
+        XCTAssertNil(window)
+    }
+
+    func testActivePeriodWindowGapBreaksStreak() {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let firstDay = cal.date(byAdding: .day, value: -7, to: today)!
+        let secondDay = cal.date(byAdding: .day, value: -1, to: today)!
+        // Two flow days, gap > 1 day → second day is its own streak.
+        let entries: [CycleEntry] = [
+            CycleEntry(date: firstDay, flow: .light),
+            CycleEntry(date: secondDay, flow: .light)
+        ]
+        let window = CalendarMath.activePeriodWindow(in: entries, periodLength: 5, today: today)
+        XCTAssertEqual(window?.lowerBound, secondDay, "Most recent streak start should win when there's a gap")
+    }
 }

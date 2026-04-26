@@ -99,13 +99,34 @@ struct MonthGridView: View {
     }
 
     private var legend: some View {
-        HStack(spacing: MavieSpacing.md) {
-            legendDot(color: MavieColor.softRose.opacity(0.85), label: "Logged")
-            legendDot(color: MavieColor.softRose.opacity(0.25), label: "Predicted")
-            legendDot(color: MavieColor.lavender, label: "PMS")
-            legendDot(color: MavieColor.sage, label: "Ovulation")
+        VStack(spacing: 6) {
+            HStack(spacing: MavieSpacing.md) {
+                legendDot(color: MavieColor.softRose.opacity(0.85), label: "Logged")
+                legendDashed(color: MavieColor.alertRose.opacity(0.65), fill: MavieColor.softRose.opacity(0.35), label: "Tap to log")
+                legendDot(color: MavieColor.softRose.opacity(0.25), label: "Predicted")
+            }
+            HStack(spacing: MavieSpacing.md) {
+                legendDot(color: MavieColor.lavender, label: "PMS")
+                legendDot(color: MavieColor.sage, label: "Ovulation")
+                Spacer(minLength: 0)
+            }
         }
         .padding(.top, 4)
+    }
+
+    private func legendDashed(color: Color, fill: Color, label: String) -> some View {
+        HStack(spacing: 4) {
+            Circle()
+                .fill(fill)
+                .frame(width: 9, height: 9)
+                .overlay(
+                    Circle()
+                        .strokeBorder(color, style: StrokeStyle(lineWidth: 1, dash: [1.5, 1]))
+                )
+            Text(label)
+                .font(MavieFont.caption)
+                .foregroundStyle(MavieColor.deepPlumText.opacity(0.55))
+        }
     }
 
     private func legendDot(color: Color, label: String) -> some View {

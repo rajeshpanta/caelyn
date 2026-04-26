@@ -40,13 +40,26 @@ struct DayCell: View {
             Circle()
                 .fill(MavieColor.softRose.opacity(0.85))
                 .padding(4)
+        case .activePeriodWindow:
+            // "Expected period day — tap to log." Soft rose with a dashed plum
+            // border to communicate "this is your period, fill me in."
+            Circle()
+                .fill(MavieColor.softRose.opacity(0.35))
+                .overlay(
+                    Circle()
+                        .strokeBorder(
+                            MavieColor.alertRose.opacity(0.65),
+                            style: StrokeStyle(lineWidth: 1.5, dash: [3, 2])
+                        )
+                )
+                .padding(4)
         case .predictedPeriod:
             Circle()
-                .fill(MavieColor.softRose.opacity(0.25))
+                .fill(MavieColor.softRose.opacity(0.18))
                 .overlay(
                     Circle()
                         .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
-                        .foregroundStyle(MavieColor.softRose.opacity(0.7))
+                        .foregroundStyle(MavieColor.softRose.opacity(0.55))
                 )
                 .padding(4)
         case .pms:
@@ -75,7 +88,8 @@ struct DayCell: View {
 
     private var textColor: Color {
         switch state.marker {
-        case .loggedPeriod:    return .white
+        case .loggedPeriod:        return .white
+        case .activePeriodWindow:  return MavieColor.alertRose
         case .predictedPeriod, .pms, .ovulation, .empty:
             return MavieColor.deepPlumText
         }
@@ -86,6 +100,7 @@ struct DayCell: View {
         if state.isToday { parts.append("today") }
         switch state.marker {
         case .loggedPeriod(let flow): parts.append("logged period \(flow.displayName.lowercased())")
+        case .activePeriodWindow:     parts.append("expected period day — tap to log")
         case .predictedPeriod:        parts.append("predicted period")
         case .pms:                    parts.append("PMS window")
         case .ovulation:              parts.append("ovulation window")
