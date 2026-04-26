@@ -7,10 +7,24 @@ struct HomeMoodCheckIn: View {
     private let moods: [Mood] = [.calm, .happy, .energetic, .tired, .sensitive, .moody, .anxious, .focused]
 
     private var subtitle: String {
-        if let selectedMood {
-            return "You logged feeling \(selectedMood.displayName.lowercased()) today."
+        guard let selectedMood else {
+            return "Tap a mood — there's no wrong answer."
         }
-        return "Tap a mood to log a quick check-in."
+        let mood = selectedMood.displayName.lowercased()
+        switch selectedMood {
+        // Light, positive moods → simple, warm confirmation.
+        case .calm, .happy, .energetic, .focused:
+            return "Logged: feeling \(mood) today. ☺︎"
+        // Heavier moods → quiet acknowledgement, no advice, no preaching.
+        case .tired, .lowEnergy:
+            return "Logged: feeling \(mood). Rest is allowed."
+        case .sensitive, .sad:
+            return "Logged: feeling \(mood). Be kind to yourself today."
+        case .anxious:
+            return "Logged: feeling anxious. Slow breaths — you're okay."
+        case .moody, .irritable:
+            return "Logged: feeling \(mood). Some days are like this."
+        }
     }
 
     var body: some View {

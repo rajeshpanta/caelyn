@@ -26,10 +26,22 @@ struct HomeHeroCard: View {
                     .foregroundStyle(MavieColor.deepPlumText)
                     .multilineTextAlignment(.center)
 
+                // Phase-aware gentle hint — "Take it easy today" / "Be gentle
+                // with yourself" / "A fresh-energy phase" — the warm one-liner
+                // that turns a tracker into a companion. Suppressed for the
+                // unknown phase since the headline already says "Welcome to
+                // Mavie" and the hint would be redundant.
+                if phase != .unknown {
+                    Text(phase.hint)
+                        .font(MavieFont.subheadline.weight(.medium))
+                        .foregroundStyle(phase.accentColor.opacity(0.85))
+                        .multilineTextAlignment(.center)
+                }
+
                 if let predictedWindow {
                     Text(HomeCopy.windowText(predictedWindow))
-                        .font(MavieFont.subheadline)
-                        .foregroundStyle(MavieColor.deepPlumText.opacity(0.6))
+                        .font(MavieFont.caption)
+                        .foregroundStyle(MavieColor.deepPlumText.opacity(0.55))
                 }
             }
             .padding(.horizontal, MavieSpacing.sm)
