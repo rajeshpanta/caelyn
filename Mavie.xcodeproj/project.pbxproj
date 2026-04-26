@@ -12,16 +12,19 @@
 		07D04D470825EE40D29D7EEC /* InsightCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485DCE66F7CA99BF79A6ED74 /* InsightCard.swift */; };
 		085A35DC2C555E5D4A018A55 /* HealthKitSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 166EA79A5EA2AD2337466652 /* HealthKitSync.swift */; };
 		08834D5BE72AD81107AC523D /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2FAEC87B355A27323A83A03 /* Typography.swift */; };
+		0A776B090B3DB1A73576E0DD /* PurchaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2562FD1AA6A2028CCFFD5FCD /* PurchaseService.swift */; };
 		0AFF5E82E22E04452B6633B2 /* HomeHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DE84D0AD1B04048AB1C0842 /* HomeHeader.swift */; };
 		0B40924D0D9DF43BCBC7DB97 /* HomeCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD05238A7AD209486A30662D /* HomeCopy.swift */; };
 		0B9B55F2BC10E29211EDD933 /* BiometricService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26606241B2914FBE068E6002 /* BiometricService.swift */; };
 		16EB808CFA34132806842110 /* RemindersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C3BE2863A48DDAADADBB41A /* RemindersView.swift */; };
 		198B7E22DB3A58343EB2D3C0 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3CD687DB1AC6131378EF3DC /* LogView.swift */; };
+		1C2D29032B7B1475DC1F3956 /* PaywallTierCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D75446990E0C623E1502BE3 /* PaywallTierCard.swift */; };
 		1F6234B85934E61698BF4E68 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44E800768FA8204832859E9A /* RootView.swift */; };
 		2A4BB93F918444539A3B01A1 /* ComponentGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9183829E797CC4BEAE95061 /* ComponentGallery.swift */; };
 		32BFF0721D36CD13D71CCF8F /* MavieUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC5C272BAC9997C05D909092 /* MavieUITests.swift */; };
 		3476CC0389BC9297748686F6 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 048E217F28A9577E6CA1BB25 /* UserProfile.swift */; };
 		375EEFBD1CDD62C33DDB0E10 /* DayDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 089BC6CCEE6DABB46946823E /* DayDetailSheet.swift */; };
+		38B8D728FBAA88EC984EABBD /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65F1372EF6BFC9AE2E0B6C87 /* PaywallView.swift */; };
 		3E59FBF6D573DDE96568B53B /* MoodChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB77D121C6C53A9441CA458 /* MoodChip.swift */; };
 		3E93B665D826FA168B8594BA /* HomeQuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB3CE13B04414D1A5B09E01 /* HomeQuickActions.swift */; };
 		413505EF38142E0539A8D714 /* MavieTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6082C91E8D26535106119306 /* MavieTests.swift */; };
@@ -50,6 +53,7 @@
 		843C55FD77761EEFF9CB2F21 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9022390D9EA5BAC63E700631 /* ExportService.swift */; };
 		85531C3D34B34A203159743A /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C1A2028CDB8963CD70BBFA /* DayCell.swift */; };
 		89EE30D8EC7CAC1BC5F46D94 /* CycleRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D6BD1125D3A805280B15260 /* CycleRingView.swift */; };
+		8A65A463A80DCB92346BEDF3 /* Mavie.storekit in Resources */ = {isa = PBXBuildFile; fileRef = DA03A26EA8705041E5E0E527 /* Mavie.storekit */; };
 		8C90317322F11F52A9C25898 /* PredictionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47B0FC088D00A5CF6F48FCD0 /* PredictionEngine.swift */; };
 		96C6EFD5759A72F2BD0DCB0A /* HomeComingUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CAB837E0BA0588707912B64 /* HomeComingUp.swift */; };
 		99DECCDF9FF07135EB5852A9 /* SettingsRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214533C61864DDE91565D435 /* SettingsRows.swift */; };
@@ -116,6 +120,7 @@
 		166EA79A5EA2AD2337466652 /* HealthKitSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitSync.swift; sourceTree = "<group>"; };
 		214533C61864DDE91565D435 /* SettingsRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRows.swift; sourceTree = "<group>"; };
 		2392C1DAB594A25CF078DBFF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		2562FD1AA6A2028CCFFD5FCD /* PurchaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseService.swift; sourceTree = "<group>"; };
 		26606241B2914FBE068E6002 /* BiometricService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricService.swift; sourceTree = "<group>"; };
 		26616A0A691A426301B6AA72 /* CycleEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleEntry.swift; sourceTree = "<group>"; };
 		2B193899A08FED788979FF16 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
@@ -148,6 +153,7 @@
 		6082C91E8D26535106119306 /* MavieTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieTests.swift; sourceTree = "<group>"; };
 		619FF8757898C4792FB6AC0F /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
 		65B417F556FED2CD6972F463 /* MavieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieApp.swift; sourceTree = "<group>"; };
+		65F1372EF6BFC9AE2E0B6C87 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		66C9C34EA57C79D360872196 /* SettingsPickerSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPickerSheets.swift; sourceTree = "<group>"; };
 		6B4741BB77F7F27DC460613E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		6E504DB3C093E1B88F5E43D4 /* DailyLogForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyLogForm.swift; sourceTree = "<group>"; };
@@ -160,6 +166,7 @@
 		85EF104E047040EC1BBAA3C8 /* PrivacyChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyChip.swift; sourceTree = "<group>"; };
 		8C3BE2863A48DDAADADBB41A /* RemindersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersView.swift; sourceTree = "<group>"; };
 		8CB3CE13B04414D1A5B09E01 /* HomeQuickActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeQuickActions.swift; sourceTree = "<group>"; };
+		8D75446990E0C623E1502BE3 /* PaywallTierCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallTierCard.swift; sourceTree = "<group>"; };
 		9022390D9EA5BAC63E700631 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
 		91BE5AC5136439A7607B7248 /* ToggleCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleCard.swift; sourceTree = "<group>"; };
 		A0692964E06D6CF3B761E4C5 /* DataStatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStatusCard.swift; sourceTree = "<group>"; };
@@ -179,6 +186,7 @@
 		C7FF15AAC8249353DAD172F9 /* MavieButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieButton.swift; sourceTree = "<group>"; };
 		C88212A52417AA4D3A899191 /* PatternsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternsSection.swift; sourceTree = "<group>"; };
 		D9E44CEFBE94981ED7EA867F /* Mavie.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Mavie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA03A26EA8705041E5E0E527 /* Mavie.storekit */ = {isa = PBXFileReference; path = Mavie.storekit; sourceTree = "<group>"; };
 		DD05238A7AD209486A30662D /* HomeCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCopy.swift; sourceTree = "<group>"; };
 		E21643CDD09AE69FDDA3AD02 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		E3C7451CCA4F2D1404F339E0 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -230,6 +238,7 @@
 			isa = PBXGroup;
 			children = (
 				85AF89F806C692616AD960CA /* Assets.xcassets */,
+				DA03A26EA8705041E5E0E527 /* Mavie.storekit */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -348,6 +357,7 @@
 				E3C7451CCA4F2D1404F339E0 /* NotificationService.swift */,
 				EA4187B2D16D4E7DE702A118 /* Persistence.swift */,
 				47B0FC088D00A5CF6F48FCD0 /* PredictionEngine.swift */,
+				2562FD1AA6A2028CCFFD5FCD /* PurchaseService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -379,6 +389,8 @@
 			isa = PBXGroup;
 			children = (
 				579DA9A9B90B604B6C347A04 /* .gitkeep */,
+				8D75446990E0C623E1502BE3 /* PaywallTierCard.swift */,
+				65F1372EF6BFC9AE2E0B6C87 /* PaywallView.swift */,
 			);
 			path = Premium;
 			sourceTree = "<group>";
@@ -580,6 +592,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7BC8CC2F29842B1A0EDC08BD /* Assets.xcassets in Resources */,
+				8A65A463A80DCB92346BEDF3 /* Mavie.storekit in Resources */,
 				6508C8A74EDAC8CA6C3182A1 /* Preview Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -661,10 +674,13 @@
 				4E0C83CCB74D665F80475A8C /* OnboardingSteps.swift in Sources */,
 				F97405DAB4D2D9562FD3D64C /* OnboardingViewModel.swift in Sources */,
 				AF53105B85323BEED6820B8B /* PatternsSection.swift in Sources */,
+				1C2D29032B7B1475DC1F3956 /* PaywallTierCard.swift in Sources */,
+				38B8D728FBAA88EC984EABBD /* PaywallView.swift in Sources */,
 				681DA71411F9796A44E47898 /* Persistence.swift in Sources */,
 				8C90317322F11F52A9C25898 /* PredictionEngine.swift in Sources */,
 				676720948A6A7AC975A3AE79 /* PreviewData.swift in Sources */,
 				53949058014DA82FA20F19C3 /* PrivacyChip.swift in Sources */,
+				0A776B090B3DB1A73576E0DD /* PurchaseService.swift in Sources */,
 				C1CF6333DD10E5DEF1FA6D82 /* QuickActionButton.swift in Sources */,
 				16EB808CFA34132806842110 /* RemindersView.swift in Sources */,
 				1F6234B85934E61698BF4E68 /* RootView.swift in Sources */,

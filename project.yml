@@ -87,5 +87,6 @@ schemes:
         - MavieUITests
     run:
       config: Debug
+      storeKitConfiguration: Mavie/Resources/Mavie.storekit
     archive:
       config: Release

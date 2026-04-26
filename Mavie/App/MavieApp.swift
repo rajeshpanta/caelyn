@@ -17,6 +17,7 @@ struct MavieApp: App {
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 Task { await NotificationService.syncFromLiveStore() }
+                Task { await PurchaseService.shared.loadProducts() }
             }
         }
     }

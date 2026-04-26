@@ -425,4 +425,40 @@ final class MavieTests: XCTestCase {
         let sample = HealthKitService.makeFlowSample(date: .now, flow: .medium, isCycleStart: true)
         XCTAssertEqual(sample.metadata?[HKMetadataKeyMenstrualCycleStart] as? Bool, true)
     }
+
+    // MARK: - Phase 16: PurchaseService
+
+    func testYearlySavingsPercentForOurPricing() {
+        // Monthly $3.99 × 12 = $47.88 vs yearly $19.99 → ~58% off.
+        let percent = PurchaseService.savingsPercent(
+            monthlyPrice: Decimal(string: "3.99")!,
+            yearlyPrice: Decimal(string: "19.99")!
+        )
+        XCTAssertEqual(percent, 58)
+    }
+
+    func testYearlySavingsPercentZeroWhenSamePrice() {
+        let percent = PurchaseService.savingsPercent(
+            monthlyPrice: Decimal(string: "3.99")!,
+            yearlyPrice: Decimal(string: "47.88")!
+        )
+        XCTAssertEqual(percent, 0)
+    }
+
+    func testYearlySavingsPercentZeroOnZeroMonthly() {
+        let percent = PurchaseService.savingsPercent(monthlyPrice: 0, yearlyPrice: 19.99)
+        XCTAssertEqual(percent, 0)
+    }
+
+    func testProductIDRawValuesAreNamespaced() {
+        XCTAssertEqual(PurchaseService.ProductID.monthly.rawValue, "com.mavie.Mavie.pro.monthly")
+        XCTAssertEqual(PurchaseService.ProductID.yearly.rawValue, "com.mavie.Mavie.pro.yearly")
+    }
+
+    func testPurchaseOutcomeEquality() {
+        XCTAssertEqual(PurchaseOutcome.success, .success)
+        XCTAssertEqual(PurchaseOutcome.cancelled, .cancelled)
+        XCTAssertEqual(PurchaseOutcome.failed("x"), .failed("x"))
+        XCTAssertNotEqual(PurchaseOutcome.failed("x"), .failed("y"))
+    }
 }

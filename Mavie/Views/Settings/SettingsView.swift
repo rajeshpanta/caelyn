@@ -13,6 +13,8 @@ struct SettingsView: View {
     @State private var showingExportSheet = false
     @State private var showingReminders = false
     @State private var showingHealthKit = false
+    @State private var showingPaywall = false
+    @State private var purchase = PurchaseService.shared
 
     @State private var lockToggleError: String?
 
@@ -23,6 +25,7 @@ struct SettingsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: MavieSpacing.lg) {
+                    proSection
                     privacySection
                     healthSection
                     dataSection
@@ -45,6 +48,9 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showingExportSheet) {
             ExportView()
+        }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView()
         }
         .sheet(isPresented: $showingFirstDayPicker) {
             if let profile {
@@ -101,6 +107,75 @@ struct SettingsView: View {
             Button("OK") { lockToggleError = nil }
         } message: {
             Text(lockToggleError ?? "")
+        }
+    }
+
+    // MARK: - Mavie Pro section
+
+    @ViewBuilder
+    private var proSection: some View {
+        if purchase.isPro {
+            MavieCard(padding: MavieSpacing.md) {
+                HStack(spacing: MavieSpacing.sm) {
+                    ZStack {
+                        Circle().fill(MavieColor.successSage.opacity(0.18)).frame(width: 36, height: 36)
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(MavieColor.successSage)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Mavie Pro · Subscribed")
+                            .font(MavieFont.body.weight(.medium))
+                            .foregroundStyle(MavieColor.deepPlumText)
+                        Text("Manage your subscription in iOS Settings.")
+                            .font(MavieFont.caption)
+                            .foregroundStyle(MavieColor.deepPlumText.opacity(0.55))
+                    }
+                    Spacer(minLength: 0)
+                }
+            }
+        } else {
+            Button { showingPaywall = true } label: {
+                HStack(alignment: .top, spacing: MavieSpacing.md) {
+                    ZStack {
+                        Circle().fill(MavieColor.lavender).frame(width: 44, height: 44)
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(MavieColor.primaryPlum)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Unlock Mavie Pro")
+                            .font(MavieFont.headline)
+                            .foregroundStyle(MavieColor.deepPlumText)
+                        Text("Advanced insights, PDF reports, themes, and yearly summary.")
+                            .font(MavieFont.subheadline)
+                            .foregroundStyle(MavieColor.deepPlumText.opacity(0.65))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .multilineTextAlignment(.leading)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(MavieColor.primaryPlum.opacity(0.55))
+                        .padding(.top, 14)
+                }
+                .padding(MavieSpacing.md)
+                .background(
+                    LinearGradient(
+                        colors: [MavieColor.cardWhite, MavieColor.lavender.opacity(0.4)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    in: RoundedRectangle(cornerRadius: MavieRadius.card, style: .continuous)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: MavieRadius.card, style: .continuous)
+                        .stroke(MavieColor.primaryPlum.opacity(0.18), lineWidth: 1)
+                )
+                .mavieShadow(.subtle)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
         }
     }
 
