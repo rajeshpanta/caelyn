@@ -8,8 +8,8 @@ struct MavieApp: App {
             AppLockGate {
                 ContentView()
                     .appPreviewMask()
-                    .applyMavieTheme()
             }
+            .applyMavieTheme()
         }
         .modelContainer(Persistence.live)
     }
