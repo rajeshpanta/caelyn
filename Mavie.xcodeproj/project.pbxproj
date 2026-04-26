@@ -7,13 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		08834D5BE72AD81107AC523D /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2FAEC87B355A27323A83A03 /* Typography.swift */; };
 		32BFF0721D36CD13D71CCF8F /* MavieUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC5C272BAC9997C05D909092 /* MavieUITests.swift */; };
 		413505EF38142E0539A8D714 /* MavieTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6082C91E8D26535106119306 /* MavieTests.swift */; };
+		4C092D945F327C03C6426BB0 /* Color+Mavie.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31FF6283E1CE2DD13A41DF46 /* Color+Mavie.swift */; };
 		5C623D6823E032C726D6BAC8 /* MavieUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7D00CBB5BED5E785D3F7E4 /* MavieUITestsLaunchTests.swift */; };
 		6508C8A74EDAC8CA6C3182A1 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 840FBF404E79FB7133C28F75 /* Preview Assets.xcassets */; };
 		7BC8CC2F29842B1A0EDC08BD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 85AF89F806C692616AD960CA /* Assets.xcassets */; };
+		A056CC329EF6A45B592ABFBC /* Spacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1053C1456A57FD6FD09246A /* Spacing.swift */; };
+		AE4D240BD55F5040E00CE48B /* Shadows.swift in Sources */ = {isa = PBXBuildFile; fileRef = C59D90DF27B3A6FD3B4BE169 /* Shadows.swift */; };
+		BCB5334AF18B6FE93F8C1759 /* DesignSystemPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A9ADCC85A4152BCD1CF311 /* DesignSystemPreview.swift */; };
 		C5A0B2888BEDDF40B5003C5A /* MavieApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65B417F556FED2CD6972F463 /* MavieApp.swift */; };
 		E8C5969AA3DD5BC287C4BA97 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F9F926F2511FF38817F76A0 /* ContentView.swift */; };
+		F96CBF5DD48C4566EC44B9F2 /* Shapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48057FC309D4D76408AE86EC /* Shapes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,28 +40,34 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0F55493705D1592BAB54DE3F /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
-		2392C1DAB594A25CF078DBFF /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		01A9ADCC85A4152BCD1CF311 /* DesignSystemPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystemPreview.swift; sourceTree = "<group>"; };
+		0F55493705D1592BAB54DE3F /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		2392C1DAB594A25CF078DBFF /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		2F9F926F2511FF38817F76A0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		3CAFCF46D8C7EEC639A3FEF6 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
-		3EBA0266F75BB4050BB17761 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		31FF6283E1CE2DD13A41DF46 /* Color+Mavie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Mavie.swift"; sourceTree = "<group>"; };
+		3CAFCF46D8C7EEC639A3FEF6 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		3EBA0266F75BB4050BB17761 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		48057FC309D4D76408AE86EC /* Shapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shapes.swift; sourceTree = "<group>"; };
 		4B0C46A6E83BAF5E37D2EC16 /* MavieUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MavieUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		579DA9A9B90B604B6C347A04 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
-		5CF5CFA1345EC46B455E2E60 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		579DA9A9B90B604B6C347A04 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		5CF5CFA1345EC46B455E2E60 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		5F640251E18D1113EAC4C59D /* MavieTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MavieTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6082C91E8D26535106119306 /* MavieTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieTests.swift; sourceTree = "<group>"; };
 		65B417F556FED2CD6972F463 /* MavieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieApp.swift; sourceTree = "<group>"; };
-		6B4741BB77F7F27DC460613E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		6B4741BB77F7F27DC460613E /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		840FBF404E79FB7133C28F75 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		85AF89F806C692616AD960CA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		AD4A8E05406767D814921FD9 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
-		B8342950B727588C93394B12 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		AD4A8E05406767D814921FD9 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		B8342950B727588C93394B12 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		BC5C272BAC9997C05D909092 /* MavieUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieUITests.swift; sourceTree = "<group>"; };
-		D9E44CEFBE94981ED7EA867F /* Mavie.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Mavie.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E9FBC458919B7A5DF91703F7 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
-		F5BE37F05C92D23805C5D294 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		C59D90DF27B3A6FD3B4BE169 /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
+		D9E44CEFBE94981ED7EA867F /* Mavie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mavie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E9FBC458919B7A5DF91703F7 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
+		F1053C1456A57FD6FD09246A /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
+		F2FAEC87B355A27323A83A03 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		F5BE37F05C92D23805C5D294 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		FA7D00CBB5BED5E785D3F7E4 /* MavieUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		FC08912DC52B2FAF1747F884 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		FC08912DC52B2FAF1747F884 /* .gitkeep */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -142,6 +154,12 @@
 			isa = PBXGroup;
 			children = (
 				3EBA0266F75BB4050BB17761 /* .gitkeep */,
+				31FF6283E1CE2DD13A41DF46 /* Color+Mavie.swift */,
+				01A9ADCC85A4152BCD1CF311 /* DesignSystemPreview.swift */,
+				C59D90DF27B3A6FD3B4BE169 /* Shadows.swift */,
+				48057FC309D4D76408AE86EC /* Shapes.swift */,
+				F1053C1456A57FD6FD09246A /* Spacing.swift */,
+				F2FAEC87B355A27323A83A03 /* Typography.swift */,
 			);
 			path = Theme;
 			sourceTree = "<group>";
@@ -316,9 +334,6 @@
 					35E7738CAC7DE3772CF95EF0 = {
 						DevelopmentTeam = "";
 					};
-					410CE2C3EBA2ABF395139BB7 = {
-						DevelopmentTeam = "";
-					};
 					F5CDDA7A36EF0D0CB783F995 = {
 						DevelopmentTeam = "";
 						TestTargetID = 410CE2C3EBA2ABF395139BB7;
@@ -380,8 +395,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C092D945F327C03C6426BB0 /* Color+Mavie.swift in Sources */,
 				E8C5969AA3DD5BC287C4BA97 /* ContentView.swift in Sources */,
+				BCB5334AF18B6FE93F8C1759 /* DesignSystemPreview.swift in Sources */,
 				C5A0B2888BEDDF40B5003C5A /* MavieApp.swift in Sources */,
+				AE4D240BD55F5040E00CE48B /* Shadows.swift in Sources */,
+				F96CBF5DD48C4566EC44B9F2 /* Shapes.swift in Sources */,
+				A056CC329EF6A45B592ABFBC /* Spacing.swift in Sources */,
+				08834D5BE72AD81107AC523D /* Typography.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -467,6 +488,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_ASSET_PATHS = "\"Mavie/Preview Content\"";
+				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -611,6 +633,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_ASSET_PATHS = "\"Mavie/Preview Content\"";
+				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
