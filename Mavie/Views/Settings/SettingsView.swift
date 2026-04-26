@@ -273,7 +273,9 @@ struct SettingsView: View {
 
     private var remindersDetail: String {
         guard let profile else { return "Off" }
-        let count = [profile.remindPeriodStart, profile.remindDailyCheckIn, profile.remindMedication, profile.remindOvulation]
+        // Only the categories that actually fire as OS notifications count.
+        // Period and ovulation events live as in-app cards and don't push.
+        let count = [profile.remindDailyCheckIn, profile.remindMedication]
             .filter { $0 }.count
         return count == 0 ? "Off" : "\(count) on"
     }

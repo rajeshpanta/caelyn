@@ -37,17 +37,12 @@ private struct RemindersForm: View {
                 }
 
                 introCopy
+                howRemindersWorkCard
 
-                ToggleCard(
-                    title: "Period may start soon",
-                    subtitle: "A heads-up two days before.",
-                    icon: "drop.fill",
-                    isOn: bind(\.remindPeriodStart)
-                )
                 VStack(spacing: 0) {
                     ToggleCard(
                         title: "Daily check-in",
-                        subtitle: "A soft prompt to log how you're feeling.",
+                        subtitle: "A silent nudge that appears in Notification Center — no banner, no sound.",
                         icon: "checkmark.circle",
                         isOn: bind(\.remindDailyCheckIn)
                     )
@@ -62,7 +57,7 @@ private struct RemindersForm: View {
                 VStack(spacing: 0) {
                     ToggleCard(
                         title: "Medication",
-                        subtitle: "A daily reminder to log medications you track.",
+                        subtitle: "A time-sensitive reminder for daily medications. Breaks through Focus modes.",
                         icon: "pills",
                         isOn: bind(\.remindMedication)
                     )
@@ -74,12 +69,8 @@ private struct RemindersForm: View {
                         )
                     }
                 }
-                ToggleCard(
-                    title: "Ovulation window",
-                    subtitle: "An estimate, not a fertility prediction.",
-                    icon: "sun.max",
-                    isOn: bind(\.remindOvulation)
-                )
+
+                inAppOnlyExplainer
 
                 privateToggleSection
             }
@@ -91,10 +82,51 @@ private struct RemindersForm: View {
     // MARK: - Sections
 
     private var introCopy: some View {
-        Text("Mavie only nudges you about what you've turned on. Everything stays on this device.")
+        Text("Mavie waits to be asked. Cycle and ovulation events live as cards inside the app — they never appear on your lock screen.")
             .font(MavieFont.subheadline)
             .foregroundStyle(MavieColor.deepPlumText.opacity(0.65))
             .fixedSize(horizontal: false, vertical: true)
+    }
+
+    /// Soft explainer card surfacing the "Reveal on Face ID" architecture so
+    /// testers/users understand what makes Mavie's reminder system different.
+    private var howRemindersWorkCard: some View {
+        MavieCard(padding: MavieSpacing.md, background: MavieColor.lavender.opacity(0.55)) {
+            VStack(alignment: .leading, spacing: MavieSpacing.xs) {
+                HStack(spacing: 6) {
+                    Image(systemName: "lock.shield")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(MavieColor.primaryPlum)
+                    Text("How Mavie's reminders work")
+                        .font(MavieFont.caption.weight(.semibold))
+                        .foregroundStyle(MavieColor.primaryPlum)
+                        .tracking(0.4)
+                }
+                Text("Notifications read \"Mavie reminder\" on the lock screen — anyone glancing at your phone sees nothing. When you tap, Face ID opens the relevant card inside the app.")
+                    .font(MavieFont.subheadline)
+                    .foregroundStyle(MavieColor.deepPlumText.opacity(0.75))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private var inAppOnlyExplainer: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Image(systemName: "moon.stars")
+                    .font(.system(size: 11, weight: .medium))
+                Text("In-app only")
+                    .font(MavieFont.caption.weight(.semibold))
+                    .tracking(0.4)
+            }
+            .foregroundStyle(MavieColor.deepPlumText.opacity(0.5))
+            Text("Period and ovulation heads-up cards always appear on Home — they don't fire as notifications. Your cycle data never leaves Mavie.")
+                .font(MavieFont.caption)
+                .foregroundStyle(MavieColor.deepPlumText.opacity(0.6))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 4)
+        .padding(.top, 4)
     }
 
     private var deniedBanner: some View {

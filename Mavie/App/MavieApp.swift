@@ -3,6 +3,11 @@ import SwiftData
 
 @main
 struct MavieApp: App {
+    /// Registers UNUserNotificationCenterDelegate at app launch so taps are
+    /// captured and the smart-tap router can route to the right card. See
+    /// AppDelegate.swift.
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {

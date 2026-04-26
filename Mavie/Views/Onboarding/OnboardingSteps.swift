@@ -328,28 +328,16 @@ struct RemindersStep: View {
         ) {
             VStack(spacing: MavieSpacing.sm) {
                 ToggleCard(
-                    title: "Period may start soon",
-                    subtitle: "A heads-up a few days before.",
-                    icon: "drop.fill",
-                    isOn: bindingFor(\.remindPeriodStart)
-                )
-                ToggleCard(
                     title: "Daily check-in",
-                    subtitle: "A soft prompt to log how you feel.",
+                    subtitle: "A silent nudge to log how you feel — no banner, no sound.",
                     icon: "checkmark.circle",
                     isOn: bindingFor(\.remindDailyCheckIn)
                 )
                 ToggleCard(
                     title: "Medication",
-                    subtitle: "Time-based reminders for any meds you track.",
+                    subtitle: "Time-sensitive reminder for any meds you track.",
                     icon: "pills",
                     isOn: bindingFor(\.remindMedication)
-                )
-                ToggleCard(
-                    title: "Ovulation window",
-                    subtitle: "An estimate, not a fertility prediction.",
-                    icon: "sun.max",
-                    isOn: bindingFor(\.remindOvulation)
                 )
                 ToggleCard(
                     title: "No reminders",

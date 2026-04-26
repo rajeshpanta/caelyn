@@ -34,6 +34,7 @@
 		4E0C83CCB74D665F80475A8C /* OnboardingSteps.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5F664294EAD5BF7CFC26C6 /* OnboardingSteps.swift */; };
 		502C3344BF9CAEC3CF42BD49 /* InsightsEmptyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C75D242FD2D79475FA2835 /* InsightsEmptyState.swift */; };
 		51F8193991427516CEA5327A /* CycleAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAFFE66B273791B6D826CE8D /* CycleAnalytics.swift */; };
+		52810300A1C8CACD1E543718 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD82C7C5397571D68D48D246 /* AppDelegate.swift */; };
 		53949058014DA82FA20F19C3 /* PrivacyChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85EF104E047040EC1BBAA3C8 /* PrivacyChip.swift */; };
 		58F6A6353A5EDF5FD78E8F0F /* OnboardingScaffold.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11C1D6C927E425BE4612398E /* OnboardingScaffold.swift */; };
 		5C623D6823E032C726D6BAC8 /* MavieUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA7D00CBB5BED5E785D3F7E4 /* MavieUITestsLaunchTests.swift */; };
@@ -83,6 +84,7 @@
 		E2E8EC5B8A34730696421AEA /* MavieCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45670FDCE91C197F219F4B7B /* MavieCard.swift */; };
 		E6871978DBE9992FDCDDE4C5 /* ProUpsellCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2B6B9B677BAE8CC8DA0624 /* ProUpsellCard.swift */; };
 		E8C5969AA3DD5BC287C4BA97 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F9F926F2511FF38817F76A0 /* ContentView.swift */; };
+		EA2DEE83BDCF24385397BD45 /* NotificationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3CB80AD3931BA2C3CE2147B /* NotificationRouter.swift */; };
 		ED331023DBD9BB944BF46C26 /* GoalCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C252748BC88D9AA4FA55C037 /* GoalCard.swift */; };
 		ED537FE4D941015C9F96B602 /* MavieButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7FF15AAC8249353DAD172F9 /* MavieButton.swift */; };
 		F1AC176F9D56639C5C0752AF /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D3CF9944AEB0891FA3D6F5 /* Enums.swift */; };
@@ -176,6 +178,7 @@
 		91BE5AC5136439A7607B7248 /* ToggleCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleCard.swift; sourceTree = "<group>"; };
 		A0692964E06D6CF3B761E4C5 /* DataStatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStatusCard.swift; sourceTree = "<group>"; };
 		A3A6B8DF8A37700CAFE9A6C2 /* HomeMoodCheckIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeMoodCheckIn.swift; sourceTree = "<group>"; };
+		A3CB80AD3931BA2C3CE2147B /* NotificationRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationRouter.swift; sourceTree = "<group>"; };
 		A3CD687DB1AC6131378EF3DC /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
 		A436A0450A271AB8E02419C1 /* HomePatternInsight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePatternInsight.swift; sourceTree = "<group>"; };
 		AD4A8E05406767D814921FD9 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -189,6 +192,7 @@
 		C59D90DF27B3A6FD3B4BE169 /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
 		C7FF15AAC8249353DAD172F9 /* MavieButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MavieButton.swift; sourceTree = "<group>"; };
 		C88212A52417AA4D3A899191 /* PatternsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternsSection.swift; sourceTree = "<group>"; };
+		CD82C7C5397571D68D48D246 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D9E44CEFBE94981ED7EA867F /* Mavie.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Mavie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD05238A7AD209486A30662D /* HomeCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCopy.swift; sourceTree = "<group>"; };
 		E21643CDD09AE69FDDA3AD02 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
@@ -356,6 +360,7 @@
 				9022390D9EA5BAC63E700631 /* ExportService.swift */,
 				619FF8757898C4792FB6AC0F /* HealthKitService.swift */,
 				166EA79A5EA2AD2337466652 /* HealthKitSync.swift */,
+				A3CB80AD3931BA2C3CE2147B /* NotificationRouter.swift */,
 				E3C7451CCA4F2D1404F339E0 /* NotificationService.swift */,
 				EA4187B2D16D4E7DE702A118 /* Persistence.swift */,
 				47B0FC088D00A5CF6F48FCD0 /* PredictionEngine.swift */,
@@ -437,6 +442,7 @@
 		C985BCD5ACB109ACC081F8A0 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				CD82C7C5397571D68D48D246 /* AppDelegate.swift */,
 				2F9F926F2511FF38817F76A0 /* ContentView.swift */,
 				65B417F556FED2CD6972F463 /* MavieApp.swift */,
 			);
@@ -625,6 +631,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52810300A1C8CACD1E543718 /* AppDelegate.swift in Sources */,
 				BFEE1409B28D8A4EBBC1A20C /* AppLockGate.swift in Sources */,
 				DC22E9EDFEA3C4C2115AF5BA /* AppPreviewMask.swift in Sources */,
 				0B9B55F2BC10E29211EDD933 /* BiometricService.swift in Sources */,
@@ -671,6 +678,7 @@
 				D14C0F5D49064AE0854762E3 /* MonthGridView.swift in Sources */,
 				73D5B9153EA62104867398FA /* MonthSummaryCard.swift in Sources */,
 				3E59FBF6D573DDE96568B53B /* MoodChip.swift in Sources */,
+				EA2DEE83BDCF24385397BD45 /* NotificationRouter.swift in Sources */,
 				455EF618A5A9632EE52F8EFA /* NotificationService.swift in Sources */,
 				7A01E0C7CC40562B806BC63D /* OnboardingFlow.swift in Sources */,
 				05035087CC00535EAB9AB450 /* OnboardingProgress.swift in Sources */,

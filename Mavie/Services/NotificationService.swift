@@ -11,12 +11,35 @@ struct NotificationContent {
 @MainActor
 enum NotificationService {
 
+    /// All notification categories Mavie has ever scheduled. We keep
+    /// .periodUpcoming and .ovulation in the enum (rather than removing them)
+    /// for two reasons:
+    ///   1. cancelAll() needs to find and remove any legacy pending requests
+    ///      from earlier app versions that used to schedule them.
+    ///   2. The smart-tap router knows the rawValue prefix even if we never
+    ///      schedule new ones.
+    /// Mavie's "private envelopes" architecture intentionally keeps cycle and
+    /// ovulation events as in-app cards (HomeHeroCard / activePeriodPrompt /
+    /// latePeriodPrompt) rather than OS notifications — they never travel to
+    /// the lock screen, Notification Center, Apple Watch, or notification logs.
     enum Category: String, CaseIterable {
         case periodUpcoming = "mavie.period.upcoming"
         case dailyCheckIn   = "mavie.daily.checkin"
         case medication     = "mavie.medication"
         case ovulation      = "mavie.ovulation"
     }
+
+    /// How many future days of one-shot reminders to pre-schedule. Picking 7
+    /// means the user keeps getting reminded for a week even if they never
+    /// open the app — but the next sync (e.g. after they open it once) refreshes
+    /// the schedule. iOS allows up to 64 pending requests; at 7 days × 2
+    /// categories = 14 we have plenty of headroom.
+    private static let scheduleHorizonDays = 7
+
+    /// Quiet hours during which Mavie will not fire any notification. Notifications
+    /// scheduled for these hours get pushed forward to `quietHoursEnd`.
+    private static let quietHoursStart = 22  // 22:00
+    private static let quietHoursEnd   = 7   // 07:00
 
     // MARK: - Permission
 
@@ -67,106 +90,157 @@ enum NotificationService {
         }
     }
 
-    // MARK: - Scheduling
-
-    static func cancelAll() {
-        let identifiers = Category.allCases.map(\.rawValue)
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+    /// Parse a notification request identifier back to a Category. Identifiers
+    /// look like `mavie.daily.checkin.20260426` for our per-day one-shots, or
+    /// the bare `mavie.daily.checkin` for legacy / non-dated requests.
+    static func category(from identifier: String) -> Category? {
+        for category in Category.allCases where identifier.hasPrefix(category.rawValue) {
+            return category
+        }
+        return nil
     }
 
-    /// Cancel and re-schedule based on current profile + predictions. Idempotent.
-    static func sync(profile: UserProfile, predictedNextPeriod: Date?, predictedOvulation: Date?) async {
+    // MARK: - Scheduling
+
+    /// Cancel every pending Mavie notification, current and legacy. Called at
+    /// the start of every sync and from Settings → Delete all data.
+    static func cancelAll() {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            let mavieIDs = requests
+                .map(\.identifier)
+                .filter { id in Category.allCases.contains { id.hasPrefix($0.rawValue) } }
+            UNUserNotificationCenter.current()
+                .removePendingNotificationRequests(withIdentifiers: mavieIDs)
+        }
+    }
+
+    /// Pre-schedule the next N days of daily check-in and medication one-shots.
+    ///
+    /// This replaces the old repeating-trigger model so we can suppress *today's*
+    /// reminder when the user has already logged the relevant data. Period and
+    /// ovulation are intentionally not scheduled — they live as in-app cards.
+    static func sync(profile: UserProfile, todayEntry: CycleEntry?) async {
         cancelAll()
 
         guard await authorizationStatus() == .authorized else { return }
 
         let isPrivate = profile.privateNotifications
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
 
-        if profile.remindPeriodStart, let next = predictedNextPeriod {
-            await scheduleOneShot(
-                category: .periodUpcoming,
-                isPrivate: isPrivate,
-                fireDate: triggerDate(daysBefore: 2, from: next, hour: 10)
-            )
-        }
         if profile.remindDailyCheckIn {
-            await scheduleDaily(
-                category: .dailyCheckIn,
-                isPrivate: isPrivate,
-                hour: profile.dailyCheckInHour,
-                minute: profile.dailyCheckInMinute
-            )
+            let moodLoggedToday = todayEntry?.mood != nil
+            for offset in 0..<scheduleHorizonDays {
+                guard let day = cal.date(byAdding: .day, value: offset, to: today) else { continue }
+                // Suppress today's reminder if the user already logged a mood.
+                if offset == 0 && moodLoggedToday { continue }
+                guard let fire = scheduledFireDate(
+                    on: day,
+                    hour: profile.dailyCheckInHour,
+                    minute: profile.dailyCheckInMinute
+                ) else { continue }
+                await scheduleOneShot(
+                    category: .dailyCheckIn,
+                    isPrivate: isPrivate,
+                    fireDate: fire,
+                    interruptionLevel: .passive
+                )
+            }
         }
+
         if profile.remindMedication {
-            await scheduleDaily(
-                category: .medication,
-                isPrivate: isPrivate,
-                hour: profile.medicationHour,
-                minute: profile.medicationMinute
-            )
-        }
-        if profile.remindOvulation, let ovulation = predictedOvulation {
-            await scheduleOneShot(
-                category: .ovulation,
-                isPrivate: isPrivate,
-                fireDate: triggerDate(daysBefore: 1, from: ovulation, hour: 10)
-            )
+            let medLoggedToday = (todayEntry?.medication?.isEmpty == false)
+            for offset in 0..<scheduleHorizonDays {
+                guard let day = cal.date(byAdding: .day, value: offset, to: today) else { continue }
+                if offset == 0 && medLoggedToday { continue }
+                guard let fire = scheduledFireDate(
+                    on: day,
+                    hour: profile.medicationHour,
+                    minute: profile.medicationMinute
+                ) else { continue }
+                await scheduleOneShot(
+                    category: .medication,
+                    isPrivate: isPrivate,
+                    fireDate: fire,
+                    interruptionLevel: .timeSensitive
+                )
+            }
         }
     }
 
-    /// Pull the live profile + entries from the persistent store and resync.
-    /// Called on app foreground so predictions stay fresh as the cycle progresses.
+    /// Read the live store and resync. Called on app foreground.
     static func syncFromLiveStore() async {
         let context = Persistence.live.mainContext
         guard let profile = (try? context.fetch(FetchDescriptor<UserProfile>()))?.first else { return }
         let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
-
-        let (next, ovulation): (Date?, Date?) = {
-            guard let last = profile.lastPeriodStart else { return (nil, nil) }
-            let cycles = PredictionEngine.cycles(from: entries)
-            let avgLen = PredictionEngine.averageCycleLength(of: cycles, fallback: profile.averageCycleLength)
-            let nextStart = PredictionEngine.nextPeriodStart(lastPeriodStart: last, cycleLength: avgLen)
-            let ovulation = PredictionEngine.ovulationEstimate(nextPeriodStart: nextStart)
-            return (nextStart, ovulation)
-        }()
-
-        await sync(profile: profile, predictedNextPeriod: next, predictedOvulation: ovulation)
-    }
-
-    // MARK: - Internals
-
-    private static func triggerDate(daysBefore: Int, from anchor: Date, hour: Int) -> Date? {
         let cal = Calendar.current
-        guard let day = cal.date(byAdding: .day, value: -daysBefore, to: anchor) else { return nil }
-        let candidate = cal.date(bySettingHour: hour, minute: 0, second: 0, of: day) ?? day
-        return candidate > .now ? candidate : nil
+        let today = cal.startOfDay(for: .now)
+        let todayEntry = entries.first { cal.isDate($0.date, inSameDayAs: today) }
+        await sync(profile: profile, todayEntry: todayEntry)
     }
 
-    private static func scheduleOneShot(category: Category, isPrivate: Bool, fireDate: Date?) async {
-        guard let fireDate else { return }
-        let content = makeContent(category: category, isPrivate: isPrivate)
+    // MARK: - Internals (exposed `internal` for unit tests)
+
+    /// Compute the actual fire date for a given calendar day + time, respecting
+    /// quiet hours. Returns nil if the resulting date is in the past.
+    static func scheduledFireDate(on day: Date, hour: Int, minute: Int, now: Date = .now) -> Date? {
+        let cal = Calendar.current
+        guard let initial = cal.date(bySettingHour: hour, minute: minute, second: 0, of: day) else { return nil }
+        let shifted = shiftOutOfQuietHours(initial)
+        return shifted > now ? shifted : nil
+    }
+
+    /// If `date` falls in 22:00–07:00, push it to the next 07:00.
+    static func shiftOutOfQuietHours(_ date: Date) -> Date {
+        let cal = Calendar.current
+        let hour = cal.component(.hour, from: date)
+        let inEveningQuiet = hour >= quietHoursStart        // 22, 23
+        let inMorningQuiet = hour < quietHoursEnd           // 0–6
+        guard inEveningQuiet || inMorningQuiet else { return date }
+
+        let dayBase = inEveningQuiet
+            ? cal.date(byAdding: .day, value: 1, to: date) ?? date
+            : date
+        return cal.date(bySettingHour: quietHoursEnd, minute: 0, second: 0, of: dayBase) ?? date
+    }
+
+    private static func scheduleOneShot(
+        category: Category,
+        isPrivate: Bool,
+        fireDate: Date,
+        interruptionLevel: UNNotificationInterruptionLevel
+    ) async {
+        let content = makeContent(category: category, isPrivate: isPrivate, interruptionLevel: interruptionLevel)
         let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate)
         let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-        let request = UNNotificationRequest(identifier: category.rawValue, content: content, trigger: trigger)
+        let id = "\(category.rawValue).\(dateSuffix(for: fireDate))"
+        let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
         try? await UNUserNotificationCenter.current().add(request)
     }
 
-    private static func scheduleDaily(category: Category, isPrivate: Bool, hour: Int, minute: Int) async {
-        let content = makeContent(category: category, isPrivate: isPrivate)
-        var components = DateComponents()
-        components.hour = hour
-        components.minute = minute
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
-        let request = UNNotificationRequest(identifier: category.rawValue, content: content, trigger: trigger)
-        try? await UNUserNotificationCenter.current().add(request)
+    private static func dateSuffix(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd"
+        return formatter.string(from: date)
     }
 
-    private static func makeContent(category: Category, isPrivate: Bool) -> UNMutableNotificationContent {
+    private static func makeContent(
+        category: Category,
+        isPrivate: Bool,
+        interruptionLevel: UNNotificationInterruptionLevel
+    ) -> UNMutableNotificationContent {
         let info = content(for: category, isPrivate: isPrivate)
         let content = UNMutableNotificationContent()
         content.title = info.title
         content.body = info.body
-        content.sound = .default
+        // Passive notifications are silent — no sound, no banner. They just appear
+        // in Notification Center for the user to find when she chooses.
+        // .timeSensitive notifications break Focus modes (used for medication only).
+        // .active is the default for everything else.
+        if interruptionLevel != .passive {
+            content.sound = .default
+        }
+        content.interruptionLevel = interruptionLevel
         return content
     }
 }
