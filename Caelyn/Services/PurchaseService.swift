@@ -19,8 +19,8 @@ final class PurchaseService {
     static let shared = PurchaseService()
 
     enum ProductID: String, CaseIterable {
-        case monthly = "smallpanta-icould.com.caelyn.pro.monthly"
-        case yearly  = "smallpanta-icould.com.caelyn.pro.yearly"
+        case monthly = "smallpanta-icould.com.caelynperiodtracker.pro.monthly"
+        case yearly  = "smallpanta-icould.com.caelynperiodtracker.pro.yearly"
     }
 
     private(set) var products: [Product] = []

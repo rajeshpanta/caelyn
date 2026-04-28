@@ -743,7 +743,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelyn.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelynperiodtracker.tests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Caelyn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caelyn";
@@ -760,7 +760,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelyn.uitests";
+				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelynperiodtracker.uitests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Caelyn;
@@ -846,7 +846,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelyn";
+				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelynperiodtracker";
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -875,7 +875,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelyn";
+				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelynperiodtracker";
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -894,7 +894,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelyn.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelynperiodtracker.tests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Caelyn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caelyn";
@@ -911,7 +911,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelyn.uitests";
+				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelynperiodtracker.uitests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Caelyn;

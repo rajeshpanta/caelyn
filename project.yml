@@ -46,7 +46,7 @@ targets:
     #     com.apple.developer.healthkit.access: []
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelyn
+        PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelynperiodtracker
         DEVELOPMENT_ASSET_PATHS: '"Caelyn/Preview Content"'
         ENABLE_PREVIEWS: YES
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -75,7 +75,7 @@ targets:
       - path: CaelynTests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelyn.tests
+        PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelynperiodtracker.tests
         BUNDLE_LOADER: "$(TEST_HOST)"
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Caelyn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caelyn"
         GENERATE_INFOPLIST_FILE: YES
@@ -89,7 +89,7 @@ targets:
       - path: CaelynUITests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelyn.uitests
+        PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelynperiodtracker.uitests
         TEST_TARGET_NAME: Caelyn
         GENERATE_INFOPLIST_FILE: YES
     dependencies:
