@@ -67,6 +67,12 @@ targets:
         # INFOPLIST_KEY_NSHealthShareUsageDescription: "Caelyn reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync."
         # INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to."
         SWIFT_EMIT_LOC_STRINGS: YES
+        CODE_SIGN_STYLE: Automatic
+      configs:
+        Debug:
+          CODE_SIGN_IDENTITY: "Apple Development"
+        Release:
+          CODE_SIGN_IDENTITY: "Apple Distribution"
 
   CaelynTests:
     type: bundle.unit-test
