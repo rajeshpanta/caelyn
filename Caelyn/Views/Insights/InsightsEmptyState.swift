@@ -15,7 +15,7 @@ struct InsightsEmptyState: View {
                             .foregroundStyle(CaelynColor.primaryPlum)
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Patterns coming soon")
+                        Text("Patterns are still forming")
                             .font(CaelynFont.headline)
                             .foregroundStyle(CaelynColor.deepPlumText)
                         Text(confidence.displayText)

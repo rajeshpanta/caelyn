@@ -165,7 +165,7 @@ struct SettingsView: View {
                         Text("Unlock Caelyn Pro")
                             .font(CaelynFont.headline)
                             .foregroundStyle(CaelynColor.deepPlumText)
-                        Text("Advanced insights, PDF reports, themes, and yearly summary.")
+                        Text("Advanced pattern insights and PDF cycle reports.")
                             .font(CaelynFont.subheadline)
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
                             .fixedSize(horizontal: false, vertical: true)
