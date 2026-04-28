@@ -3,7 +3,7 @@ options:
   # Bundle ID prefix — needs to be unique to your Apple Developer team.
   # If you're on a paid Apple Developer Program, you can use your own
   # reverse-domain (e.g. com.yourdomain).
-  bundleIdPrefix: com.rajeshpanta
+  bundleIdPrefix: smallpanta-icould.com
   deploymentTarget:
     iOS: "17.0"
   developmentLanguage: en
@@ -14,7 +14,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "1.0.1"
-    CURRENT_PROJECT_VERSION: 1
+    CURRENT_PROJECT_VERSION: 2
     DEVELOPMENT_TEAM: "8VF49Q32QG"
 
 targets:
@@ -46,7 +46,7 @@ targets:
     #     com.apple.developer.healthkit.access: []
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.rajeshpanta.caelyn
+        PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelyn
         DEVELOPMENT_ASSET_PATHS: '"Caelyn/Preview Content"'
         ENABLE_PREVIEWS: YES
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -75,7 +75,7 @@ targets:
       - path: CaelynTests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.rajeshpanta.caelyn.tests
+        PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelyn.tests
         BUNDLE_LOADER: "$(TEST_HOST)"
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Caelyn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caelyn"
         GENERATE_INFOPLIST_FILE: YES
@@ -89,7 +89,7 @@ targets:
       - path: CaelynUITests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.rajeshpanta.caelyn.uitests
+        PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelyn.uitests
         TEST_TARGET_NAME: Caelyn
         GENERATE_INFOPLIST_FILE: YES
     dependencies:

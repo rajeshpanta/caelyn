@@ -35,7 +35,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.rajeshpanta.caelyn.pro.monthly",
+          "productID" : "smallpanta-icould.com.caelyn.pro.monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Caelyn Pro Monthly",
           "subscriptionGroupID" : "21525751",
@@ -56,7 +56,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.rajeshpanta.caelyn.pro.yearly",
+          "productID" : "smallpanta-icould.com.caelyn.pro.yearly",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Caelyn Pro Yearly",
           "subscriptionGroupID" : "21525751",

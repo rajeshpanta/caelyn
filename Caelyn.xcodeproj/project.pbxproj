@@ -50,7 +50,6 @@
 		6D3293F70DFD8C6B2B7280B7 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CF157977EC9D07CEDE4334 /* CalendarView.swift */; };
 		6EE73517CCFF174B7DF6F843 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CB27B600CFE9B63241AD672 /* HomeView.swift */; };
 		7346A991F2E84C669EEC8729 /* CycleAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893A18A5E786299D456D8D29 /* CycleAnalytics.swift */; };
-		7698EE0B2FA04CEE00A7D0DB /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7698EE0A2FA04CEE00A7D0DB /* StoreKit.framework */; };
 		776A3C2C7F8086C9E1FB0D1D /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */; };
 		79E714A8CB6876CD2F78846E /* SymptomChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED36F8EF76DAB80A668C937 /* SymptomChip.swift */; };
 		7BAFF729C4DBF3F64901E1D1 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F4166D3870A6F4C282B5832 /* Typography.swift */; };
@@ -170,7 +169,6 @@
 		6CB27B600CFE9B63241AD672 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		6F67174E0AA8DF3F4111B5DF /* MonthGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthGridView.swift; sourceTree = "<group>"; };
 		716AADA33C2AA6BA1134DF22 /* ComponentGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentGallery.swift; sourceTree = "<group>"; };
-		7698EE0A2FA04CEE00A7D0DB /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		7A923C9143914C0A18515A7F /* QuickActionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionButton.swift; sourceTree = "<group>"; };
 		7BBAE1207378ECD1DA48A5DE /* InsightsStatsGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsStatsGrid.swift; sourceTree = "<group>"; };
 		7C61F24B11915E63DD4E264C /* CycleEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleEntry.swift; sourceTree = "<group>"; };
@@ -217,17 +215,6 @@
 		FDA214E11FC745FFBCD83EC1 /* OnboardingScaffold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScaffold.swift; sourceTree = "<group>"; };
 		FEAD398D65E99ED782B4FA33 /* CaelynUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CaelynUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
-
-/* Begin PBXFrameworksBuildPhase section */
-		7698EE0C2FA04CEE00A7D0DB /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7698EE0B2FA04CEE00A7D0DB /* StoreKit.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		0CF20BC0545F616BDCA142EC /* App */ = {
@@ -382,21 +369,12 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
-		7698EE092FA04CEE00A7D0DB /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				7698EE0A2FA04CEE00A7D0DB /* StoreKit.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		7B0900D7853516E002FA94E9 = {
 			isa = PBXGroup;
 			children = (
 				7B0FB055026A3276B28473FA /* Caelyn */,
 				39AB51C6DFF8B4371C985737 /* CaelynTests */,
 				A23CF008B9BBE106533A4FB5 /* CaelynUITests */,
-				7698EE092FA04CEE00A7D0DB /* Frameworks */,
 				4E5E4F83D4FD529FBFF79F39 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -567,7 +545,6 @@
 			buildPhases = (
 				F57477FF5F7345BE1B4488A4 /* Sources */,
 				87448F3981F98349B1DA2D04 /* Resources */,
-				7698EE0C2FA04CEE00A7D0DB /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -763,7 +740,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.rajeshpanta.caelyn.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelyn.tests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Caelyn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caelyn";
@@ -780,7 +757,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.rajeshpanta.caelyn.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelyn.uitests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Caelyn;
@@ -821,7 +798,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 8VF49Q32QG;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -857,7 +834,6 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -868,7 +844,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.rajeshpanta.caelyn;
+				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelyn";
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -888,7 +864,6 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -899,7 +874,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.rajeshpanta.caelyn;
+				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelyn";
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -918,7 +893,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.rajeshpanta.caelyn.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelyn.tests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Caelyn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caelyn";
@@ -935,7 +910,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.rajeshpanta.caelyn.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = "smallpanta-icould.com.caelyn.uitests";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Caelyn;
@@ -976,7 +951,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 8VF49Q32QG;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;

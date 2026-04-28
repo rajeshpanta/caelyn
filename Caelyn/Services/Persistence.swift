@@ -10,7 +10,7 @@ extension ModelContext {
         do {
             try save()
         } catch {
-            Logger(subsystem: "com.rajeshpanta.caelyn", category: "swiftdata")
+            Logger(subsystem: "smallpanta-icould.com.caelyn", category: "swiftdata")
                 .error("SwiftData save failed at \(file, privacy: .public):\(line): \(error.localizedDescription, privacy: .public)")
         }
     }
