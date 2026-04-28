@@ -14,7 +14,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     MARKETING_VERSION: "1.0.1"
-    CURRENT_PROJECT_VERSION: 2
+    CURRENT_PROJECT_VERSION: 3
     DEVELOPMENT_TEAM: "7T9897GFKH"
 
 targets:
@@ -62,10 +62,13 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_CFBundleDisplayName: "Caelyn"
         INFOPLIST_KEY_NSFaceIDUsageDescription: "Caelyn uses Face ID to keep your cycle data private."
-        # HealthKit usage strings (block B) — MUST be uncommented together
-        # with the `entitlements:` block above. See note at top of this target.
-        # INFOPLIST_KEY_NSHealthShareUsageDescription: "Caelyn reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync."
-        # INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to."
+        # HealthKit usage strings — required even when the entitlement is OFF,
+        # because the binary still contains references to HealthKit APIs in
+        # Services/. Apple's static analyzer rejects uploads (ITMS-90683)
+        # without these strings. Re-comment these only if all HealthKit
+        # symbols are removed from the binary.
+        INFOPLIST_KEY_NSHealthShareUsageDescription: "Caelyn reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync."
+        INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to."
         SWIFT_EMIT_LOC_STRINGS: YES
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"

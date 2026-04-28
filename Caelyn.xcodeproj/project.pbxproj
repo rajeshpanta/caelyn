@@ -802,7 +802,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -839,6 +839,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -869,6 +871,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -955,7 +959,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
