@@ -1,6 +1,6 @@
-# Mavie: Period Tracker
+# Caelyn: Period & Cycle Tracker
 
-A private, beautiful iOS period tracker built in SwiftUI.
+A private, beautiful iOS period tracker built in SwiftUI. The on-device display name is "Caelyn" — the longer "Caelyn: Period & Cycle Tracker" is reserved for the App Store listing and in-app About surface, so anyone glancing at her phone sees nothing about cycles.
 
 > **Status:** Phase 0 — Project bootstrap complete.
 
@@ -13,7 +13,7 @@ A private, beautiful iOS period tracker built in SwiftUI.
 ## Getting started
 
 ```bash
-open Mavie.xcodeproj
+open Caelyn.xcodeproj
 ```
 
 In Xcode, hit `⌘R` to build and run on the iOS Simulator.
@@ -21,7 +21,7 @@ In Xcode, hit `⌘R` to build and run on the iOS Simulator.
 ## Project structure
 
 ```
-Mavie/
+Caelyn/
 ├── App/             # @main, app entry, root scene
 ├── Theme/           # design tokens — colors, typography, spacing       (Phase 1)
 ├── Components/      # reusable UI — cards, buttons, chips, ring         (Phase 2)

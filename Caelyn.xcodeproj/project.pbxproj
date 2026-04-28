@@ -1,0 +1,1029 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		036BA33CD4D86A7FBC7EB83A /* Color+Caelyn.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B21C55B9209C096D76941E /* Color+Caelyn.swift */; };
+		07E5A710DF8ECD1462E692D1 /* HomeHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8CB13185D631BA4005CD6C /* HomeHeader.swift */; };
+		0C581E8B0DBDCFD8200EF13F /* HealthKitSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59064BE929C94D1B84DE947C /* HealthKitSync.swift */; };
+		11FEBA53A510B9DFDBE35CFD /* Shadows.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5100528FE83F0873584CDBC /* Shadows.swift */; };
+		1252C4EA2C01E95C82D7AF42 /* PurchaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AE5BF45B9E75202940D8F7 /* PurchaseService.swift */; };
+		126219ED6C31C5F6A97A5CAB /* ToggleCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3238D5E5DA356783A9A2BA1F /* ToggleCard.swift */; };
+		133751836219E19B8BB24B0A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 884D8350457334717AFDE17B /* PrivacyInfo.xcprivacy */; };
+		14690102084C6BB10D47DA61 /* MonthGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F67174E0AA8DF3F4111B5DF /* MonthGridView.swift */; };
+		14FC48433AA3511A592FBFE6 /* Spacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D237A741F754AC1F6FD0AC64 /* Spacing.swift */; };
+		17A3409231A1A3244C342F0E /* NotificationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 483D4ABE3B0FBDCFACE74186 /* NotificationRouter.swift */; };
+		1C566289B10118DEA3ABDCFA /* HealthKitConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1525588F818995E2E60CF533 /* HealthKitConnectView.swift */; };
+		1F55F3C99335A109FF917A65 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDF7284C85E89A58176F940 /* MainTabView.swift */; };
+		218A1D7F2C2FDC91289482A8 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 368EA8FCC339D47BDE93020F /* PaywallView.swift */; };
+		25564C308FDA9E6CB89F7542 /* PatternsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4676439157E4C2C4A31806B7 /* PatternsSection.swift */; };
+		2630C7CF38701E169675A5A2 /* InsightsEmptyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD48D14EB120165091660899 /* InsightsEmptyState.swift */; };
+		2769D9A192CDAF084FDB7688 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3631FAF209987A1704C78F36 /* ContentView.swift */; };
+		2B4851D91A1CD6DBB6C5296E /* HomeComingUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F217396A66FD507CDBD109BA /* HomeComingUp.swift */; };
+		30CB3F72A2205298FDF17583 /* PredictionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C1F783DA3E9B4345CA306AC /* PredictionEngine.swift */; };
+		30D0ECE98187C5E88F4B4FEF /* InsightCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00731802B5C8B96D6AC55E9 /* InsightCard.swift */; };
+		3DB284FE2C8F763A6E0F9199 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */; };
+		3ED93C314D3398057BF14BBC /* HomeMoodCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D72FA6409165615CFC45E1 /* HomeMoodCheckIn.swift */; };
+		403194B34DD4A2B53FADA0D2 /* QuickActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A923C9143914C0A18515A7F /* QuickActionButton.swift */; };
+		433BD4EC552A95D00B4B7F07 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3516961D449934550DCF93 /* Haptics.swift */; };
+		45D7233A755B333BD1199215 /* AppLockGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ABB74AEF2C2F9EAD97CDA2C /* AppLockGate.swift */; };
+		46D5AFC8BE254313ADAE3509 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE1504121970ACCEA336450 /* PreviewData.swift */; };
+		4B39AAED1E1CF8F4249DFEAB /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95030A62CE85285A1B7447CE /* ExportView.swift */; };
+		545420A041759717671D6019 /* AppPreviewMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = E88754596ACA60C51D4EC8D3 /* AppPreviewMask.swift */; };
+		58B3689F2054DF67F23594B9 /* CaelynButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29AD7A95A766A2973718AE3D /* CaelynButton.swift */; };
+		5C104A68E2609F5ECD9CFC95 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5322159624E05FC0C7C1686B /* ExportService.swift */; };
+		5F745BA64C443BC266F66445 /* AppURLs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3D9A2E9305840410E900DE /* AppURLs.swift */; };
+		60CE2C6B72B2C3BC33887DC2 /* DataStatusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F8759E4F031305F132899D /* DataStatusCard.swift */; };
+		61B1000513AE1D2AC81ED400 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53C42DDF815AFDFE00A7D214 /* LogView.swift */; };
+		62140E22137E9BFD253F7C3D /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A9CD6A95C7EC0C76441783 /* Enums.swift */; };
+		661515C66A81E3DF7ABA7CE9 /* OnboardingSteps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D48D4147BDA4F0E3B4942CB /* OnboardingSteps.swift */; };
+		670A3218F030EAAF4D349B2D /* MoodChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECDCA0268B520CF6DE71EE5 /* MoodChip.swift */; };
+		68B19BD4A1651FC72243F58E /* DayDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4BC2802ED9E13B920ABEFD /* DayDetailSheet.swift */; };
+		692E4812E610E9093A97A8F0 /* CaelynUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1627592A44213DFBF0ADE392 /* CaelynUITestsLaunchTests.swift */; };
+		6BFC3C1CB1394B1520981C18 /* OnboardingProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BBA80B3841E6E03E0EFB1EC /* OnboardingProgress.swift */; };
+		6C71D556C272156ADE20A629 /* CycleRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 590EF59CCF6828268AE024A3 /* CycleRingView.swift */; };
+		6CA673EF60F6E08D1F1D4BB0 /* CaelynUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820D9BF9B360C1A5531E053E /* CaelynUITests.swift */; };
+		6D3293F70DFD8C6B2B7280B7 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CF157977EC9D07CEDE4334 /* CalendarView.swift */; };
+		6EE73517CCFF174B7DF6F843 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CB27B600CFE9B63241AD672 /* HomeView.swift */; };
+		7346A991F2E84C669EEC8729 /* CycleAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893A18A5E786299D456D8D29 /* CycleAnalytics.swift */; };
+		776A3C2C7F8086C9E1FB0D1D /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */; };
+		79E714A8CB6876CD2F78846E /* SymptomChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED36F8EF76DAB80A668C937 /* SymptomChip.swift */; };
+		7BAFF729C4DBF3F64901E1D1 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F4166D3870A6F4C282B5832 /* Typography.swift */; };
+		7BDFA27E1EBA79E24E84F7EF /* CaelynCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7110E218D7376F63A078A1C /* CaelynCard.swift */; };
+		7DBE433603812776A07CD9F5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0573AB74971CE763A3A4BD08 /* Assets.xcassets */; };
+		8365DE6D282CEB140AEA20BE /* ComponentGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 716AADA33C2AA6BA1134DF22 /* ComponentGallery.swift */; };
+		87C388F7E2B1DF57EA5EB394 /* CyclePrediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D5D74DF250AA8A6396C3896 /* CyclePrediction.swift */; };
+		8F40B2801D830BE5BD40BCED /* Shapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3393953805D85FD844EA1DDC /* Shapes.swift */; };
+		8F9FBACA1AB4B3CF19B97FFA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1324749F9ED0476DABEC79C3 /* SettingsView.swift */; };
+		903D408B317900DB6B1E13B4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF78CFC55351ED7D33634AA0 /* RootView.swift */; };
+		94EF936F835F61CD2B65D964 /* HomePatternInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220787509170B408F4B03C6B /* HomePatternInsight.swift */; };
+		9793F7ACFFB971F837581A8D /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFE9A76ACD4C8CB6B8CE0C9 /* OnboardingStep.swift */; };
+		AC374C70C11C05D3B5C002D4 /* CaelynApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E24994FC37F88D50DE9B59B /* CaelynApp.swift */; };
+		AC5DA2BA4EAE6B7ED6191DED /* CalendarMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544E8077B17E70A1F5752069 /* CalendarMath.swift */; };
+		B12524314A6A32AE345D353D /* SettingsRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19182C4F23C467AC50DDED0 /* SettingsRows.swift */; };
+		B1C2EAF40578A39A58085C5C /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F703D1FBCAA2E9C6A61BF8E4 /* OnboardingViewModel.swift */; };
+		B1D468BAD909A0179142179E /* SettingsPickerSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3931C56DD039472FB7265FA2 /* SettingsPickerSheets.swift */; };
+		B2DAD96CCD4FE630BC6C8944 /* HomeCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60AD87ED1BAC8968B70FAE43 /* HomeCopy.swift */; };
+		B54C125DD9E05A5CB548105D /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A45E9FE5A677D4562C59DE7 /* HealthKitService.swift */; };
+		BAFF08D9C8C782AA2497E59D /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A27162A4340D1998A09B11 /* DayCell.swift */; };
+		BBC23E6131EC21D7AF843BFB /* PrivacyChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = F482876413250EE67CC8E266 /* PrivacyChip.swift */; };
+		BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354545D943378E53A1B935B7 /* CaelynTests.swift */; };
+		BFF497451E33CBC53ACCE00B /* OnboardingScaffold.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA214E11FC745FFBCD83EC1 /* OnboardingScaffold.swift */; };
+		CEFF825CB5AD92FDFA5B5816 /* DailyLogForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCA3984C3998D72FA315625 /* DailyLogForm.swift */; };
+		D1475D3E5B70DAD2D5B3495E /* CycleEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C61F24B11915E63DD4E264C /* CycleEntry.swift */; };
+		D32410CB7EF599104D4AFAA4 /* HomeQuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 074FFFF68AC191D9677D35DB /* HomeQuickActions.swift */; };
+		D3D093EDB66FE730C5A122D9 /* ProUpsellCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B35E72936365A18992EE8CC /* ProUpsellCard.swift */; };
+		DD549E00756CE802FF125BB9 /* StatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E9BDBBD279D29A2A77C926 /* StatCard.swift */; };
+		DDFD2FE65A7105E7154A3FFC /* MonthSummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29C32A52D52FD6E8FB154FCE /* MonthSummaryCard.swift */; };
+		DE3270435FCD973820713D5C /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D2C463E713B1341A1DDDCA /* UserProfile.swift */; };
+		E0905B45C9B6DBBF071BE5D8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7B8D0A8D8A1C1621780130A /* AppDelegate.swift */; };
+		E13765FA27B5002E4DEFF042 /* DesignSystemPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC71E3A11A7D1A8CD036E7AC /* DesignSystemPreview.swift */; };
+		E25279A0EFD42D53F2D1CAEF /* BiometricService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6D8A6D5E649BC3272BA4A4 /* BiometricService.swift */; };
+		E2791BFAB11145A765840272 /* GoalCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E04439EFC176289240A6888 /* GoalCard.swift */; };
+		E3BD504097E951ABAFA21554 /* HomeHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCFC2DE6E44F2E39E83EB23 /* HomeHeroCard.swift */; };
+		E770FCFA78B811972499CE97 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F727008BDD9FE097F46B549E /* NotificationService.swift */; };
+		EAFC9E788FEAD10FAEEC1901 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133DA567417FA320181DEB05 /* Persistence.swift */; };
+		EBD8A8A5883E9AD187D8C2E2 /* InsightsStatsGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BBAE1207378ECD1DA48A5DE /* InsightsStatsGrid.swift */; };
+		EE6F1A175709790139DD31CF /* PaywallTierCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E98B3962F3C4B33A33C5001 /* PaywallTierCard.swift */; };
+		F30D5500E73F1BFBB2EF01FF /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB2A3A73ABB750626A13958B /* InsightsView.swift */; };
+		F3C14FB0136889C385D26B01 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 01934B982642BD96A3984DF4 /* Preview Assets.xcassets */; };
+		F62CF1A517E50F8D1FBD5C69 /* InsightsCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F0CABBB7635B472536C64A /* InsightsCharts.swift */; };
+		F90650B46E641B57CF766373 /* RemindersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42F6A57085360293469134B1 /* RemindersView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		57B0807CEA3945CC86D4867F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E2CB491CA4DC166464DDCF62 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C37C4F45E7DB94E60ADA2B96;
+			remoteInfo = Caelyn;
+		};
+		EA9D9E43630FBACF3BC3D01B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E2CB491CA4DC166464DDCF62 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C37C4F45E7DB94E60ADA2B96;
+			remoteInfo = Caelyn;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		01934B982642BD96A3984DF4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		0573AB74971CE763A3A4BD08 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		074FFFF68AC191D9677D35DB /* HomeQuickActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeQuickActions.swift; sourceTree = "<group>"; };
+		08F7B66C9C067BF416634B9E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		0B3516961D449934550DCF93 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
+		0D48D4147BDA4F0E3B4942CB /* OnboardingSteps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSteps.swift; sourceTree = "<group>"; };
+		0E24994FC37F88D50DE9B59B /* CaelynApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynApp.swift; sourceTree = "<group>"; };
+		0ED36F8EF76DAB80A668C937 /* SymptomChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomChip.swift; sourceTree = "<group>"; };
+		0F4C4DF012FBD0A2568B5252 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		12EB370D7339101CB7E5FBC2 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		1324749F9ED0476DABEC79C3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		133DA567417FA320181DEB05 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		1525588F818995E2E60CF533 /* HealthKitConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitConnectView.swift; sourceTree = "<group>"; };
+		1627592A44213DFBF0ADE392 /* CaelynUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		220787509170B408F4B03C6B /* HomePatternInsight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePatternInsight.swift; sourceTree = "<group>"; };
+		23413D59226D3A1BBCDC7148 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		294EA3EE854C87EEF4D2311A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		29AD7A95A766A2973718AE3D /* CaelynButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynButton.swift; sourceTree = "<group>"; };
+		29C32A52D52FD6E8FB154FCE /* MonthSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthSummaryCard.swift; sourceTree = "<group>"; };
+		2A45E9FE5A677D4562C59DE7 /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
+		3238D5E5DA356783A9A2BA1F /* ToggleCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleCard.swift; sourceTree = "<group>"; };
+		3393953805D85FD844EA1DDC /* Shapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shapes.swift; sourceTree = "<group>"; };
+		354545D943378E53A1B935B7 /* CaelynTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynTests.swift; sourceTree = "<group>"; };
+		3631FAF209987A1704C78F36 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		368EA8FCC339D47BDE93020F /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		3931C56DD039472FB7265FA2 /* SettingsPickerSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPickerSheets.swift; sourceTree = "<group>"; };
+		3D5D74DF250AA8A6396C3896 /* CyclePrediction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclePrediction.swift; sourceTree = "<group>"; };
+		3E04439EFC176289240A6888 /* GoalCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalCard.swift; sourceTree = "<group>"; };
+		3EE1504121970ACCEA336450 /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
+		42F6A57085360293469134B1 /* RemindersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersView.swift; sourceTree = "<group>"; };
+		43A27162A4340D1998A09B11 /* DayCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayCell.swift; sourceTree = "<group>"; };
+		4676439157E4C2C4A31806B7 /* PatternsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternsSection.swift; sourceTree = "<group>"; };
+		483D4ABE3B0FBDCFACE74186 /* NotificationRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationRouter.swift; sourceTree = "<group>"; };
+		4AFE9A76ACD4C8CB6B8CE0C9 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
+		4B35E72936365A18992EE8CC /* ProUpsellCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProUpsellCard.swift; sourceTree = "<group>"; };
+		4E98B3962F3C4B33A33C5001 /* PaywallTierCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallTierCard.swift; sourceTree = "<group>"; };
+		51F8759E4F031305F132899D /* DataStatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStatusCard.swift; sourceTree = "<group>"; };
+		5322159624E05FC0C7C1686B /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
+		53C42DDF815AFDFE00A7D214 /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
+		544E8077B17E70A1F5752069 /* CalendarMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMath.swift; sourceTree = "<group>"; };
+		55A9CD6A95C7EC0C76441783 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
+		55CF157977EC9D07CEDE4334 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		59064BE929C94D1B84DE947C /* HealthKitSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitSync.swift; sourceTree = "<group>"; };
+		590EF59CCF6828268AE024A3 /* CycleRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleRingView.swift; sourceTree = "<group>"; };
+		5A6D8A6D5E649BC3272BA4A4 /* BiometricService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricService.swift; sourceTree = "<group>"; };
+		5B5C57C3693134752F42ED43 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		5B8CB13185D631BA4005CD6C /* HomeHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeHeader.swift; sourceTree = "<group>"; };
+		5C4FFE6F4155280EEFBD7322 /* CaelynTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CaelynTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5F4166D3870A6F4C282B5832 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		60AD87ED1BAC8968B70FAE43 /* HomeCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCopy.swift; sourceTree = "<group>"; };
+		67133C802EE9BE664F6E291D /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		6ABB74AEF2C2F9EAD97CDA2C /* AppLockGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockGate.swift; sourceTree = "<group>"; };
+		6C4BC2802ED9E13B920ABEFD /* DayDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailSheet.swift; sourceTree = "<group>"; };
+		6CB27B600CFE9B63241AD672 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		6F67174E0AA8DF3F4111B5DF /* MonthGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthGridView.swift; sourceTree = "<group>"; };
+		716AADA33C2AA6BA1134DF22 /* ComponentGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentGallery.swift; sourceTree = "<group>"; };
+		7A923C9143914C0A18515A7F /* QuickActionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionButton.swift; sourceTree = "<group>"; };
+		7BBAE1207378ECD1DA48A5DE /* InsightsStatsGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsStatsGrid.swift; sourceTree = "<group>"; };
+		7C61F24B11915E63DD4E264C /* CycleEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleEntry.swift; sourceTree = "<group>"; };
+		7DCA3984C3998D72FA315625 /* DailyLogForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyLogForm.swift; sourceTree = "<group>"; };
+		7F3D9A2E9305840410E900DE /* AppURLs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppURLs.swift; sourceTree = "<group>"; };
+		820D9BF9B360C1A5531E053E /* CaelynUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynUITests.swift; sourceTree = "<group>"; };
+		884D8350457334717AFDE17B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		893A18A5E786299D456D8D29 /* CycleAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleAnalytics.swift; sourceTree = "<group>"; };
+		8C1F783DA3E9B4345CA306AC /* PredictionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictionEngine.swift; sourceTree = "<group>"; };
+		8ECDCA0268B520CF6DE71EE5 /* MoodChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodChip.swift; sourceTree = "<group>"; };
+		93D2C463E713B1341A1DDDCA /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
+		95030A62CE85285A1B7447CE /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
+		97F0CABBB7635B472536C64A /* InsightsCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsCharts.swift; sourceTree = "<group>"; };
+		9BBA80B3841E6E03E0EFB1EC /* OnboardingProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingProgress.swift; sourceTree = "<group>"; };
+		A00731802B5C8B96D6AC55E9 /* InsightCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightCard.swift; sourceTree = "<group>"; };
+		A804FDBB1CB616D607B89290 /* Caelyn.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Caelyn.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AC71E3A11A7D1A8CD036E7AC /* DesignSystemPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystemPreview.swift; sourceTree = "<group>"; };
+		B3E9BDBBD279D29A2A77C926 /* StatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatCard.swift; sourceTree = "<group>"; };
+		B5AE5BF45B9E75202940D8F7 /* PurchaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseService.swift; sourceTree = "<group>"; };
+		B8FBF952865F40EC744AF966 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		BD48D14EB120165091660899 /* InsightsEmptyState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsEmptyState.swift; sourceTree = "<group>"; };
+		C1D72FA6409165615CFC45E1 /* HomeMoodCheckIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeMoodCheckIn.swift; sourceTree = "<group>"; };
+		C5100528FE83F0873584CDBC /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
+		C7B8D0A8D8A1C1621780130A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
+		CEDF7284C85E89A58176F940 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		D237A741F754AC1F6FD0AC64 /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
+		D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
+		E2702E1D3675E82E5037E3F5 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		E2BF3402959D855BEA0096A3 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		E5B21C55B9209C096D76941E /* Color+Caelyn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Caelyn.swift"; sourceTree = "<group>"; };
+		E8095793F30CC64CF859BE7F /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		E88754596ACA60C51D4EC8D3 /* AppPreviewMask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPreviewMask.swift; sourceTree = "<group>"; };
+		EDCFC2DE6E44F2E39E83EB23 /* HomeHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeHeroCard.swift; sourceTree = "<group>"; };
+		EF78CFC55351ED7D33634AA0 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		F19182C4F23C467AC50DDED0 /* SettingsRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRows.swift; sourceTree = "<group>"; };
+		F217396A66FD507CDBD109BA /* HomeComingUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeComingUp.swift; sourceTree = "<group>"; };
+		F482876413250EE67CC8E266 /* PrivacyChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyChip.swift; sourceTree = "<group>"; };
+		F703D1FBCAA2E9C6A61BF8E4 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
+		F7110E218D7376F63A078A1C /* CaelynCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynCard.swift; sourceTree = "<group>"; };
+		F727008BDD9FE097F46B549E /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		FB2A3A73ABB750626A13958B /* InsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsView.swift; sourceTree = "<group>"; };
+		FCA40AC122A9C30B1AA5B101 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		FDA214E11FC745FFBCD83EC1 /* OnboardingScaffold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScaffold.swift; sourceTree = "<group>"; };
+		FEAD398D65E99ED782B4FA33 /* CaelynUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CaelynUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0CF20BC0545F616BDCA142EC /* App */ = {
+			isa = PBXGroup;
+			children = (
+				C7B8D0A8D8A1C1621780130A /* AppDelegate.swift */,
+				7F3D9A2E9305840410E900DE /* AppURLs.swift */,
+				0E24994FC37F88D50DE9B59B /* CaelynApp.swift */,
+				3631FAF209987A1704C78F36 /* ContentView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		228D0F7284D3D497828E3735 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				E8095793F30CC64CF859BE7F /* .gitkeep */,
+				CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */,
+				4AFE9A76ACD4C8CB6B8CE0C9 /* OnboardingStep.swift */,
+				0D48D4147BDA4F0E3B4942CB /* OnboardingSteps.swift */,
+				F703D1FBCAA2E9C6A61BF8E4 /* OnboardingViewModel.swift */,
+				6297D357EF566B30618C94F0 /* Components */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		22AD290C99CADE720191F32A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				0573AB74971CE763A3A4BD08 /* Assets.xcassets */,
+				884D8350457334717AFDE17B /* PrivacyInfo.xcprivacy */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		232605BA1569CD4174D1D6EF /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				01934B982642BD96A3984DF4 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		2ED30FF2F7BB66F3F42732E3 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				5B5C57C3693134752F42ED43 /* .gitkeep */,
+				5A6D8A6D5E649BC3272BA4A4 /* BiometricService.swift */,
+				893A18A5E786299D456D8D29 /* CycleAnalytics.swift */,
+				5322159624E05FC0C7C1686B /* ExportService.swift */,
+				2A45E9FE5A677D4562C59DE7 /* HealthKitService.swift */,
+				59064BE929C94D1B84DE947C /* HealthKitSync.swift */,
+				483D4ABE3B0FBDCFACE74186 /* NotificationRouter.swift */,
+				F727008BDD9FE097F46B549E /* NotificationService.swift */,
+				133DA567417FA320181DEB05 /* Persistence.swift */,
+				8C1F783DA3E9B4345CA306AC /* PredictionEngine.swift */,
+				B5AE5BF45B9E75202940D8F7 /* PurchaseService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		33B31EACEFDB832C944D7AF8 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				E2702E1D3675E82E5037E3F5 /* .gitkeep */,
+				E5B21C55B9209C096D76941E /* Color+Caelyn.swift */,
+				AC71E3A11A7D1A8CD036E7AC /* DesignSystemPreview.swift */,
+				C5100528FE83F0873584CDBC /* Shadows.swift */,
+				3393953805D85FD844EA1DDC /* Shapes.swift */,
+				D237A741F754AC1F6FD0AC64 /* Spacing.swift */,
+				5F4166D3870A6F4C282B5832 /* Typography.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		348398A965E73470FDC873BD /* Calendar */ = {
+			isa = PBXGroup;
+			children = (
+				0F4C4DF012FBD0A2568B5252 /* .gitkeep */,
+				544E8077B17E70A1F5752069 /* CalendarMath.swift */,
+				55CF157977EC9D07CEDE4334 /* CalendarView.swift */,
+				43A27162A4340D1998A09B11 /* DayCell.swift */,
+				6C4BC2802ED9E13B920ABEFD /* DayDetailSheet.swift */,
+				6F67174E0AA8DF3F4111B5DF /* MonthGridView.swift */,
+				29C32A52D52FD6E8FB154FCE /* MonthSummaryCard.swift */,
+			);
+			path = Calendar;
+			sourceTree = "<group>";
+		};
+		39AB51C6DFF8B4371C985737 /* CaelynTests */ = {
+			isa = PBXGroup;
+			children = (
+				354545D943378E53A1B935B7 /* CaelynTests.swift */,
+			);
+			path = CaelynTests;
+			sourceTree = "<group>";
+		};
+		3D84A90295DB5D6C472D76B4 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				23413D59226D3A1BBCDC7148 /* .gitkeep */,
+				95030A62CE85285A1B7447CE /* ExportView.swift */,
+				1525588F818995E2E60CF533 /* HealthKitConnectView.swift */,
+				42F6A57085360293469134B1 /* RemindersView.swift */,
+				3931C56DD039472FB7265FA2 /* SettingsPickerSheets.swift */,
+				F19182C4F23C467AC50DDED0 /* SettingsRows.swift */,
+				1324749F9ED0476DABEC79C3 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		485B5ABA57564F7C77FB885D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E2BF3402959D855BEA0096A3 /* .gitkeep */,
+				7C61F24B11915E63DD4E264C /* CycleEntry.swift */,
+				3D5D74DF250AA8A6396C3896 /* CyclePrediction.swift */,
+				55A9CD6A95C7EC0C76441783 /* Enums.swift */,
+				93D2C463E713B1341A1DDDCA /* UserProfile.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		4E5E4F83D4FD529FBFF79F39 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A804FDBB1CB616D607B89290 /* Caelyn.app */,
+				5C4FFE6F4155280EEFBD7322 /* CaelynTests.xctest */,
+				FEAD398D65E99ED782B4FA33 /* CaelynUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		58624629D4F78B6F0D20CEF2 /* Log */ = {
+			isa = PBXGroup;
+			children = (
+				294EA3EE854C87EEF4D2311A /* .gitkeep */,
+				7DCA3984C3998D72FA315625 /* DailyLogForm.swift */,
+				53C42DDF815AFDFE00A7D214 /* LogView.swift */,
+			);
+			path = Log;
+			sourceTree = "<group>";
+		};
+		6297D357EF566B30618C94F0 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				3E04439EFC176289240A6888 /* GoalCard.swift */,
+				9BBA80B3841E6E03E0EFB1EC /* OnboardingProgress.swift */,
+				FDA214E11FC745FFBCD83EC1 /* OnboardingScaffold.swift */,
+				3238D5E5DA356783A9A2BA1F /* ToggleCard.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		7B0900D7853516E002FA94E9 = {
+			isa = PBXGroup;
+			children = (
+				7B0FB055026A3276B28473FA /* Caelyn */,
+				39AB51C6DFF8B4371C985737 /* CaelynTests */,
+				A23CF008B9BBE106533A4FB5 /* CaelynUITests */,
+				4E5E4F83D4FD529FBFF79F39 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7B0FB055026A3276B28473FA /* Caelyn */ = {
+			isa = PBXGroup;
+			children = (
+				0CF20BC0545F616BDCA142EC /* App */,
+				EEE7CDCD19D0C0273D1F5F98 /* Components */,
+				BEE68D8479C3FAF40A96EE18 /* Mock */,
+				485B5ABA57564F7C77FB885D /* Models */,
+				232605BA1569CD4174D1D6EF /* Preview Content */,
+				22AD290C99CADE720191F32A /* Resources */,
+				2ED30FF2F7BB66F3F42732E3 /* Services */,
+				33B31EACEFDB832C944D7AF8 /* Theme */,
+				9E256F00934AF21D2E6680F7 /* Views */,
+			);
+			path = Caelyn;
+			sourceTree = "<group>";
+		};
+		8A0FACB43C04D115FC534B50 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				12EB370D7339101CB7E5FBC2 /* .gitkeep */,
+				F217396A66FD507CDBD109BA /* HomeComingUp.swift */,
+				60AD87ED1BAC8968B70FAE43 /* HomeCopy.swift */,
+				5B8CB13185D631BA4005CD6C /* HomeHeader.swift */,
+				EDCFC2DE6E44F2E39E83EB23 /* HomeHeroCard.swift */,
+				C1D72FA6409165615CFC45E1 /* HomeMoodCheckIn.swift */,
+				220787509170B408F4B03C6B /* HomePatternInsight.swift */,
+				074FFFF68AC191D9677D35DB /* HomeQuickActions.swift */,
+				6CB27B600CFE9B63241AD672 /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		8B8675012000BBA356BB6934 /* Insights */ = {
+			isa = PBXGroup;
+			children = (
+				B8FBF952865F40EC744AF966 /* .gitkeep */,
+				97F0CABBB7635B472536C64A /* InsightsCharts.swift */,
+				BD48D14EB120165091660899 /* InsightsEmptyState.swift */,
+				7BBAE1207378ECD1DA48A5DE /* InsightsStatsGrid.swift */,
+				FB2A3A73ABB750626A13958B /* InsightsView.swift */,
+				4676439157E4C2C4A31806B7 /* PatternsSection.swift */,
+			);
+			path = Insights;
+			sourceTree = "<group>";
+		};
+		966E3FBBF80A9E6C62377488 /* Premium */ = {
+			isa = PBXGroup;
+			children = (
+				FCA40AC122A9C30B1AA5B101 /* .gitkeep */,
+				4E98B3962F3C4B33A33C5001 /* PaywallTierCard.swift */,
+				368EA8FCC339D47BDE93020F /* PaywallView.swift */,
+				4B35E72936365A18992EE8CC /* ProUpsellCard.swift */,
+			);
+			path = Premium;
+			sourceTree = "<group>";
+		};
+		9E256F00934AF21D2E6680F7 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				CEDF7284C85E89A58176F940 /* MainTabView.swift */,
+				EF78CFC55351ED7D33634AA0 /* RootView.swift */,
+				348398A965E73470FDC873BD /* Calendar */,
+				8A0FACB43C04D115FC534B50 /* Home */,
+				8B8675012000BBA356BB6934 /* Insights */,
+				58624629D4F78B6F0D20CEF2 /* Log */,
+				C1E2CB47D312BBAA6D57EA17 /* Main */,
+				228D0F7284D3D497828E3735 /* Onboarding */,
+				966E3FBBF80A9E6C62377488 /* Premium */,
+				3D84A90295DB5D6C472D76B4 /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A23CF008B9BBE106533A4FB5 /* CaelynUITests */ = {
+			isa = PBXGroup;
+			children = (
+				820D9BF9B360C1A5531E053E /* CaelynUITests.swift */,
+				1627592A44213DFBF0ADE392 /* CaelynUITestsLaunchTests.swift */,
+			);
+			path = CaelynUITests;
+			sourceTree = "<group>";
+		};
+		BEE68D8479C3FAF40A96EE18 /* Mock */ = {
+			isa = PBXGroup;
+			children = (
+				67133C802EE9BE664F6E291D /* .gitkeep */,
+				3EE1504121970ACCEA336450 /* PreviewData.swift */,
+			);
+			path = Mock;
+			sourceTree = "<group>";
+		};
+		C1E2CB47D312BBAA6D57EA17 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				6ABB74AEF2C2F9EAD97CDA2C /* AppLockGate.swift */,
+				E88754596ACA60C51D4EC8D3 /* AppPreviewMask.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		EEE7CDCD19D0C0273D1F5F98 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				08F7B66C9C067BF416634B9E /* .gitkeep */,
+				29AD7A95A766A2973718AE3D /* CaelynButton.swift */,
+				F7110E218D7376F63A078A1C /* CaelynCard.swift */,
+				716AADA33C2AA6BA1134DF22 /* ComponentGallery.swift */,
+				590EF59CCF6828268AE024A3 /* CycleRingView.swift */,
+				51F8759E4F031305F132899D /* DataStatusCard.swift */,
+				0B3516961D449934550DCF93 /* Haptics.swift */,
+				A00731802B5C8B96D6AC55E9 /* InsightCard.swift */,
+				8ECDCA0268B520CF6DE71EE5 /* MoodChip.swift */,
+				F482876413250EE67CC8E266 /* PrivacyChip.swift */,
+				7A923C9143914C0A18515A7F /* QuickActionButton.swift */,
+				D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */,
+				B3E9BDBBD279D29A2A77C926 /* StatCard.swift */,
+				0ED36F8EF76DAB80A668C937 /* SymptomChip.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BD08FB6094F31D5E54CC0832 /* CaelynTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9BE4340E59DF08153306CA53 /* Build configuration list for PBXNativeTarget "CaelynTests" */;
+			buildPhases = (
+				2083116C77BEBECDAAA54065 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5F273894F3D64F2AA7D50DA0 /* PBXTargetDependency */,
+			);
+			name = CaelynTests;
+			packageProductDependencies = (
+			);
+			productName = CaelynTests;
+			productReference = 5C4FFE6F4155280EEFBD7322 /* CaelynTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C1665703BF459188400DA773 /* CaelynUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 01EB824E5304A6BD79A124AD /* Build configuration list for PBXNativeTarget "CaelynUITests" */;
+			buildPhases = (
+				656BD2A3CE3CE0BAB58723AF /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				265BD44FAC6416C60FBAAD53 /* PBXTargetDependency */,
+			);
+			name = CaelynUITests;
+			packageProductDependencies = (
+			);
+			productName = CaelynUITests;
+			productReference = FEAD398D65E99ED782B4FA33 /* CaelynUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		C37C4F45E7DB94E60ADA2B96 /* Caelyn */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 26C6BC972E172B93918C13A6 /* Build configuration list for PBXNativeTarget "Caelyn" */;
+			buildPhases = (
+				F57477FF5F7345BE1B4488A4 /* Sources */,
+				87448F3981F98349B1DA2D04 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Caelyn;
+			packageProductDependencies = (
+			);
+			productName = Caelyn;
+			productReference = A804FDBB1CB616D607B89290 /* Caelyn.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E2CB491CA4DC166464DDCF62 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					BD08FB6094F31D5E54CC0832 = {
+						DevelopmentTeam = 8VF49Q32QG;
+					};
+					C1665703BF459188400DA773 = {
+						DevelopmentTeam = 8VF49Q32QG;
+						TestTargetID = C37C4F45E7DB94E60ADA2B96;
+					};
+					C37C4F45E7DB94E60ADA2B96 = {
+						DevelopmentTeam = 8VF49Q32QG;
+					};
+				};
+			};
+			buildConfigurationList = A072AB8C3F27ED1CB9C95007 /* Build configuration list for PBXProject "Caelyn" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 7B0900D7853516E002FA94E9;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4E5E4F83D4FD529FBFF79F39 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C37C4F45E7DB94E60ADA2B96 /* Caelyn */,
+				BD08FB6094F31D5E54CC0832 /* CaelynTests */,
+				C1665703BF459188400DA773 /* CaelynUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		87448F3981F98349B1DA2D04 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7DBE433603812776A07CD9F5 /* Assets.xcassets in Resources */,
+				F3C14FB0136889C385D26B01 /* Preview Assets.xcassets in Resources */,
+				133751836219E19B8BB24B0A /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2083116C77BEBECDAAA54065 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		656BD2A3CE3CE0BAB58723AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6CA673EF60F6E08D1F1D4BB0 /* CaelynUITests.swift in Sources */,
+				692E4812E610E9093A97A8F0 /* CaelynUITestsLaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F57477FF5F7345BE1B4488A4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E0905B45C9B6DBBF071BE5D8 /* AppDelegate.swift in Sources */,
+				45D7233A755B333BD1199215 /* AppLockGate.swift in Sources */,
+				545420A041759717671D6019 /* AppPreviewMask.swift in Sources */,
+				5F745BA64C443BC266F66445 /* AppURLs.swift in Sources */,
+				E25279A0EFD42D53F2D1CAEF /* BiometricService.swift in Sources */,
+				AC374C70C11C05D3B5C002D4 /* CaelynApp.swift in Sources */,
+				58B3689F2054DF67F23594B9 /* CaelynButton.swift in Sources */,
+				7BDFA27E1EBA79E24E84F7EF /* CaelynCard.swift in Sources */,
+				AC5DA2BA4EAE6B7ED6191DED /* CalendarMath.swift in Sources */,
+				6D3293F70DFD8C6B2B7280B7 /* CalendarView.swift in Sources */,
+				036BA33CD4D86A7FBC7EB83A /* Color+Caelyn.swift in Sources */,
+				8365DE6D282CEB140AEA20BE /* ComponentGallery.swift in Sources */,
+				2769D9A192CDAF084FDB7688 /* ContentView.swift in Sources */,
+				7346A991F2E84C669EEC8729 /* CycleAnalytics.swift in Sources */,
+				D1475D3E5B70DAD2D5B3495E /* CycleEntry.swift in Sources */,
+				87C388F7E2B1DF57EA5EB394 /* CyclePrediction.swift in Sources */,
+				6C71D556C272156ADE20A629 /* CycleRingView.swift in Sources */,
+				CEFF825CB5AD92FDFA5B5816 /* DailyLogForm.swift in Sources */,
+				60CE2C6B72B2C3BC33887DC2 /* DataStatusCard.swift in Sources */,
+				BAFF08D9C8C782AA2497E59D /* DayCell.swift in Sources */,
+				68B19BD4A1651FC72243F58E /* DayDetailSheet.swift in Sources */,
+				E13765FA27B5002E4DEFF042 /* DesignSystemPreview.swift in Sources */,
+				62140E22137E9BFD253F7C3D /* Enums.swift in Sources */,
+				5C104A68E2609F5ECD9CFC95 /* ExportService.swift in Sources */,
+				4B39AAED1E1CF8F4249DFEAB /* ExportView.swift in Sources */,
+				E2791BFAB11145A765840272 /* GoalCard.swift in Sources */,
+				433BD4EC552A95D00B4B7F07 /* Haptics.swift in Sources */,
+				1C566289B10118DEA3ABDCFA /* HealthKitConnectView.swift in Sources */,
+				B54C125DD9E05A5CB548105D /* HealthKitService.swift in Sources */,
+				0C581E8B0DBDCFD8200EF13F /* HealthKitSync.swift in Sources */,
+				2B4851D91A1CD6DBB6C5296E /* HomeComingUp.swift in Sources */,
+				B2DAD96CCD4FE630BC6C8944 /* HomeCopy.swift in Sources */,
+				07E5A710DF8ECD1462E692D1 /* HomeHeader.swift in Sources */,
+				E3BD504097E951ABAFA21554 /* HomeHeroCard.swift in Sources */,
+				3ED93C314D3398057BF14BBC /* HomeMoodCheckIn.swift in Sources */,
+				94EF936F835F61CD2B65D964 /* HomePatternInsight.swift in Sources */,
+				D32410CB7EF599104D4AFAA4 /* HomeQuickActions.swift in Sources */,
+				6EE73517CCFF174B7DF6F843 /* HomeView.swift in Sources */,
+				30D0ECE98187C5E88F4B4FEF /* InsightCard.swift in Sources */,
+				F62CF1A517E50F8D1FBD5C69 /* InsightsCharts.swift in Sources */,
+				2630C7CF38701E169675A5A2 /* InsightsEmptyState.swift in Sources */,
+				EBD8A8A5883E9AD187D8C2E2 /* InsightsStatsGrid.swift in Sources */,
+				F30D5500E73F1BFBB2EF01FF /* InsightsView.swift in Sources */,
+				61B1000513AE1D2AC81ED400 /* LogView.swift in Sources */,
+				1F55F3C99335A109FF917A65 /* MainTabView.swift in Sources */,
+				14690102084C6BB10D47DA61 /* MonthGridView.swift in Sources */,
+				DDFD2FE65A7105E7154A3FFC /* MonthSummaryCard.swift in Sources */,
+				670A3218F030EAAF4D349B2D /* MoodChip.swift in Sources */,
+				17A3409231A1A3244C342F0E /* NotificationRouter.swift in Sources */,
+				E770FCFA78B811972499CE97 /* NotificationService.swift in Sources */,
+				3DB284FE2C8F763A6E0F9199 /* OnboardingFlow.swift in Sources */,
+				6BFC3C1CB1394B1520981C18 /* OnboardingProgress.swift in Sources */,
+				BFF497451E33CBC53ACCE00B /* OnboardingScaffold.swift in Sources */,
+				9793F7ACFFB971F837581A8D /* OnboardingStep.swift in Sources */,
+				661515C66A81E3DF7ABA7CE9 /* OnboardingSteps.swift in Sources */,
+				B1C2EAF40578A39A58085C5C /* OnboardingViewModel.swift in Sources */,
+				25564C308FDA9E6CB89F7542 /* PatternsSection.swift in Sources */,
+				EE6F1A175709790139DD31CF /* PaywallTierCard.swift in Sources */,
+				218A1D7F2C2FDC91289482A8 /* PaywallView.swift in Sources */,
+				EAFC9E788FEAD10FAEEC1901 /* Persistence.swift in Sources */,
+				30CB3F72A2205298FDF17583 /* PredictionEngine.swift in Sources */,
+				46D5AFC8BE254313ADAE3509 /* PreviewData.swift in Sources */,
+				BBC23E6131EC21D7AF843BFB /* PrivacyChip.swift in Sources */,
+				D3D093EDB66FE730C5A122D9 /* ProUpsellCard.swift in Sources */,
+				1252C4EA2C01E95C82D7AF42 /* PurchaseService.swift in Sources */,
+				403194B34DD4A2B53FADA0D2 /* QuickActionButton.swift in Sources */,
+				F90650B46E641B57CF766373 /* RemindersView.swift in Sources */,
+				903D408B317900DB6B1E13B4 /* RootView.swift in Sources */,
+				776A3C2C7F8086C9E1FB0D1D /* SectionHeader.swift in Sources */,
+				B1D468BAD909A0179142179E /* SettingsPickerSheets.swift in Sources */,
+				B12524314A6A32AE345D353D /* SettingsRows.swift in Sources */,
+				8F9FBACA1AB4B3CF19B97FFA /* SettingsView.swift in Sources */,
+				11FEBA53A510B9DFDBE35CFD /* Shadows.swift in Sources */,
+				8F40B2801D830BE5BD40BCED /* Shapes.swift in Sources */,
+				14FC48433AA3511A592FBFE6 /* Spacing.swift in Sources */,
+				DD549E00756CE802FF125BB9 /* StatCard.swift in Sources */,
+				79E714A8CB6876CD2F78846E /* SymptomChip.swift in Sources */,
+				126219ED6C31C5F6A97A5CAB /* ToggleCard.swift in Sources */,
+				7BAFF729C4DBF3F64901E1D1 /* Typography.swift in Sources */,
+				DE3270435FCD973820713D5C /* UserProfile.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		265BD44FAC6416C60FBAAD53 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C37C4F45E7DB94E60ADA2B96 /* Caelyn */;
+			targetProxy = EA9D9E43630FBACF3BC3D01B /* PBXContainerItemProxy */;
+		};
+		5F273894F3D64F2AA7D50DA0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C37C4F45E7DB94E60ADA2B96 /* Caelyn */;
+			targetProxy = 57B0807CEA3945CC86D4867F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		229AB72E30C978E9A869FDD8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rajeshpanta.caelyn.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Caelyn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caelyn";
+			};
+			name = Release;
+		};
+		28BCC7A53FD17DCEE3D0E43F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rajeshpanta.caelyn.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Caelyn;
+			};
+			name = Release;
+		};
+		3A0F3642ED12D7F49515E91F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 8VF49Q32QG;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		7BA5138F39EE15C1CBC8F81E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_ASSET_PATHS = "\"Caelyn/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rajeshpanta.caelyn;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9EB938E4C41F71264FCD102D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_ASSET_PATHS = "\"Caelyn/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rajeshpanta.caelyn;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C3D5586CABED8855BBFB52BA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rajeshpanta.caelyn.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Caelyn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caelyn";
+			};
+			name = Debug;
+		};
+		CC95AD7D139F062B29F30D4A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.rajeshpanta.caelyn.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Caelyn;
+			};
+			name = Debug;
+		};
+		E76ACCAEA5DA736028CCC81E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 8VF49Q32QG;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		01EB824E5304A6BD79A124AD /* Build configuration list for PBXNativeTarget "CaelynUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CC95AD7D139F062B29F30D4A /* Debug */,
+				28BCC7A53FD17DCEE3D0E43F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		26C6BC972E172B93918C13A6 /* Build configuration list for PBXNativeTarget "Caelyn" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9EB938E4C41F71264FCD102D /* Debug */,
+				7BA5138F39EE15C1CBC8F81E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9BE4340E59DF08153306CA53 /* Build configuration list for PBXNativeTarget "CaelynTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C3D5586CABED8855BBFB52BA /* Debug */,
+				229AB72E30C978E9A869FDD8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A072AB8C3F27ED1CB9C95007 /* Build configuration list for PBXProject "Caelyn" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E76ACCAEA5DA736028CCC81E /* Debug */,
+				3A0F3642ED12D7F49515E91F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E2CB491CA4DC166464DDCF62 /* Project object */;
+}

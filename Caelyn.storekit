@@ -1,0 +1,72 @@
+{
+  "identifier" : "F8B1D2E3",
+  "nonRenewingSubscriptions" : [],
+  "products" : [],
+  "settings" : {
+    "_compatibilityTimeRate" : 1,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : []
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21525751",
+      "localizations" : [
+        {
+          "description" : "Caelyn Pro unlocks advanced insights, PDF reports, themes, and yearly summaries.",
+          "displayName" : "Caelyn Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "name" : "Caelyn Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "3.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "21525752",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Monthly subscription to Caelyn Pro.",
+              "displayName" : "Caelyn Pro · Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.rajeshpanta.caelyn.pro.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Caelyn Pro Monthly",
+          "subscriptionGroupID" : "21525751",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "19.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "21525753",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Yearly subscription to Caelyn Pro. Best value.",
+              "displayName" : "Caelyn Pro · Yearly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.rajeshpanta.caelyn.pro.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Caelyn Pro Yearly",
+          "subscriptionGroupID" : "21525751",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

@@ -1,9 +1,9 @@
-name: Mavie
+name: Caelyn
 options:
   # Bundle ID prefix — needs to be unique to your Apple Developer team.
   # If you're on a paid Apple Developer Program, you can use your own
   # reverse-domain (e.g. com.yourdomain).
-  bundleIdPrefix: com.smile
+  bundleIdPrefix: com.rajeshpanta
   deploymentTarget:
     iOS: "17.0"
   developmentLanguage: en
@@ -13,33 +13,41 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "1.0.1"
     CURRENT_PROJECT_VERSION: 1
-    DEVELOPMENT_TEAM: ""
+    DEVELOPMENT_TEAM: "8VF49Q32QG"
 
 targets:
-  Mavie:
+  Caelyn:
     type: application
     platform: iOS
     sources:
-      - path: Mavie
-    # HealthKit capability disabled by default because it requires:
+      - path: Caelyn
+    # ────────────────────────────────────────────────────────────────────
+    # HealthKit setup — TWO BLOCKS MUST BE UNCOMMENTED TOGETHER
+    # ────────────────────────────────────────────────────────────────────
+    # HealthKit is disabled by default because it requires:
     #   1. A paid Apple Developer Program membership ($99/year)
     #   2. The App ID registered in developer.apple.com with HealthKit enabled
     #   3. A provisioning profile that includes the HealthKit entitlement
-    # When you're ready, uncomment the `entitlements:` block below and
-    # uncomment the two NSHealth* INFOPLIST keys further down. The
-    # HealthKit code in Services/ stays in place either way.
+    #
+    # To enable, you MUST uncomment BOTH of the following:
+    #   (A) the `entitlements:` block immediately below
+    #   (B) the two `INFOPLIST_KEY_NSHealth*` keys further down in `settings.base`
+    # If you uncomment only (A), the app will crash on first HealthKit auth
+    # call with "missing usage description." If you uncomment only (B), the
+    # entitlement isn't granted and HealthKit calls silently no-op.
+    # The HealthKit code in Services/ stays in place either way.
     #
     # entitlements:
-    #   path: Mavie/Mavie.entitlements
+    #   path: Caelyn/Caelyn.entitlements
     #   properties:
     #     com.apple.developer.healthkit: true
     #     com.apple.developer.healthkit.access: []
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.smile.Mavie
-        DEVELOPMENT_ASSET_PATHS: '"Mavie/Preview Content"'
+        PRODUCT_BUNDLE_IDENTIFIER: com.rajeshpanta.caelyn
+        DEVELOPMENT_ASSET_PATHS: '"Caelyn/Preview Content"'
         ENABLE_PREVIEWS: YES
         TARGETED_DEVICE_FAMILY: "1,2"
         SUPPORTS_MACCATALYST: NO
@@ -52,57 +60,59 @@ targets:
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
-        INFOPLIST_KEY_NSFaceIDUsageDescription: "Mavie uses Face ID to keep your cycle data private."
-        # HealthKit usage strings — uncomment when re-enabling HealthKit:
-        # INFOPLIST_KEY_NSHealthShareUsageDescription: "Mavie reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync."
-        # INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Mavie writes your menstrual flow and symptoms to Apple Health when you choose to."
+        INFOPLIST_KEY_CFBundleDisplayName: "Caelyn"
+        INFOPLIST_KEY_NSFaceIDUsageDescription: "Caelyn uses Face ID to keep your cycle data private."
+        # HealthKit usage strings (block B) — MUST be uncommented together
+        # with the `entitlements:` block above. See note at top of this target.
+        # INFOPLIST_KEY_NSHealthShareUsageDescription: "Caelyn reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync."
+        # INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to."
         SWIFT_EMIT_LOC_STRINGS: YES
 
-  MavieTests:
+  CaelynTests:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - path: MavieTests
+      - path: CaelynTests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.smile.MavieTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.rajeshpanta.caelyn.tests
         BUNDLE_LOADER: "$(TEST_HOST)"
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Mavie.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Mavie"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Caelyn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caelyn"
         GENERATE_INFOPLIST_FILE: YES
     dependencies:
-      - target: Mavie
+      - target: Caelyn
 
-  MavieUITests:
+  CaelynUITests:
     type: bundle.ui-testing
     platform: iOS
     sources:
-      - path: MavieUITests
+      - path: CaelynUITests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.smile.MavieUITests
-        TEST_TARGET_NAME: Mavie
+        PRODUCT_BUNDLE_IDENTIFIER: com.rajeshpanta.caelyn.uitests
+        TEST_TARGET_NAME: Caelyn
         GENERATE_INFOPLIST_FILE: YES
     dependencies:
-      - target: Mavie
+      - target: Caelyn
 
 schemes:
-  Mavie:
+  Caelyn:
     build:
       targets:
-        Mavie: all
-        MavieTests: [test]
-        MavieUITests: [test]
+        Caelyn: all
+        CaelynTests: [test]
+        CaelynUITests: [test]
     test:
       config: Debug
       targets:
-        - MavieTests
-        - MavieUITests
+        - CaelynTests
+        - CaelynUITests
     run:
       config: Debug
       # The .storekit lives at the project root, OUTSIDE the source path,
       # so it is NOT bundled into Release/TestFlight builds. It is used only
       # when running locally from Xcode against the Simulator. Release and
       # TestFlight always talk to real App Store / Sandbox StoreKit.
-      storeKitConfiguration: Mavie.storekit
+      storeKitConfiguration: Caelyn.storekit
     archive:
       config: Release
