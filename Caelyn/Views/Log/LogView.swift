@@ -42,6 +42,8 @@ struct LogView: View {
                 .padding(.horizontal, CaelynSpacing.lg)
                 .padding(.top, CaelynSpacing.md)
                 .padding(.bottom, CaelynSpacing.xl)
+                .caelynContentWidth()
+                .frame(maxWidth: .infinity)
             }
             .background(CaelynColor.backgroundCream.ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)

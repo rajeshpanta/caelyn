@@ -6,8 +6,15 @@ struct InsightsStatsGrid: View {
     let cycleVariation: Int
     let daysLoggedRecent: Int
 
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+
+    private var columns: [GridItem] {
+        let count = hSizeClass == .regular ? 4 : 2
+        return Array(repeating: GridItem(.flexible()), count: count)
+    }
+
     var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: CaelynSpacing.sm) {
+        LazyVGrid(columns: columns, spacing: CaelynSpacing.sm) {
             StatCard(value: "\(avgCycleLength)", label: "Avg cycle", unit: "days")
             StatCard(value: "\(avgPeriodLength)", label: "Avg period", unit: "days")
             StatCard(

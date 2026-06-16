@@ -1,4 +1,5 @@
 import CoreGraphics
+import SwiftUI
 
 enum CaelynSpacing {
     static let xxs: CGFloat = 4
@@ -8,6 +9,19 @@ enum CaelynSpacing {
     static let lg:  CGFloat = 24
     static let xl:  CGFloat = 32
     static let xxl: CGFloat = 48
+}
+
+/// Maximum readable content width — applied on iPad to keep scroll content
+/// from stretching uncomfortably wide. Apply via `.caelynContentWidth()`.
+enum CaelynLayout {
+    static let maxContentWidth: CGFloat = 680
+}
+
+extension View {
+    /// Centers content with a max readable width on iPad; full width on iPhone.
+    func caelynContentWidth() -> some View {
+        self.frame(maxWidth: CaelynLayout.maxContentWidth)
+    }
 }
 
 /// Sizes for circular icon backgrounds (e.g. row leading icons, hero icons).

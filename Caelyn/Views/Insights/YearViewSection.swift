@@ -6,6 +6,8 @@ struct YearViewSection: View {
     let isPro: Bool
     var onUpgrade: () -> Void = {}
 
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+
     private var cal: Calendar { Calendar.current }
     private var firstDayOfWeek: Int { profile?.firstDayOfWeek ?? cal.firstWeekday }
 
@@ -26,7 +28,10 @@ struct YearViewSection: View {
 
             let months = isPro ? monthsToShow : Array(monthsToShow.suffix(3))
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: CaelynSpacing.md) {
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible()), count: hSizeClass == .regular ? 3 : 2),
+                spacing: CaelynSpacing.md
+            ) {
                 ForEach(months, id: \.self) { month in
                     MiniMonthView(month: month, entries: entries, profile: profile, firstDayOfWeek: firstDayOfWeek)
                 }
