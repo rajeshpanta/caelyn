@@ -101,6 +101,7 @@
 		D2D1626B36290421AEC9C1E5 /* OnboardingAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870D1AB3C46C174650091279 /* OnboardingAnimations.swift */; };
 		D32410CB7EF599104D4AFAA4 /* HomeQuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 074FFFF68AC191D9677D35DB /* HomeQuickActions.swift */; };
 		D3D093EDB66FE730C5A122D9 /* ProUpsellCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B35E72936365A18992EE8CC /* ProUpsellCard.swift */; };
+		DA44185948642E71F6426224 /* ScreenshotSeeder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B18D49C63DA9E976C31F2053 /* ScreenshotSeeder.swift */; };
 		DD549E00756CE802FF125BB9 /* StatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E9BDBBD279D29A2A77C926 /* StatCard.swift */; };
 		DDFD2FE65A7105E7154A3FFC /* MonthSummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29C32A52D52FD6E8FB154FCE /* MonthSummaryCard.swift */; };
 		DE3270435FCD973820713D5C /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93D2C463E713B1341A1DDDCA /* UserProfile.swift */; };
@@ -285,6 +286,7 @@
 		AA4BD2A286B2E8E8E9657261 /* CaelynWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynWidgetBundle.swift; sourceTree = "<group>"; };
 		AC71E3A11A7D1A8CD036E7AC /* DesignSystemPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystemPreview.swift; sourceTree = "<group>"; };
 		B0C166CBDCCBDA1702DCEE16 /* CaelynWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CaelynWatch.entitlements; sourceTree = "<group>"; };
+		B18D49C63DA9E976C31F2053 /* ScreenshotSeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotSeeder.swift; sourceTree = "<group>"; };
 		B3E9BDBBD279D29A2A77C926 /* StatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatCard.swift; sourceTree = "<group>"; };
 		B5AE5BF45B9E75202940D8F7 /* PurchaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseService.swift; sourceTree = "<group>"; };
 		B8FBF952865F40EC744AF966 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -628,6 +630,7 @@
 			children = (
 				67133C802EE9BE664F6E291D /* .gitkeep */,
 				3EE1504121970ACCEA336450 /* PreviewData.swift */,
+				B18D49C63DA9E976C31F2053 /* ScreenshotSeeder.swift */,
 			);
 			path = Mock;
 			sourceTree = "<group>";
@@ -948,6 +951,7 @@
 				F6A10B30D141D8F2E0D57AAB /* RatingService.swift in Sources */,
 				F90650B46E641B57CF766373 /* RemindersView.swift in Sources */,
 				903D408B317900DB6B1E13B4 /* RootView.swift in Sources */,
+				DA44185948642E71F6426224 /* ScreenshotSeeder.swift in Sources */,
 				776A3C2C7F8086C9E1FB0D1D /* SectionHeader.swift in Sources */,
 				B1D468BAD909A0179142179E /* SettingsPickerSheets.swift in Sources */,
 				B12524314A6A32AE345D353D /* SettingsRows.swift in Sources */,

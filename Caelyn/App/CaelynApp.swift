@@ -8,6 +8,8 @@ struct CaelynApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
 
+    private static let isScreenshotMode = CommandLine.arguments.contains("--screenshot-mode")
+
     var body: some Scene {
         WindowGroup {
             AppLockGate {
@@ -16,13 +18,18 @@ struct CaelynApp: App {
                     .syncWidgetData()
             }
             .task {
-                await PurchaseService.shared.loadProducts()
-                WatchBridgeService.shared.activate()
+                if Self.isScreenshotMode {
+                    // Override Pro status for screenshot capture so Pro charts are visible.
+                    PurchaseService.shared.overridePro(true)
+                } else {
+                    await PurchaseService.shared.loadProducts()
+                    WatchBridgeService.shared.activate()
+                }
             }
         }
-        .modelContainer(Persistence.live)
+        .modelContainer(Self.isScreenshotMode ? Persistence.screenshot : Persistence.live)
         .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .active {
+            if newPhase == .active && !Self.isScreenshotMode {
                 Task { await NotificationService.syncFromLiveStore() }
                 Task { await PurchaseService.shared.loadProducts() }
             }

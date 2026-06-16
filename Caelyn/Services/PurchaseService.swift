@@ -37,8 +37,12 @@ final class PurchaseService {
 
     // MARK: - Derived state
 
-    var isPro: Bool { !purchasedProductIDs.isEmpty }
+    private var proOverride: Bool? = nil
+    var isPro: Bool { proOverride ?? !purchasedProductIDs.isEmpty }
     var isLifetimePro: Bool { purchasedProductIDs.contains(ProductID.lifetime.rawValue) }
+
+    /// Forces isPro to a fixed value — used in screenshot mode only.
+    func overridePro(_ value: Bool) { proOverride = value }
 
     var monthlyProduct:  Product? { products.first(where: { $0.id == ProductID.monthly.rawValue  }) }
     var yearlyProduct:   Product? { products.first(where: { $0.id == ProductID.yearly.rawValue   }) }

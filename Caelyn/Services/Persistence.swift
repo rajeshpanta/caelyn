@@ -76,4 +76,20 @@ enum Persistence {
             fatalError("Failed to create preview ModelContainer: \(error)")
         }
     }()
+
+    /// In-memory container seeded with rich App Store screenshot data.
+    static let screenshot: ModelContainer = {
+        let config = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: true,
+            cloudKitDatabase: .none
+        )
+        do {
+            let container = try ModelContainer(for: schema, configurations: [config])
+            ScreenshotSeeder.populate(container.mainContext)
+            return container
+        } catch {
+            fatalError("Failed to create screenshot ModelContainer: \(error)")
+        }
+    }()
 }
