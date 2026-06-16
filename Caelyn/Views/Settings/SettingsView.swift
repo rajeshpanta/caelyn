@@ -163,10 +163,12 @@ struct SettingsView: View {
                             .foregroundStyle(CaelynColor.successSage)
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Caelyn Pro · Subscribed")
+                        Text(purchase.isLifetimePro ? "Caelyn Pro · Lifetime" : "Caelyn Pro · Active")
                             .font(CaelynFont.body.weight(.medium))
                             .foregroundStyle(CaelynColor.deepPlumText)
-                        Text("Manage your subscription in iOS Settings.")
+                        Text(purchase.isLifetimePro
+                             ? "One-time purchase — no subscription needed."
+                             : "Manage your subscription in iOS Settings.")
                             .font(CaelynFont.caption)
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                     }

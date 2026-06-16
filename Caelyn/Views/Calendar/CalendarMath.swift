@@ -50,9 +50,10 @@ enum CalendarMath {
     /// Weekday symbols ordered by firstDayOfWeek (e.g. ["S","M","T","W","T","F","S"]).
     static func weekdaySymbols(firstDayOfWeek: Int = 1) -> [String] {
         var cal = calendar
-        cal.firstWeekday = firstDayOfWeek
+        let safeFirst = max(1, min(7, firstDayOfWeek))
+        cal.firstWeekday = safeFirst
         let symbols = cal.veryShortStandaloneWeekdaySymbols
-        let offset = firstDayOfWeek - 1
+        let offset = safeFirst - 1
         return Array(symbols[offset...] + symbols[..<offset])
     }
 

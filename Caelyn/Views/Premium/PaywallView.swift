@@ -316,7 +316,7 @@ struct PaywallView: View {
     // MARK: - Empty / loading states
 
     private var productsAreReady: Bool {
-        purchase.monthlyProduct != nil && purchase.yearlyProduct != nil
+        purchase.monthlyProduct != nil || purchase.yearlyProduct != nil || purchase.lifetimeProduct != nil
     }
 
     private var loadingState: some View {

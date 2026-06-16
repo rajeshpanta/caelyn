@@ -15,10 +15,6 @@ struct HomeHeroCard: View {
     var body: some View {
         VStack(spacing: CaelynSpacing.md) {
             phaseBadge
-                .sheet(isPresented: $showingPhaseGuide) {
-                    PhaseGuideView(phase: phase)
-                        .presentationDetents([.large])
-                }
             CycleRingView(
                 cycleDay: cycleDay,
                 cycleLength: cycleLength,
@@ -89,6 +85,10 @@ struct HomeHeroCard: View {
                 .stroke(phase.accentColor.opacity(0.15), lineWidth: 1)
         )
         .caelynShadow(.card)
+        .sheet(isPresented: $showingPhaseGuide) {
+            PhaseGuideView(phase: phase)
+                .presentationDetents([.large])
+        }
     }
 
     private var phaseBadge: some View {

@@ -37,6 +37,7 @@ struct LogView: View {
                     dateSelectorRow
                     header
                     DailyLogForm(date: selectedDate)
+                        .id(selectedDate)
                 }
                 .padding(.horizontal, CaelynSpacing.lg)
                 .padding(.top, CaelynSpacing.md)

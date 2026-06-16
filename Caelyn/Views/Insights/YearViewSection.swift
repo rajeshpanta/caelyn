@@ -76,10 +76,13 @@ private struct MiniMonthView: View {
     }
 
     private var entryMap: [Date: CycleEntry] {
-        Dictionary(uniqueKeysWithValues: entries.compactMap { entry -> (Date, CycleEntry)? in
-            let d = cal.startOfDay(for: entry.date)
-            return (d, entry)
-        })
+        Dictionary(
+            entries.compactMap { entry -> (Date, CycleEntry)? in
+                let d = cal.startOfDay(for: entry.date)
+                return (d, entry)
+            },
+            uniquingKeysWith: { first, _ in first }
+        )
     }
 
     private var nextPeriodStart: Date? {

@@ -135,8 +135,23 @@ struct HomeView: View {
                     onAddNote:     { showingLogSheet = true }
                 )
                 .sheet(isPresented: $showingLogSheet) {
-                    DailyLogForm(date: today)
-                        .presentationDetents([.large])
+                    NavigationStack {
+                        ScrollView {
+                            DailyLogForm(date: today)
+                                .padding(CaelynSpacing.lg)
+                        }
+                        .background(CaelynColor.backgroundCream.ignoresSafeArea())
+                        .navigationTitle("Today's Log")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button("Done") { showingLogSheet = false }
+                                    .font(CaelynFont.body.weight(.semibold))
+                                    .foregroundStyle(CaelynColor.primaryPlum)
+                            }
+                        }
+                    }
+                    .presentationDetents([.large])
                 }
 
                 HomeStreakCard(

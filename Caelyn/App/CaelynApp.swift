@@ -42,10 +42,7 @@ struct CaelynApp: App {
 
 private struct ApplyCaelynThemeModifier: ViewModifier {
     func body(content: Content) -> some View {
-        // Locked to light mode until Phase 17 ships dark-variant tokens for the
-        // cream/blush/lavender palette. The AppTheme enum and picker remain
-        // wired so we can flip this on without re-plumbing.
-        content.preferredColorScheme(.light)
+        content
     }
 }
 

@@ -140,6 +140,7 @@ struct BirthControlView: View {
     }
 
     private func save() {
+        modelContext.saveOrLog()
         Task { await NotificationService.syncFromLiveStore() }
     }
 }

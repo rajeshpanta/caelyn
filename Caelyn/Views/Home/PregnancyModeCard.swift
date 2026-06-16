@@ -13,7 +13,7 @@ struct PregnancyModeCard: View {
 
     private var weeksPregnant: Int {
         let days = cal.dateComponents([.day], from: conceptionDate, to: today).day ?? 0
-        return max(0, days / 7)
+        return max(0, min(42, days / 7))
     }
 
     private var daysRemaining: Int {

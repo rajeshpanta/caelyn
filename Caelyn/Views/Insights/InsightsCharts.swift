@@ -10,32 +10,36 @@ struct CycleLengthChart: View {
         VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
             chartHeader(title: "Cycle length", subtitle: "Recent cycles")
             CaelynCard(padding: CaelynSpacing.md) {
-                Chart(series) { point in
-                    LineMark(
-                        x: .value("Cycle", point.cycleStartDate),
-                        y: .value("Length", point.length)
-                    )
-                    .foregroundStyle(CaelynColor.primaryPlum)
-                    .interpolationMethod(.monotone)
-                    .lineStyle(StrokeStyle(lineWidth: 2.5))
+                if series.isEmpty {
+                    emptyChartCopy("No cycle data yet.")
+                } else {
+                    Chart(series) { point in
+                        LineMark(
+                            x: .value("Cycle", point.cycleStartDate),
+                            y: .value("Length", point.length)
+                        )
+                        .foregroundStyle(CaelynColor.primaryPlum)
+                        .interpolationMethod(.monotone)
+                        .lineStyle(StrokeStyle(lineWidth: 2.5))
 
-                    PointMark(
-                        x: .value("Cycle", point.cycleStartDate),
-                        y: .value("Length", point.length)
-                    )
-                    .foregroundStyle(CaelynColor.primaryPlum)
-                    .symbolSize(60)
+                        PointMark(
+                            x: .value("Cycle", point.cycleStartDate),
+                            y: .value("Length", point.length)
+                        )
+                        .foregroundStyle(CaelynColor.primaryPlum)
+                        .symbolSize(60)
+                    }
+                    .chartYScale(domain: yDomain)
+                    .chartYAxis { AxisMarks(position: .leading) { _ in
+                        AxisGridLine().foregroundStyle(CaelynColor.deepPlumText.opacity(0.06))
+                        AxisValueLabel().foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                    } }
+                    .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) { value in
+                        AxisValueLabel(format: .dateTime.month(.abbreviated))
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                    } }
+                    .frame(height: 160)
                 }
-                .chartYScale(domain: yDomain)
-                .chartYAxis { AxisMarks(position: .leading) { _ in
-                    AxisGridLine().foregroundStyle(CaelynColor.deepPlumText.opacity(0.06))
-                    AxisValueLabel().foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
-                } }
-                .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) { value in
-                    AxisValueLabel(format: .dateTime.month(.abbreviated))
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
-                } }
-                .frame(height: 160)
             }
         }
     }
@@ -56,30 +60,34 @@ struct PeriodLengthChart: View {
         VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
             chartHeader(title: "Period length", subtitle: "Recent cycles")
             CaelynCard(padding: CaelynSpacing.md) {
-                Chart(series) { point in
-                    BarMark(
-                        x: .value("Cycle", point.cycleStartDate, unit: .month),
-                        y: .value("Length", point.length),
-                        width: .ratio(0.55)
-                    )
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [CaelynColor.softRose, CaelynColor.alertRose.opacity(0.85)],
-                            startPoint: .bottom,
-                            endPoint: .top
+                if series.isEmpty {
+                    emptyChartCopy("No period data yet.")
+                } else {
+                    Chart(series) { point in
+                        BarMark(
+                            x: .value("Cycle", point.cycleStartDate, unit: .month),
+                            y: .value("Length", point.length),
+                            width: .ratio(0.55)
                         )
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [CaelynColor.softRose, CaelynColor.alertRose.opacity(0.85)],
+                                startPoint: .bottom,
+                                endPoint: .top
+                            )
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    }
+                    .chartYAxis { AxisMarks(position: .leading) { _ in
+                        AxisGridLine().foregroundStyle(CaelynColor.deepPlumText.opacity(0.06))
+                        AxisValueLabel().foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                    } }
+                    .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) { value in
+                        AxisValueLabel(format: .dateTime.month(.abbreviated))
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                    } }
+                    .frame(height: 160)
                 }
-                .chartYAxis { AxisMarks(position: .leading) { _ in
-                    AxisGridLine().foregroundStyle(CaelynColor.deepPlumText.opacity(0.06))
-                    AxisValueLabel().foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
-                } }
-                .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) { value in
-                    AxisValueLabel(format: .dateTime.month(.abbreviated))
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
-                } }
-                .frame(height: 160)
             }
         }
     }

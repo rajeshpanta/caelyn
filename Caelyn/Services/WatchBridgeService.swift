@@ -48,27 +48,24 @@ extension WatchBridgeService: WCSessionDelegate {
         let pain  = info["pain"] as? Int
         let mood  = info["mood"] as? String
 
-        DispatchQueue.main.async {
-            Task { @MainActor in
-                guard let container = try? ModelContainer(for: CycleEntry.self, UserProfile.self) else { return }
-                let context = container.mainContext
-                let cal = Calendar.current
-                let target = cal.startOfDay(for: date)
-                let descriptor = FetchDescriptor<CycleEntry>(
-                    predicate: #Predicate { $0.date == target }
-                )
-                let existing = (try? context.fetch(descriptor))?.first
-                let entry = existing ?? {
-                    let e = CycleEntry(date: date)
-                    context.insert(e)
-                    return e
-                }()
-                if let f = flow, let level = FlowLevel(rawValue: f) { entry.flow = level }
-                if let p = pain { entry.pain = p }
-                if let m = mood, let moodVal = Mood(rawValue: m) { entry.mood = moodVal }
-                entry.updatedAt = .now
-                try? context.save()
-            }
+        Task { @MainActor in
+            let context = Persistence.live.mainContext
+            let cal = Calendar.current
+            let target = cal.startOfDay(for: date)
+            let descriptor = FetchDescriptor<CycleEntry>(
+                predicate: #Predicate { $0.date == target }
+            )
+            let existing = (try? context.fetch(descriptor))?.first
+            let entry = existing ?? {
+                let e = CycleEntry(date: date)
+                context.insert(e)
+                return e
+            }()
+            if let f = flow, let level = FlowLevel(rawValue: f) { entry.flow = level }
+            if let p = pain { entry.pain = p }
+            if let m = mood, let moodVal = Mood(rawValue: m) { entry.mood = moodVal }
+            entry.updatedAt = .now
+            context.saveOrLog()
         }
     }
 }

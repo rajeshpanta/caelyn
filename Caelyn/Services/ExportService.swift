@@ -105,9 +105,9 @@ enum ExportService {
             ctx.beginPage()
 
             drawReportHeader(page: &page, range: range, ctx: ctx.cgContext)
-            drawClinicalSummary(page: &page, entries: entries, cycles: cycles, profile: profile, ctx: ctx.cgContext)
-            drawCycleTimeline(page: &page, cycles: cycles, ctx: ctx.cgContext)
-            drawSymptomBarChart(page: &page, entries: entries, ctx: ctx.cgContext)
+            drawClinicalSummary(page: &page, entries: entries, cycles: cycles, profile: profile, ctx: ctx)
+            drawCycleTimeline(page: &page, cycles: cycles, ctx: ctx)
+            drawSymptomBarChart(page: &page, entries: entries, ctx: ctx)
             drawEntryTable(page: &page, entries: entries, ctx: ctx)
             if includeNotes { drawNotes(page: &page, entries: entries, ctx: ctx) }
             drawFooter(page: &page, ctx: ctx.cgContext)
@@ -184,7 +184,7 @@ enum ExportService {
 
     // MARK: - Clinical Summary
 
-    private static func drawClinicalSummary(page: inout PDFPageContext, entries: [CycleEntry], cycles: [Cycle], profile: UserProfile?, ctx: CGContext) {
+    private static func drawClinicalSummary(page: inout PDFPageContext, entries: [CycleEntry], cycles: [Cycle], profile: UserProfile?, ctx: UIGraphicsPDFRendererContext) {
         guard !cycles.isEmpty else { return }
         let avgCycle  = PredictionEngine.averageCycleLength(of: cycles, fallback: profile?.averageCycleLength ?? 28)
         let avgPeriod = PredictionEngine.averagePeriodLength(of: cycles, fallback: profile?.averagePeriodLength ?? 5)
@@ -197,7 +197,7 @@ enum ExportService {
         case .irregular(let r): regularityText = "Irregular — \(r.rawValue)"
         }
 
-        drawSectionHeader("Clinical Summary", page: &page, ctx: ctx)
+        drawSectionHeader("Clinical Summary", page: &page, ctx: ctx.cgContext)
 
         let rows: [(label: String, value: String, note: String?)] = [
             ("Average cycle length", "\(avgCycle) days", "Normal: 21–35 days"),
@@ -224,16 +224,17 @@ enum ExportService {
             page.advance(17)
         }
         page.advance(8)
-        drawDivider(page: &page, ctx: ctx)
+        drawDivider(page: &page, ctx: ctx.cgContext)
     }
 
     // MARK: - Cycle Timeline
 
-    private static func drawCycleTimeline(page: inout PDFPageContext, cycles: [Cycle], ctx: CGContext) {
+    private static func drawCycleTimeline(page: inout PDFPageContext, cycles: [Cycle], ctx: UIGraphicsPDFRendererContext) {
+        let cgCtx = ctx.cgContext
         guard cycles.count >= 1 else { return }
         if page.y > page.contentBottom - 80 { breakPage(page: &page, ctx: ctx) }
 
-        drawSectionHeader("Cycle Timeline", page: &page, ctx: ctx)
+        drawSectionHeader("Cycle Timeline", page: &page, ctx: cgCtx)
 
         let barH: CGFloat = 12
         let spacing: CGFloat = 6
@@ -251,13 +252,13 @@ enum ExportService {
 
             // Cycle background (full length)
             let cycleRect = CGRect(x: page.margin, y: page.y, width: totalW, height: barH)
-            ctx.setFillColor(roseLight.cgColor)
-            ctx.fill(cycleRect)
+            cgCtx.setFillColor(roseLight.cgColor)
+            cgCtx.fill(cycleRect)
 
             // Period portion (highlighted)
             let periodRect = CGRect(x: page.margin, y: page.y, width: periodW, height: barH)
-            ctx.setFillColor(roseColor.cgColor)
-            ctx.fill(periodRect)
+            cgCtx.setFillColor(roseColor.cgColor)
+            cgCtx.fill(periodRect)
 
             // Date label
             let label = formatter.string(from: cycle.start) + "  (\(cycle.length)d cycle, \(cycle.periodLength)d period)"
@@ -273,17 +274,18 @@ enum ExportService {
         }
 
         page.advance(4)
-        drawDivider(page: &page, ctx: ctx)
+        drawDivider(page: &page, ctx: cgCtx)
     }
 
     // MARK: - Symptom Bar Chart
 
-    private static func drawSymptomBarChart(page: inout PDFPageContext, entries: [CycleEntry], ctx: CGContext) {
+    private static func drawSymptomBarChart(page: inout PDFPageContext, entries: [CycleEntry], ctx: UIGraphicsPDFRendererContext) {
+        let cgCtx = ctx.cgContext
         let counts = CycleAnalytics.symptomFrequency(in: entries, limit: 6)
         guard !counts.isEmpty else { return }
         if page.y > page.contentBottom - 80 { breakPage(page: &page, ctx: ctx) }
 
-        drawSectionHeader("Top Symptoms (by frequency)", page: &page, ctx: ctx)
+        drawSectionHeader("Top Symptoms (by frequency)", page: &page, ctx: cgCtx)
 
         let barH: CGFloat = 13
         let spacing: CGFloat = 7
@@ -301,10 +303,10 @@ enum ExportService {
 
             // Bar
             let barX = page.margin + labelW
-            ctx.setFillColor(plumColor.withAlphaComponent(0.18).cgColor)
-            ctx.fill(CGRect(x: barX, y: page.y, width: maxWidth, height: barH))
-            ctx.setFillColor(plumColor.cgColor)
-            ctx.fill(CGRect(x: barX, y: page.y, width: barW, height: barH))
+            cgCtx.setFillColor(plumColor.withAlphaComponent(0.18).cgColor)
+            cgCtx.fill(CGRect(x: barX, y: page.y, width: maxWidth, height: barH))
+            cgCtx.setFillColor(plumColor.cgColor)
+            cgCtx.fill(CGRect(x: barX, y: page.y, width: barW, height: barH))
 
             // Count label
             let cAttrs: [NSAttributedString.Key: Any] = [.font: captionFont, .foregroundColor: UIColor.white]
@@ -313,13 +315,13 @@ enum ExportService {
             page.advance(barH + spacing)
         }
         page.advance(8)
-        drawDivider(page: &page, ctx: ctx)
+        drawDivider(page: &page, ctx: cgCtx)
     }
 
     // MARK: - Entry table
 
     private static func drawEntryTable(page: inout PDFPageContext, entries: [CycleEntry], ctx: UIGraphicsPDFRendererContext) {
-        if page.y > page.contentBottom - 60 { breakPage(page: &page, ctx: ctx.cgContext) }
+        if page.y > page.contentBottom - 60 { breakPage(page: &page, ctx: ctx) }
         drawSectionHeader("Detailed Entries", page: &page, ctx: ctx.cgContext)
 
         let formatter = DateFormatter()
@@ -369,7 +371,7 @@ enum ExportService {
         }
         guard !withNotes.isEmpty else { return }
 
-        if page.y > page.contentBottom - 60 { breakPage(page: &page, ctx: ctx.cgContext) }
+        if page.y > page.contentBottom - 60 { breakPage(page: &page, ctx: ctx) }
         drawSectionHeader("Notes", page: &page, ctx: ctx.cgContext)
 
         let formatter = DateFormatter()
@@ -417,7 +419,8 @@ enum ExportService {
         page.advance(thin ? 4 : 10)
     }
 
-    private static func breakPage(page: inout PDFPageContext, ctx: CGContext) {
+    private static func breakPage(page: inout PDFPageContext, ctx: UIGraphicsPDFRendererContext) {
+        ctx.beginPage()
         page.y = page.margin
     }
 

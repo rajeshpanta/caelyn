@@ -94,7 +94,7 @@ struct MainTabView: View {
 
             CalendarView()
                 .tabItem {
-                    Label("Calendar", systemImage: selection == .calendar ? "calendar" : "calendar")
+                    Label("Calendar", systemImage: selection == .calendar ? "calendar.badge.checkmark" : "calendar")
                 }
                 .tag(Tab.calendar)
 
@@ -137,7 +137,9 @@ struct MainTabView: View {
     /// the matching card for a soft pulse, and clear after ~2.5 seconds.
     private func handlePendingCategory(_ category: NotificationService.Category?) {
         guard let category else { return }
-        selection = tab(for: category)
+        let target = tab(for: category)
+        selection = target
+        iPadSelection = target
         router.highlightedCategory = category
         router.pendingCategory = nil
         Task { @MainActor in

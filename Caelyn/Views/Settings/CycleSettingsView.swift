@@ -12,47 +12,45 @@ struct CycleSettingsView: View {
     private let periodLengthRange = Array(1...12)
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
-                    cycleLengthSection
-                    periodLengthSection
-                    lastPeriodSection
-                    irregularModeSection
+        ScrollView {
+            VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
+                cycleLengthSection
+                periodLengthSection
+                lastPeriodSection
+                irregularModeSection
 
-                    if purchase.isPro {
-                        perimenoModeSection
-                        conditionModeSection
-                        ttcSection
-                        pregnancySection
-                        postpartumSection
-                    } else {
-                        proLockedSection(
-                            title: "Specialist modes",
-                            description: "Perimenopause, Endometriosis, PCOS, TTC, Pregnancy, and Postpartum modes are part of Caelyn Pro.",
-                            icon: "heart.circle.fill"
-                        )
-                    }
+                if purchase.isPro {
+                    perimenoModeSection
+                    conditionModeSection
+                    ttcSection
+                    pregnancySection
+                    postpartumSection
+                } else {
+                    proLockedSection(
+                        title: "Specialist modes",
+                        description: "Perimenopause, Endometriosis, PCOS, TTC, Pregnancy, and Postpartum modes are part of Caelyn Pro.",
+                        icon: "heart.circle.fill"
+                    )
+                }
 
-                    disclaimer
-                }
-                .sheet(isPresented: $showingPaywall) {
-                    PaywallView()
-                }
-                .padding(.horizontal, CaelynSpacing.lg)
-                .padding(.top, CaelynSpacing.md)
-                .padding(.bottom, CaelynSpacing.xl)
+                disclaimer
             }
-            .background(CaelynColor.backgroundCream.ignoresSafeArea())
-            .navigationTitle("Cycle settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .font(CaelynFont.body.weight(.semibold))
-                        .foregroundStyle(CaelynColor.primaryPlum)
-                }
+            .padding(.horizontal, CaelynSpacing.lg)
+            .padding(.top, CaelynSpacing.md)
+            .padding(.bottom, CaelynSpacing.xl)
+        }
+        .background(CaelynColor.backgroundCream.ignoresSafeArea())
+        .navigationTitle("Cycle settings")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Done") { dismiss() }
+                    .font(CaelynFont.body.weight(.semibold))
+                    .foregroundStyle(CaelynColor.primaryPlum)
             }
+        }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView()
         }
     }
 

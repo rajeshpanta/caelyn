@@ -22,7 +22,9 @@ final class WatchDataModel: NSObject, ObservableObject, WCSessionDelegate {
         if let p = pain  { info["pain"]  = p }
         if let m = mood  { info["mood"]  = m }
         if WCSession.default.isReachable {
-            WCSession.default.sendMessage(info, replyHandler: nil)
+            WCSession.default.sendMessage(info, replyHandler: { _ in }) { _ in
+                WCSession.default.transferUserInfo(info)
+            }
         } else {
             WCSession.default.transferUserInfo(info)
         }

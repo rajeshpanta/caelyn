@@ -38,6 +38,7 @@ final class PurchaseService {
     // MARK: - Derived state
 
     var isPro: Bool { !purchasedProductIDs.isEmpty }
+    var isLifetimePro: Bool { purchasedProductIDs.contains(ProductID.lifetime.rawValue) }
 
     var monthlyProduct:  Product? { products.first(where: { $0.id == ProductID.monthly.rawValue  }) }
     var yearlyProduct:   Product? { products.first(where: { $0.id == ProductID.yearly.rawValue   }) }

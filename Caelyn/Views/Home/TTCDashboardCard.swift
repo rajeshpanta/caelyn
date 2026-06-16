@@ -38,20 +38,18 @@ struct TTCDashboardCard: View {
                 if let next = nextPeriodStart {
                     let fertile = PredictionEngine.fertileWindow(nextPeriodStart: next)
                     let start = fertile.lowerBound, end = fertile.upperBound
-                if true {
-                        let cal = Calendar.current
-                        let today = cal.startOfDay(for: .now)
-                        if start > today {
-                            let daysUntil = cal.dateComponents([.day], from: today, to: start).day ?? 0
-                            Text("Fertile window in \(daysUntil) day\(daysUntil == 1 ? "" : "s")")
-                                .font(CaelynFont.caption)
-                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
-                        } else if fertile.contains(today) {
-                            let daysLeft = cal.dateComponents([.day], from: today, to: end).day ?? 0
-                            Text("In your fertile window — \(daysLeft) day\(daysLeft == 1 ? "" : "s") remaining")
-                                .font(CaelynFont.caption.weight(.medium))
-                                .foregroundStyle(CaelynColor.successSage)
-                        }
+                    let cal = Calendar.current
+                    let today = cal.startOfDay(for: .now)
+                    if start > today {
+                        let daysUntil = cal.dateComponents([.day], from: today, to: start).day ?? 0
+                        Text("Fertile window in \(daysUntil) day\(daysUntil == 1 ? "" : "s")")
+                            .font(CaelynFont.caption)
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                    } else if fertile.contains(today) {
+                        let daysLeft = cal.dateComponents([.day], from: today, to: end).day ?? 0
+                        Text("In your fertile window — \(daysLeft) day\(daysLeft == 1 ? "" : "s") remaining")
+                            .font(CaelynFont.caption.weight(.medium))
+                            .foregroundStyle(CaelynColor.successSage)
                     }
                 }
 
