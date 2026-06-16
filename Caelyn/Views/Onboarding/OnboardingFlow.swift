@@ -10,6 +10,10 @@ struct OnboardingFlow: View {
             backgroundGradient
                 .ignoresSafeArea()
 
+            // Subtle decorative blobs behind everything
+            decorativeBackground
+                .ignoresSafeArea()
+
             VStack(spacing: 0) {
                 progressArea
                     .frame(height: 36)
@@ -30,6 +34,8 @@ struct OnboardingFlow: View {
         switch vm.step {
         case .welcome:
             WelcomeStep(vm: vm)
+        case .featureHighlights:
+            FeatureHighlightsStep(vm: vm)
         case .privacy:
             PrivacyStep(vm: vm)
         case .lastPeriod:
@@ -77,11 +83,28 @@ struct OnboardingFlow: View {
         LinearGradient(
             colors: [
                 CaelynColor.backgroundCream,
-                CaelynColor.blush.opacity(0.55)
+                CaelynColor.blush.opacity(0.6),
+                CaelynColor.lavender.opacity(0.35)
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
+    }
+
+    private var decorativeBackground: some View {
+        ZStack {
+            Circle()
+                .fill(CaelynColor.softRose.opacity(0.10))
+                .frame(width: 320, height: 320)
+                .blur(radius: 60)
+                .offset(x: -80, y: -120)
+
+            Circle()
+                .fill(CaelynColor.lavender.opacity(0.12))
+                .frame(width: 280, height: 280)
+                .blur(radius: 60)
+                .offset(x: 120, y: 400)
+        }
     }
 }
 

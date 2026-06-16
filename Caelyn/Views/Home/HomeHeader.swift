@@ -7,22 +7,35 @@ struct HomeHeader: View {
 
     var body: some View {
         HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(greeting)
-                    .font(.system(.title, design: .rounded).weight(.semibold))
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(greeting) \(greetingEmoji) ")
+                    .font(.system(.title, design: .rounded).weight(.bold))
                     .foregroundStyle(CaelynColor.deepPlumText)
-                HStack(spacing: 6) {
-                    Text("Cycle day \(cycleDay)")
+
+                HStack(spacing: 0) {
+                    Text("Day \(cycleDay)")
+                        .font(CaelynFont.subheadline.weight(.semibold))
+                        .foregroundStyle(phase.accentColor)
                         .contentTransition(.numericText())
                         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: cycleDay)
-                    Text("·")
-                    Text(phase.displayName.lowercased())
+
+                    Text(" · \(phase.displayName.lowercased())")
+                        .font(CaelynFont.subheadline)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                 }
-                .font(CaelynFont.subheadline)
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
             }
             Spacer(minLength: 0)
             PrivacyChip()
+        }
+    }
+
+    private var greetingEmoji: String {
+        let hour = Calendar.current.component(.hour, from: .now)
+        switch hour {
+        case 5..<12:  return "☀️"
+        case 12..<17: return "🌸"
+        case 17..<22: return "🌙"
+        default:      return "✨"
         }
     }
 }

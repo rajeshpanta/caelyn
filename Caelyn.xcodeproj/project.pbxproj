@@ -98,6 +98,7 @@
 		BFF497451E33CBC53ACCE00B /* OnboardingScaffold.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA214E11FC745FFBCD83EC1 /* OnboardingScaffold.swift */; };
 		CEFF825CB5AD92FDFA5B5816 /* DailyLogForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCA3984C3998D72FA315625 /* DailyLogForm.swift */; };
 		D1475D3E5B70DAD2D5B3495E /* CycleEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C61F24B11915E63DD4E264C /* CycleEntry.swift */; };
+		D2D1626B36290421AEC9C1E5 /* OnboardingAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870D1AB3C46C174650091279 /* OnboardingAnimations.swift */; };
 		D32410CB7EF599104D4AFAA4 /* HomeQuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 074FFFF68AC191D9677D35DB /* HomeQuickActions.swift */; };
 		D3D093EDB66FE730C5A122D9 /* ProUpsellCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B35E72936365A18992EE8CC /* ProUpsellCard.swift */; };
 		DD549E00756CE802FF125BB9 /* StatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E9BDBBD279D29A2A77C926 /* StatCard.swift */; };
@@ -267,6 +268,7 @@
 		7DCA3984C3998D72FA315625 /* DailyLogForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyLogForm.swift; sourceTree = "<group>"; };
 		7F3D9A2E9305840410E900DE /* AppURLs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppURLs.swift; sourceTree = "<group>"; };
 		820D9BF9B360C1A5531E053E /* CaelynUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynUITests.swift; sourceTree = "<group>"; };
+		870D1AB3C46C174650091279 /* OnboardingAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingAnimations.swift; sourceTree = "<group>"; };
 		884D8350457334717AFDE17B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		893A18A5E786299D456D8D29 /* CycleAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleAnalytics.swift; sourceTree = "<group>"; };
 		8A0CE13176EDA61E7E405D69 /* iCloudSyncView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudSyncView.swift; sourceTree = "<group>"; };
@@ -347,6 +349,7 @@
 			isa = PBXGroup;
 			children = (
 				E8095793F30CC64CF859BE7F /* .gitkeep */,
+				870D1AB3C46C174650091279 /* OnboardingAnimations.swift */,
 				CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */,
 				4AFE9A76ACD4C8CB6B8CE0C9 /* OnboardingStep.swift */,
 				0D48D4147BDA4F0E3B4942CB /* OnboardingSteps.swift */,
@@ -920,6 +923,7 @@
 				670A3218F030EAAF4D349B2D /* MoodChip.swift in Sources */,
 				17A3409231A1A3244C342F0E /* NotificationRouter.swift in Sources */,
 				E770FCFA78B811972499CE97 /* NotificationService.swift in Sources */,
+				D2D1626B36290421AEC9C1E5 /* OnboardingAnimations.swift in Sources */,
 				3DB284FE2C8F763A6E0F9199 /* OnboardingFlow.swift in Sources */,
 				6BFC3C1CB1394B1520981C18 /* OnboardingProgress.swift in Sources */,
 				BFF497451E33CBC53ACCE00B /* OnboardingScaffold.swift in Sources */,
