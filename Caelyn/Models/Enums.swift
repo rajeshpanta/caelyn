@@ -225,11 +225,12 @@ enum BirthControlMethod: String, Codable, CaseIterable, Identifiable {
 }
 
 enum OvulationTestResult: String, Codable, CaseIterable, Identifiable {
-    case negative, lhSurge, positive
+    case negative, rising, lhSurge, positive
     var id: String { rawValue }
     var displayName: String {
         switch self {
         case .negative: return "Negative"
+        case .rising:   return "Rising LH"
         case .lhSurge:  return "LH Surge"
         case .positive: return "Positive"
         }
@@ -237,6 +238,7 @@ enum OvulationTestResult: String, Codable, CaseIterable, Identifiable {
     var icon: String {
         switch self {
         case .negative: return "minus.circle"
+        case .rising:   return "chart.line.uptrend.xyaxis"
         case .lhSurge:  return "waveform.path.ecg"
         case .positive: return "checkmark.circle.fill"
         }
@@ -244,7 +246,8 @@ enum OvulationTestResult: String, Codable, CaseIterable, Identifiable {
     var color: String {
         switch self {
         case .negative: return "deepPlumText"
-        case .lhSurge:  return "warmSand"
+        case .rising:   return "warmSand"
+        case .lhSurge:  return "primaryPlum"
         case .positive: return "successSage"
         }
     }

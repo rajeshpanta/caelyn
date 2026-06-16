@@ -519,15 +519,18 @@ struct DailyLogForm: View {
                         ovTestChip(result)
                     }
                 }
-                if let result = entry?.ovulationTestResult, result == .positive || result == .lhSurge {
-                    Label(
-                        result == .positive
-                            ? "Ovulation likely today — highest fertility window."
-                            : "LH surge detected — ovulation expected within 24–36 hours.",
-                        systemImage: "info.circle"
-                    )
-                    .font(CaelynFont.caption)
-                    .foregroundStyle(CaelynColor.successSage)
+                if let result = entry?.ovulationTestResult, result != .negative {
+                    let hint: String = {
+                        switch result {
+                        case .rising:  return "LH is rising — ovulation may be 2–3 days away."
+                        case .lhSurge: return "LH surge detected — ovulation expected within 24–36 hours."
+                        case .positive: return "Ovulation likely today — highest fertility window."
+                        default: return ""
+                        }
+                    }()
+                    Label(hint, systemImage: "info.circle")
+                        .font(CaelynFont.caption)
+                        .foregroundStyle(CaelynColor.successSage)
                 }
             }
         }
@@ -538,7 +541,8 @@ struct DailyLogForm: View {
         let accentColor: Color = {
             switch result {
             case .negative: return CaelynColor.deepPlumText.opacity(0.6)
-            case .lhSurge:  return CaelynColor.warmSand
+            case .rising:   return CaelynColor.warmSand.opacity(0.8)
+            case .lhSurge:  return CaelynColor.primaryPlum
             case .positive: return CaelynColor.successSage
             }
         }()

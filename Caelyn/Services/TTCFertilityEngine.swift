@@ -43,6 +43,7 @@ enum TTCFertilityEngine {
             switch lh {
             case .positive: score += 30; signals.append("LH test positive")
             case .lhSurge:  score += 20; signals.append("LH surge detected")
+            case .rising:   score += 10; signals.append("LH rising")
             case .negative: score -= 5
             }
         }
