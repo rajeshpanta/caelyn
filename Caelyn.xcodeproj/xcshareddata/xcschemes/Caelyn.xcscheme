@@ -49,6 +49,34 @@
                ReferencedContainer = "container:Caelyn.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "F73BCA1527FA3EA49E55F76E"
+               BuildableName = "CaelynWatch.app"
+               BlueprintName = "CaelynWatch"
+               ReferencedContainer = "container:Caelyn.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AB04FD9751C15326CE1ED8E7"
+               BuildableName = "CaelynWidget.appex"
+               BlueprintName = "CaelynWidget"
+               ReferencedContainer = "container:Caelyn.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

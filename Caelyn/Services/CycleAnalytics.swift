@@ -46,6 +46,23 @@ struct PhaseSymptomCount {
     let count: Int
 }
 
+struct BBTPoint: Identifiable {
+    let id = UUID()
+    let date: Date
+    let temperature: Double
+}
+
+struct EnergyCount: Identifiable {
+    let id: String
+    let level: EnergyLevel
+    let count: Int
+    init(level: EnergyLevel, count: Int) {
+        self.id = level.rawValue
+        self.level = level
+        self.count = count
+    }
+}
+
 enum CycleAnalytics {
 
     /// Cycle length series for chart, oldest → newest.
@@ -78,6 +95,28 @@ enum CycleAnalytics {
         return counts
             .sorted { $0.value > $1.value }
             .map { MoodCount(mood: $0.key, count: $0.value) }
+    }
+
+    /// Energy level distribution, sorted by level order (low → high).
+    static func energyFrequency(in entries: [CycleEntry]) -> [EnergyCount] {
+        var counts: [EnergyLevel: Int] = [:]
+        for entry in entries {
+            if let level = entry.energyLevel { counts[level, default: 0] += 1 }
+        }
+        return EnergyLevel.allCases.compactMap { level in
+            guard let count = counts[level] else { return nil }
+            return EnergyCount(level: level, count: count)
+        }
+    }
+
+    /// BBT data points oldest → newest, only entries where temperature was logged.
+    static func bbtSeries(in entries: [CycleEntry]) -> [BBTPoint] {
+        entries
+            .compactMap { entry -> BBTPoint? in
+                guard let temp = entry.basalTemperature else { return nil }
+                return BBTPoint(date: entry.date, temperature: temp)
+            }
+            .sorted { $0.date < $1.date }
     }
 
     /// Pain over time, oldest → newest, only entries with pain logged.
@@ -134,5 +173,38 @@ enum CycleAnalytics {
         let cal = Calendar.current
         guard let start = cal.date(byAdding: .day, value: -lookbackDays, to: cal.startOfDay(for: today)) else { return 0 }
         return entries.filter { $0.hasContent && $0.date >= start }.count
+    }
+
+    /// Current consecutive logging streak (days in a row with any content logged,
+    /// counting backwards from today inclusive). Returns 0 if today has no log.
+    static func loggingStreak(in entries: [CycleEntry], today: Date = .now) -> Int {
+        let cal = Calendar.current
+        let loggedDays = Set(
+            entries
+                .filter { $0.hasContent }
+                .map { cal.startOfDay(for: $0.date) }
+        )
+        var streak = 0
+        var cursor = cal.startOfDay(for: today)
+        while loggedDays.contains(cursor) {
+            streak += 1
+            guard let prev = cal.date(byAdding: .day, value: -1, to: cursor) else { break }
+            cursor = prev
+        }
+        return streak
+    }
+
+    /// The last N days as start-of-day dates, newest first.
+    static func recentDayStates(in entries: [CycleEntry], days: Int = 14, today: Date = .now) -> [(date: Date, logged: Bool)] {
+        let cal = Calendar.current
+        let loggedDays = Set(
+            entries
+                .filter { $0.hasContent }
+                .map { cal.startOfDay(for: $0.date) }
+        )
+        return (0..<days).compactMap { offset -> (Date, Bool)? in
+            guard let date = cal.date(byAdding: .day, value: -offset, to: cal.startOfDay(for: today)) else { return nil }
+            return (date, loggedDays.contains(date))
+        }
     }
 }

@@ -47,7 +47,8 @@ enum HomeCopy {
     static func comingUpEvents(
         daysUntilPMS: Int,
         daysUntilPeriod: Int,
-        daysUntilOvulation: Int,
+        daysUntilFertileWindowStart: Int,
+        fertileWindow: ClosedRange<Date>?,
         currentPhase: CyclePhase
     ) -> [(icon: String, label: String, accent: String)] {
         var events: [(icon: String, label: String, accent: String)] = []
@@ -66,14 +67,24 @@ enum HomeCopy {
                 accent: "rose"
             ))
         }
-        if currentPhase != .ovulation && daysUntilOvulation > 0 && daysUntilOvulation <= 16 {
-            events.append((
-                icon: "sun.max.fill",
-                label: "Ovulation estimate in \(daysUntilOvulation) day\(daysUntilOvulation == 1 ? "" : "s")",
-                accent: "sage"
-            ))
+        if currentPhase != .ovulation, let window = fertileWindow, daysUntilFertileWindowStart <= 14 {
+            let label: String
+            if daysUntilFertileWindowStart <= 0 {
+                label = "Fertile window: \(shortDateRange(window))"
+            } else if daysUntilFertileWindowStart == 1 {
+                label = "Fertile window starts tomorrow"
+            } else {
+                label = "Fertile window in \(daysUntilFertileWindowStart) days (\(shortDateRange(window)))"
+            }
+            events.append((icon: "sun.max.fill", label: label, accent: "sage"))
         }
         return events
+    }
+
+    private static func shortDateRange(_ range: ClosedRange<Date>) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "MMM d"
+        return "\(f.string(from: range.lowerBound))–\(f.string(from: range.upperBound))"
     }
 
     static func emptyStatePatternMessage(_ confidence: Confidence) -> String {

@@ -14,6 +14,10 @@ struct InsightsView: View {
         PredictionEngine.cycles(from: entries)
     }
 
+    private var patternInsights: [PatternInsight] {
+        PatternEngine.insights(from: entries, cycles: cycles, profile: profile)
+    }
+
     private var avgCycleLength: Int {
         PredictionEngine.averageCycleLength(of: cycles, fallback: profile?.averageCycleLength ?? 28)
     }
@@ -66,23 +70,43 @@ struct InsightsView: View {
             cycleVariation: cycleVariation
         )
 
+        if !patternInsights.isEmpty {
+            PatternInsightsSection(
+                insights: patternInsights,
+                isPro: purchase.isPro,
+                onUpgrade: { showingPaywall = true }
+            )
+        }
+
+        YearViewSection(
+            entries: entries,
+            profile: profile,
+            isPro: purchase.isPro,
+            onUpgrade: { showingPaywall = true }
+        )
+
+        CycleHistorySection(cycles: cycles, entries: entries)
+
         if purchase.isPro {
             CycleLengthChart(series: CycleAnalytics.cycleLengthSeries(from: cycles))
             PeriodLengthChart(series: CycleAnalytics.periodLengthSeries(from: cycles))
             SymptomFrequencyChart(counts: CycleAnalytics.symptomFrequency(in: entries))
             MoodPatternChart(counts: CycleAnalytics.moodFrequency(in: entries))
             PainTrendChart(series: CycleAnalytics.painSeries(in: entries))
+            BBTChart(series: CycleAnalytics.bbtSeries(in: entries))
         } else {
             ProUpsellCard(
-                title: "Unlock advanced charts",
-                subtitle: "See how your cycle length, symptoms, mood, and pain change over time.",
+                title: "Unlock Pro insights",
+                subtitle: "Deeper data, smarter patterns — everything to understand your body at a glance.",
                 icon: "chart.line.uptrend.xyaxis",
                 highlights: [
                     "Cycle & period length trends",
                     "Symptom frequency patterns",
-                    "Mood distribution",
-                    "Pain levels over time",
-                    "PDF cycle reports for your doctor"
+                    "Mood & pain over time",
+                    "Basal body temperature chart",
+                    "PDF doctor report",
+                    "TTC fertility scoring",
+                    "Apple Watch companion"
                 ]
             ) {
                 showingPaywall = true

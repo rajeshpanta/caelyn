@@ -7,9 +7,17 @@ struct CalendarView: View {
 
     @State private var visibleMonth: Date = Calendar.current.startOfDay(for: .now)
     @State private var selectedDay: Date?
+    @State private var swipeDirection: Int = 1  // 1 = forward (→), -1 = backward (←)
 
     private var profile: UserProfile? { profiles.first }
     private var firstDayOfWeek: Int { profile?.firstDayOfWeek ?? Calendar.current.firstWeekday }
+    private var cycles: [Cycle] { PredictionEngine.cycles(from: entries) }
+
+    private var monthTransition: AnyTransition {
+        swipeDirection > 0
+            ? .asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading))
+            : .asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing))
+    }
 
     var body: some View {
         NavigationStack {
@@ -20,12 +28,17 @@ struct CalendarView: View {
                         entries: entries,
                         profile: profile,
                         firstDayOfWeek: firstDayOfWeek,
+                        cycles: cycles,
                         onPrev: prev,
                         onNext: next,
                         onDayTap: { date in selectedDay = date }
                     )
+                    .id(visibleMonth)
+                    .transition(monthTransition)
 
                     MonthSummaryCard(month: visibleMonth, entries: entries)
+                        .id(visibleMonth)
+                        .transition(monthTransition)
                 }
                 .padding(.horizontal, CaelynSpacing.lg)
                 .padding(.top, CaelynSpacing.md)
@@ -61,19 +74,23 @@ struct CalendarView: View {
     }
 
     private func prev() {
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+        swipeDirection = -1
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.88)) {
             visibleMonth = Calendar.current.date(byAdding: .month, value: -1, to: visibleMonth) ?? visibleMonth
         }
     }
 
     private func next() {
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+        swipeDirection = 1
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.88)) {
             visibleMonth = Calendar.current.date(byAdding: .month, value: 1, to: visibleMonth) ?? visibleMonth
         }
     }
 
     private func jumpToToday() {
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+        let isAhead = visibleMonth > Calendar.current.startOfDay(for: .now)
+        swipeDirection = isAhead ? -1 : 1
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.88)) {
             visibleMonth = Calendar.current.startOfDay(for: .now)
         }
     }

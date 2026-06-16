@@ -7,10 +7,18 @@ struct HomeHeroCard: View {
     let phase: CyclePhase
     let daysUntilPeriod: Int
     let predictedWindow: ClosedRange<Date>?
+    var variation: Int = 0
+    var confidence: Confidence = .low
+
+    @State private var showingPhaseGuide = false
 
     var body: some View {
         VStack(spacing: CaelynSpacing.md) {
             phaseBadge
+                .sheet(isPresented: $showingPhaseGuide) {
+                    PhaseGuideView(phase: phase)
+                        .presentationDetents([.large])
+                }
             CycleRingView(
                 cycleDay: cycleDay,
                 cycleLength: cycleLength,
@@ -39,9 +47,20 @@ struct HomeHeroCard: View {
                 }
 
                 if let predictedWindow {
-                    Text(HomeCopy.windowText(predictedWindow))
+                    HStack(spacing: 4) {
+                        Text(HomeCopy.windowText(predictedWindow))
+                        if variation > 1 {
+                            Text("±\(variation) days")
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.38))
+                        }
+                    }
+                    .font(CaelynFont.caption)
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                }
+                if confidence == .low {
+                    Text("Still learning your pattern")
                         .font(CaelynFont.caption)
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.38))
                 }
             }
             .padding(.horizontal, CaelynSpacing.sm)
@@ -73,17 +92,27 @@ struct HomeHeroCard: View {
     }
 
     private var phaseBadge: some View {
-        HStack(spacing: 6) {
-            Image(systemName: phase.icon)
-                .font(.system(size: 11, weight: .semibold))
-            Text(phase.displayName)
-                .font(CaelynFont.footnote.weight(.semibold))
-                .tracking(0.3)
+        Button {
+            showingPhaseGuide = true
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: phase.icon)
+                    .font(.system(size: 11, weight: .semibold))
+                Text(phase.displayName)
+                    .font(CaelynFont.footnote.weight(.semibold))
+                    .tracking(0.3)
+                Image(systemName: "info.circle")
+                    .font(.system(size: 11, weight: .regular))
+                    .opacity(0.65)
+            }
+            .foregroundStyle(phase.accentColor)
+            .padding(.horizontal, CaelynSpacing.sm)
+            .padding(.vertical, 6)
+            .background(phase.tintBackground.opacity(0.7), in: Capsule())
         }
-        .foregroundStyle(phase.accentColor)
-        .padding(.horizontal, CaelynSpacing.sm)
-        .padding(.vertical, 6)
-        .background(phase.tintBackground.opacity(0.7), in: Capsule())
+        .buttonStyle(.plain)
+        .accessibilityLabel("Learn about the \(phase.displayName) phase")
+        .accessibilityHint("Opens a guide to what's happening in your cycle right now")
     }
 
     private var phaseLegend: some View {

@@ -57,12 +57,14 @@ enum CalendarMath {
     }
 
     /// Compute the marker for a given date based on entries + predictions.
+    /// Pass `adaptivePmsDaysBefore` to personalise the PMS highlight window.
     static func dayState(
         for date: Date,
         month: Date,
         entries: [CycleEntry],
         profile: UserProfile?,
-        today: Date = .now
+        today: Date = .now,
+        adaptivePmsDaysBefore: Int = 5
     ) -> DayState {
         let day = calendar.startOfDay(for: date)
         let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: month)) ?? month
@@ -114,16 +116,14 @@ enum CalendarMath {
                 nextPeriodStart: nextStart,
                 periodLength: periodLength
             )
-            let pmsRange = PredictionEngine.pmsWindow(nextPeriodStart: nextStart)
-            let ovulation = PredictionEngine.ovulationEstimate(nextPeriodStart: nextStart)
-            let ovulationStart = calendar.date(byAdding: .day, value: -1, to: ovulation) ?? ovulation
-            let ovulationEnd = calendar.date(byAdding: .day, value: 1, to: ovulation) ?? ovulation
+            let pmsRange = PredictionEngine.pmsWindow(nextPeriodStart: nextStart, daysBefore: adaptivePmsDaysBefore)
+            let fertileRange = PredictionEngine.fertileWindow(nextPeriodStart: nextStart)
 
             if predictedWindow.contains(day) {
                 marker = .predictedPeriod
             } else if pmsRange.contains(day) {
                 marker = .pms
-            } else if (ovulationStart...ovulationEnd).contains(day) {
+            } else if fertileRange.contains(day) {
                 marker = .ovulation
             }
         }

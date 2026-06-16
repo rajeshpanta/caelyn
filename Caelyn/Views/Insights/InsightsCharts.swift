@@ -211,6 +211,73 @@ struct PainTrendChart: View {
     }
 }
 
+// MARK: - BBT Chart
+
+struct BBTChart: View {
+    let series: [BBTPoint]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
+            chartHeader(title: "Basal Body Temperature", subtitle: "°C over time — rise signals ovulation")
+            CaelynCard(padding: CaelynSpacing.md) {
+                if series.isEmpty {
+                    emptyChartCopy("No BBT readings logged yet.")
+                } else {
+                    Chart {
+                        RuleMark(y: .value("Threshold", 36.4))
+                            .foregroundStyle(CaelynColor.successSage.opacity(0.6))
+                            .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                            .annotation(position: .trailing, alignment: .leading) {
+                                Text("36.4°")
+                                    .font(CaelynFont.caption)
+                                    .foregroundStyle(CaelynColor.successSage)
+                            }
+                        ForEach(series) { point in
+                            AreaMark(
+                                x: .value("Date", point.date),
+                                y: .value("Temp", point.temperature)
+                            )
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [CaelynColor.primaryPlum.opacity(0.18), CaelynColor.primaryPlum.opacity(0.0)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .interpolationMethod(.monotone)
+                            LineMark(
+                                x: .value("Date", point.date),
+                                y: .value("Temp", point.temperature)
+                            )
+                            .foregroundStyle(CaelynColor.primaryPlum)
+                            .interpolationMethod(.monotone)
+                            .lineStyle(StrokeStyle(lineWidth: 2.5))
+                            PointMark(
+                                x: .value("Date", point.date),
+                                y: .value("Temp", point.temperature)
+                            )
+                            .foregroundStyle(CaelynColor.primaryPlum)
+                            .symbolSize(55)
+                        }
+                    }
+                    .chartYAxis { AxisMarks(position: .leading) { value in
+                        AxisGridLine().foregroundStyle(CaelynColor.deepPlumText.opacity(0.06))
+                        if let temp = value.as(Double.self) {
+                            AxisValueLabel(String(format: "%.1f", temp))
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                        }
+                    } }
+                    .chartXAxis { AxisMarks(values: .automatic(desiredCount: 4)) { value in
+                        AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                    } }
+                    .frame(height: 180)
+                }
+            }
+        }
+    }
+}
+
 // MARK: - Helpers
 
 private func chartHeader(title: String, subtitle: String) -> some View {

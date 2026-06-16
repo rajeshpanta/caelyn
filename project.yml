@@ -24,26 +24,31 @@ targets:
     sources:
       - path: Caelyn
     # ────────────────────────────────────────────────────────────────────
-    # HealthKit setup — TWO BLOCKS MUST BE UNCOMMENTED TOGETHER
-    # ────────────────────────────────────────────────────────────────────
-    # HealthKit is disabled by default because it requires:
-    #   1. A paid Apple Developer Program membership ($99/year)
-    #   2. The App ID registered in developer.apple.com with HealthKit enabled
-    #   3. A provisioning profile that includes the HealthKit entitlement
+    # App Group — required for WidgetKit data sharing.
+    # Register group.smallpanta-icould.com.caelynperiodtracker in
+    # developer.apple.com → Identifiers → App Groups before building
+    # with a provisioning profile. Automatic signing handles it once
+    # the group exists in the portal.
     #
-    # To enable, you MUST uncomment BOTH of the following:
-    #   (A) the `entitlements:` block immediately below
-    #   (B) the two `INFOPLIST_KEY_NSHealth*` keys further down in `settings.base`
-    # If you uncomment only (A), the app will crash on first HealthKit auth
-    # call with "missing usage description." If you uncomment only (B), the
-    # entitlement isn't granted and HealthKit calls silently no-op.
-    # The HealthKit code in Services/ stays in place either way.
-    #
-    # entitlements:
-    #   path: Caelyn/Caelyn.entitlements
-    #   properties:
-    #     com.apple.developer.healthkit: true
-    #     com.apple.developer.healthkit.access: []
+    # HealthKit: uncomment the healthkit lines below (both at once) if
+    # enabling HealthKit. The App Group entitlement must stay uncommented
+    # regardless of HealthKit status because WidgetKit requires it.
+    entitlements:
+      path: Caelyn/Caelyn.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.smallpanta-icould.com.caelynperiodtracker
+        com.apple.developer.icloud-services:
+          - CloudKit
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.smallpanta-icould.com.caelynperiodtracker
+        # com.apple.developer.healthkit: true
+        # com.apple.developer.healthkit.access: []
+    dependencies:
+      - target: CaelynWidget
+        embed: true
+      - target: CaelynWatch
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelynperiodtracker
@@ -100,11 +105,77 @@ targets:
     dependencies:
       - target: Caelyn
 
+  CaelynWidget:
+    type: app-extension
+    platform: iOS
+    # Sources: all files in CaelynWidget/ plus the shared WidgetDataStore
+    # (pure Foundation — no SwiftData/PredictionEngine/etc.).
+    sources:
+      - path: CaelynWidget
+      - path: Caelyn/Services/WidgetDataStore.swift
+    info:
+      path: CaelynWidget/Info.plist
+      properties:
+        CFBundleDisplayName: CaelynWidget
+        CFBundleVersion: "3"
+        CFBundleShortVersionString: "1.0.1"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: CaelynWidget/CaelynWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.smallpanta-icould.com.caelynperiodtracker
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelynperiodtracker.widget
+        SKIP_INSTALL: YES
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: "7T9897GFKH"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_EMIT_LOC_STRINGS: YES
+        SWIFT_VERSION: "5.0"
+
+  CaelynWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget:
+      watchOS: "10.0"
+    sources:
+      - path: CaelynWatch
+      - path: Caelyn/Services/WidgetDataStore.swift
+    info:
+      path: CaelynWatch/Info.plist
+      properties:
+        CFBundleDisplayName: Caelyn
+        CFBundleVersion: "3"
+        CFBundleShortVersionString: "1.0.1"
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: smallpanta-icould.com.caelynperiodtracker
+    entitlements:
+      path: CaelynWatch/CaelynWatch.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.smallpanta-icould.com.caelynperiodtracker
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelynperiodtracker.watchapp
+        SKIP_INSTALL: YES
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: "7T9897GFKH"
+        SWIFT_EMIT_LOC_STRINGS: YES
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "4"
+
 schemes:
   Caelyn:
     build:
       targets:
         Caelyn: all
+        CaelynWidget: all
+        CaelynWatch: all
         CaelynTests: [test]
         CaelynUITests: [test]
     test:

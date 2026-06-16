@@ -34,6 +34,8 @@ struct SymptomChip: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(label)
+        .accessibilityHint(isSelected ? "Logged" : "Tap to log this symptom")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

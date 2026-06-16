@@ -73,6 +73,37 @@ enum CyclePhase: String, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Irregular Cycle
+
+enum IrregularCycleReason: String {
+    case highVariation   = "High cycle-length variation"
+    case longCycles      = "Consistently long cycles"
+    case shortCycles     = "Consistently short cycles"
+    case skippedPeriods  = "Infrequent periods (gaps > 45 days)"
+    case increasingShift = "Cycles becoming noticeably longer or shorter"
+
+    var note: String {
+        switch self {
+        case .highVariation:
+            return "Your cycle length varies significantly between months, which can make predictions less accurate. This is common and may indicate hormonal fluctuation."
+        case .longCycles:
+            return "Your cycles are consistently longer than 35 days. This is sometimes associated with conditions like PCOS. It's worth discussing with your doctor."
+        case .shortCycles:
+            return "Your cycles are consistently shorter than 21 days. A healthcare provider can help determine if this is within normal range for you."
+        case .skippedPeriods:
+            return "Caelyn has detected gaps of 45 days or more, suggesting some periods may have been missed or skipped."
+        case .increasingShift:
+            return "Your cycles have been progressively shifting in length. This can be a normal change or an early sign of hormonal shifts — worth tracking closely."
+        }
+    }
+}
+
+enum IrregularCycleStatus: Equatable {
+    case regular
+    case irregular(reason: IrregularCycleReason)
+    case insufficient  // fewer than 3 completed cycles
+}
+
 enum Confidence: String {
     case low      // < 3 cycles logged
     case medium   // 3–5 cycles

@@ -20,21 +20,36 @@ extension ModelContext {
 enum Persistence {
     static let schema = Schema([CycleEntry.self, UserProfile.self])
 
-    /// The live SwiftData container backing the running app. A failure here
-    /// means the local store is unreadable / unmigratable — there's no graceful
-    /// recovery path that doesn't risk losing or corrupting user data, so we
-    /// halt with `fatalError` rather than silently downgrading to an empty
-    /// in-memory store. Crashlytics-style logs will surface the specific cause.
+    /// Private CloudKit container — data syncs to the user's own iCloud account,
+    /// not to any Caelyn server. If the user isn't signed in to iCloud or the
+    /// CloudKit container isn't provisioned yet, we fall back to local-only
+    /// storage so the app stays fully functional either way.
+    private static let cloudKitContainerID = "iCloud.smallpanta-icould.com.caelynperiodtracker"
+
+    /// The live SwiftData container. Tries CloudKit first; falls back to
+    /// local-only if unavailable (no iCloud account, unprovisioned container,
+    /// simulator, etc.). A failure on both paths is unrecoverable — fatalError
+    /// so the crash log captures the exact storage error.
     static let live: ModelContainer = {
-        let config = ModelConfiguration(
+        let log = Logger(subsystem: "smallpanta-icould.com.caelynperiodtracker", category: "swiftdata")
+
+        let cloudConfig = ModelConfiguration(
             schema: schema,
             isStoredInMemoryOnly: false,
-            cloudKitDatabase: .none
+            cloudKitDatabase: .private(cloudKitContainerID)
         )
+        if let container = try? ModelContainer(for: schema, configurations: [cloudConfig]) {
+            log.info("SwiftData: using CloudKit-backed store")
+            return container
+        }
+
+        // Fallback: local-only. CloudKit may be unavailable on this device.
+        log.warning("SwiftData: CloudKit unavailable, falling back to local store")
+        let localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {
-            return try ModelContainer(for: schema, configurations: [config])
+            return try ModelContainer(for: schema, configurations: [localConfig])
         } catch {
-            fatalError("Failed to create live ModelContainer: \(error)")
+            fatalError("Failed to create ModelContainer: \(error)")
         }
     }()
 

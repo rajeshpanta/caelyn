@@ -5,6 +5,7 @@ struct MonthGridView: View {
     let entries: [CycleEntry]
     let profile: UserProfile?
     let firstDayOfWeek: Int
+    let cycles: [Cycle]
     let onPrev: () -> Void
     let onNext: () -> Void
     let onDayTap: (Date) -> Void
@@ -15,6 +16,10 @@ struct MonthGridView: View {
 
     private var weekdays: [String] {
         CalendarMath.weekdaySymbols(firstDayOfWeek: firstDayOfWeek)
+    }
+
+    private var adaptivePmsDays: Int {
+        PredictionEngine.adaptivePmsDaysBefore(entries: entries, cycles: cycles) ?? 5
     }
 
     var body: some View {
@@ -30,13 +35,13 @@ struct MonthGridView: View {
     }
 
     private var swipeGesture: some Gesture {
-        DragGesture(minimumDistance: 24, coordinateSpace: .local)
+        DragGesture(minimumDistance: 30, coordinateSpace: .local)
             .onEnded { value in
                 let dx = value.translation.width
                 let dy = value.translation.height
-                guard abs(dx) > abs(dy) else { return }  // ignore vertical scrolls
-                if dx < -40 { onNext() }
-                else if dx > 40 { onPrev() }
+                // Only handle clearly horizontal swipes; let vertical pass to ScrollView.
+                guard abs(dx) > abs(dy) * 1.5, abs(dx) > 40 else { return }
+                if dx < 0 { onNext() } else { onPrev() }
             }
     }
 
@@ -89,7 +94,8 @@ struct MonthGridView: View {
                     for: date,
                     month: month,
                     entries: entries,
-                    profile: profile
+                    profile: profile,
+                    adaptivePmsDaysBefore: adaptivePmsDays
                 )
                 DayCell(state: state) {
                     onDayTap(date)

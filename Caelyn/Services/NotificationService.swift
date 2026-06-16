@@ -27,6 +27,7 @@ enum NotificationService {
         case dailyCheckIn   = "caelyn.daily.checkin"
         case medication     = "caelyn.medication"
         case ovulation      = "caelyn.ovulation"
+        case birthControl   = "caelyn.birthcontrol"
     }
 
     /// Identifier prefixes used by earlier builds (pre-rebrand). Kept so
@@ -98,6 +99,12 @@ enum NotificationService {
             return NotificationContent(
                 title: isPrivate ? "Caelyn reminder" : "Ovulation window",
                 body:  isPrivate ? "Tap to learn more." : "Caelyn estimates ovulation is around now.",
+                identifier: category.rawValue
+            )
+        case .birthControl:
+            return NotificationContent(
+                title: isPrivate ? "Caelyn reminder" : "Birth control reminder",
+                body:  isPrivate ? "Tap to log." : "Don't forget your birth control today.",
                 identifier: category.rawValue
             )
         }
@@ -180,6 +187,100 @@ enum NotificationService {
                     fireDate: fire,
                     interruptionLevel: .timeSensitive
                 )
+            }
+        }
+
+        if let lastPeriod = profile.lastPeriodStart {
+            let nextPeriod = PredictionEngine.nextPeriodStart(
+                lastPeriodStart: lastPeriod,
+                today: today,
+                cycleLength: profile.averageCycleLength
+            )
+
+            if profile.remindPeriodStart {
+                let daysOffset = -max(0, profile.periodReminderDaysBefore)
+                if let reminderDay = cal.date(byAdding: .day, value: daysOffset, to: nextPeriod),
+                   let fire = scheduledFireDate(
+                       on: reminderDay,
+                       hour: profile.periodReminderHour,
+                       minute: profile.periodReminderMinute
+                   ) {
+                    await scheduleOneShot(
+                        category: .periodUpcoming,
+                        isPrivate: isPrivate,
+                        fireDate: fire,
+                        interruptionLevel: .active
+                    )
+                }
+            }
+
+            if profile.remindOvulation {
+                let ovulationDay = PredictionEngine.ovulationEstimate(nextPeriodStart: nextPeriod)
+                if let fire = scheduledFireDate(
+                    on: ovulationDay,
+                    hour: profile.ovulationReminderHour,
+                    minute: profile.ovulationReminderMinute
+                ) {
+                    await scheduleOneShot(
+                        category: .ovulation,
+                        isPrivate: isPrivate,
+                        fireDate: fire,
+                        interruptionLevel: .active
+                    )
+                }
+            }
+        }
+
+        if profile.birthControlEnabled && profile.birthControlReminderEnabled {
+            let method = profile.birthControlMethod
+            let startDate = profile.birthControlStartDate ?? today
+            switch method {
+            case .pill:
+                for offset in 0..<scheduleHorizonDays {
+                    guard let day = cal.date(byAdding: .day, value: offset, to: today) else { continue }
+                    guard let fire = scheduledFireDate(
+                        on: day,
+                        hour: profile.birthControlReminderHour,
+                        minute: profile.birthControlReminderMinute
+                    ) else { continue }
+                    await scheduleOneShot(
+                        category: .birthControl,
+                        isPrivate: isPrivate,
+                        fireDate: fire,
+                        interruptionLevel: .timeSensitive
+                    )
+                }
+            case .patch:
+                let patchDays = cal.dateComponents([.day], from: cal.startOfDay(for: startDate), to: today).day ?? 0
+                let patchCycleDay = patchDays % 28
+                let nextPatchOffset: Int = {
+                    if patchCycleDay < 7  { return 7 - patchCycleDay }
+                    if patchCycleDay < 14 { return 14 - patchCycleDay }
+                    if patchCycleDay < 21 { return 21 - patchCycleDay }
+                    return 28 - patchCycleDay
+                }()
+                if let changeDay = cal.date(byAdding: .day, value: nextPatchOffset, to: today),
+                   let fire = scheduledFireDate(on: changeDay, hour: profile.birthControlReminderHour, minute: profile.birthControlReminderMinute) {
+                    await scheduleOneShot(
+                        category: .birthControl,
+                        isPrivate: isPrivate,
+                        fireDate: fire,
+                        interruptionLevel: .timeSensitive
+                    )
+                }
+            case .ring:
+                let ringDays = cal.dateComponents([.day], from: cal.startOfDay(for: startDate), to: today).day ?? 0
+                let ringCycleDay = ringDays % 28
+                let nextRingOffset: Int = ringCycleDay < 21 ? (21 - ringCycleDay) : (28 - ringCycleDay)
+                if let eventDay = cal.date(byAdding: .day, value: nextRingOffset, to: today),
+                   let fire = scheduledFireDate(on: eventDay, hour: profile.birthControlReminderHour, minute: profile.birthControlReminderMinute) {
+                    await scheduleOneShot(
+                        category: .birthControl,
+                        isPrivate: isPrivate,
+                        fireDate: fire,
+                        interruptionLevel: .timeSensitive
+                    )
+                }
             }
         }
     }

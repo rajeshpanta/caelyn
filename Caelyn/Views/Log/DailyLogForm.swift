@@ -6,14 +6,20 @@ struct DailyLogForm: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \CycleEntry.date, order: .reverse) private var allEntries: [CycleEntry]
+    @Query private var profiles: [UserProfile]
 
     @State private var noteDraft: String = ""
     @State private var showAdvanced: Bool = false
     @State private var medicationDraft: String = ""
     @State private var basalTempDraft: String = ""
+    @State private var showAddSymptom = false
+    @State private var newSymptomDraft = ""
     @FocusState private var noteFocused: Bool
     @FocusState private var medicationFocused: Bool
     @FocusState private var basalFocused: Bool
+    @FocusState private var newSymptomFocused: Bool
+
+    private var profile: UserProfile? { profiles.first }
 
     private var entry: CycleEntry? {
         let target = Calendar.current.startOfDay(for: date)
@@ -26,6 +32,9 @@ struct DailyLogForm: View {
             painSection
             symptomsSection
             moodSection
+            energySection
+            temperatureSection
+            ovulationTestSection
             noteSection
             advancedSection
         }
@@ -183,27 +192,207 @@ struct DailyLogForm: View {
 
     // MARK: - Symptoms
 
+    private var visibleSymptoms: [Symptom] {
+        var base: [Symptom] = [.bloating, .acne, .cravings, .fatigue, .nausea, .dizziness, .sleepChanges, .tenderBreasts]
+        if profile?.perimenoEnabled == true {
+            base += Symptom.perimenoSymptoms.filter { !base.contains($0) }
+        }
+        if profile?.endoEnabled == true {
+            base += Symptom.endoSymptoms.filter { !base.contains($0) }
+        }
+        if profile?.pcosEnabled == true {
+            base += Symptom.pcosSymptoms.filter { !base.contains($0) }
+        }
+        if profile?.pregnancyEnabled == true {
+            base += Symptom.pregnancySymptoms.filter { !base.contains($0) }
+        }
+        if profile?.postpartumEnabled == true {
+            base += Symptom.postpartumSymptoms.filter { !base.contains($0) }
+        }
+        return base
+    }
+
     private var symptomsSection: some View {
-        let visibleSymptoms: [Symptom] = [
-            .bloating, .acne, .cravings, .fatigue,
-            .nausea, .dizziness, .sleepChanges, .tenderBreasts
-        ]
+        let customNames = profile?.customSymptoms ?? []
+        let builtInSelected = entry?.symptoms ?? []
+        let customSelected = entry?.loggedCustomSymptoms ?? []
         return SectionContainer(title: "Symptoms") {
-            LazyVGrid(
-                columns: Array(repeating: GridItem(.flexible(), spacing: CaelynSpacing.xs), count: 4),
-                spacing: CaelynSpacing.xs
-            ) {
-                ForEach(visibleSymptoms) { symptom in
-                    SymptomChip(
-                        label: symptom.displayName,
-                        icon: symptom.icon,
-                        isSelected: entry?.symptoms.contains(symptom) ?? false
-                    ) {
-                        toggleSymptom(symptom)
+            VStack(alignment: .leading, spacing: CaelynSpacing.md) {
+                // Built-in chips
+                LazyVGrid(
+                    columns: Array(repeating: GridItem(.flexible(), spacing: CaelynSpacing.xs), count: 4),
+                    spacing: CaelynSpacing.xs
+                ) {
+                    ForEach(visibleSymptoms) { symptom in
+                        SymptomChip(
+                            label: symptom.displayName,
+                            icon: symptom.icon,
+                            isSelected: entry?.symptoms.contains(symptom) ?? false
+                        ) {
+                            toggleSymptom(symptom)
+                        }
                     }
+                }
+
+                // Custom symptom chips + add button
+                FlowLayout(spacing: CaelynSpacing.xs) {
+                    ForEach(customNames, id: \.self) { name in
+                        SymptomChip(
+                            label: name,
+                            icon: "tag.fill",
+                            isSelected: entry?.loggedCustomSymptoms.contains(name) ?? false
+                        ) {
+                            toggleCustomSymptom(name)
+                        }
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                removeCustomSymptom(name)
+                            } label: {
+                                Label("Remove symptom", systemImage: "trash")
+                            }
+                        }
+                    }
+
+                    if customNames.count < 5 {
+                        Button {
+                            showAddSymptom = true
+                        } label: {
+                            Label("Add", systemImage: "plus")
+                                .font(CaelynFont.caption.weight(.semibold))
+                                .foregroundStyle(CaelynColor.primaryPlum)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 7)
+                                .background(CaelynColor.lavender.opacity(0.5), in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Add custom symptom")
+                    }
+                }
+
+                // Severity picker for all selected (built-in + custom)
+                if !builtInSelected.isEmpty || !customSelected.isEmpty {
+                    severitySection(builtIn: builtInSelected, custom: customSelected)
                 }
             }
         }
+        .sheet(isPresented: $showAddSymptom) {
+            addCustomSymptomSheet
+        }
+    }
+
+    // MARK: - Severity
+
+    private func severitySection(builtIn: [Symptom], custom: [String]) -> some View {
+        VStack(alignment: .leading, spacing: CaelynSpacing.xs) {
+            Text("SEVERITY")
+                .font(CaelynFont.caption.weight(.semibold))
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
+                .tracking(0.5)
+                .padding(.top, 4)
+
+            ForEach(builtIn) { symptom in
+                severityRow(name: symptom.displayName, key: symptom.rawValue)
+            }
+            ForEach(custom, id: \.self) { name in
+                severityRow(name: name, key: "custom:\(name)")
+            }
+        }
+    }
+
+    private func severityRow(name: String, key: String) -> some View {
+        let currentLevel = entry?.symptomSeverity[key] ?? 2
+        return HStack(spacing: 6) {
+            Text(name)
+                .font(CaelynFont.callout)
+                .foregroundStyle(CaelynColor.deepPlumText)
+                .frame(minWidth: 80, alignment: .leading)
+                .lineLimit(1)
+            Spacer(minLength: 4)
+            ForEach([1, 2, 3], id: \.self) { level in
+                let labels = ["Mild", "Mod", "Severe"]
+                let label = labels[level - 1]
+                let isActive = currentLevel == level
+                Button {
+                    Haptics.selection()
+                    withEntry { $0.symptomSeverity[key] = level }
+                } label: {
+                    Text(label)
+                        .font(CaelynFont.caption.weight(isActive ? .semibold : .regular))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .foregroundStyle(isActive ? Color.white : CaelynColor.deepPlumText.opacity(0.7))
+                        .background(
+                            isActive ? severityColor(level) : CaelynColor.lavender.opacity(0.45),
+                            in: Capsule()
+                        )
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("\(label) severity for \(name)")
+                .accessibilityAddTraits(isActive ? .isSelected : [])
+            }
+        }
+    }
+
+    private func severityColor(_ level: Int) -> Color {
+        switch level {
+        case 1:  return CaelynColor.successSage
+        case 2:  return CaelynColor.primaryPlum.opacity(0.75)
+        default: return CaelynColor.alertRose
+        }
+    }
+
+    // MARK: - Add Custom Symptom Sheet
+
+    private var addCustomSymptomSheet: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
+                Text("Name your symptom")
+                    .font(CaelynFont.callout)
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+
+                TextField("e.g. Insomnia, Joint pain", text: $newSymptomDraft)
+                    .focused($newSymptomFocused)
+                    .textFieldStyle(.roundedBorder)
+                    .autocorrectionDisabled()
+                    .onSubmit { commitAddSymptom() }
+
+                Spacer()
+            }
+            .padding(CaelynSpacing.lg)
+            .onAppear { newSymptomFocused = true }
+            .navigationTitle("Add Symptom")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        newSymptomDraft = ""
+                        showAddSymptom = false
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") { commitAddSymptom() }
+                        .disabled(addSymptomDisabled)
+                        .fontWeight(.semibold)
+                }
+            }
+        }
+        .presentationDetents([.height(220)])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var addSymptomDisabled: Bool {
+        let trimmed = newSymptomDraft.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return true }
+        let existing = profile?.customSymptoms ?? []
+        return existing.contains(trimmed)
+    }
+
+    private func commitAddSymptom() {
+        let name = newSymptomDraft.trimmingCharacters(in: .whitespaces)
+        guard !name.isEmpty, !(profile?.customSymptoms.contains(name) ?? false) else { return }
+        profile?.customSymptoms.append(name)
+        newSymptomDraft = ""
+        showAddSymptom = false
     }
 
     // MARK: - Mood
@@ -223,6 +412,161 @@ struct DailyLogForm: View {
                 }
             }
         }
+    }
+
+    // MARK: - Energy
+
+    private var energySection: some View {
+        SectionContainer(title: "Energy") {
+            HStack(spacing: CaelynSpacing.xs) {
+                ForEach(EnergyLevel.allCases) { level in
+                    energyPill(level)
+                }
+            }
+        }
+    }
+
+    private func energyPill(_ level: EnergyLevel) -> some View {
+        let isSelected = entry?.energyLevel == level
+        return Button {
+            Haptics.selection()
+            withEntry { $0.energyLevel = $0.energyLevel == level ? nil : level }
+        } label: {
+            VStack(spacing: 5) {
+                Image(systemName: level.icon)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(isSelected ? energyColor(level) : CaelynColor.deepPlumText.opacity(0.4))
+                Text(level.displayName)
+                    .font(CaelynFont.caption.weight(isSelected ? .semibold : .regular))
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(isSelected ? 0.9 : 0.55))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, CaelynSpacing.sm)
+            .background(
+                isSelected ? energyColor(level).opacity(0.15) : CaelynColor.cardWhite.opacity(0.5),
+                in: RoundedRectangle(cornerRadius: CaelynRadius.chip, style: .continuous)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: CaelynRadius.chip, style: .continuous)
+                    .stroke(
+                        isSelected ? energyColor(level).opacity(0.4) : CaelynColor.deepPlumText.opacity(0.06),
+                        lineWidth: 1
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(level.displayName) energy")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private func energyColor(_ level: EnergyLevel) -> Color {
+        switch level {
+        case .drained:   return CaelynColor.deepPlumText
+        case .low:       return CaelynColor.alertRose
+        case .moderate:  return CaelynColor.warmSand
+        case .high:      return CaelynColor.successSage
+        case .energized: return CaelynColor.primaryPlum
+        }
+    }
+
+    // MARK: - Temperature
+
+    private var temperatureSection: some View {
+        SectionContainer(title: "Basal Body Temp") {
+            HStack(spacing: CaelynSpacing.sm) {
+                Image(systemName: "thermometer.medium")
+                    .foregroundStyle(CaelynColor.primaryPlum)
+                    .frame(width: 24)
+                TextField("°C (e.g. 36.5)", text: $basalTempDraft)
+                    .font(CaelynFont.body)
+                    .foregroundStyle(CaelynColor.deepPlumText)
+                    .keyboardType(.decimalPad)
+                    .focused($basalFocused)
+                if let temp = entry?.basalTemperature {
+                    Text(String(format: "%.2f°", temp))
+                        .font(CaelynFont.callout.monospacedDigit())
+                        .foregroundStyle(CaelynColor.primaryPlum)
+                }
+            }
+        }
+    }
+
+    // MARK: - Ovulation Test
+
+    private var ovulationTestSection: some View {
+        SectionContainer(title: "Ovulation Test (LH Strip)") {
+            VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
+                HStack(spacing: CaelynSpacing.xs) {
+                    // Clear button
+                    if entry?.ovulationTestResult != nil {
+                        Button {
+                            Haptics.selection()
+                            withEntry { $0.ovulationTestResult = nil }
+                        } label: {
+                            Image(systemName: "xmark.circle")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    Spacer(minLength: 0)
+                }
+                HStack(spacing: CaelynSpacing.xs) {
+                    ForEach(OvulationTestResult.allCases) { result in
+                        ovTestChip(result)
+                    }
+                }
+                if let result = entry?.ovulationTestResult, result == .positive || result == .lhSurge {
+                    Label(
+                        result == .positive
+                            ? "Ovulation likely today — highest fertility window."
+                            : "LH surge detected — ovulation expected within 24–36 hours.",
+                        systemImage: "info.circle"
+                    )
+                    .font(CaelynFont.caption)
+                    .foregroundStyle(CaelynColor.successSage)
+                }
+            }
+        }
+    }
+
+    private func ovTestChip(_ result: OvulationTestResult) -> some View {
+        let isSelected = entry?.ovulationTestResult == result
+        let accentColor: Color = {
+            switch result {
+            case .negative: return CaelynColor.deepPlumText.opacity(0.6)
+            case .lhSurge:  return CaelynColor.warmSand
+            case .positive: return CaelynColor.successSage
+            }
+        }()
+        return Button {
+            Haptics.selection()
+            withEntry { $0.ovulationTestResult = $0.ovulationTestResult == result ? nil : result }
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: result.icon)
+                    .font(.system(size: 13, weight: .medium))
+                Text(result.displayName)
+                    .font(CaelynFont.callout.weight(isSelected ? .semibold : .regular))
+            }
+            .foregroundStyle(isSelected ? .white : accentColor)
+            .padding(.horizontal, CaelynSpacing.sm)
+            .padding(.vertical, CaelynSpacing.xs)
+            .frame(maxWidth: .infinity)
+            .background(
+                isSelected ? accentColor : accentColor.opacity(0.12),
+                in: RoundedRectangle(cornerRadius: CaelynRadius.chip, style: .continuous)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: CaelynRadius.chip, style: .continuous)
+                    .stroke(isSelected ? accentColor.opacity(0.0) : accentColor.opacity(0.25), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(result.displayName) ovulation test")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     // MARK: - Note
@@ -276,15 +620,6 @@ struct DailyLogForm: View {
             if showAdvanced {
                 VStack(spacing: CaelynSpacing.sm) {
                     medicationField
-                    basalTempField
-                    advancedToggleRow(
-                        title: "Ovulation test",
-                        icon: "testtube.2",
-                        isOn: Binding(
-                            get: { entry?.ovulationTest ?? false },
-                            set: { newValue in withEntry { $0.ovulationTest = newValue ? true : nil } }
-                        )
-                    )
                     advancedToggleRow(
                         title: "Pregnancy test",
                         icon: "cross.case",
@@ -321,21 +656,6 @@ struct DailyLogForm: View {
                     .focused($medicationFocused)
                     .submitLabel(.done)
                     .onSubmit { commitMedication() }
-            }
-        }
-    }
-
-    private var basalTempField: some View {
-        CaelynCard(padding: CaelynSpacing.md) {
-            HStack(spacing: CaelynSpacing.sm) {
-                Image(systemName: "thermometer.medium")
-                    .foregroundStyle(CaelynColor.primaryPlum)
-                    .frame(width: 24)
-                TextField("Basal temperature", text: $basalTempDraft)
-                    .font(CaelynFont.body)
-                    .foregroundStyle(CaelynColor.deepPlumText)
-                    .keyboardType(.decimalPad)
-                    .focused($basalFocused)
             }
         }
     }
@@ -395,6 +715,10 @@ struct DailyLogForm: View {
         target.updatedAt = .now
         modelContext.saveOrLog()
 
+        // Prompt for review after meaningful engagement.
+        let entryCount = allEntries.count
+        Task { @MainActor in RatingService.considerRequestingReview(loggedEntryCount: entryCount) }
+
         // Fire-and-forget HealthKit sync. Service no-ops if not connected.
         let snapshotEntries = allEntries
         let captured = target
@@ -405,10 +729,35 @@ struct DailyLogForm: View {
         withEntry { entry in
             if let idx = entry.symptoms.firstIndex(of: symptom) {
                 entry.symptoms.remove(at: idx)
+                entry.symptomSeverity.removeValue(forKey: symptom.rawValue)
             } else {
                 entry.symptoms.append(symptom)
+                entry.symptomSeverity[symptom.rawValue] = 2  // default: moderate
             }
         }
+    }
+
+    private func toggleCustomSymptom(_ name: String) {
+        Haptics.selection()
+        withEntry { entry in
+            if let idx = entry.loggedCustomSymptoms.firstIndex(of: name) {
+                entry.loggedCustomSymptoms.remove(at: idx)
+                entry.symptomSeverity.removeValue(forKey: "custom:\(name)")
+            } else {
+                entry.loggedCustomSymptoms.append(name)
+                entry.symptomSeverity["custom:\(name)"] = 2  // default: moderate
+            }
+        }
+    }
+
+    private func removeCustomSymptom(_ name: String) {
+        // Deselect from today's log if selected
+        withEntry { entry in
+            entry.loggedCustomSymptoms.removeAll { $0 == name }
+            entry.symptomSeverity.removeValue(forKey: "custom:\(name)")
+        }
+        // Remove from the user's custom list
+        profile?.customSymptoms.removeAll { $0 == name }
     }
 
     private func togglePainType(_ painType: PainType) {

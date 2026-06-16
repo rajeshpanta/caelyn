@@ -2,13 +2,89 @@ import SwiftUI
 
 struct MainTabView: View {
     @State private var selection: Tab = .home
+    @State private var iPadSelection: Tab? = .home
     @State private var router = NotificationRouter.shared
+    @Environment(\.horizontalSizeClass) private var hSizeClass
 
-    enum Tab: Hashable {
+    enum Tab: Hashable, CaseIterable {
         case home, calendar, log, insights, settings
+
+        var label: String {
+            switch self {
+            case .home:     return "Home"
+            case .calendar: return "Calendar"
+            case .log:      return "Log"
+            case .insights: return "Insights"
+            case .settings: return "Settings"
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .home:     return "house"
+            case .calendar: return "calendar"
+            case .log:      return "square.and.pencil"
+            case .insights: return "chart.bar"
+            case .settings: return "gearshape"
+            }
+        }
+
+        var selectedIcon: String {
+            switch self {
+            case .home:     return "house.fill"
+            case .calendar: return "calendar.badge.checkmark"
+            case .log:      return "square.and.pencil.circle.fill"
+            case .insights: return "chart.bar.fill"
+            case .settings: return "gearshape.fill"
+            }
+        }
+
+        @ViewBuilder
+        var destination: some View {
+            switch self {
+            case .home:     HomeView()
+            case .calendar: CalendarView()
+            case .log:      LogView()
+            case .insights: InsightsView()
+            case .settings: SettingsView()
+            }
+        }
     }
 
     var body: some View {
+        if hSizeClass == .regular {
+            ipadLayout
+        } else {
+            iPhoneLayout
+        }
+    }
+
+    // MARK: - iPad: sidebar + detail split
+
+    private var ipadLayout: some View {
+        NavigationSplitView {
+            List(selection: $iPadSelection) {
+                ForEach(Tab.allCases, id: \.self) { tab in
+                    Label(tab.label, systemImage: iPadSelection == tab ? tab.selectedIcon : tab.icon)
+                        .tag(tab)
+                }
+            }
+            .navigationTitle("Caelyn")
+            .listStyle(.sidebar)
+            .tint(CaelynColor.primaryPlum)
+        } detail: {
+            (iPadSelection ?? .home).destination
+        }
+        .tint(CaelynColor.primaryPlum)
+        .environment(\.highlightedNotificationCategory, router.highlightedCategory)
+        .onChange(of: router.pendingCategory) { _, newCategory in
+            handlePendingCategory(newCategory)
+        }
+    }
+
+    // MARK: - iPhone: tab bar
+
+    private var iPhoneLayout: some View {
         TabView(selection: $selection) {
             HomeView()
                 .tabItem {
@@ -52,7 +128,7 @@ struct MainTabView: View {
         switch category {
         case .dailyCheckIn, .periodUpcoming, .ovulation:
             return .home
-        case .medication:
+        case .medication, .birthControl:
             return .log
         }
     }

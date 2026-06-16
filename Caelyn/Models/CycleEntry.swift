@@ -9,10 +9,15 @@ final class CycleEntry {
     var painTypes: [PainType]
     var symptoms: [Symptom]
     var mood: Mood?
+    var energyLevel: EnergyLevel?
+    /// Severity per logged symptom: key = Symptom.rawValue, value = 1 (mild) / 2 (moderate) / 3 (severe).
+    /// Only symptoms in `symptoms` array should have entries here.
+    var symptomSeverity: [String: Int]
+    var loggedCustomSymptoms: [String]
     var note: String?
 
     var medication: String?
-    var ovulationTest: Bool?
+    var ovulationTestResult: OvulationTestResult?
     var pregnancyTest: Bool?
     var cervicalMucus: CervicalMucus?
     var basalTemperature: Double?
@@ -36,9 +41,12 @@ final class CycleEntry {
         self.painTypes = painTypes
         self.symptoms = symptoms
         self.mood = mood
+        self.energyLevel = nil
+        self.symptomSeverity = [:]
+        self.loggedCustomSymptoms = []
         self.note = note
         self.medication = nil
-        self.ovulationTest = nil
+        self.ovulationTestResult = nil
         self.pregnancyTest = nil
         self.cervicalMucus = nil
         self.basalTemperature = nil
@@ -54,9 +62,11 @@ final class CycleEntry {
             || !painTypes.isEmpty
             || !symptoms.isEmpty
             || mood != nil
+            || energyLevel != nil
+            || !loggedCustomSymptoms.isEmpty
             || (note?.isEmpty == false)
             || medication != nil
-            || ovulationTest != nil
+            || ovulationTestResult != nil
             || pregnancyTest != nil
             || cervicalMucus != nil
             || basalTemperature != nil

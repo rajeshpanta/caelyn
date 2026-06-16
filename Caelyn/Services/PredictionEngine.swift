@@ -47,17 +47,20 @@ enum PredictionEngine {
         return count
     }
 
-    /// Mean of recent cycle lengths. Falls back to user-entered value when fewer than 2 cycles logged.
+    /// Recency-weighted mean of recent cycle lengths. More recent cycles count more
+    /// (decay factor 0.85 per step back), so the prediction self-corrects faster
+    /// when the user's cycle changes. Falls back to user-entered value when fewer
+    /// than 2 cycles logged.
     static func averageCycleLength(of cycles: [Cycle], fallback: Int) -> Int {
         guard cycles.count >= 2 else { return fallback }
-        let recent = cycles.suffix(6).map(\.length)
-        return Int((Double(recent.reduce(0, +)) / Double(recent.count)).rounded())
+        let recent = Array(cycles.suffix(6))
+        return weightedMean(recent.map(\.length))
     }
 
     static func averagePeriodLength(of cycles: [Cycle], fallback: Int) -> Int {
         guard cycles.count >= 2 else { return fallback }
-        let recent = cycles.suffix(6).map(\.periodLength)
-        return Int((Double(recent.reduce(0, +)) / Double(recent.count)).rounded())
+        let recent = Array(cycles.suffix(6))
+        return weightedMean(recent.map(\.periodLength))
     }
 
     /// Variation: half the spread of recent cycle lengths (±N days).
@@ -66,6 +69,21 @@ enum PredictionEngine {
         let lengths = cycles.suffix(6).map(\.length)
         guard let min = lengths.min(), let max = lengths.max() else { return 0 }
         return (max - min + 1) / 2
+    }
+
+    /// Exponentially-weighted mean: newest value has weight 1.0, each prior step
+    /// decays by 0.85. Values are ordered oldest → newest (suffix order).
+    private static func weightedMean(_ values: [Int]) -> Int {
+        guard !values.isEmpty else { return 0 }
+        let decay = 0.85
+        var weightedSum = 0.0
+        var totalWeight = 0.0
+        for (i, value) in values.enumerated() {
+            let weight = pow(decay, Double(values.count - 1 - i))
+            weightedSum += Double(value) * weight
+            totalWeight += weight
+        }
+        return Int((weightedSum / totalWeight).rounded())
     }
 
     /// Cycle day (1-indexed) computed by wrapping at cycleLength.
@@ -96,16 +114,62 @@ enum PredictionEngine {
         return nextPeriodStart...end
     }
 
-    /// Estimated ovulation: nextStart - 14.
+    /// Estimated ovulation day: nextStart - 14 (standard 14-day luteal phase model).
     static func ovulationEstimate(nextPeriodStart: Date) -> Date {
         calendar.date(byAdding: .day, value: -14, to: nextPeriodStart) ?? nextPeriodStart
     }
 
-    /// PMS window: 5 days ending the day before the predicted period.
-    static func pmsWindow(nextPeriodStart: Date) -> ClosedRange<Date> {
-        let end = calendar.date(byAdding: .day, value: -1, to: nextPeriodStart) ?? nextPeriodStart
-        let start = calendar.date(byAdding: .day, value: -5, to: nextPeriodStart) ?? end
+    /// Fertile window: the 5-day window where conception is most likely.
+    /// Sperm survive up to 5 days; the egg lives ~12-24 hours post-ovulation.
+    /// Window spans ovulation-day-4 through ovulation-day+1 (peak = ovulation day).
+    static func fertileWindow(nextPeriodStart: Date) -> ClosedRange<Date> {
+        let ovulation = ovulationEstimate(nextPeriodStart: nextPeriodStart)
+        let start = calendar.date(byAdding: .day, value: -4, to: ovulation) ?? ovulation
+        let end   = calendar.date(byAdding: .day, value: 1,  to: ovulation) ?? ovulation
         return start...end
+    }
+
+    /// PMS window ending the day before the predicted period.
+    /// `daysBefore` defaults to 5; pass `adaptivePmsDaysBefore()` to personalise.
+    static func pmsWindow(nextPeriodStart: Date, daysBefore: Int = 5) -> ClosedRange<Date> {
+        let end = calendar.date(byAdding: .day, value: -1, to: nextPeriodStart) ?? nextPeriodStart
+        let start = calendar.date(byAdding: .day, value: -daysBefore, to: nextPeriodStart) ?? end
+        return start...end
+    }
+
+    /// Returns the average number of days before the period start at which PMS
+    /// symptoms / moods first appear, derived from actual logged data. Returns nil
+    /// when fewer than 3 cycles have qualifying markers (fallback to the default 5).
+    static func adaptivePmsDaysBefore(entries: [CycleEntry], cycles: [Cycle]) -> Int? {
+        let pmsSymptoms: Set<Symptom> = [.bloating, .cravings, .tenderBreasts, .fatigue, .acne, .cramps]
+        let pmsMoods: Set<Mood>       = [.anxious, .irritable, .moody, .sad, .sensitive, .lowEnergy]
+
+        var onsets: [Int] = []
+        for cycle in cycles {
+            guard let windowStart = calendar.date(byAdding: .day, value: -14, to: cycle.start) else { continue }
+            let periodDay = calendar.startOfDay(for: cycle.start)
+
+            let windowEntries = entries.filter {
+                let d = calendar.startOfDay(for: $0.date)
+                return d >= windowStart && d < periodDay
+            }
+
+            // Find the *earliest* PMS marker in the pre-period window.
+            let pmsEntries = windowEntries.filter { entry in
+                let hasMood    = entry.mood.map { pmsMoods.contains($0) } ?? false
+                let hasSymptom = entry.symptoms.contains { pmsSymptoms.contains($0) }
+                return hasMood || hasSymptom
+            }
+
+            if let earliest = pmsEntries.map({ calendar.startOfDay(for: $0.date) }).min() {
+                let daysUntil = calendar.dateComponents([.day], from: earliest, to: periodDay).day ?? 0
+                if daysUntil > 0 { onsets.append(daysUntil) }
+            }
+        }
+
+        guard onsets.count >= 3 else { return nil }
+        let avg = Int(Double(onsets.reduce(0, +)) / Double(onsets.count))
+        return max(2, min(14, avg))
     }
 
     /// Phase classification for a cycle day (1-indexed).
@@ -159,5 +223,48 @@ enum PredictionEngine {
             }
         }
         return counts.max(by: { $0.value < $1.value })
+    }
+
+    /// Determines whether logged cycle data suggests irregular cycles.
+    /// Requires at least 3 completed cycles for any determination.
+    static func irregularCycleStatus(from cycles: [Cycle]) -> IrregularCycleStatus {
+        guard cycles.count >= 3 else { return .insufficient }
+
+        let lengths = cycles.map(\.length)
+        let avg = Double(lengths.reduce(0, +)) / Double(lengths.count)
+        let variation = cycleLengthVariation(of: cycles)
+
+        // Any cycle longer than 45 days → skipped period
+        if lengths.contains(where: { $0 > 45 }) {
+            return .irregular(reason: .skippedPeriods)
+        }
+
+        // High variation (> 7 days)
+        if variation > 7 {
+            return .irregular(reason: .highVariation)
+        }
+
+        // Consistently long cycles (avg > 35 days)
+        if avg > 35 {
+            return .irregular(reason: .longCycles)
+        }
+
+        // Consistently short cycles (avg < 21 days)
+        if avg < 21 {
+            return .irregular(reason: .shortCycles)
+        }
+
+        // Progressive shift (requires ≥6 cycles): recent avg differs from older avg by >7 days
+        if cycles.count >= 6 {
+            let recent = cycles.suffix(3).map(\.length)
+            let older  = cycles.dropLast(3).suffix(3).map(\.length)
+            let rAvg   = Double(recent.reduce(0, +)) / 3.0
+            let oAvg   = Double(older.reduce(0, +)) / 3.0
+            if abs(rAvg - oAvg) >= 7 {
+                return .irregular(reason: .increasingShift)
+            }
+        }
+
+        return .regular
     }
 }

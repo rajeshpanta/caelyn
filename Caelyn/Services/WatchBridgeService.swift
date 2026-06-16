@@ -1,0 +1,74 @@
+import Foundation
+import WatchConnectivity
+import SwiftData
+
+/// Bridges the iPhone app and Apple Watch companion.
+/// - Sends the current WidgetSnapshot to Watch whenever it changes.
+/// - Receives quick log entries from Watch and saves them as CycleEntry.
+@MainActor
+final class WatchBridgeService: NSObject, ObservableObject {
+    static let shared = WatchBridgeService()
+
+    private override init() { super.init() }
+
+    func activate() {
+        guard WCSession.isSupported() else { return }
+        WCSession.default.delegate = self
+        WCSession.default.activate()
+    }
+
+    func pushSnapshot(_ snapshot: WidgetSnapshot) {
+        guard WCSession.isSupported(),
+              WCSession.default.activationState == .activated,
+              WCSession.default.isWatchAppInstalled else { return }
+        guard let data = try? JSONEncoder().encode(snapshot) else { return }
+        try? WCSession.default.updateApplicationContext(["snapshot": data])
+    }
+}
+
+extension WatchBridgeService: WCSessionDelegate {
+    nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
+    nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
+    nonisolated func sessionDidDeactivate(_ session: WCSession) {
+        WCSession.default.activate()
+    }
+
+    nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
+        handleIncoming(userInfo)
+    }
+
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        handleIncoming(message)
+    }
+
+    private nonisolated func handleIncoming(_ info: [String: Any]) {
+        guard let timestamp = info["date"] as? TimeInterval else { return }
+        let date = Date(timeIntervalSince1970: timestamp)
+        let flow  = info["flow"] as? String
+        let pain  = info["pain"] as? Int
+        let mood  = info["mood"] as? String
+
+        DispatchQueue.main.async {
+            Task { @MainActor in
+                guard let container = try? ModelContainer(for: CycleEntry.self, UserProfile.self) else { return }
+                let context = container.mainContext
+                let cal = Calendar.current
+                let target = cal.startOfDay(for: date)
+                let descriptor = FetchDescriptor<CycleEntry>(
+                    predicate: #Predicate { $0.date == target }
+                )
+                let existing = (try? context.fetch(descriptor))?.first
+                let entry = existing ?? {
+                    let e = CycleEntry(date: date)
+                    context.insert(e)
+                    return e
+                }()
+                if let f = flow, let level = FlowLevel(rawValue: f) { entry.flow = level }
+                if let p = pain { entry.pain = p }
+                if let m = mood, let moodVal = Mood(rawValue: m) { entry.mood = moodVal }
+                entry.updatedAt = .now
+                try? context.save()
+            }
+        }
+    }
+}

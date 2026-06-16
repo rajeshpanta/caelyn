@@ -6,6 +6,9 @@ struct SettingsView: View {
     @Query private var entries: [CycleEntry]
     @Environment(\.modelContext) private var modelContext
 
+    @State private var showingCycleSettings = false
+    @State private var showingPrivacyTrust = false
+    @State private var showingCloudSync = false
     @State private var showingFirstDayPicker = false
     @State private var showingResetOnboardingConfirm = false
     @State private var showingDeleteFirst = false
@@ -18,6 +21,8 @@ struct SettingsView: View {
     @State private var showingExportSheet = false
     @State private var showingReminders = false
     @State private var showingHealthKit = false
+    @State private var showingBirthControl = false
+    @State private var showingShareMode = false
     @State private var showingPaywall = false
     @State private var purchase = PurchaseService.shared
 
@@ -40,6 +45,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
                     proSection
+                    cycleSection
                     privacySection
                     healthSection
                     dataSection
@@ -55,11 +61,26 @@ struct SettingsView: View {
             }
             .background(CaelynColor.backgroundCream.ignoresSafeArea())
             .navigationTitle("Settings")
+            .navigationDestination(isPresented: $showingCycleSettings) {
+                if let profile { CycleSettingsView(profile: profile) }
+            }
+            .navigationDestination(isPresented: $showingPrivacyTrust) {
+                PrivacyTrustView()
+            }
+            .navigationDestination(isPresented: $showingCloudSync) {
+                iCloudSyncView()
+            }
             .navigationDestination(isPresented: $showingReminders) {
                 RemindersView()
             }
             .navigationDestination(isPresented: $showingHealthKit) {
                 HealthKitConnectView()
+            }
+            .navigationDestination(isPresented: $showingBirthControl) {
+                BirthControlView()
+            }
+            .navigationDestination(isPresented: $showingShareMode) {
+                ShareModeView()
             }
         }
         .sheet(isPresented: $showingExportSheet) {
@@ -197,10 +218,34 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Cycle section
+
+    private var cycleSection: some View {
+        SettingsSectionCard(title: "Cycle") {
+            if let profile {
+                SettingsRow(
+                    icon: "drop.fill",
+                    iconColor: CaelynColor.alertRose,
+                    title: "Cycle & period length",
+                    detail: "\(profile.averageCycleLength)-day cycle · \(profile.averagePeriodLength)-day period",
+                    action: { showingCycleSettings = true }
+                )
+            }
+        }
+    }
+
     // MARK: - Privacy section
 
     private var privacySection: some View {
         SettingsSectionCard(title: "Privacy") {
+            SettingsRow(
+                icon: "lock.shield.fill",
+                iconColor: CaelynColor.primaryPlum,
+                title: "Your privacy",
+                detail: "How Caelyn protects your data",
+                action: { showingPrivacyTrust = true }
+            )
+            SettingsDivider()
             if let profile {
                 SettingsToggleRow(
                     icon: lockIcon,
@@ -246,8 +291,28 @@ struct SettingsView: View {
 
     // MARK: - Data section
 
+    private var iCloudStatusDetail: String {
+        FileManager.default.ubiquityIdentityToken != nil ? "On" : "Off — sign in to iCloud"
+    }
+
     private var dataSection: some View {
         SettingsSectionCard(title: "Data") {
+            SettingsRow(
+                icon: "icloud.fill",
+                iconColor: CaelynColor.primaryPlum,
+                title: "iCloud backup",
+                detail: iCloudStatusDetail,
+                action: { showingCloudSync = true }
+            )
+            SettingsDivider()
+            SettingsRow(
+                icon: "person.2",
+                iconColor: CaelynColor.primaryPlum,
+                title: "Partner Access",
+                detail: purchase.isPro ? nil : "Pro",
+                action: { purchase.isPro ? (showingShareMode = true) : (showingPaywall = true) }
+            )
+            SettingsDivider()
             SettingsRow(
                 icon: "square.and.arrow.up",
                 iconColor: CaelynColor.primaryPlum,
@@ -277,6 +342,16 @@ struct SettingsView: View {
                 title: "First day of week",
                 detail: firstDayLabel,
                 action: { showingFirstDayPicker = true }
+            )
+            SettingsDivider()
+            SettingsRow(
+                icon: "pills",
+                iconColor: CaelynColor.successSage,
+                title: "Birth Control",
+                detail: purchase.isPro
+                    ? (profile?.birthControlEnabled == true ? (profile?.birthControlMethod.displayName ?? "On") : "Off")
+                    : "Pro",
+                action: { purchase.isPro ? (showingBirthControl = true) : (showingPaywall = true) }
             )
             SettingsDivider()
             SettingsRow(

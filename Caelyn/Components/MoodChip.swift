@@ -19,6 +19,8 @@ struct MoodChip: View {
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(label) mood")
+        .accessibilityHint(isSelected ? "Selected" : "Tap to select")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

@@ -98,7 +98,7 @@ struct PaywallView: View {
                 .font(.system(size: 32, weight: .semibold, design: .rounded))
                 .foregroundStyle(CaelynColor.deepPlumText)
                 .multilineTextAlignment(.center)
-            Text("Understand your body, deeper. With insights, reports, and reminders that grow with you.")
+            Text("Advanced insights, fertility tracking, a Watch companion, and specialist modes — built for your whole health journey.")
                 .font(CaelynFont.body)
                 .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
                 .multilineTextAlignment(.center)
@@ -109,11 +109,6 @@ struct PaywallView: View {
 
     // MARK: - Features
 
-    /// Comparison only lists features that ship in this build AND are
-    /// truthfully enforced. "Custom themes", "Yearly summary", "iCloud
-    /// backup", and "Widgets" are deliberately omitted — they aren't
-    /// implemented yet, and listing aspirational features in a paid-IAP
-    /// comparison is a misrepresentation Apple Review will flag.
     private var featureSection: some View {
         CaelynCard(padding: CaelynSpacing.md) {
             VStack(spacing: 0) {
@@ -125,15 +120,23 @@ struct PaywallView: View {
                 featureDivider
                 featureRow("Symptom & mood logging", inFree: true, inPro: true)
                 featureDivider
-                featureRow("Beautiful calendar", inFree: true, inPro: true)
+                featureRow("Calendar & cycle history", inFree: true, inPro: true)
                 featureDivider
-                featureRow("Gentle reminders", inFree: true, inPro: true)
+                featureRow("Reminders & alerts", inFree: true, inPro: true)
                 featureDivider
-                featureRow("CSV export", inFree: true, inPro: true)
+                featureRow("CSV data export", inFree: true, inPro: true)
                 featureDivider
-                featureRow("Advanced pattern insights", inFree: false, inPro: true)
+                featureRow("Advanced insights & charts", inFree: false, inPro: true)
                 featureDivider
-                featureRow("PDF cycle reports", inFree: false, inPro: true)
+                featureRow("PDF doctor report", inFree: false, inPro: true)
+                featureDivider
+                featureRow("TTC fertility tracking", inFree: false, inPro: true)
+                featureDivider
+                featureRow("Condition modes (endo, PCOS…)", inFree: false, inPro: true)
+                featureDivider
+                featureRow("Apple Watch companion", inFree: false, inPro: true)
+                featureDivider
+                featureRow("Partner view access", inFree: false, inPro: true)
             }
         }
     }
@@ -192,31 +195,48 @@ struct PaywallView: View {
     // MARK: - Tier cards
 
     private var tierCards: some View {
-        HStack(spacing: CaelynSpacing.sm) {
-            PaywallTierCard(
-                kind: .monthly,
-                displayPrice: monthlyDisplayPrice,
-                strikethroughPrice: monthlyOriginalPrice,
-                perMonthLabel: nil,
-                badgeText: "$2 OFF",
-                badgeBackground: CaelynColor.alertRose,
-                isSelected: selectedTier == .monthly,
-                isBestValue: false
-            ) {
-                selectedTier = .monthly
+        VStack(spacing: CaelynSpacing.sm) {
+            HStack(spacing: CaelynSpacing.sm) {
+                PaywallTierCard(
+                    kind: .monthly,
+                    displayPrice: monthlyDisplayPrice,
+                    strikethroughPrice: nil,
+                    perMonthLabel: nil,
+                    badgeText: "FLEXIBLE",
+                    badgeBackground: CaelynColor.deepPlumText.opacity(0.45),
+                    isSelected: selectedTier == .monthly,
+                    isBestValue: false
+                ) {
+                    selectedTier = .monthly
+                }
+
+                PaywallTierCard(
+                    kind: .yearly,
+                    displayPrice: yearlyDisplayPrice,
+                    strikethroughPrice: nil,
+                    perMonthLabel: yearlyPerMonthLabel,
+                    badgeText: yearlySavingsBadgeText,
+                    badgeBackground: CaelynColor.successSage,
+                    isSelected: selectedTier == .yearly,
+                    isBestValue: true
+                ) {
+                    selectedTier = .yearly
+                }
             }
 
-            PaywallTierCard(
-                kind: .yearly,
-                displayPrice: yearlyDisplayPrice,
-                strikethroughPrice: nil,
-                perMonthLabel: yearlyPerMonthLabel,
-                badgeText: yearlySavingsBadgeText,
-                badgeBackground: CaelynColor.successSage,
-                isSelected: selectedTier == .yearly,
-                isBestValue: true
-            ) {
-                selectedTier = .yearly
+            if purchase.lifetimeProduct != nil {
+                PaywallTierCard(
+                    kind: .lifetime,
+                    displayPrice: lifetimeDisplayPrice,
+                    strikethroughPrice: nil,
+                    perMonthLabel: "Pay once · own forever",
+                    badgeText: "ONE-TIME",
+                    badgeBackground: CaelynColor.primaryPlum,
+                    isSelected: selectedTier == .lifetime,
+                    isBestValue: false
+                ) {
+                    selectedTier = .lifetime
+                }
             }
         }
     }
@@ -268,10 +288,8 @@ struct PaywallView: View {
         .padding(.horizontal, 4)
     }
 
-    /// Subscription disclosure required by App Store Review for any
-    /// auto-renewable IAP. Includes the auto-renew wording and the
-    /// cancellation instruction. The actual subscription length and price are
-    /// shown by the tier cards above so the user sees them in context.
+    /// Subscription disclosure required by App Store Review for auto-renewable IAPs.
+    /// Omitted for the lifetime one-time purchase tier.
     private var trustCopy: some View {
         VStack(spacing: 4) {
             HStack(spacing: 6) {
@@ -280,9 +298,15 @@ struct PaywallView: View {
                 Text("Your core cycle data stays yours.")
                     .font(CaelynFont.footnote)
             }
-            Text("Auto-renewable subscription. Renews at the price shown above unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions.")
-                .font(CaelynFont.footnote)
-                .fixedSize(horizontal: false, vertical: true)
+            if selectedTier != .lifetime {
+                Text("Auto-renewable subscription. Renews at the price shown above unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions.")
+                    .font(CaelynFont.footnote)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text("One-time purchase. No subscription required. Access is permanent and does not expire.")
+                    .font(CaelynFont.footnote)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
         .multilineTextAlignment(.center)
@@ -343,17 +367,18 @@ struct PaywallView: View {
 
     private var selectedProduct: Product? {
         switch selectedTier {
-        case .monthly: return purchase.monthlyProduct
-        case .yearly:  return purchase.yearlyProduct
+        case .monthly:  return purchase.monthlyProduct
+        case .yearly:   return purchase.yearlyProduct
+        case .lifetime: return purchase.lifetimeProduct
         }
     }
 
     private var ctaTitle: String {
         if purchase.isPro { return "You're already Pro" }
-        if isPurchasing { return "Subscribing…" }
         switch selectedTier {
-        case .monthly: return "Continue with Monthly"
-        case .yearly:  return "Continue with Yearly"
+        case .monthly:  return isPurchasing ? "Subscribing…"  : "Continue with Monthly"
+        case .yearly:   return isPurchasing ? "Subscribing…"  : "Continue with Yearly"
+        case .lifetime: return isPurchasing ? "Purchasing…"   : "Get Lifetime Access"
         }
     }
 
@@ -367,18 +392,14 @@ struct PaywallView: View {
         return "\(product.displayPrice)/mo"
     }
 
-    /// Synthesized "was X" price for the discount badge — this is marketing copy,
-    /// independent of StoreKit's real price. Derived from the live product price,
-    /// so it stays consistent if pricing changes in App Store Connect.
-    private var monthlyOriginalPrice: String? {
-        guard let product = purchase.monthlyProduct else { return nil }
-        let original = product.price + 2
-        return formatPrice(original, with: product) + "/mo"
-    }
-
     private var yearlyDisplayPrice: String {
         guard let product = purchase.yearlyProduct else { return "—" }
         return "\(product.displayPrice)/yr"
+    }
+
+    private var lifetimeDisplayPrice: String {
+        guard let product = purchase.lifetimeProduct else { return "—" }
+        return product.displayPrice
     }
 
     private var yearlyPerMonthLabel: String? {

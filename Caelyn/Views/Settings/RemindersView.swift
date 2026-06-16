@@ -39,6 +39,42 @@ private struct RemindersForm: View {
                 introCopy
                 howRemindersWorkCard
 
+                sectionHeader("Cycle")
+
+                VStack(spacing: 0) {
+                    ToggleCard(
+                        title: "Period start",
+                        subtitle: "Get reminded before your period is predicted to start.",
+                        icon: "drop.circle",
+                        isOn: bind(\.remindPeriodStart)
+                    )
+                    if profile.remindPeriodStart {
+                        timePickerRow(
+                            label: "Reminder time",
+                            hour: bindHour(\.periodReminderHour, \.periodReminderMinute),
+                            note: nil
+                        )
+                        daysPicker
+                    }
+                }
+                VStack(spacing: 0) {
+                    ToggleCard(
+                        title: "Ovulation window",
+                        subtitle: "A heads-up when Caelyn estimates you're near ovulation.",
+                        icon: "sparkles",
+                        isOn: bind(\.remindOvulation)
+                    )
+                    if profile.remindOvulation {
+                        timePickerRow(
+                            label: "Reminder time",
+                            hour: bindHour(\.ovulationReminderHour, \.ovulationReminderMinute),
+                            note: nil
+                        )
+                    }
+                }
+
+                sectionHeader("Daily")
+
                 VStack(spacing: 0) {
                     ToggleCard(
                         title: "Daily check-in",
@@ -70,8 +106,6 @@ private struct RemindersForm: View {
                     }
                 }
 
-                inAppOnlyExplainer
-
                 privateToggleSection
             }
             .padding(CaelynSpacing.lg)
@@ -82,10 +116,46 @@ private struct RemindersForm: View {
     // MARK: - Sections
 
     private var introCopy: some View {
-        Text("Caelyn waits to be asked. Cycle and ovulation events live as cards inside the app — they never appear on your lock screen.")
+        Text("Notifications always respect your privacy settings — Private Mode masks cycle details on the lock screen so only you know what the reminder is for.")
             .font(CaelynFont.subheadline)
             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
             .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title.uppercased())
+            .font(CaelynFont.caption.weight(.semibold))
+            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+            .tracking(0.6)
+            .padding(.top, 4)
+    }
+
+    private var daysPicker: some View {
+        CaelynCard(padding: CaelynSpacing.md) {
+            HStack {
+                Image(systemName: "calendar.badge.minus")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(CaelynColor.primaryPlum)
+                    .frame(width: 24)
+                Text("Remind me")
+                    .font(CaelynFont.body)
+                    .foregroundStyle(CaelynColor.deepPlumText)
+                Spacer(minLength: 0)
+                Picker("", selection: $profile.periodReminderDaysBefore) {
+                    Text("Day of").tag(0)
+                    Text("1 day before").tag(1)
+                    Text("2 days before").tag(2)
+                    Text("3 days before").tag(3)
+                }
+                .pickerStyle(.menu)
+                .tint(CaelynColor.primaryPlum)
+                .onChange(of: profile.periodReminderDaysBefore) { _, _ in
+                    modelContext.saveOrLog()
+                    Task { await NotificationService.syncFromLiveStore() }
+                }
+            }
+        }
+        .padding(.top, 4)
     }
 
     /// Soft explainer card surfacing the "Reveal on Face ID" architecture so
@@ -108,25 +178,6 @@ private struct RemindersForm: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-    }
-
-    private var inAppOnlyExplainer: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
-                Image(systemName: "moon.stars")
-                    .font(.system(size: 11, weight: .medium))
-                Text("In-app only")
-                    .font(CaelynFont.caption.weight(.semibold))
-                    .tracking(0.4)
-            }
-            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
-            Text("Period and ovulation heads-up cards always appear on Home — they don't fire as notifications. Your cycle data never leaves Caelyn.")
-                .font(CaelynFont.caption)
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(.horizontal, 4)
-        .padding(.top, 4)
     }
 
     private var deniedBanner: some View {

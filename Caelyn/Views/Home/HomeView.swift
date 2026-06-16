@@ -6,6 +6,8 @@ struct HomeView: View {
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
     @Environment(\.modelContext) private var modelContext
 
+    @State private var showingLogSheet = false
+
     private var profile: UserProfile? { profiles.first }
 
     private var today: Date { Calendar.current.startOfDay(for: .now) }
@@ -58,9 +60,17 @@ struct HomeView: View {
         return PredictionEngine.daysUntil(nextStart, from: today)
     }
 
+    private var adaptivePmsDays: Int {
+        PredictionEngine.adaptivePmsDaysBefore(entries: entries, cycles: cycles) ?? 5
+    }
+
+    private var irregularStatus: IrregularCycleStatus {
+        PredictionEngine.irregularCycleStatus(from: cycles)
+    }
+
     private var daysUntilPMS: Int {
         guard let nextStart else { return 0 }
-        let pmsStart = PredictionEngine.pmsWindow(nextPeriodStart: nextStart).lowerBound
+        let pmsStart = PredictionEngine.pmsWindow(nextPeriodStart: nextStart, daysBefore: adaptivePmsDays).lowerBound
         return PredictionEngine.daysUntil(pmsStart, from: today)
     }
 
@@ -70,6 +80,16 @@ struct HomeView: View {
         return PredictionEngine.daysUntil(ovulation, from: today)
     }
 
+    private var fertileWindow: ClosedRange<Date>? {
+        guard let nextStart else { return nil }
+        return PredictionEngine.fertileWindow(nextPeriodStart: nextStart)
+    }
+
+    private var daysUntilFertileWindowStart: Int {
+        guard let window = fertileWindow else { return 0 }
+        return PredictionEngine.daysUntil(window.lowerBound, from: today)
+    }
+
     private var predictedWindow: ClosedRange<Date>? {
         guard let nextStart else { return nil }
         return PredictionEngine.predictedPeriodWindow(nextPeriodStart: nextStart, periodLength: periodLength)
@@ -77,6 +97,15 @@ struct HomeView: View {
 
     private var confidence: Confidence {
         PredictionEngine.confidence(cycleCount: cycles.count)
+    }
+
+    private var ttcResult: TTCFertilityEngine.FertilityResult {
+        TTCFertilityEngine.result(
+            todayEntry: todayEntry,
+            cycleDay: cycleDay,
+            nextPeriodStart: nextStart,
+            cycleLength: cycleLength
+        )
     }
 
     var body: some View {
@@ -94,17 +123,42 @@ struct HomeView: View {
                     periodLength: periodLength,
                     phase: phase,
                     daysUntilPeriod: daysUntilPeriod,
-                    predictedWindow: predictedWindow
+                    predictedWindow: predictedWindow,
+                    variation: PredictionEngine.cycleLengthVariation(of: cycles),
+                    confidence: confidence
                 )
 
                 HomeQuickActions(
                     onLogPeriod: { logPeriodToday() },
-                    onAddSymptoms: {},
-                    onMoodCheckIn: {},
-                    onAddNote: {}
+                    onAddSymptoms: { showingLogSheet = true },
+                    onMoodCheckIn: { showingLogSheet = true },
+                    onAddNote:     { showingLogSheet = true }
+                )
+                .sheet(isPresented: $showingLogSheet) {
+                    DailyLogForm(date: today)
+                        .presentationDetents([.large])
+                }
+
+                HomeStreakCard(
+                    streak: CycleAnalytics.loggingStreak(in: entries, today: today),
+                    recentDays: CycleAnalytics.recentDayStates(in: entries, today: today)
                 )
 
                 periodStatePrompt
+
+                irregularModeBanner
+
+                if profile?.ttcEnabled == true {
+                    TTCDashboardCard(result: ttcResult, nextPeriodStart: nextStart)
+                }
+
+                if profile?.pregnancyEnabled == true, let due = profile?.pregnancyDueDate {
+                    PregnancyModeCard(dueDate: due)
+                }
+
+                if profile?.postpartumEnabled == true, let birth = profile?.postpartumBirthDate {
+                    PostpartumModeCard(birthDate: birth)
+                }
 
                 HomeMoodCheckIn(
                     selectedMood: todayEntry?.mood,
@@ -115,7 +169,8 @@ struct HomeView: View {
                     events: HomeCopy.comingUpEvents(
                         daysUntilPMS: daysUntilPMS,
                         daysUntilPeriod: daysUntilPeriod,
-                        daysUntilOvulation: daysUntilOvulation,
+                        daysUntilFertileWindowStart: daysUntilFertileWindowStart,
+                        fertileWindow: fertileWindow,
                         currentPhase: phase
                     )
                 )
@@ -348,6 +403,70 @@ struct HomeView: View {
         // the sync hook there will pick it up.
         let snapshot = entries
         Task { await HealthKitSync.syncIfConnected(target, in: snapshot, modelContext: modelContext) }
+    }
+
+    // MARK: - Irregular Mode Banner
+
+    @ViewBuilder
+    private var irregularModeBanner: some View {
+        // Show when auto-detection fires but the user hasn't dismissed or already enabled the mode.
+        if case .irregular(let reason) = irregularStatus,
+           !(profile?.irregularModeDismissed ?? false),
+           !(profile?.irregularModeEnabled ?? false) {
+            CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.lavender.opacity(0.55)) {
+                VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "waveform.path.ecg.rectangle.fill")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(CaelynColor.primaryPlum)
+                        Text("Irregular cycles detected")
+                            .font(CaelynFont.callout.weight(.semibold))
+                            .foregroundStyle(CaelynColor.deepPlumText)
+                    }
+                    Text(reason.note)
+                        .font(CaelynFont.subheadline)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.75))
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    HStack(spacing: CaelynSpacing.sm) {
+                        Button {
+                            profile?.irregularModeEnabled = true
+                            profile?.irregularModeDismissed = true
+                        } label: {
+                            Text("Enable irregular mode")
+                                .font(CaelynFont.caption.weight(.semibold))
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 7)
+                                .background(CaelynColor.primaryPlum, in: Capsule())
+                        }
+                        .buttonStyle(.plain)
+
+                        Button {
+                            profile?.irregularModeDismissed = true
+                        } label: {
+                            Text("Dismiss")
+                                .font(CaelynFont.caption)
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.top, 2)
+                }
+            }
+        } else if profile?.irregularModeEnabled == true {
+            // Small persistent badge when mode is explicitly on
+            HStack(spacing: 6) {
+                Image(systemName: "waveform.path.ecg")
+                    .font(.system(size: 11, weight: .medium))
+                Text("Irregular cycle mode on")
+                    .font(CaelynFont.caption.weight(.medium))
+            }
+            .foregroundStyle(CaelynColor.primaryPlum.opacity(0.75))
+            .padding(.horizontal, CaelynSpacing.sm)
+            .padding(.vertical, 5)
+            .background(CaelynColor.lavender.opacity(0.55), in: Capsule())
+        }
     }
 }
 

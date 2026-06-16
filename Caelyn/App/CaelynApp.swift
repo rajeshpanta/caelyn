@@ -1,5 +1,7 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
+import WatchConnectivity
 
 @main
 struct CaelynApp: App {
@@ -15,6 +17,7 @@ struct CaelynApp: App {
             AppLockGate {
                 ContentView()
                     .appPreviewMask()
+                    .syncWidgetData()
             }
             .applyCaelynTheme()
             .task {
@@ -24,6 +27,7 @@ struct CaelynApp: App {
                 // Transaction.currentEntitlements before the user can reach
                 // the paywall / Insights / Export.
                 await PurchaseService.shared.loadProducts()
+                WatchBridgeService.shared.activate()
             }
         }
         .modelContainer(Persistence.live)
