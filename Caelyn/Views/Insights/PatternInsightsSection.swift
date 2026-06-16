@@ -41,10 +41,10 @@ struct PatternInsightsSection: View {
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(CaelynColor.primaryPlum)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("\(remaining) more insight\(remaining == 1 ? "" : "s") with Pro")
+                        Text("\(remaining) more insight\(remaining == 1 ? "" : "s") locked")
                             .font(CaelynFont.callout.weight(.semibold))
                             .foregroundStyle(CaelynColor.primaryPlum)
-                        Text("Unlock cycle trend analysis, mood predictions, and more.")
+                        Text("Pro shows every pattern your cycle history contains.")
                             .font(CaelynFont.caption)
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
                             .fixedSize(horizontal: false, vertical: true)

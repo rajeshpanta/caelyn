@@ -104,18 +104,19 @@ struct InsightsView: View {
             BBTChart(series: CycleAnalytics.bbtSeries(in: entries))
         } else {
             ProUpsellCard(
-                title: "Unlock Pro insights",
-                subtitle: "Deeper data, smarter patterns — everything to understand your body at a glance.",
+                title: "Your body has more to say",
+                subtitle: "Pro reveals the patterns free can't show — what triggers your symptoms, when your energy peaks, and why your cycle varies.",
                 icon: "chart.line.uptrend.xyaxis",
                 highlights: [
                     "Cycle & period length trends",
-                    "Symptom frequency patterns",
-                    "Mood & pain over time",
-                    "Basal body temperature chart",
-                    "PDF doctor report",
+                    "Symptom frequency over time",
+                    "Mood & pain charts",
+                    "Basal body temperature graph",
+                    "PDF report for your doctor",
                     "TTC fertility scoring",
-                    "Apple Watch companion"
-                ]
+                    "Apple Watch + Home Screen widgets"
+                ],
+                featureIcons: ["chart.bar.fill", "brain", "heart.text.square.fill", "doc.richtext.fill", "applewatch"]
             ) {
                 showingPaywall = true
             }

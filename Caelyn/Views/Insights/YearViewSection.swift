@@ -39,7 +39,7 @@ struct YearViewSection: View {
                             Image(systemName: "lock.fill")
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(CaelynColor.primaryPlum)
-                            Text("See all 12 months with Pro")
+                            Text("Unlock your full year with Pro")
                                 .font(CaelynFont.callout.weight(.semibold))
                                 .foregroundStyle(CaelynColor.primaryPlum)
                             Spacer(minLength: 0)
