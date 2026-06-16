@@ -296,7 +296,7 @@ struct PrivacyStep: View {
 
     private let promises: [(String, String, String, Color)] = [
         ("iphone",                "Stays on your device",       "Your cycle data never touches our servers.",       Color(hex: 0x6F3D74)),
-        ("faceid",                "Face ID protection",         "Lock the app — your body, your business.",         Color(hex: 0xA855F7)),
+        (BiometricService.availableKind() == .none ? "lock.fill" : BiometricService.availableKind().icon, "\(BiometricService.availableKind() == .none ? "App" : BiometricService.availableKind().displayName) protection", "Lock the app — your body, your business.", Color(hex: 0xA855F7)),
         ("hand.raised.slash.fill","Zero ads, zero selling",     "No trackers. No selling. Ever.",                   Color(hex: 0xFB7185)),
         ("square.and.arrow.up",   "Your data, your choice",     "Export as CSV, or delete everything in seconds.",  Color(hex: 0x6E9B7B)),
     ]
@@ -662,7 +662,7 @@ struct LockStep: View {
             icon: "lock.shield.fill",
             iconColor: CaelynColor.primaryPlum,
             title: "Keep Caelyn private 🔐",
-            subtitle: "Add Face ID so only you can open the app. You can change this anytime in Settings."
+            subtitle: "Add \(BiometricService.availableKind() == .none ? "a passcode" : BiometricService.availableKind().displayName) so only you can open the app. You can change this anytime in Settings."
         ) {
             VStack(spacing: CaelynSpacing.lg) {
                 ZStack {
@@ -679,7 +679,8 @@ struct LockStep: View {
                         .frame(width: 150, height: 150)
                         .shadow(color: CaelynColor.primaryPlum.opacity(0.2), radius: 20, x: 0, y: 8)
 
-                    Image(systemName: vm.enableLock ? "faceid" : "lock.open.fill")
+                    let biometricIcon = BiometricService.availableKind() == .none ? "lock.fill" : BiometricService.availableKind().icon
+                    Image(systemName: vm.enableLock ? biometricIcon : "lock.open.fill")
                         .font(.system(size: 60, weight: .light))
                         .foregroundStyle(CaelynColor.primaryPlum)
                         .contentTransition(.symbolEffect(.replace))
@@ -693,7 +694,8 @@ struct LockStep: View {
                     }
                 }
 
-                Text(vm.enableLock ? "Face ID is on 🔒" : "Face ID is off")
+                let biometricName = BiometricService.availableKind() == .none ? "Lock" : BiometricService.availableKind().displayName
+                Text(vm.enableLock ? "\(biometricName) is on 🔒" : "\(biometricName) is off")
                     .font(CaelynFont.headline)
                     .foregroundStyle(CaelynColor.deepPlumText)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -701,15 +703,16 @@ struct LockStep: View {
             }
         } footer: {
             VStack(spacing: CaelynSpacing.xs) {
+                let biometricName = BiometricService.availableKind() == .none ? "Lock" : BiometricService.availableKind().displayName
                 CaelynButton(
-                    title: vm.enableLock ? "Continue" : "Enable Face ID",
+                    title: vm.enableLock ? "Continue" : "Enable \(biometricName)",
                     variant: .primary
                 ) {
                     if vm.enableLock { vm.next() }
                     else { vm.enableLock = true }
                 }
                 CaelynButton(
-                    title: vm.enableLock ? "Turn off Face ID" : "Skip for now",
+                    title: vm.enableLock ? "Turn off \(biometricName)" : "Skip for now",
                     variant: .tertiary
                 ) {
                     if vm.enableLock { vm.enableLock = false }

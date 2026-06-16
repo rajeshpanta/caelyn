@@ -6,14 +6,14 @@ final class CycleEntry {
     @Attribute(.unique) var date: Date
     var flow: FlowLevel?
     var pain: Int?
-    var painTypes: [PainType]
-    var symptoms: [Symptom]
+    var painTypes: [PainType] = []
+    var symptoms: [Symptom] = []
     var mood: Mood?
     var energyLevel: EnergyLevel?
     /// Severity per logged symptom: key = Symptom.rawValue, value = 1 (mild) / 2 (moderate) / 3 (severe).
     /// Only symptoms in `symptoms` array should have entries here.
-    var symptomSeverity: [String: Int]
-    var loggedCustomSymptoms: [String]
+    var symptomSeverity: [String: Int] = [:]
+    var loggedCustomSymptoms: [String] = []
     var note: String?
 
     var medication: String?
@@ -23,8 +23,8 @@ final class CycleEntry {
     var basalTemperature: Double?
     var sexualActivity: Bool?
 
-    var createdAt: Date
-    var updatedAt: Date
+    var createdAt: Date = Date()
+    var updatedAt: Date = Date()
 
     init(
         date: Date,

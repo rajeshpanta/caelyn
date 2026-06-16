@@ -3,33 +3,33 @@ import SwiftData
 
 @Model
 final class UserProfile {
-    var averageCycleLength: Int
-    var averagePeriodLength: Int
-    var trackingGoals: [TrackingGoal]
+    var averageCycleLength: Int = 28
+    var averagePeriodLength: Int = 5
+    var trackingGoals: [TrackingGoal] = []
 
-    var lockEnabled: Bool
-    var hidePreview: Bool
-    var privateNotifications: Bool
-    var healthKitConnected: Bool
+    var lockEnabled: Bool = false
+    var hidePreview: Bool = false
+    var privateNotifications: Bool = true
+    var healthKitConnected: Bool = false
 
     var hkReadFlow: Bool = false
     var hkWriteFlow: Bool = false
     var hkReadSymptoms: Bool = false
     var hkWriteSymptoms: Bool = false
 
-    var firstDayOfWeek: Int
+    var firstDayOfWeek: Int = 1
     var theme: AppTheme
 
-    var hasOnboarded: Bool
+    var hasOnboarded: Bool = false
     var lastPeriodStart: Date?
 
-    var remindPeriodStart: Bool
-    var remindDailyCheckIn: Bool
-    var remindMedication: Bool
-    var remindOvulation: Bool
+    var remindPeriodStart: Bool = true
+    var remindDailyCheckIn: Bool = false
+    var remindMedication: Bool = false
+    var remindOvulation: Bool = false
 
     /// User-defined symptom names, max 5.
-    var customSymptoms: [String]
+    var customSymptoms: [String] = []
     /// True when the user has explicitly opted into Irregular Cycle Mode.
     var irregularModeEnabled: Bool = false
     /// True when the user dismissed the auto-detection banner without enabling the mode.
@@ -65,8 +65,8 @@ final class UserProfile {
     var birthControlReminderMinute: Int = 0
     var birthControlStartDate: Date?
 
-    var isPro: Bool
-    var createdAt: Date
+    var isPro: Bool = false
+    var createdAt: Date = Date()
 
     init(
         averageCycleLength: Int = 28,

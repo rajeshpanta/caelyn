@@ -155,6 +155,8 @@ private struct HealthKitConnectForm: View {
                     icon: "sparkle",
                     isOn: bind(\.hkReadSymptoms)
                 )
+                .disabled(true)
+                .opacity(0.55)
             }
         }
     }
@@ -262,12 +264,20 @@ private struct HealthKitConnectForm: View {
         defer { isAuthorizing = false }
         do {
             try await HealthKitService.requestAuthorization()
-            profile.healthKitConnected = true
-            // Default sync preferences on connect — user can adjust afterwards
-            profile.hkWriteFlow = true
-            profile.hkWriteSymptoms = true
-            modelContext.saveOrLog()
-            statusBanner = .success("Connected. Choose what to sync below.")
+            // Only mark as connected if the user actually granted write access.
+            // Apple's API always succeeds (it silently records denial), so we
+            // probe the authorization status directly afterwards.
+            let authorized = HealthKitService.canWriteMenstrualFlow()
+            profile.healthKitConnected = authorized
+            if authorized {
+                profile.hkWriteFlow = true
+                profile.hkWriteSymptoms = true
+                modelContext.saveOrLog()
+                statusBanner = .success("Connected. Choose what to sync below.")
+            } else {
+                modelContext.saveOrLog()
+                statusBanner = .error("Apple Health access was denied. Enable it in iOS Settings → Privacy & Security → Health.")
+            }
         } catch {
             statusBanner = .error("Couldn't connect — \(error.localizedDescription)")
         }

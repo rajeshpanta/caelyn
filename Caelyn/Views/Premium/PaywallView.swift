@@ -7,6 +7,7 @@ struct PaywallView: View {
     @State private var isPurchasing = false
     @State private var purchaseError: String?
     @State private var showRestoreNotice = false
+    @State private var showPendingNotice = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -57,6 +58,11 @@ struct PaywallView: View {
             Text(purchase.isPro
                  ? "You're all set with Caelyn Pro."
                  : "No active Caelyn Pro subscription was found on this Apple ID.")
+        }
+        .alert("Purchase Pending", isPresented: $showPendingNotice) {
+            Button("OK") { showPendingNotice = false }
+        } message: {
+            Text("Your purchase is awaiting approval — for example, if parental controls are enabled. Caelyn Pro will unlock automatically once it's approved.")
         }
     }
 
@@ -299,7 +305,8 @@ struct PaywallView: View {
                     .font(CaelynFont.footnote)
             }
             if selectedTier != .lifetime {
-                Text("Auto-renewable subscription. Renews at the price shown above unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions.")
+                let renewalPrice = selectedTier == .monthly ? monthlyDisplayPrice : yearlyDisplayPrice
+                Text("Auto-renewable subscription. Renews at \(renewalPrice) unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions.")
                     .font(CaelynFont.footnote)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
@@ -441,8 +448,10 @@ struct PaywallView: View {
         case .success:
             Haptics.success()
             dismiss()
-        case .cancelled, .pending:
+        case .cancelled:
             break
+        case .pending:
+            showPendingNotice = true
         case .failed(let message):
             Haptics.warning()
             purchaseError = message

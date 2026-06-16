@@ -42,8 +42,9 @@ targets:
           - CloudKit
         com.apple.developer.icloud-container-identifiers:
           - iCloud.smallpanta-icould.com.caelynperiodtracker
-        # com.apple.developer.healthkit: true
-        # com.apple.developer.healthkit.access: []
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+        com.apple.developer.usernotifications.time-sensitive: true
     dependencies:
       - target: CaelynWidget
         embed: true

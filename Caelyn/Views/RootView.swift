@@ -3,6 +3,7 @@ import SwiftData
 
 struct RootView: View {
     @Query private var profiles: [UserProfile]
+    @State private var isLoaded = false
 
     private var hasOnboarded: Bool {
         profiles.first?.hasOnboarded ?? false
@@ -10,15 +11,27 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if hasOnboarded {
-                MainTabView()
-                    .transition(.opacity)
+            if isLoaded {
+                if hasOnboarded {
+                    MainTabView()
+                        .transition(.opacity)
+                } else {
+                    OnboardingFlow()
+                        .transition(.opacity)
+                }
             } else {
-                OnboardingFlow()
-                    .transition(.opacity)
+                Color(uiColor: .systemBackground)
+                    .ignoresSafeArea()
             }
         }
         .animation(.easeInOut(duration: 0.4), value: hasOnboarded)
+        .task {
+            // Brief delay lets SwiftData hydrate from the store before we make
+            // routing decisions. Without this, a brief [] from @Query would
+            // incorrectly flash the onboarding screen on returning users.
+            try? await Task.sleep(for: .milliseconds(120))
+            withAnimation { isLoaded = true }
+        }
     }
 }
 

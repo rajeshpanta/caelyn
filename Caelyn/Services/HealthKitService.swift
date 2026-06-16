@@ -203,7 +203,7 @@ enum HealthKitService {
                 created += 1
             }
         }
-        try? context.save()
+        context.saveOrLog()
         return ImportResult(entriesCreated: created, entriesUpdated: updated)
     }
 

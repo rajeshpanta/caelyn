@@ -32,6 +32,7 @@ struct DayDetailSheet: View {
                 .padding(.bottom, CaelynSpacing.xl)
             }
             .background(CaelynColor.backgroundCream.ignoresSafeArea())
+            .navigationTitle(titleLabel)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { isPresented = false }

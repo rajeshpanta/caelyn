@@ -8,7 +8,7 @@ struct ThemePickerSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: CaelynSpacing.md) {
-                    Text("Pick how Caelyn looks. We currently support Light only — Dark mode is on the roadmap.")
+                    Text("Pick how Caelyn looks.")
                         .font(CaelynFont.body)
                         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
                         .padding(.horizontal, CaelynSpacing.lg)
@@ -30,7 +30,7 @@ struct ThemePickerSheet: View {
                 .padding(.bottom, CaelynSpacing.lg)
             }
             .background(CaelynColor.backgroundCream.ignoresSafeArea())
-            .navigationTitle("Theme")
+            .navigationTitle("Appearance")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -44,6 +44,7 @@ struct ThemePickerSheet: View {
     private func themeRow(_ theme: AppTheme) -> some View {
         Button {
             selection = theme
+            isPresented = false
         } label: {
             HStack(spacing: CaelynSpacing.sm) {
                 Image(systemName: themeIcon(theme))
@@ -93,6 +94,7 @@ struct FirstDayOfWeekPickerSheet: View {
                         ForEach(options, id: \.0) { value, label in
                             Button {
                                 selection = value
+                                isPresented = false
                             } label: {
                                 HStack {
                                     Text(label)

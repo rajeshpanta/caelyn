@@ -22,8 +22,8 @@ struct PrivacyTrustView: View {
             color: CaelynColor.primaryPlum
         ),
         (
-            icon: "faceid",
-            title: "Face ID / Touch ID lock",
+            icon: BiometricService.availableKind() == .none ? "lock.fill" : BiometricService.availableKind().icon,
+            title: "\(BiometricService.availableKind() == .none ? "App" : BiometricService.availableKind().displayName) lock",
             body: "Optional but built in. Enable it in Settings and the app locks itself whenever it moves to the background.",
             color: CaelynColor.primaryPlum
         ),

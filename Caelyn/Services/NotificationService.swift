@@ -124,16 +124,21 @@ enum NotificationService {
 
     /// Cancel every pending Caelyn notification, current and legacy. Called at
     /// the start of every sync and from Settings → Delete all data.
-    static func cancelAll() {
-        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
-            let caelynIDs = requests
-                .map(\.identifier)
-                .filter { id in
-                    Category.allCases.contains { id.hasPrefix($0.rawValue) }
-                        || legacyCategoryPrefixes.contains { id.hasPrefix($0) }
-                }
-            UNUserNotificationCenter.current()
-                .removePendingNotificationRequests(withIdentifiers: caelynIDs)
+    /// Async so callers can await completion before scheduling new requests,
+    /// eliminating the race between removal and re-scheduling.
+    static func cancelAll() async {
+        await withCheckedContinuation { continuation in
+            UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+                let caelynIDs = requests
+                    .map(\.identifier)
+                    .filter { id in
+                        Category.allCases.contains { id.hasPrefix($0.rawValue) }
+                            || legacyCategoryPrefixes.contains { id.hasPrefix($0) }
+                    }
+                UNUserNotificationCenter.current()
+                    .removePendingNotificationRequests(withIdentifiers: caelynIDs)
+                continuation.resume()
+            }
         }
     }
 
@@ -143,7 +148,7 @@ enum NotificationService {
     /// reminder when the user has already logged the relevant data. Period and
     /// ovulation are intentionally not scheduled — they live as in-app cards.
     static func sync(profile: UserProfile, todayEntry: CycleEntry?) async {
-        cancelAll()
+        await cancelAll()
 
         guard await authorizationStatus() == .authorized else { return }
 

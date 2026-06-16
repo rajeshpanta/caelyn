@@ -46,10 +46,19 @@ enum Persistence {
         // Fallback: local-only. CloudKit may be unavailable on this device.
         log.warning("SwiftData: CloudKit unavailable, falling back to local store")
         let localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        if let container = try? ModelContainer(for: schema, configurations: [localConfig]) {
+            return container
+        }
+
+        // Last resort: in-memory store so the app stays alive. User data will
+        // not persist this session. We log critically so the error surfaces in
+        // Console.app and any attached crash reporter.
+        log.critical("SwiftData: local store failed — using in-memory fallback. User data will not persist.")
+        let memConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         do {
-            return try ModelContainer(for: schema, configurations: [localConfig])
+            return try ModelContainer(for: schema, configurations: [memConfig])
         } catch {
-            fatalError("Failed to create ModelContainer: \(error)")
+            fatalError("SwiftData: even in-memory ModelContainer failed: \(error)")
         }
     }()
 

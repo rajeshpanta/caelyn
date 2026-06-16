@@ -484,6 +484,7 @@ struct DailyLogForm: View {
                     .foregroundStyle(CaelynColor.deepPlumText)
                     .keyboardType(.decimalPad)
                     .focused($basalFocused)
+                    .accessibilityLabel("Basal body temperature in degrees Celsius")
                 if let temp = entry?.basalTemperature {
                     Text(String(format: "%.2f°", temp))
                         .font(CaelynFont.callout.monospacedDigit())
@@ -761,6 +762,7 @@ struct DailyLogForm: View {
     }
 
     private func togglePainType(_ painType: PainType) {
+        Haptics.selection()
         withEntry { entry in
             if let idx = entry.painTypes.firstIndex(of: painType) {
                 entry.painTypes.remove(at: idx)

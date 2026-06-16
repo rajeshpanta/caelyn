@@ -420,6 +420,7 @@ enum ExportService {
     }
 
     private static func breakPage(page: inout PDFPageContext, ctx: UIGraphicsPDFRendererContext) {
+        drawFooter(page: &page, ctx: ctx.cgContext)
         ctx.beginPage()
         page.y = page.margin
     }

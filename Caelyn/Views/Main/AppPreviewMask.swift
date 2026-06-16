@@ -6,7 +6,7 @@ struct AppPreviewMask: ViewModifier {
     @Environment(\.scenePhase) private var scenePhase
 
     private var hidePreview: Bool { profiles.first?.hidePreview ?? false }
-    private var shouldMask: Bool { hidePreview && scenePhase != .active }
+    private var shouldMask: Bool { hidePreview && scenePhase == .background }
 
     func body(content: Content) -> some View {
         ZStack {

@@ -90,5 +90,6 @@ struct GoalCard: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityHint(isSelected ? "Double-tap to deselect" : "Double-tap to select")
     }
 }

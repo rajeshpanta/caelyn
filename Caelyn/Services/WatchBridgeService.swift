@@ -41,6 +41,11 @@ extension WatchBridgeService: WCSessionDelegate {
         handleIncoming(message)
     }
 
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
+        handleIncoming(message)
+        replyHandler(["status": "ok"])
+    }
+
     private nonisolated func handleIncoming(_ info: [String: Any]) {
         guard let timestamp = info["date"] as? TimeInterval else { return }
         let date = Date(timeIntervalSince1970: timestamp)

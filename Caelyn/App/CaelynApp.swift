@@ -5,27 +5,17 @@ import WatchConnectivity
 
 @main
 struct CaelynApp: App {
-    /// Registers UNUserNotificationCenterDelegate at app launch so taps are
-    /// captured and the smart-tap router can route to the right card. See
-    /// AppDelegate.swift.
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             AppLockGate {
-                ContentView()
+                ThemedContentView()
                     .appPreviewMask()
                     .syncWidgetData()
             }
-            .applyCaelynTheme()
             .task {
-                // Run on first appearance so PurchaseService.shared is created
-                // and its Transaction.updates listener starts as early as
-                // possible. Also primes Product.products(for:) and reads
-                // Transaction.currentEntitlements before the user can reach
-                // the paywall / Insights / Export.
                 await PurchaseService.shared.loadProducts()
                 WatchBridgeService.shared.activate()
             }
@@ -40,14 +30,20 @@ struct CaelynApp: App {
     }
 }
 
-private struct ApplyCaelynThemeModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-    }
-}
+/// Reads the user's theme preference and applies `preferredColorScheme`.
+private struct ThemedContentView: View {
+    @Query private var profiles: [UserProfile]
 
-private extension View {
-    func applyCaelynTheme() -> some View {
-        modifier(ApplyCaelynThemeModifier())
+    private var colorScheme: ColorScheme? {
+        switch profiles.first?.theme ?? .system {
+        case .light:  return .light
+        case .dark:   return .dark
+        case .system: return nil
+        }
+    }
+
+    var body: some View {
+        ContentView()
+            .preferredColorScheme(colorScheme)
     }
 }

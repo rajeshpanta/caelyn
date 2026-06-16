@@ -24,9 +24,12 @@ struct SettingsView: View {
     @State private var showingBirthControl = false
     @State private var showingShareMode = false
     @State private var showingPaywall = false
+    @State private var showingThemePicker = false
     @State private var purchase = PurchaseService.shared
 
     @State private var lockToggleError: String?
+    @State private var showRestoreNotice = false
+    @State private var isRestoring = false
 
     private var profile: UserProfile? { profiles.first }
 
@@ -97,6 +100,19 @@ struct SettingsView: View {
                 )
                 .presentationDetents([.medium])
             }
+        }
+        .sheet(isPresented: $showingThemePicker) {
+            if let profile {
+                ThemePickerSheet(selection: themeBinding(profile: profile), isPresented: $showingThemePicker)
+                    .presentationDetents([.medium])
+            }
+        }
+        .alert("Purchases Restored", isPresented: $showRestoreNotice) {
+            Button("OK") { showRestoreNotice = false }
+        } message: {
+            Text(purchase.isPro
+                 ? "You're all set with Caelyn Pro."
+                 : "No active Caelyn Pro subscription was found on this Apple ID.")
         }
         .confirmationDialog(
             "Reset onboarding?",
@@ -217,7 +233,31 @@ struct SettingsView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+
+            Button {
+                Task { await runRestore() }
+            } label: {
+                HStack {
+                    Spacer()
+                    if isRestoring {
+                        ProgressView().tint(CaelynColor.primaryPlum)
+                    }
+                    Text(isRestoring ? "Restoring…" : "Restore Purchases")
+                        .font(CaelynFont.subheadline.weight(.medium))
+                        .foregroundStyle(CaelynColor.primaryPlum)
+                    Spacer()
+                }
+            }
+            .disabled(isRestoring)
+            .padding(.top, CaelynSpacing.xs)
         }
+    }
+
+    private func runRestore() async {
+        isRestoring = true
+        await purchase.restore()
+        isRestoring = false
+        showRestoreNotice = true
     }
 
     // MARK: - Cycle section
@@ -346,6 +386,16 @@ struct SettingsView: View {
                 action: { showingFirstDayPicker = true }
             )
             SettingsDivider()
+            if let profile {
+                SettingsRow(
+                    icon: "circle.lefthalf.filled",
+                    iconColor: CaelynColor.primaryPlum,
+                    title: "Appearance",
+                    detail: profile.theme.displayName,
+                    action: { showingThemePicker = true }
+                )
+                SettingsDivider()
+            }
             SettingsRow(
                 icon: "pills",
                 iconColor: CaelynColor.successSage,
@@ -488,7 +538,11 @@ struct SettingsView: View {
     private func privateNotificationsBinding(profile: UserProfile) -> Binding<Bool> {
         Binding(
             get: { profile.privateNotifications },
-            set: { profile.privateNotifications = $0; modelContext.saveOrLog() }
+            set: { newValue in
+                profile.privateNotifications = newValue
+                modelContext.saveOrLog()
+                Task { await NotificationService.syncFromLiveStore() }
+            }
         )
     }
 
@@ -496,6 +550,13 @@ struct SettingsView: View {
         Binding(
             get: { profile.firstDayOfWeek },
             set: { profile.firstDayOfWeek = $0; modelContext.saveOrLog() }
+        )
+    }
+
+    private func themeBinding(profile: UserProfile) -> Binding<AppTheme> {
+        Binding(
+            get: { profile.theme },
+            set: { profile.theme = $0; modelContext.saveOrLog() }
         )
     }
 
@@ -523,7 +584,7 @@ struct SettingsView: View {
         modelContext.saveOrLog()
         // Pending local notifications would still fire and reference data
         // that no longer exists — cancel them as part of the wipe.
-        NotificationService.cancelAll()
+        Task { await NotificationService.cancelAll() }
         Haptics.warning()
     }
 }

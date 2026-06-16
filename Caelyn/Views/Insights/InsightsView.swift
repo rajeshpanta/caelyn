@@ -51,7 +51,15 @@ struct InsightsView: View {
             .background(CaelynColor.backgroundCream.ignoresSafeArea())
             .navigationTitle("Insights")
         }
-        .sheet(isPresented: $showingPaywall) { PaywallView() }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView()
+        }
+        .onChange(of: showingPaywall) { _, isShowing in
+            if !isShowing {
+                // Force the purchase state to refresh after paywall dismissal
+                purchase = PurchaseService.shared
+            }
+        }
     }
 
     @ViewBuilder

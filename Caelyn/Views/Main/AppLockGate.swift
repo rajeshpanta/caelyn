@@ -33,16 +33,6 @@ struct AppLockGate<Content: View>: View {
         }
         .animation(.easeInOut(duration: 0.25), value: showLockScreen)
         .task(id: lockEnabled) {
-            // If lockEnabled is false, no need to do anything: showLockScreen already
-            // returns false when lockEnabled is false, regardless of isUnlocked.
-            //
-            // We deliberately do NOT set isUnlocked = true on the false branch. That
-            // would create a race on cold launch: @Query may briefly return [] before
-            // the profile loads, lockEnabled reads as false, isUnlocked flips to true,
-            // and when the profile loads with lockEnabled=true the auto-prompt branch
-            // is skipped — leaving the user inside the app without authenticating.
-            //
-            // Authentication is the only path that sets isUnlocked = true.
             if lockEnabled && isUnlocked == false {
                 await tryUnlock()
             }
@@ -51,11 +41,10 @@ struct AppLockGate<Content: View>: View {
             if newPhase == .background {
                 isUnlocked = false
                 errorMessage = nil
+            } else if newPhase == .active && lockEnabled && !isUnlocked {
+                // Auto-prompt Face ID / Touch ID when returning from background
+                Task { await tryUnlock() }
             }
-            // Foreground resume shows the lock screen; the user taps the
-            // Unlock button to authenticate. This avoids a re-prompt loop
-            // when the user has already cancelled Face ID once. The initial
-            // cold-launch auto-prompt still fires via .task(id: lockEnabled).
         }
     }
 
@@ -69,6 +58,14 @@ struct AppLockGate<Content: View>: View {
         guard !attemptingAuth else { return }
         attemptingAuth = true
         errorMessage = nil
+
+        // Spawn a timeout that resets auth state if biometrics hangs for > 30 s
+        let timeoutTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(30))
+            if attemptingAuth { attemptingAuth = false }
+        }
+        defer { timeoutTask.cancel() }
+
         do {
             try await BiometricService.authenticate(reason: "Unlock Caelyn")
             isUnlocked = true

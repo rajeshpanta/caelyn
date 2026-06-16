@@ -100,9 +100,13 @@ enum PredictionEngine {
         let lp = calendar.startOfDay(for: lastPeriodStart)
         let t = calendar.startOfDay(for: today)
         let safeLen = max(cycleLength, 1)
-        var nextStart = calendar.date(byAdding: .day, value: safeLen, to: lp) ?? lp
+        guard var nextStart = calendar.date(byAdding: .day, value: safeLen, to: lp) else { return t }
+        var iterations = 0
         while nextStart < t {
-            nextStart = calendar.date(byAdding: .day, value: safeLen, to: nextStart) ?? nextStart
+            guard let next = calendar.date(byAdding: .day, value: safeLen, to: nextStart) else { break }
+            nextStart = next
+            iterations += 1
+            if iterations > 3650 { break }  // safety cap: ~10 years of daily cycles
         }
         return nextStart
     }

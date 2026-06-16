@@ -12,6 +12,7 @@ struct ExportView: View {
     @State private var includeNotes: Bool = true
     @State private var generatedURL: URL?
     @State private var generationError: String?
+    @State private var isGenerating = false
     @State private var showingPaywall = false
 
     private var profile: UserProfile? { profiles.first }
@@ -210,12 +211,16 @@ struct ExportView: View {
                     .foregroundStyle(.white)
                     .background(CaelynColor.primaryPlum, in: RoundedRectangle(cornerRadius: CaelynRadius.button, style: .continuous))
                 }
-                CaelynButton(title: "Generate again", variant: .tertiary) { generate() }
+                CaelynButton(title: "Generate again", variant: .tertiary) { Task { await generate() } }
             } else {
-                CaelynButton(title: "Generate \(format.displayName)", variant: .primary, icon: "doc.badge.gearshape") {
-                    generate()
+                CaelynButton(
+                    title: isGenerating ? "Generating…" : "Generate \(format.displayName)",
+                    variant: .primary,
+                    icon: isGenerating ? nil : "doc.badge.gearshape"
+                ) {
+                    Task { await generate() }
                 }
-                .disabled(filteredEntries.isEmpty)
+                .disabled(filteredEntries.isEmpty || isGenerating)
             }
         }
     }
@@ -247,16 +252,32 @@ struct ExportView: View {
         generationError = nil
     }
 
-    private func generate() {
+    private func generate() async {
+        guard !isGenerating else { return }
+        isGenerating = true
+        defer { isGenerating = false }
+
         do {
-            let data: Data
-            switch format {
-            case .csv:
-                data = ExportService.generateCSV(entries: filteredEntries, includeNotes: includeNotes).data(using: .utf8) ?? Data()
-            case .pdf:
-                data = ExportService.generatePDF(entries: filteredEntries, profile: profile, range: range, includeNotes: includeNotes)
-            }
-            let url = try ExportService.writeToTempFile(data: data, format: format, range: range)
+            let capturedEntries = filteredEntries
+            let capturedProfile = profile
+            let capturedRange = range
+            let capturedFormat = format
+            let capturedIncludeNotes = includeNotes
+
+            let data: Data = try await Task.detached(priority: .userInitiated) {
+                switch capturedFormat {
+                case .csv:
+                    guard let csvData = ExportService.generateCSV(entries: capturedEntries, includeNotes: capturedIncludeNotes).data(using: .utf8),
+                          !csvData.isEmpty else {
+                        throw CocoaError(.fileWriteUnknown)
+                    }
+                    return csvData
+                case .pdf:
+                    return ExportService.generatePDF(entries: capturedEntries, profile: capturedProfile, range: capturedRange, includeNotes: capturedIncludeNotes)
+                }
+            }.value
+
+            let url = try ExportService.writeToTempFile(data: data, format: capturedFormat, range: capturedRange)
             generatedURL = url
             generationError = nil
         } catch {

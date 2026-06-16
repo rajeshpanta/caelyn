@@ -7,6 +7,7 @@ struct ShareModeView: View {
     @State private var errorMessage: String? = nil
     @State private var isLoading = false
     @State private var activeShare: CKShare? = nil
+    @State private var showingRevokeConfirm = false
 
     var body: some View {
         List {
@@ -90,9 +91,19 @@ struct ShareModeView: View {
                     .foregroundStyle(CaelynColor.primaryPlum)
             }
             Button(role: .destructive) {
-                Task { await revokeShare() }
+                showingRevokeConfirm = true
             } label: {
                 Label("Revoke Access", systemImage: "person.crop.circle.badge.minus")
+            }
+            .confirmationDialog(
+                "Revoke partner access?",
+                isPresented: $showingRevokeConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("Revoke Access", role: .destructive) { Task { await revokeShare() } }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Your partner will lose access to your cycle data immediately. You can share again anytime.")
             }
         }
     }
