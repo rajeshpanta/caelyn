@@ -6,6 +6,12 @@ import Charts
 struct CycleLengthChart: View {
     let series: [CycleLengthPoint]
 
+    private var a11yLabel: String {
+        guard !series.isEmpty else { return "Cycle length chart. No data yet." }
+        let avg = series.map(\.length).reduce(0, +) / series.count
+        return "Cycle length chart. \(series.count) cycle\(series.count == 1 ? "" : "s") shown. Average \(avg) days."
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
             chartHeader(title: "Cycle length", subtitle: "Recent cycles")
@@ -39,6 +45,7 @@ struct CycleLengthChart: View {
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                     } }
                     .frame(height: 160)
+                    .accessibilityLabel(a11yLabel)
                 }
             }
         }
@@ -55,6 +62,12 @@ struct CycleLengthChart: View {
 
 struct PeriodLengthChart: View {
     let series: [PeriodLengthPoint]
+
+    private var a11yLabel: String {
+        guard !series.isEmpty else { return "Period length chart. No data yet." }
+        let avg = series.map(\.length).reduce(0, +) / series.count
+        return "Period length chart. \(series.count) cycle\(series.count == 1 ? "" : "s") shown. Average \(avg) days."
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
@@ -87,6 +100,7 @@ struct PeriodLengthChart: View {
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                     } }
                     .frame(height: 160)
+                    .accessibilityLabel(a11yLabel)
                 }
             }
         }
@@ -97,6 +111,12 @@ struct PeriodLengthChart: View {
 
 struct SymptomFrequencyChart: View {
     let counts: [SymptomCount]
+
+    private var a11yLabel: String {
+        guard !counts.isEmpty else { return "Symptom frequency chart. No symptoms logged yet." }
+        let top = counts.prefix(3).map { "\($0.symptom.displayName) \($0.count) times" }.joined(separator: ", ")
+        return "Symptom frequency chart. Most logged: \(top)."
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
@@ -125,6 +145,7 @@ struct SymptomFrequencyChart: View {
                             .font(CaelynFont.caption)
                     } }
                     .frame(height: CGFloat(counts.count) * 28 + 20)
+                    .accessibilityLabel(a11yLabel)
                 }
             }
         }
@@ -135,6 +156,12 @@ struct SymptomFrequencyChart: View {
 
 struct MoodPatternChart: View {
     let counts: [MoodCount]
+
+    private var a11yLabel: String {
+        guard !counts.isEmpty else { return "Mood pattern chart. No moods logged yet." }
+        let top = counts.prefix(3).map { "\($0.mood.displayName) \($0.count) times" }.joined(separator: ", ")
+        return "Mood pattern chart. Most logged: \(top)."
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
@@ -163,6 +190,7 @@ struct MoodPatternChart: View {
                             .font(CaelynFont.caption)
                     } }
                     .frame(height: CGFloat(counts.count) * 28 + 20)
+                    .accessibilityLabel(a11yLabel)
                 }
             }
         }
@@ -173,6 +201,12 @@ struct MoodPatternChart: View {
 
 struct PainTrendChart: View {
     let series: [PainPoint]
+
+    private var a11yLabel: String {
+        guard !series.isEmpty else { return "Pain trend chart. No pain data logged yet." }
+        let avg = series.map(\.pain).reduce(0, +) / series.count
+        return "Pain trend chart. \(series.count) day\(series.count == 1 ? "" : "s") of data. Average pain level \(avg) out of 10."
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
@@ -213,6 +247,7 @@ struct PainTrendChart: View {
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                     } }
                     .frame(height: 160)
+                    .accessibilityLabel(a11yLabel)
                 }
             }
         }
@@ -223,6 +258,12 @@ struct PainTrendChart: View {
 
 struct BBTChart: View {
     let series: [BBTPoint]
+
+    private var a11yLabel: String {
+        guard !series.isEmpty else { return "Basal body temperature chart. No BBT readings yet." }
+        let recent = series.last.map { String(format: "Most recent reading: %.1f°C.", $0.temperature) } ?? ""
+        return "Basal body temperature chart. \(series.count) reading\(series.count == 1 ? "" : "s") shown. \(recent)"
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
@@ -280,6 +321,7 @@ struct BBTChart: View {
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                     } }
                     .frame(height: 180)
+                    .accessibilityLabel(a11yLabel)
                 }
             }
         }

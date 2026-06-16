@@ -121,11 +121,14 @@ struct HomeHeroCard: View {
             legendDot(color: CaelynColor.successSage, label: "Ovulation")
             legendDot(color: CaelynColor.primaryPlum.opacity(0.55), label: "PMS")
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Legend: rose for period, green for ovulation, purple for PMS")
     }
 
     private func legendDot(color: Color, label: String) -> some View {
         HStack(spacing: 6) {
             Circle().fill(color).frame(width: 7, height: 7)
+                .accessibilityHidden(true)
             Text(label)
                 .font(CaelynFont.caption)
                 .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
