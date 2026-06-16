@@ -49,7 +49,8 @@ enum HomeCopy {
         daysUntilPeriod: Int,
         daysUntilFertileWindowStart: Int,
         fertileWindow: ClosedRange<Date>?,
-        currentPhase: CyclePhase
+        currentPhase: CyclePhase,
+        variation: Int = 0
     ) -> [(icon: String, label: String, accent: String)] {
         var events: [(icon: String, label: String, accent: String)] = []
 
@@ -61,11 +62,9 @@ enum HomeCopy {
             ))
         }
         if currentPhase != .menstrual && daysUntilPeriod > 0 {
-            events.append((
-                icon: "drop.fill",
-                label: "Period expected in \(daysUntilPeriod) day\(daysUntilPeriod == 1 ? "" : "s")",
-                accent: "rose"
-            ))
+            let base = "Period expected in \(daysUntilPeriod) day\(daysUntilPeriod == 1 ? "" : "s")"
+            let label = variation > 1 ? "\(base) (±\(variation) days)" : base
+            events.append((icon: "drop.fill", label: label, accent: "rose"))
         }
         if currentPhase != .ovulation, let window = fertileWindow, daysUntilFertileWindowStart <= 14 {
             let label: String

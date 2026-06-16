@@ -186,7 +186,8 @@ struct HomeView: View {
                         daysUntilPeriod: daysUntilPeriod,
                         daysUntilFertileWindowStart: daysUntilFertileWindowStart,
                         fertileWindow: fertileWindow,
-                        currentPhase: phase
+                        currentPhase: phase,
+                        variation: PredictionEngine.cycleLengthVariation(of: cycles)
                     )
                 )
 
