@@ -7,6 +7,8 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var showingLogSheet = false
+    @State private var showingPeriodStartSheet = false
+    @State private var periodStartDraft: Date = .now
 
     private var profile: UserProfile? { profiles.first }
 
@@ -161,6 +163,8 @@ struct HomeView: View {
                 )
 
                 periodStatePrompt
+
+                periodStartEditRow
 
                 irregularModeBanner
 
@@ -357,6 +361,128 @@ struct HomeView: View {
             return "Day \(day) of your period — log it?"
         }
         return "Did your period start today?"
+    }
+
+    // MARK: - Period start edit row
+
+    @ViewBuilder
+    private var periodStartEditRow: some View {
+        if let start = profile?.lastPeriodStart, isInActivePeriodWindow {
+            let fmt: DateFormatter = {
+                let f = DateFormatter()
+                f.dateFormat = "MMM d"
+                return f
+            }()
+            let label = Calendar.current.isDateInToday(start) ? "today" : fmt.string(from: start)
+            Button {
+                periodStartDraft = start
+                showingPeriodStartSheet = true
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "calendar.badge.clock")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(CaelynColor.primaryPlum.opacity(0.65))
+                    Text("Period started \(label) · Change date")
+                        .font(CaelynFont.caption.weight(.medium))
+                        .foregroundStyle(CaelynColor.primaryPlum.opacity(0.75))
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(CaelynColor.primaryPlum.opacity(0.35))
+                }
+                .padding(.horizontal, CaelynSpacing.md)
+                .padding(.vertical, CaelynSpacing.sm)
+                .background(CaelynColor.lavender.opacity(0.45), in: RoundedRectangle(cornerRadius: CaelynRadius.chip, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            .sheet(isPresented: $showingPeriodStartSheet) {
+                periodStartSheet
+            }
+        }
+    }
+
+    private var periodStartSheet: some View {
+        NavigationStack {
+            VStack(spacing: CaelynSpacing.lg) {
+                DatePicker(
+                    "Period start date",
+                    selection: $periodStartDraft,
+                    in: ...today,
+                    displayedComponents: .date
+                )
+                .datePickerStyle(.graphical)
+                .tint(CaelynColor.primaryPlum)
+                .padding(.horizontal, CaelynSpacing.md)
+
+                Button(role: .destructive) {
+                    removePeriodLog()
+                    showingPeriodStartSheet = false
+                } label: {
+                    Label("Remove period log", systemImage: "trash")
+                        .font(CaelynFont.body)
+                        .foregroundStyle(CaelynColor.alertRose)
+                        .frame(maxWidth: .infinity)
+                        .padding(CaelynSpacing.md)
+                        .background(CaelynColor.alertRose.opacity(0.1), in: RoundedRectangle(cornerRadius: CaelynRadius.card, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, CaelynSpacing.md)
+
+                Spacer()
+            }
+            .padding(.top, CaelynSpacing.md)
+            .background(CaelynColor.backgroundCream.ignoresSafeArea())
+            .navigationTitle("When did it start?")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { showingPeriodStartSheet = false }
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Save") {
+                        movePeriodStart(to: periodStartDraft)
+                        showingPeriodStartSheet = false
+                    }
+                    .font(CaelynFont.body.weight(.semibold))
+                    .foregroundStyle(CaelynColor.primaryPlum)
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+
+    private func movePeriodStart(to newDate: Date) {
+        let cal = Calendar.current
+        let newDay = cal.startOfDay(for: newDate)
+        // Move the flow log to the correct date
+        if let old = entries.first(where: { cal.isDate($0.date, inSameDayAs: today) }), old.flow != nil {
+            old.flow = nil
+            old.updatedAt = .now
+        }
+        if let existing = entries.first(where: { cal.isDate($0.date, inSameDayAs: newDay) }) {
+            if existing.flow == nil { existing.flow = .medium }
+            existing.updatedAt = .now
+        } else {
+            let entry = CycleEntry(date: newDay, flow: .medium)
+            modelContext.insert(entry)
+        }
+        profile?.lastPeriodStart = newDay
+        modelContext.saveOrLog()
+        Haptics.success()
+    }
+
+    private func removePeriodLog() {
+        let cal = Calendar.current
+        if let entry = entries.first(where: { cal.isDate($0.date, inSameDayAs: today) }) {
+            entry.flow = nil
+            entry.updatedAt = .now
+        }
+        if Calendar.current.isDateInToday(profile?.lastPeriodStart ?? .distantPast) {
+            profile?.lastPeriodStart = nil
+        }
+        modelContext.saveOrLog()
+        Haptics.selection()
     }
 
     /// Quick action: mark today as a Medium-flow period day. If today starts
