@@ -2,23 +2,22 @@ import XCTest
 
 /// App Store screenshot capture for Caelyn.
 ///
-/// **Run command (iPhone 16 Pro Max — 6.9" required by App Store):**
-///   xcodebuild test \
-///     -scheme Caelyn \
-///     -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max,OS=latest' \
+/// **iPhone 6.9" (required):**
+///   xcodebuild test -scheme Caelyn \
+///     -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.4' \
 ///     -only-testing CaelynUITests/ScreenshotTests \
-///     -resultBundlePath screenshots_6_9.xcresult
+///     -resultBundlePath screenshots_iphone.xcresult
+///
+/// **iPad Pro 13-inch / 12.9" (required):**
+///   xcodebuild test -scheme Caelyn \
+///     -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M4),OS=18.4' \
+///     -only-testing CaelynUITests/ScreenshotTests \
+///     -resultBundlePath screenshots_ipad.xcresult
 ///
 /// **Extract screenshots:**
-///   xcrun xcresulttool export --type directory \
-///     --path screenshots_6_9.xcresult \
-///     --output-path ./screenshots/6.9
-///
-/// **Also run on iPhone 8 Plus (5.5" — second required size):**
-///   Replace destination with: 'platform=iOS Simulator,name=iPhone 8 Plus,OS=15.5'
-///
-/// Screenshots land as PNG attachments inside the result bundle.
-/// All 6 screens are captured in order: Home, Log, Calendar, Insights, Charts, Paywall.
+///   xcrun xcresulttool export object --legacy --type directory \
+///     --path screenshots_ipad.xcresult \
+///     --output-path ./screenshots/ipad
 final class ScreenshotTests: XCTestCase {
 
     var app: XCUIApplication!
@@ -26,14 +25,15 @@ final class ScreenshotTests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         app = XCUIApplication()
-        // --screenshot-mode triggers ScreenshotSeeder + Pro override in the app
         app.launchArguments = ["--screenshot-mode"]
         app.launch()
 
-        // Wait for main tab bar (seeded data skips onboarding)
+        // On iPhone, tabs live in a bottom TabView (tabBars).
+        // On iPad iOS 18, tabs render as top pill buttons (regular buttons).
+        // Waiting for app.buttons["Home"] covers both cases.
         XCTAssertTrue(
-            app.tabBars.buttons["Home"].waitForExistence(timeout: 10),
-            "Main tab bar should appear immediately with screenshot seed data"
+            app.buttons["Home"].waitForExistence(timeout: 15),
+            "Home tab should appear with screenshot seed data"
         )
     }
 
@@ -41,7 +41,6 @@ final class ScreenshotTests: XCTestCase {
 
     func test01_Home() throws {
         tap(tab: "Home")
-        // Let the prediction engine settle and ring animate
         sleep(1)
         snapshot("01_Home_Ovulation")
     }
@@ -75,9 +74,7 @@ final class ScreenshotTests: XCTestCase {
     func test05_InsightsCharts() throws {
         tap(tab: "Insights")
         sleep(1)
-
         let scroll = app.scrollViews.firstMatch
-        // Scroll down to reach the Pro charts section
         scroll.swipeUp()
         scroll.swipeUp()
         sleep(1)
@@ -89,18 +86,16 @@ final class ScreenshotTests: XCTestCase {
     func test06_Paywall() throws {
         tap(tab: "Settings")
         sleep(1)
-
-        // Tap the upgrade row to open paywall
-        let upgradeRow = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Pro' OR label CONTAINS 'Upgrade'")).firstMatch
+        let upgradeRow = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS 'Pro' OR label CONTAINS 'Upgrade'")
+        ).firstMatch
         if upgradeRow.waitForExistence(timeout: 3) {
             upgradeRow.tap()
             sleep(1)
             snapshot("06_Paywall")
-            // Dismiss
             let dismiss = app.buttons["Close"]
             if dismiss.waitForExistence(timeout: 2) { dismiss.tap() }
         } else {
-            // Fallback: capture Settings with the pro status row visible
             snapshot("06_Settings")
         }
     }
@@ -108,8 +103,8 @@ final class ScreenshotTests: XCTestCase {
     // MARK: - Helpers
 
     private func tap(tab name: String) {
-        let tab = app.tabBars.buttons[name]
-        if tab.waitForExistence(timeout: 5) { tab.tap() }
+        let btn = app.buttons[name]
+        if btn.waitForExistence(timeout: 5) { btn.tap() }
     }
 
     private func snapshot(_ name: String) {

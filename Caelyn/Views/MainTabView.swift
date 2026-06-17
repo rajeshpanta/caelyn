@@ -6,6 +6,8 @@ struct MainTabView: View {
     @State private var router = NotificationRouter.shared
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
+    private static let isScreenshotMode = CommandLine.arguments.contains("--screenshot-mode")
+
     enum Tab: Hashable, CaseIterable {
         case home, calendar, log, insights, settings
 
@@ -52,7 +54,7 @@ struct MainTabView: View {
     }
 
     var body: some View {
-        if hSizeClass == .regular {
+        if hSizeClass == .regular && !Self.isScreenshotMode {
             ipadLayout
         } else {
             iPhoneLayout
