@@ -43,6 +43,11 @@ struct DailyLogForm: View {
             medicationDraft = entry?.medication ?? ""
             basalTempDraft = entry?.basalTemperature.map { String(format: "%.1f", $0) } ?? ""
         }
+        .onDisappear {
+            commitNote()
+            commitMedication()
+            commitBasalTemp()
+        }
         .onChange(of: noteFocused) { _, focused in
             if !focused { commitNote() }
         }
@@ -391,6 +396,7 @@ struct DailyLogForm: View {
         let name = newSymptomDraft.trimmingCharacters(in: .whitespaces)
         guard !name.isEmpty, !(profile?.customSymptoms.contains(name) ?? false) else { return }
         profile?.customSymptoms.append(name)
+        modelContext.saveOrLog()
         newSymptomDraft = ""
         showAddSymptom = false
     }
@@ -763,6 +769,7 @@ struct DailyLogForm: View {
         }
         // Remove from the user's custom list
         profile?.customSymptoms.removeAll { $0 == name }
+        modelContext.saveOrLog()
     }
 
     private func togglePainType(_ painType: PainType) {
