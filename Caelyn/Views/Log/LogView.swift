@@ -161,6 +161,13 @@ struct LogView: View {
             }
             .font(CaelynFont.subheadline)
             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+
+            if isToday && !hasEntryOnSelectedDate && entries.count < 3 {
+                Text("Log even just one thing — every tap teaches Caelyn your pattern.")
+                    .font(CaelynFont.caption)
+                    .foregroundStyle(CaelynColor.primaryPlum.opacity(0.7))
+                    .padding(.top, 2)
+            }
         }
     }
 }

@@ -62,7 +62,7 @@ struct DailyLogForm: View {
     // MARK: - Flow
 
     private var flowSection: some View {
-        SectionContainer(title: "Flow") {
+        SectionContainer(title: "Flow", subtitle: "The first day of flow starts a new cycle") {
             HStack(spacing: 6) {
                 flowPill(nil, label: "None")
                 flowPill(.spotting, label: "Spotting")
@@ -127,7 +127,7 @@ struct DailyLogForm: View {
     // MARK: - Pain
 
     private var painSection: some View {
-        SectionContainer(title: "Pain") {
+        SectionContainer(title: "Pain", subtitle: "Patterns help you prepare for tough days ahead") {
             VStack(alignment: .leading, spacing: CaelynSpacing.md) {
                 HStack(alignment: .firstTextBaseline) {
                     Text("\(entry?.pain ?? 0)")
@@ -221,7 +221,7 @@ struct DailyLogForm: View {
         let customNames = profile?.customSymptoms ?? []
         let builtInSelected = entry?.symptoms ?? []
         let customSelected = entry?.loggedCustomSymptoms ?? []
-        return SectionContainer(title: "Symptoms") {
+        return SectionContainer(title: "Symptoms", subtitle: "Tap anything you notice — patterns show up fast") {
             VStack(alignment: .leading, spacing: CaelynSpacing.md) {
                 // Built-in chips
                 LazyVGrid(
@@ -408,7 +408,7 @@ struct DailyLogForm: View {
             .calm, .happy, .focused, .sensitive,
             .anxious, .sad, .irritable, .lowEnergy
         ]
-        return SectionContainer(title: "Mood") {
+        return SectionContainer(title: "Mood", subtitle: "Mood follows hormones — logging it reveals the pattern") {
             FlexibleChipRow(items: visibleMoods) { mood in
                 MoodChip(
                     label: mood.displayName,
@@ -423,7 +423,7 @@ struct DailyLogForm: View {
     // MARK: - Energy
 
     private var energySection: some View {
-        SectionContainer(title: "Energy") {
+        SectionContainer(title: "Energy", subtitle: "Energy shifts predictably through your cycle") {
             HStack(spacing: CaelynSpacing.xs) {
                 ForEach(EnergyLevel.allCases) { level in
                     energyPill(level)

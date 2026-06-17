@@ -4,6 +4,7 @@ struct StatCard: View {
     let value: String
     let label: String
     var unit: String? = nil
+    var hint: String? = nil
     var accent: Color = CaelynColor.primaryPlum
 
     var body: some View {
@@ -22,6 +23,12 @@ struct StatCard: View {
                 Text(label)
                     .font(CaelynFont.footnote)
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+                if let hint {
+                    Text(hint)
+                        .font(CaelynFont.caption)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.38))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
     }

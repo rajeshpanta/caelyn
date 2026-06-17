@@ -14,8 +14,8 @@ struct HomePatternInsight: View {
             )
         } else if let (symptom, _) = mostFrequentSymptom {
             InsightCard(
-                title: "Pattern",
-                message: "You often log \(symptom.displayName.lowercased()) around this time of your cycle.",
+                title: "Your pattern",
+                message: "You often experience \(symptom.displayName.lowercased()) at this point in your cycle. That's your body's rhythm — not random.",
                 icon: "sparkles",
                 accent: CaelynColor.primaryPlum
             )
