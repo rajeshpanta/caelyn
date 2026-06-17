@@ -30,6 +30,12 @@ struct LogView: View {
         entries.contains { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
     }
 
+    private var entryOnSelectedDate: CycleEntry? {
+        entries.first { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
+    }
+
+    @Environment(\.modelContext) private var modelContext
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -63,6 +69,21 @@ struct LogView: View {
                         }
                         .font(CaelynFont.body.weight(.semibold))
                         .foregroundStyle(CaelynColor.primaryPlum)
+                    }
+                }
+                if hasEntryOnSelectedDate {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            if let entry = entryOnSelectedDate {
+                                modelContext.delete(entry)
+                                try? modelContext.save()
+                                Haptics.selection()
+                            }
+                        } label: {
+                            Image(systemName: "trash")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
+                        }
                     }
                 }
             }

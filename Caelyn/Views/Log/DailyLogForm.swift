@@ -77,7 +77,7 @@ struct DailyLogForm: View {
         let isSelected = entry?.flow == flow
         return Button {
             Haptics.selection()
-            withEntry { $0.flow = flow }
+            withEntry { $0.flow = ($0.flow == flow) ? nil : flow }
         } label: {
             VStack(spacing: 6) {
                 ZStack {
@@ -139,7 +139,18 @@ struct DailyLogForm: View {
                         .font(CaelynFont.subheadline)
                         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                     Spacer()
-                    Text(painLabel(entry?.pain ?? 0))
+                    if let pain = entry?.pain, pain > 0 {
+                        Button {
+                            Haptics.selection()
+                            withEntry { $0.pain = nil }
+                        } label: {
+                            Image(systemName: "xmark.circle")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.35))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    Text(entry?.pain != nil ? painLabel(entry!.pain!) : "")
                         .font(CaelynFont.caption.weight(.medium))
                         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                 }
@@ -319,7 +330,13 @@ struct DailyLogForm: View {
                 let isActive = currentLevel == level
                 Button {
                     Haptics.selection()
-                    withEntry { $0.symptomSeverity[key] = level }
+                    withEntry {
+                        if $0.symptomSeverity[key] == level {
+                            $0.symptomSeverity.removeValue(forKey: key)
+                        } else {
+                            $0.symptomSeverity[key] = level
+                        }
+                    }
                 } label: {
                     Text(label)
                         .font(CaelynFont.caption.weight(isActive ? .semibold : .regular))

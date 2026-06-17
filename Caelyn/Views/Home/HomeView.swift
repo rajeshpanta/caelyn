@@ -365,10 +365,16 @@ struct HomeView: View {
     private func logPeriodToday() {
         let target: CycleEntry
         if let existing = todayEntry {
-            if existing.flow == nil {
-                existing.flow = .medium
+            // Toggle: if flow is already logged, remove it (undo accidental tap)
+            if existing.flow != nil {
+                existing.flow = nil
                 existing.updatedAt = .now
+                modelContext.saveOrLog()
+                Haptics.selection()
+                return
             }
+            existing.flow = .medium
+            existing.updatedAt = .now
             target = existing
         } else {
             target = CycleEntry(date: today, flow: .medium)
@@ -408,7 +414,7 @@ struct HomeView: View {
     private func logMood(_ mood: Mood) {
         let target: CycleEntry
         if let existing = todayEntry {
-            existing.mood = mood
+            existing.mood = existing.mood == mood ? nil : mood
             existing.updatedAt = .now
             target = existing
         } else {
