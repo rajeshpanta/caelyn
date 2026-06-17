@@ -15,19 +15,16 @@ struct InsightsStatsGrid: View {
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: CaelynSpacing.sm) {
-            StatCard(value: "\(avgCycleLength)", label: "Avg cycle", unit: "days",
-                     hint: "Day 1 of flow to Day 1 of next flow")
-            StatCard(value: "\(avgPeriodLength)", label: "Avg period", unit: "days",
-                     hint: "How long your flow typically lasts")
+            StatCard(value: "\(avgCycleLength)", label: "Avg cycle", unit: "days")
+            StatCard(value: "\(avgPeriodLength)", label: "Avg period", unit: "days")
             StatCard(
                 value: "±\(cycleVariation)",
                 label: "Variation",
                 unit: cycleVariation == 1 ? "day" : "days",
-                hint: cycleVariation <= 4 ? "Your cycle is quite regular" : "Cycles vary — predictions are wider",
+                hint: cycleVariation <= 4 ? "Pretty regular" : "Cycles vary a bit",
                 accent: cycleVariation > 4 ? CaelynColor.alertRose : CaelynColor.successSage
             )
-            StatCard(value: "\(daysLoggedRecent)", label: "Logged", unit: "in 30 days",
-                     hint: "More logs = more accurate predictions")
+            StatCard(value: "\(daysLoggedRecent)", label: "Logged", unit: "in 30 days")
         }
     }
 }
