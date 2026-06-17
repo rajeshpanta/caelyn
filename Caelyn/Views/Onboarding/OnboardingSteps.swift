@@ -377,6 +377,7 @@ struct LastPeriodStep: View {
                     .opacity(vm.notSureLastPeriod ? 0.35 : 1.0)
                     .labelsHidden()
                 }
+                .staggeredAppear(delay: 0.28)
 
                 ToggleCard(
                     title: "I'm not sure right now",
@@ -384,6 +385,7 @@ struct LastPeriodStep: View {
                     icon: "questionmark.circle",
                     isOn: $vm.notSureLastPeriod
                 )
+                .staggeredAppear(delay: 0.42)
             }
         } footer: {
             CaelynButton(title: "Continue", variant: .primary) { vm.next() }
@@ -406,6 +408,7 @@ struct CycleLengthStep: View {
         ) {
             VStack(spacing: CaelynSpacing.lg) {
                 bigNumber
+                    .staggeredAppear(delay: 0.28)
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: CaelynSpacing.xs) {
@@ -417,6 +420,7 @@ struct CycleLengthStep: View {
                     .padding(.vertical, 4)
                 }
                 .scrollClipDisabled()
+                .staggeredAppear(delay: 0.36)
 
                 ToggleCard(
                     title: "Not sure — use the average",
@@ -424,6 +428,7 @@ struct CycleLengthStep: View {
                     icon: "questionmark.circle",
                     isOn: $vm.notSureCycleLength
                 )
+                .staggeredAppear(delay: 0.44)
             }
         } footer: {
             CaelynButton(title: "Continue", variant: .primary) { vm.next() }
@@ -511,6 +516,7 @@ struct PeriodLengthStep: View {
                 .frame(maxWidth: .infinity)
                 .opacity(vm.notSurePeriodLength ? 0.38 : 1.0)
                 .animation(.easeOut, value: vm.notSurePeriodLength)
+                .staggeredAppear(delay: 0.28)
 
                 HStack(spacing: CaelynSpacing.xs) {
                     ForEach(options, id: \.self) { value in
@@ -542,6 +548,7 @@ struct PeriodLengthStep: View {
                         .accessibilityAddTraits(selected ? .isSelected : [])
                     }
                 }
+                .staggeredAppear(delay: 0.36)
 
                 ToggleCard(
                     title: "Not sure — use 5 days",
@@ -549,6 +556,7 @@ struct PeriodLengthStep: View {
                     icon: "questionmark.circle",
                     isOn: $vm.notSurePeriodLength
                 )
+                .staggeredAppear(delay: 0.44)
             }
         } footer: {
             CaelynButton(title: "Continue", variant: .primary) { vm.next() }

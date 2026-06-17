@@ -35,9 +35,11 @@ struct OnboardingScaffold<Content: View, Footer: View>: View {
                     VStack(alignment: .leading, spacing: 12) {
                         if let icon {
                             ZStack {
+                                PulsingGlow(color: iconColor.opacity(0.22), size: 100, delay: 0.1)
                                 Circle()
-                                    .fill(iconColor.opacity(0.12))
+                                    .fill(iconColor.opacity(0.13))
                                     .frame(width: 60, height: 60)
+                                    .shadow(color: iconColor.opacity(0.18), radius: 8, x: 0, y: 4)
                                 Image(systemName: icon)
                                     .font(.system(size: 24, weight: .medium))
                                     .foregroundStyle(iconColor)
