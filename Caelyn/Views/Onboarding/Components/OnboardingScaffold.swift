@@ -9,6 +9,7 @@ struct OnboardingScaffold<Content: View, Footer: View>: View {
     let footer: () -> Footer
 
     @State private var headerAppear = false
+    @State private var titleAppear = false
 
     init(
         icon: String? = nil,
@@ -60,6 +61,13 @@ struct OnboardingScaffold<Content: View, Footer: View>: View {
                                     .font(CaelynFont.body)
                                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
                                     .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .opacity(titleAppear ? 1 : 0)
+                        .offset(y: titleAppear ? 0 : 14)
+                        .onAppear {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.85).delay(0.2)) {
+                                titleAppear = true
                             }
                         }
                     }

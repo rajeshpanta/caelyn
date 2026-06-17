@@ -89,6 +89,30 @@ struct ConfettiParticle: View {
     }
 }
 
+// MARK: - Staggered appear modifier
+
+struct StaggeredAppear: ViewModifier {
+    let delay: Double
+    @State private var appeared = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 18)
+            .onAppear {
+                withAnimation(.spring(response: 0.52, dampingFraction: 0.82).delay(delay)) {
+                    appeared = true
+                }
+            }
+    }
+}
+
+extension View {
+    func staggeredAppear(delay: Double = 0) -> some View {
+        modifier(StaggeredAppear(delay: delay))
+    }
+}
+
 // MARK: - Feature slide illustration
 
 struct FeatureSlideIllustration: View {

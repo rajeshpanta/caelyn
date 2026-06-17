@@ -347,6 +347,7 @@ struct PrivacyStep: View {
                 Spacer(minLength: 0)
             }
         }
+        .staggeredAppear(delay: 0.3 + delay)
     }
 }
 
@@ -585,7 +586,8 @@ struct GoalsStep: View {
                 ],
                 spacing: CaelynSpacing.sm
             ) {
-                ForEach(allGoals, id: \.0) { goal, icon, label in
+                ForEach(Array(allGoals.enumerated()), id: \.offset) { i, goalData in
+                    let (goal, icon, label) = goalData
                     GoalCard(
                         title: label,
                         icon: icon,
@@ -594,6 +596,7 @@ struct GoalsStep: View {
                         vm.toggleGoal(goal)
                         Haptics.selection()
                     }
+                    .staggeredAppear(delay: 0.32 + Double(i) * 0.055)
                 }
             }
         } footer: {
@@ -630,6 +633,7 @@ struct RemindersStep: View {
                         set: { vm.updateReminder(daily: $0) }
                     )
                 )
+                .staggeredAppear(delay: 0.30)
                 ToggleCard(
                     title: "Medication reminder",
                     subtitle: "Time to take your pill or any other medication you track.",
@@ -639,6 +643,7 @@ struct RemindersStep: View {
                         set: { vm.updateReminder(medication: $0) }
                     )
                 )
+                .staggeredAppear(delay: 0.38)
                 ToggleCard(
                     title: "No reminders for now",
                     subtitle: "Caelyn stays completely quiet — you come to it when you're ready.",
@@ -648,6 +653,7 @@ struct RemindersStep: View {
                         set: { vm.setNoReminders($0) }
                     )
                 )
+                .staggeredAppear(delay: 0.46)
             }
         } footer: {
             CaelynButton(title: "Continue", variant: .primary) {
@@ -859,8 +865,10 @@ struct HealthStep: View {
             VStack(spacing: CaelynSpacing.sm) {
                 healthRow(icon: "drop.fill",  title: "Menstrual flow",
                           body: "Reads and writes period data to Health.")
+                    .staggeredAppear(delay: 0.30)
                 healthRow(icon: "sparkles",   title: "Symptoms",
                           body: "Shares symptoms you log with Apple Health.")
+                    .staggeredAppear(delay: 0.38)
 
                 if connected {
                     CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.successSage.opacity(0.12)) {
