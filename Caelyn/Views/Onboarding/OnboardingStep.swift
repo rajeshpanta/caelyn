@@ -8,9 +8,10 @@ enum OnboardingStep: Int, CaseIterable, Identifiable {
     case cycleLength      = 4
     case periodLength     = 5
     case goals            = 6
-    case reminders        = 7
-    case lock             = 8
-    case done             = 9
+    case health           = 7
+    case reminders        = 8
+    case lock             = 9
+    case done             = 10
 
     var id: Int { rawValue }
 
@@ -29,12 +30,13 @@ enum OnboardingStep: Int, CaseIterable, Identifiable {
         case .cycleLength:   return 3
         case .periodLength:  return 4
         case .goals:         return 5
-        case .reminders:     return 6
-        case .lock:          return 7
+        case .health:        return 6
+        case .reminders:     return 7
+        case .lock:          return 8
         }
     }
 
-    var surveyTotal: Int { 7 }
+    var surveyTotal: Int { 8 }
 }
 
 enum NavigationDirection {

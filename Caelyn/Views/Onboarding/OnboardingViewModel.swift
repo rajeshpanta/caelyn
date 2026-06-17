@@ -26,6 +26,15 @@ final class OnboardingViewModel {
     var noReminders: Bool = false
 
     var enableLock: Bool = false
+    var healthKitConnected: Bool = false
+
+    func skipHealthStep() {
+        // Skip the health step if HealthKit isn't available on this device
+        guard let next = OnboardingStep(rawValue: step.rawValue + 1) else { return }
+        navigationDirection = .forward
+        step = next
+        Haptics.selection()
+    }
 
     func next() {
         guard let next = OnboardingStep(rawValue: step.rawValue + 1) else { return }
@@ -81,7 +90,7 @@ final class OnboardingViewModel {
             lockEnabled: enableLock,
             hidePreview: false,
             privateNotifications: true,
-            healthKitConnected: false,
+            healthKitConnected: healthKitConnected,
             firstDayOfWeek: Calendar.current.firstWeekday,
             theme: .system,
             hasOnboarded: true,

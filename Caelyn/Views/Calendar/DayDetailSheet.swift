@@ -31,6 +31,7 @@ struct DayDetailSheet: View {
                 .padding(.top, CaelynSpacing.md)
                 .padding(.bottom, CaelynSpacing.xl)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(CaelynColor.backgroundCream.ignoresSafeArea())
             .navigationTitle(titleLabel)
             .toolbar {

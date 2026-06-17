@@ -608,6 +608,11 @@ struct GoalsStep: View {
 struct RemindersStep: View {
     let vm: OnboardingViewModel
 
+    private var anyReminderEnabled: Bool {
+        vm.remindDailyCheckIn || vm.remindMedication ||
+        vm.remindPeriodStart  || vm.remindOvulation
+    }
+
     var body: some View {
         OnboardingScaffold(
             icon: "bell.fill",
@@ -645,7 +650,12 @@ struct RemindersStep: View {
                 )
             }
         } footer: {
-            CaelynButton(title: "Continue", variant: .primary) { vm.next() }
+            CaelynButton(title: "Continue", variant: .primary) {
+                if anyReminderEnabled {
+                    Task { await NotificationService.requestAuthorization() }
+                }
+                vm.next()
+            }
         }
     }
 }
@@ -826,6 +836,111 @@ struct DoneStep: View {
                 .padding(.horizontal, CaelynSpacing.lg)
                 .padding(.bottom, CaelynSpacing.lg)
                 .opacity(textAppear ? 1 : 0)
+        }
+    }
+}
+
+// MARK: - Apple Health
+
+struct HealthStep: View {
+    let vm: OnboardingViewModel
+
+    @State private var isConnecting = false
+    @State private var connected = false
+    @State private var denied = false
+
+    var body: some View {
+        OnboardingScaffold(
+            icon: "heart.text.square.fill",
+            iconColor: CaelynColor.alertRose,
+            title: "Sync with Apple Health?",
+            subtitle: "Import your existing period logs and symptoms — or skip and start fresh. You can always change this in Settings."
+        ) {
+            VStack(spacing: CaelynSpacing.sm) {
+                healthRow(icon: "drop.fill",  title: "Menstrual flow",
+                          body: "Reads and writes period data to Health.")
+                healthRow(icon: "sparkles",   title: "Symptoms",
+                          body: "Shares symptoms you log with Apple Health.")
+
+                if connected {
+                    CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.successSage.opacity(0.12)) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(CaelynColor.successSage)
+                            Text("Apple Health connected")
+                                .font(CaelynFont.subheadline.weight(.medium))
+                                .foregroundStyle(CaelynColor.deepPlumText)
+                        }
+                    }
+                } else if denied {
+                    CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.alertRose.opacity(0.10)) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "info.circle")
+                                .foregroundStyle(CaelynColor.alertRose)
+                            Text("Enable access in iOS Settings → Health anytime.")
+                                .font(CaelynFont.caption)
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+            }
+        } footer: {
+            VStack(spacing: CaelynSpacing.xs) {
+                if !connected && !denied {
+                    CaelynButton(
+                        title: isConnecting ? "Connecting…" : "Connect Apple Health",
+                        variant: .primary,
+                        icon: "heart.text.square"
+                    ) {
+                        Task { await connect() }
+                    }
+                    .disabled(isConnecting)
+                }
+                CaelynButton(title: connected ? "Continue" : "Skip for now", variant: connected ? .primary : .tertiary) {
+                    vm.next()
+                }
+            }
+        }
+        .onAppear {
+            // Auto-skip if HealthKit isn't available on this device/build
+            if !HealthKitService.isAvailable { vm.next() }
+        }
+    }
+
+    private func healthRow(icon: String, title: String, body: String) -> some View {
+        CaelynCard(padding: CaelynSpacing.md) {
+            HStack(spacing: CaelynSpacing.sm) {
+                ZStack {
+                    Circle().fill(CaelynColor.alertRose.opacity(0.12)).frame(width: CaelynIconSize.lg, height: CaelynIconSize.lg)
+                    Image(systemName: icon)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(CaelynColor.alertRose)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(CaelynFont.body).foregroundStyle(CaelynColor.deepPlumText)
+                    Text(body).font(CaelynFont.subheadline).foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+        }
+    }
+
+    private func connect() async {
+        isConnecting = true
+        defer { isConnecting = false }
+        do {
+            try await HealthKitService.requestAuthorization()
+            let granted = HealthKitService.canWriteMenstrualFlow()
+            if granted {
+                vm.healthKitConnected = true
+                connected = true
+            } else {
+                denied = true
+            }
+        } catch {
+            denied = true
         }
     }
 }

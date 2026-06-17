@@ -45,6 +45,7 @@ struct LogView: View {
                 .caelynContentWidth()
                 .frame(maxWidth: .infinity)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(CaelynColor.backgroundCream.ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

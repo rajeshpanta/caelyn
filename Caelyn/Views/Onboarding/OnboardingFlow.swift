@@ -46,6 +46,8 @@ struct OnboardingFlow: View {
             PeriodLengthStep(vm: vm)
         case .goals:
             GoalsStep(vm: vm)
+        case .health:
+            HealthStep(vm: vm)
         case .reminders:
             RemindersStep(vm: vm)
         case .lock:

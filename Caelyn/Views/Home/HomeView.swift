@@ -140,6 +140,7 @@ struct HomeView: View {
                             DailyLogForm(date: today)
                                 .padding(CaelynSpacing.lg)
                         }
+                        .scrollDismissesKeyboard(.interactively)
                         .background(CaelynColor.backgroundCream.ignoresSafeArea())
                         .navigationTitle("Today's Log")
                         .navigationBarTitleDisplayMode(.inline)
