@@ -137,7 +137,7 @@ struct SettingsView: View {
             Button("Continue", role: .destructive) { pendingShowDeleteSecond = true }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This permanently removes every cycle entry, your profile, and any settings. This cannot be undone.")
+            Text("This deletes your entire history — every cycle entry, your profile, and all settings. It cannot be undone.")
         }
         .onChange(of: showingDeleteFirst) { _, isShowing in
             // First dialog has fully dismissed and the user opted to continue
@@ -155,7 +155,7 @@ struct SettingsView: View {
             Button("Delete everything", role: .destructive) { deleteAllData() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Last chance — there's no recovery after this.")
+            Text("Everything will be permanently removed.")
         }
         .alert("Couldn't enable lock", isPresented: Binding(
             get: { lockToggleError != nil },
@@ -304,7 +304,7 @@ struct SettingsView: View {
                     icon: "eye.slash",
                     iconColor: CaelynColor.primaryPlum,
                     title: "Hide app preview",
-                    subtitle: "Mask Caelyn in the iOS task switcher.",
+                    subtitle: "People nearby won't see Caelyn when you switch apps.",
                     isOn: hidePreviewBinding(profile: profile)
                 )
                 SettingsDivider()
@@ -312,7 +312,7 @@ struct SettingsView: View {
                     icon: "bell.badge.slash",
                     iconColor: CaelynColor.primaryPlum,
                     title: "Private notifications",
-                    subtitle: "Reminders show \"Caelyn reminder\" instead of details.",
+                    subtitle: "Notifications show 'Caelyn' — not your cycle details.",
                     isOn: privateNotificationsBinding(profile: profile)
                 )
             }
@@ -352,7 +352,7 @@ struct SettingsView: View {
             SettingsRow(
                 icon: "person.2",
                 iconColor: CaelynColor.primaryPlum,
-                title: "Partner Access",
+                title: "Share with a partner",
                 detail: purchase.isPro ? nil : "Pro",
                 action: { purchase.isPro ? (showingShareMode = true) : (showingPaywall = true) }
             )

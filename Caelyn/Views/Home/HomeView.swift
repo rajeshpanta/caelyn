@@ -438,7 +438,7 @@ struct HomeView: View {
                         Image(systemName: "waveform.path.ecg.rectangle.fill")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(CaelynColor.primaryPlum)
-                        Text("Irregular cycles detected")
+                        Text("Your cycles look a bit irregular")
                             .font(CaelynFont.callout.weight(.semibold))
                             .foregroundStyle(CaelynColor.deepPlumText)
                     }
@@ -478,7 +478,7 @@ struct HomeView: View {
             HStack(spacing: 6) {
                 Image(systemName: "waveform.path.ecg")
                     .font(.system(size: 11, weight: .medium))
-                Text("Irregular cycle mode on")
+                Text("Irregular mode on")
                     .font(CaelynFont.caption.weight(.medium))
             }
             .foregroundStyle(CaelynColor.primaryPlum.opacity(0.75))

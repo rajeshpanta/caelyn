@@ -54,7 +54,7 @@ struct HomeHeroCard: View {
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                 }
                 if confidence == .low {
-                    Text("Still learning your pattern")
+                    Text("Log a few more cycles and predictions will improve")
                         .font(CaelynFont.caption)
                         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.38))
                 }

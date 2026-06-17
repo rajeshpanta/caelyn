@@ -156,7 +156,7 @@ struct DailyLogForm: View {
                 .accessibilityLabel("Pain level")
                 .accessibilityValue("\(entry?.pain ?? 0) out of 10, \(painLabel(entry?.pain ?? 0))")
 
-                Text("Pain locations")
+                Text("Where does it hurt?")
                     .font(CaelynFont.caption.weight(.semibold))
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                     .tracking(0.3)
@@ -289,10 +289,10 @@ struct DailyLogForm: View {
 
     private func severitySection(builtIn: [Symptom], custom: [String]) -> some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.xs) {
-            Text("SEVERITY")
+            Text("How severe?")
                 .font(CaelynFont.caption.weight(.semibold))
                 .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
-                .tracking(0.5)
+                .tracking(0.3)
                 .padding(.top, 4)
 
             ForEach(builtIn) { symptom in
@@ -480,7 +480,7 @@ struct DailyLogForm: View {
     // MARK: - Temperature
 
     private var temperatureSection: some View {
-        SectionContainer(title: "Basal Body Temp") {
+        SectionContainer(title: "Temperature", subtitle: "Measure before getting up for accuracy") {
             HStack(spacing: CaelynSpacing.sm) {
                 Image(systemName: "thermometer.medium")
                     .foregroundStyle(CaelynColor.primaryPlum)
@@ -503,7 +503,7 @@ struct DailyLogForm: View {
     // MARK: - Ovulation Test
 
     private var ovulationTestSection: some View {
-        SectionContainer(title: "Ovulation Test (LH Strip)") {
+        SectionContainer(title: "Ovulation Test") {
             VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
                 HStack(spacing: CaelynSpacing.xs) {
                     // Clear button
@@ -528,9 +528,9 @@ struct DailyLogForm: View {
                 if let result = entry?.ovulationTestResult, result != .negative {
                     let hint: String = {
                         switch result {
-                        case .rising:  return "LH is rising — ovulation may be 2–3 days away."
-                        case .lhSurge: return "LH surge detected — ovulation expected within 24–36 hours."
-                        case .positive: return "Ovulation likely today — highest fertility window."
+                        case .rising:  return "LH is rising — you may ovulate in the next 2–3 days."
+                        case .lhSurge: return "Surge detected — you're likely ovulating soon. Most fertile now."
+                        case .positive: return "Peak fertility — great time if you're trying to conceive."
                         default: return ""
                         }
                     }()
@@ -586,7 +586,7 @@ struct DailyLogForm: View {
         SectionContainer(title: "Note") {
             ZStack(alignment: .topLeading) {
                 if noteDraft.isEmpty {
-                    Text("Add a private note…")
+                    Text("What's on your mind? Just for you 🔒")
                         .font(CaelynFont.body)
                         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.35))
                         .padding(.top, 8)
@@ -614,7 +614,7 @@ struct DailyLogForm: View {
                 }
             } label: {
                 HStack {
-                    Text(showAdvanced ? "Hide tracking options" : "More tracking options")
+                    Text(showAdvanced ? "Hide extra options" : "More to track · meds, fluid, tests")
                         .font(CaelynFont.body.weight(.medium))
                         .foregroundStyle(CaelynColor.primaryPlum)
                     Spacer()
@@ -661,7 +661,7 @@ struct DailyLogForm: View {
                 Image(systemName: "pills")
                     .foregroundStyle(CaelynColor.primaryPlum)
                     .frame(width: 24)
-                TextField("Medication", text: $medicationDraft)
+                TextField("What are you taking today?", text: $medicationDraft)
                     .font(CaelynFont.body)
                     .foregroundStyle(CaelynColor.deepPlumText)
                     .focused($medicationFocused)
@@ -677,9 +677,14 @@ struct DailyLogForm: View {
                 Image(systemName: "drop.degreesign")
                     .foregroundStyle(CaelynColor.primaryPlum)
                     .frame(width: 24)
-                Text("Cervical mucus")
-                    .font(CaelynFont.body)
-                    .foregroundStyle(CaelynColor.deepPlumText)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Cervical fluid")
+                        .font(CaelynFont.body)
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                    Text("Helps track fertile days")
+                        .font(CaelynFont.caption)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                }
                 Spacer()
                 Menu {
                     Button("Clear") { withEntry { $0.cervicalMucus = nil } }
@@ -811,14 +816,22 @@ struct DailyLogForm: View {
 
 private struct SectionContainer<Content: View>: View {
     let title: String
+    var subtitle: String? = nil
     @ViewBuilder var content: () -> Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
-            Text(title.uppercased())
-                .font(CaelynFont.caption.weight(.semibold))
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
-                .tracking(0.6)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title.uppercased())
+                    .font(CaelynFont.caption.weight(.semibold))
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                    .tracking(0.6)
+                if let subtitle {
+                    Text(subtitle)
+                        .font(CaelynFont.caption)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.38))
+                }
+            }
             CaelynCard(padding: CaelynSpacing.md) {
                 content()
             }
