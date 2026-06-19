@@ -19,9 +19,8 @@ final class PurchaseService {
     static let shared = PurchaseService()
 
     enum ProductID: String, CaseIterable {
-        case monthly  = "smallpanta-icould.com.caelynperiodtracker.pro.monthly"
-        case yearly   = "smallpanta-icould.com.caelynperiodtracker.pro.yearly"
-        case lifetime = "smallpanta-icould.com.caelynperiodtracker.pro.lifetime"
+        case monthly = "smallpanta-icould.com.caelynperiodtracker.pro.monthly"
+        case yearly  = "smallpanta-icould.com.caelynperiodtracker.pro.yearly"
     }
 
     private(set) var products: [Product] = []
@@ -39,14 +38,12 @@ final class PurchaseService {
 
     private var proOverride: Bool? = nil
     var isPro: Bool { proOverride ?? !purchasedProductIDs.isEmpty }
-    var isLifetimePro: Bool { purchasedProductIDs.contains(ProductID.lifetime.rawValue) }
 
     /// Forces isPro to a fixed value — used in screenshot mode only.
     func overridePro(_ value: Bool) { proOverride = value }
 
-    var monthlyProduct:  Product? { products.first(where: { $0.id == ProductID.monthly.rawValue  }) }
-    var yearlyProduct:   Product? { products.first(where: { $0.id == ProductID.yearly.rawValue   }) }
-    var lifetimeProduct: Product? { products.first(where: { $0.id == ProductID.lifetime.rawValue }) }
+    var monthlyProduct: Product? { products.first(where: { $0.id == ProductID.monthly.rawValue }) }
+    var yearlyProduct:  Product? { products.first(where: { $0.id == ProductID.yearly.rawValue  }) }
 
     /// "Save N%" badge for the yearly tier, derived from monthly × 12 vs yearly.
     var yearlySavingsPercent: Int {

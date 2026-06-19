@@ -46,12 +46,15 @@ struct HomeComingUp: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(accentColor(for: event.accent))
             }
+            .accessibilityHidden(true)
             Text(event.label)
                 .font(CaelynFont.body)
                 .foregroundStyle(CaelynColor.deepPlumText)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(event.label)
     }
 
     private func accentBackground(for accent: String) -> Color {

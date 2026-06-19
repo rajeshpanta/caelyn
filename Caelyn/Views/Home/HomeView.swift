@@ -354,6 +354,7 @@ struct HomeView: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(activePeriodPromptTitle). Tap to mark today as a period day.")
     }
 
     private var activePeriodPromptTitle: String {

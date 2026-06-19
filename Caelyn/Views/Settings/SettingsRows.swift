@@ -62,6 +62,9 @@ struct SettingsRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel([title, detail].compactMap { $0 }.joined(separator: ", "))
+        .accessibilityHint("Opens \(title.lowercased())")
+        .accessibilityAddTraits(.isButton)
     }
 
     private var iconBadge: some View {
@@ -106,9 +109,12 @@ struct SettingsToggleRow: View {
                 .labelsHidden()
                 .tint(CaelynColor.primaryPlum)
                 .disabled(disabled)
+                .accessibilityLabel(title)
+                .accessibilityHint(subtitle ?? "")
         }
         .padding(CaelynSpacing.md)
         .opacity(disabled ? 0.6 : 1.0)
+        .accessibilityElement(children: .combine)
     }
 }
 

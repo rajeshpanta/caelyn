@@ -31,6 +31,8 @@ struct StatCard: View {
                 }
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel([label, value, unit].compactMap { $0 }.joined(separator: " ") + (hint.map { ". \($0)" } ?? ""))
     }
 }
 

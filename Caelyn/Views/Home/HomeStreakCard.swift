@@ -25,6 +25,11 @@ struct HomeStreakCard: View {
 
     private var isActive: Bool { streak > 0 }
 
+    private var accessibilityDescription: String {
+        if streak == 0 { return "Logging streak. Log today to start your streak." }
+        return "Logging streak: \(streak) \(streak == 1 ? "day" : "days") in a row. \(streakLabel)"
+    }
+
     var body: some View {
         CaelynCard(padding: CaelynSpacing.md) {
             VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
@@ -93,8 +98,11 @@ struct HomeStreakCard: View {
                 }
 
                 dotGrid
+                    .accessibilityHidden(true)
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityDescription)
     }
 
     private var dotGrid: some View {

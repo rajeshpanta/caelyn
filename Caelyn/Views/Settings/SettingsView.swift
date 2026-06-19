@@ -5,6 +5,7 @@ struct SettingsView: View {
     @Query private var profiles: [UserProfile]
     @Query private var entries: [CycleEntry]
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.openURL) private var openURL
 
     @State private var showingCycleSettings = false
     @State private var showingPrivacyTrust = false
@@ -181,12 +182,10 @@ struct SettingsView: View {
                             .foregroundStyle(CaelynColor.successSage)
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(purchase.isLifetimePro ? "Caelyn Pro · Lifetime" : "Caelyn Pro · Active")
+                        Text("Caelyn Pro · Active")
                             .font(CaelynFont.body.weight(.medium))
                             .foregroundStyle(CaelynColor.deepPlumText)
-                        Text(purchase.isLifetimePro
-                             ? "One-time purchase — no subscription needed."
-                             : "Manage your subscription in iOS Settings.")
+                        Text("Manage your subscription in iOS Settings.")
                             .font(CaelynFont.caption)
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                     }
@@ -288,6 +287,14 @@ struct SettingsView: View {
                 title: "Your privacy",
                 detail: "How Caelyn protects your data",
                 action: { showingPrivacyTrust = true }
+            )
+            SettingsDivider()
+            SettingsRow(
+                icon: "doc.text",
+                iconColor: CaelynColor.primaryPlum,
+                title: "Privacy Policy",
+                detail: "Read our full policy",
+                action: { openURL(AppURLs.privacyPolicy) }
             )
             SettingsDivider()
             if let profile {

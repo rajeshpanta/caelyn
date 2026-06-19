@@ -9,6 +9,8 @@ struct CaelynApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     private static let isScreenshotMode = CommandLine.arguments.contains("--screenshot-mode")
+                                        || CommandLine.arguments.contains("--screenshot-paywall")
+    private static let isPaywallMode    = CommandLine.arguments.contains("--screenshot-paywall")
 
     var body: some Scene {
         WindowGroup {
@@ -19,8 +21,9 @@ struct CaelynApp: App {
             }
             .task {
                 if Self.isScreenshotMode {
-                    // Override Pro status for screenshot capture so Pro charts are visible.
-                    PurchaseService.shared.overridePro(true)
+                    if !Self.isPaywallMode {
+                        PurchaseService.shared.overridePro(true)
+                    }
                 } else {
                     await PurchaseService.shared.loadProducts()
                     WatchBridgeService.shared.activate()

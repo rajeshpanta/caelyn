@@ -150,7 +150,7 @@ struct DailyLogForm: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    Text(entry?.pain != nil ? painLabel(entry!.pain!) : "")
+                    Text(entry?.pain.map { painLabel($0) } ?? "")
                         .font(CaelynFont.caption.weight(.medium))
                         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                 }
@@ -282,6 +282,12 @@ struct DailyLogForm: View {
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel("Add custom symptom")
+                    } else {
+                        Text("5 max")
+                            .font(CaelynFont.caption)
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.35))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 7)
                     }
                 }
 
@@ -406,12 +412,14 @@ struct DailyLogForm: View {
         let trimmed = newSymptomDraft.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return true }
         let existing = profile?.customSymptoms ?? []
-        return existing.contains(trimmed)
+        return existing.contains(trimmed) || existing.count >= 5
     }
 
     private func commitAddSymptom() {
         let name = newSymptomDraft.trimmingCharacters(in: .whitespaces)
-        guard !name.isEmpty, !(profile?.customSymptoms.contains(name) ?? false) else { return }
+        guard !name.isEmpty,
+              !(profile?.customSymptoms.contains(name) ?? false),
+              (profile?.customSymptoms.count ?? 0) < 5 else { return }
         profile?.customSymptoms.append(name)
         modelContext.saveOrLog()
         newSymptomDraft = ""
@@ -498,20 +506,29 @@ struct DailyLogForm: View {
 
     private var temperatureSection: some View {
         SectionContainer(title: "Temperature", subtitle: "Measure before getting up for accuracy") {
-            HStack(spacing: CaelynSpacing.sm) {
-                Image(systemName: "thermometer.medium")
-                    .foregroundStyle(CaelynColor.primaryPlum)
-                    .frame(width: 24)
-                TextField("°C (e.g. 36.5)", text: $basalTempDraft)
-                    .font(CaelynFont.body)
-                    .foregroundStyle(CaelynColor.deepPlumText)
-                    .keyboardType(.decimalPad)
-                    .focused($basalFocused)
-                    .accessibilityLabel("Basal body temperature in degrees Celsius")
-                if let temp = entry?.basalTemperature {
-                    Text(String(format: "%.2f°", temp))
-                        .font(CaelynFont.callout.monospacedDigit())
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: CaelynSpacing.sm) {
+                    Image(systemName: "thermometer.medium")
                         .foregroundStyle(CaelynColor.primaryPlum)
+                        .frame(width: 24)
+                    TextField("°C (e.g. 36.5)", text: $basalTempDraft)
+                        .font(CaelynFont.body)
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                        .keyboardType(.decimalPad)
+                        .focused($basalFocused)
+                        .accessibilityLabel("Basal body temperature in degrees Celsius")
+                    if let temp = entry?.basalTemperature {
+                        Text(String(format: "%.2f°C", temp))
+                            .font(CaelynFont.callout.monospacedDigit())
+                            .foregroundStyle(CaelynColor.primaryPlum)
+                    }
+                }
+                if !basalTempDraft.isEmpty, Double(basalTempDraft) == nil || {
+                    let v = Double(basalTempDraft) ?? 0; return v < 35.0 || v > 42.0
+                }() {
+                    Text("Enter a value between 35.0 and 42.0°C")
+                        .font(CaelynFont.caption)
+                        .foregroundStyle(CaelynColor.alertRose.opacity(0.8))
                 }
             }
         }
@@ -823,8 +840,11 @@ struct DailyLogForm: View {
         let trimmed = basalTempDraft.trimmingCharacters(in: .whitespaces)
         if trimmed.isEmpty {
             withEntry { $0.basalTemperature = nil }
-        } else if let value = Double(trimmed) {
+        } else if let value = Double(trimmed), value >= 35.0, value <= 42.0 {
             withEntry { $0.basalTemperature = value }
+        } else {
+            // Out of realistic range — reset to last saved value
+            basalTempDraft = entry?.basalTemperature.map { String(format: "%.1f", $0) } ?? ""
         }
     }
 }

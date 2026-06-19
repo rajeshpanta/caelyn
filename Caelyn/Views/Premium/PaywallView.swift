@@ -229,21 +229,6 @@ struct PaywallView: View {
                     selectedTier = .yearly
                 }
             }
-
-            if purchase.lifetimeProduct != nil {
-                PaywallTierCard(
-                    kind: .lifetime,
-                    displayPrice: lifetimeDisplayPrice,
-                    strikethroughPrice: nil,
-                    perMonthLabel: "Pay once · own forever",
-                    badgeText: "ONE-TIME",
-                    badgeBackground: CaelynColor.primaryPlum,
-                    isSelected: selectedTier == .lifetime,
-                    isBestValue: false
-                ) {
-                    selectedTier = .lifetime
-                }
-            }
         }
     }
 
@@ -272,7 +257,7 @@ struct PaywallView: View {
                 .opacity(isPurchasing ? 0.8 : 1.0)
             }
             .buttonStyle(.plain)
-            .disabled(isPurchasing || selectedProduct == nil)
+            .disabled(isPurchasing || selectedProduct == nil || purchase.isPro)
         }
     }
 
@@ -294,8 +279,6 @@ struct PaywallView: View {
         .padding(.horizontal, 4)
     }
 
-    /// Subscription disclosure required by App Store Review for auto-renewable IAPs.
-    /// Omitted for the lifetime one-time purchase tier.
     private var trustCopy: some View {
         VStack(spacing: 4) {
             HStack(spacing: 6) {
@@ -304,16 +287,10 @@ struct PaywallView: View {
                 Text("Your core cycle data stays yours.")
                     .font(CaelynFont.footnote)
             }
-            if selectedTier != .lifetime {
-                let renewalPrice = selectedTier == .monthly ? monthlyDisplayPrice : yearlyDisplayPrice
-                Text("Auto-renewable subscription. Renews at \(renewalPrice) unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions.")
-                    .font(CaelynFont.footnote)
-                    .fixedSize(horizontal: false, vertical: true)
-            } else {
-                Text("One-time purchase. No subscription required. Access is permanent and does not expire.")
-                    .font(CaelynFont.footnote)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            let renewalPrice = selectedTier == .monthly ? monthlyDisplayPrice : yearlyDisplayPrice
+            Text("Auto-renewable subscription. Renews at \(renewalPrice) unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions.")
+                .font(CaelynFont.footnote)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
         .multilineTextAlignment(.center)
@@ -323,7 +300,7 @@ struct PaywallView: View {
     // MARK: - Empty / loading states
 
     private var productsAreReady: Bool {
-        purchase.monthlyProduct != nil || purchase.yearlyProduct != nil || purchase.lifetimeProduct != nil
+        purchase.monthlyProduct != nil || purchase.yearlyProduct != nil
     }
 
     private var loadingState: some View {
@@ -374,18 +351,16 @@ struct PaywallView: View {
 
     private var selectedProduct: Product? {
         switch selectedTier {
-        case .monthly:  return purchase.monthlyProduct
-        case .yearly:   return purchase.yearlyProduct
-        case .lifetime: return purchase.lifetimeProduct
+        case .monthly: return purchase.monthlyProduct
+        case .yearly:  return purchase.yearlyProduct
         }
     }
 
     private var ctaTitle: String {
         if purchase.isPro { return "You're already Pro" }
         switch selectedTier {
-        case .monthly:  return isPurchasing ? "Subscribing…"  : "Continue with Monthly"
-        case .yearly:   return isPurchasing ? "Subscribing…"  : "Continue with Yearly"
-        case .lifetime: return isPurchasing ? "Purchasing…"   : "Get Lifetime Access"
+        case .monthly: return isPurchasing ? "Subscribing…" : "Continue with Monthly"
+        case .yearly:  return isPurchasing ? "Subscribing…" : "Continue with Yearly"
         }
     }
 
@@ -402,11 +377,6 @@ struct PaywallView: View {
     private var yearlyDisplayPrice: String {
         guard let product = purchase.yearlyProduct else { return "—" }
         return "\(product.displayPrice)/yr"
-    }
-
-    private var lifetimeDisplayPrice: String {
-        guard let product = purchase.lifetimeProduct else { return "—" }
-        return product.displayPrice
     }
 
     private var yearlyPerMonthLabel: String? {

@@ -84,19 +84,23 @@ final class ScreenshotTests: XCTestCase {
     // MARK: - 6: Paywall — upsell card
 
     func test06_Paywall() throws {
+        // Relaunch without the Pro override so Settings shows the upgrade button
+        app.terminate()
+        app.launchArguments = ["--screenshot-paywall"]
+        app.launch()
+        XCTAssertTrue(app.buttons["Home"].waitForExistence(timeout: 15))
+        sleep(1)
         tap(tab: "Settings")
         sleep(1)
-        let upgradeRow = app.buttons.matching(
-            NSPredicate(format: "label CONTAINS 'Pro' OR label CONTAINS 'Upgrade'")
+        let upgradeBtn = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS 'Unlock Caelyn Pro'")
         ).firstMatch
-        if upgradeRow.waitForExistence(timeout: 3) {
-            upgradeRow.tap()
-            sleep(1)
+        if upgradeBtn.waitForExistence(timeout: 3) {
+            upgradeBtn.tap()
+            sleep(2)
             snapshot("06_Paywall")
-            let dismiss = app.buttons["Close"]
-            if dismiss.waitForExistence(timeout: 2) { dismiss.tap() }
         } else {
-            snapshot("06_Settings")
+            snapshot("06_Settings_Fallback")
         }
     }
 

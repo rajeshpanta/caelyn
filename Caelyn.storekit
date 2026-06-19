@@ -1,23 +1,7 @@
 {
   "identifier" : "F8B1D2E3",
   "nonRenewingSubscriptions" : [],
-  "products" : [
-    {
-      "displayPrice" : "39.99",
-      "familyShareable" : false,
-      "internalID" : "21525754",
-      "localizations" : [
-        {
-          "description" : "Lifetime access to Caelyn Pro. One-time purchase, no subscription required.",
-          "displayName" : "Caelyn Pro · Lifetime",
-          "locale" : "en_US"
-        }
-      ],
-      "productID" : "smallpanta-icould.com.caelynperiodtracker.pro.lifetime",
-      "referenceName" : "Caelyn Pro Lifetime",
-      "type" : "NonConsumable"
-    }
-  ],
+  "products" : [],
   "settings" : {
     "_compatibilityTimeRate" : 1,
     "_locale" : "en_US",

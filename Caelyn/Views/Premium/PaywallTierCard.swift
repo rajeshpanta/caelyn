@@ -14,13 +14,11 @@ struct PaywallTierCard: View {
     enum Kind {
         case monthly
         case yearly
-        case lifetime
 
         var title: String {
             switch self {
-            case .monthly:  return "Monthly"
-            case .yearly:   return "Yearly"
-            case .lifetime: return "Lifetime"
+            case .monthly: return "Monthly"
+            case .yearly:  return "Yearly"
             }
         }
     }
