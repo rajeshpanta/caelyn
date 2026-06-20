@@ -397,7 +397,7 @@ struct LastPeriodStep: View {
 
 struct CycleLengthStep: View {
     @Bindable var vm: OnboardingViewModel
-    private let options = Array(21...40)
+    private let options = Array(18...45)
 
     var body: some View {
         OnboardingScaffold(
@@ -487,7 +487,7 @@ struct CycleLengthStep: View {
 
 struct PeriodLengthStep: View {
     @Bindable var vm: OnboardingViewModel
-    private let options = Array(2...9)
+    private let options = Array(1...12)
 
     var body: some View {
         OnboardingScaffold(

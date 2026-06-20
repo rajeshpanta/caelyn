@@ -9,6 +9,7 @@ struct HomeView: View {
     @State private var showingLogSheet = false
     @State private var showingPeriodStartSheet = false
     @State private var periodStartDraft: Date = .now
+    @State private var purchase = PurchaseService.shared
 
     private var profile: UserProfile? { profiles.first }
 
@@ -168,15 +169,15 @@ struct HomeView: View {
 
                 irregularModeBanner
 
-                if profile?.ttcEnabled == true {
+                if purchase.isPro && profile?.ttcEnabled == true {
                     TTCDashboardCard(result: ttcResult, nextPeriodStart: nextStart)
                 }
 
-                if profile?.pregnancyEnabled == true, let due = profile?.pregnancyDueDate {
+                if purchase.isPro && profile?.pregnancyEnabled == true, let due = profile?.pregnancyDueDate {
                     PregnancyModeCard(dueDate: due)
                 }
 
-                if profile?.postpartumEnabled == true, let birth = profile?.postpartumBirthDate {
+                if purchase.isPro && profile?.postpartumEnabled == true, let birth = profile?.postpartumBirthDate {
                     PostpartumModeCard(birthDate: birth)
                 }
 
@@ -456,11 +457,10 @@ struct HomeView: View {
     private func movePeriodStart(to newDate: Date) {
         let cal = Calendar.current
         let newDay = cal.startOfDay(for: newDate)
-        // Move the flow log to the correct date
-        if let old = entries.first(where: { cal.isDate($0.date, inSameDayAs: today) }), old.flow != nil {
-            old.flow = nil
-            old.updatedAt = .now
-        }
+        // Only create a flow entry for the stated start date if one doesn't exist.
+        // Existing logs on any other dates are intentionally left untouched —
+        // historical logs are the source of truth for cycle tracking and exports.
+        // Users can clear any day's log themselves via the Log tab.
         if let existing = entries.first(where: { cal.isDate($0.date, inSameDayAs: newDay) }) {
             if existing.flow == nil { existing.flow = .medium }
             existing.updatedAt = .now
@@ -475,15 +475,21 @@ struct HomeView: View {
 
     private func removePeriodLog() {
         let cal = Calendar.current
+        var entryToSync: CycleEntry?
         if let entry = entries.first(where: { cal.isDate($0.date, inSameDayAs: today) }) {
             entry.flow = nil
             entry.updatedAt = .now
+            entryToSync = entry
         }
-        if Calendar.current.isDateInToday(profile?.lastPeriodStart ?? .distantPast) {
+        if cal.isDateInToday(profile?.lastPeriodStart ?? .distantPast) {
             profile?.lastPeriodStart = nil
         }
         modelContext.saveOrLog()
         Haptics.selection()
+        if let captured = entryToSync {
+            let snapshot = entries
+            Task { await HealthKitSync.syncIfConnected(captured, in: snapshot, modelContext: modelContext) }
+        }
     }
 
     /// Quick action: mark today as a Medium-flow period day. If today starts
@@ -497,6 +503,9 @@ struct HomeView: View {
                 existing.flow = nil
                 existing.updatedAt = .now
                 modelContext.saveOrLog()
+                let snapshot = entries
+                let captured = existing
+                Task { await HealthKitSync.syncIfConnected(captured, in: snapshot, modelContext: modelContext) }
                 Haptics.selection()
                 return
             }

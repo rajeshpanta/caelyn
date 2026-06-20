@@ -25,21 +25,22 @@ enum PredictionEngine {
 
         guard periodStarts.count >= 2 else { return [] }
 
+        let daySet = Set(dayStarts)
         var cycles: [Cycle] = []
         for i in 0..<(periodStarts.count - 1) {
             let start = periodStarts[i]
             let nextStart = periodStarts[i + 1]
             let length = calendar.dateComponents([.day], from: start, to: nextStart).day ?? 0
-            let periodLength = consecutiveFlowDays(from: start, in: dayStarts)
+            let periodLength = consecutiveFlowDays(from: start, in: daySet)
             cycles.append(Cycle(start: start, length: length, periodLength: periodLength))
         }
         return cycles
     }
 
-    private static func consecutiveFlowDays(from start: Date, in dayStarts: [Date]) -> Int {
+    private static func consecutiveFlowDays(from start: Date, in daySet: Set<Date>) -> Int {
         var count = 0
         var cursor = start
-        while dayStarts.contains(cursor) {
+        while daySet.contains(cursor) {
             count += 1
             guard let next = calendar.date(byAdding: .day, value: 1, to: cursor) else { break }
             cursor = next
@@ -68,7 +69,7 @@ enum PredictionEngine {
         guard cycles.count >= 2 else { return 0 }
         let lengths = cycles.suffix(6).map(\.length)
         guard let min = lengths.min(), let max = lengths.max() else { return 0 }
-        return (max - min + 1) / 2
+        return (max - min) / 2
     }
 
     /// Exponentially-weighted mean: newest value has weight 1.0, each prior step

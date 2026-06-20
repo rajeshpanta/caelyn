@@ -52,8 +52,8 @@ enum NotificationService {
 
     /// Quiet hours during which Caelyn will not fire any notification. Notifications
     /// scheduled for these hours get pushed forward to `quietHoursEnd`.
-    private static let quietHoursStart = 22  // 22:00
-    private static let quietHoursEnd   = 7   // 07:00
+    static let quietHoursStart = 22  // 22:00
+    static let quietHoursEnd   = 7   // 07:00
 
     // MARK: - Permission
 
@@ -204,18 +204,26 @@ enum NotificationService {
 
             if profile.remindPeriodStart {
                 let daysOffset = -max(0, profile.periodReminderDaysBefore)
-                if let reminderDay = cal.date(byAdding: .day, value: daysOffset, to: nextPeriod),
-                   let fire = scheduledFireDate(
-                       on: reminderDay,
-                       hour: profile.periodReminderHour,
-                       minute: profile.periodReminderMinute
-                   ) {
-                    await scheduleOneShot(
-                        category: .periodUpcoming,
-                        isPrivate: isPrivate,
-                        fireDate: fire,
-                        interruptionLevel: .active
-                    )
+                // Try preferred reminder day first; fall back to the period start day itself
+                // so we never silently drop the notification when the advance date is already past.
+                let candidates = [
+                    cal.date(byAdding: .day, value: daysOffset, to: nextPeriod),
+                    nextPeriod
+                ].compactMap { $0 }
+                for candidate in candidates {
+                    if let fire = scheduledFireDate(
+                        on: candidate,
+                        hour: profile.periodReminderHour,
+                        minute: profile.periodReminderMinute
+                    ) {
+                        await scheduleOneShot(
+                            category: .periodUpcoming,
+                            isPrivate: isPrivate,
+                            fireDate: fire,
+                            interruptionLevel: .active
+                        )
+                        break
+                    }
                 }
             }
 
@@ -258,33 +266,50 @@ enum NotificationService {
             case .patch:
                 let patchDays = cal.dateComponents([.day], from: cal.startOfDay(for: startDate), to: today).day ?? 0
                 let patchCycleDay = patchDays % 28
-                let nextPatchOffset: Int = {
-                    if patchCycleDay < 7  { return 7 - patchCycleDay }
-                    if patchCycleDay < 14 { return 14 - patchCycleDay }
-                    if patchCycleDay < 21 { return 21 - patchCycleDay }
-                    return 28 - patchCycleDay
+                // Candidate offsets in ascending order. The first one whose scheduledFireDate
+                // is in the future is the correct next event.
+                let patchOffsets: [Int] = {
+                    // change days at cycle days 7, 14, 21; then wrap to next cycle
+                    let checkpoints = [7, 14, 21, 28]
+                    return checkpoints.compactMap { cp in
+                        let offset = cp - patchCycleDay
+                        return offset >= 0 ? offset : nil
+                    } + [28 + (7 - patchCycleDay % 28)]  // safety: first event of next cycle
                 }()
-                if let changeDay = cal.date(byAdding: .day, value: nextPatchOffset, to: today),
-                   let fire = scheduledFireDate(on: changeDay, hour: profile.birthControlReminderHour, minute: profile.birthControlReminderMinute) {
+                for offset in patchOffsets {
+                    guard let changeDay = cal.date(byAdding: .day, value: offset, to: today),
+                          let fire = scheduledFireDate(on: changeDay, hour: profile.birthControlReminderHour, minute: profile.birthControlReminderMinute)
+                    else { continue }
                     await scheduleOneShot(
                         category: .birthControl,
                         isPrivate: isPrivate,
                         fireDate: fire,
                         interruptionLevel: .timeSensitive
                     )
+                    break
                 }
             case .ring:
                 let ringDays = cal.dateComponents([.day], from: cal.startOfDay(for: startDate), to: today).day ?? 0
                 let ringCycleDay = ringDays % 28
-                let nextRingOffset: Int = ringCycleDay < 21 ? (21 - ringCycleDay) : (28 - ringCycleDay)
-                if let eventDay = cal.date(byAdding: .day, value: nextRingOffset, to: today),
-                   let fire = scheduledFireDate(on: eventDay, hour: profile.birthControlReminderHour, minute: profile.birthControlReminderMinute) {
+                // Events: day 21 = remove, day 28 (=0) = insert. Pick the soonest future one.
+                let ringOffsets: [Int] = {
+                    let checkpoints = [21, 28]
+                    return checkpoints.compactMap { cp in
+                        let offset = cp - ringCycleDay
+                        return offset >= 0 ? offset : nil
+                    } + [21 + (28 - ringCycleDay)]  // safety: removal in next cycle
+                }()
+                for offset in ringOffsets {
+                    guard let eventDay = cal.date(byAdding: .day, value: offset, to: today),
+                          let fire = scheduledFireDate(on: eventDay, hour: profile.birthControlReminderHour, minute: profile.birthControlReminderMinute)
+                    else { continue }
                     await scheduleOneShot(
                         category: .birthControl,
                         isPrivate: isPrivate,
                         fireDate: fire,
                         interruptionLevel: .timeSensitive
                     )
+                    break
                 }
             }
         }

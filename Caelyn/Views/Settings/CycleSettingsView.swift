@@ -334,7 +334,10 @@ struct CycleSettingsView: View {
                         }
                     }
                     .tint(CaelynColor.primaryPlum)
-                    .onChange(of: profile.pregnancyEnabled) { _, _ in modelContext.saveOrLog() }
+                    .onChange(of: profile.pregnancyEnabled) { _, newValue in
+                        if newValue { profile.postpartumEnabled = false }
+                        modelContext.saveOrLog()
+                    }
 
                     if profile.pregnancyEnabled {
                         Divider()
@@ -376,7 +379,10 @@ struct CycleSettingsView: View {
                         }
                     }
                     .tint(CaelynColor.primaryPlum)
-                    .onChange(of: profile.postpartumEnabled) { _, _ in modelContext.saveOrLog() }
+                    .onChange(of: profile.postpartumEnabled) { _, newValue in
+                        if newValue { profile.pregnancyEnabled = false }
+                        modelContext.saveOrLog()
+                    }
 
                     if profile.postpartumEnabled {
                         Divider()

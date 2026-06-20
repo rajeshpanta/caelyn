@@ -52,7 +52,7 @@ private struct RemindersForm: View {
                         timePickerRow(
                             label: "Reminder time",
                             hour: bindHour(\.periodReminderHour, \.periodReminderMinute),
-                            note: nil
+                            note: quietHoursNote(hour: profile.periodReminderHour, minute: profile.periodReminderMinute)
                         )
                         daysPicker
                     }
@@ -68,7 +68,7 @@ private struct RemindersForm: View {
                         timePickerRow(
                             label: "Reminder time",
                             hour: bindHour(\.ovulationReminderHour, \.ovulationReminderMinute),
-                            note: nil
+                            note: quietHoursNote(hour: profile.ovulationReminderHour, minute: profile.ovulationReminderMinute)
                         )
                     }
                 }
@@ -86,7 +86,7 @@ private struct RemindersForm: View {
                         timePickerRow(
                             label: "Check-in time",
                             hour: bindHour(\.dailyCheckInHour, \.dailyCheckInMinute),
-                            note: nil
+                            note: quietHoursNote(hour: profile.dailyCheckInHour, minute: profile.dailyCheckInMinute)
                         )
                     }
                 }
@@ -101,7 +101,7 @@ private struct RemindersForm: View {
                         timePickerRow(
                             label: "Medication time",
                             hour: bindHour(\.medicationHour, \.medicationMinute),
-                            note: nil
+                            note: quietHoursNote(hour: profile.medicationHour, minute: profile.medicationMinute)
                         )
                     }
                 }
@@ -221,21 +221,50 @@ private struct RemindersForm: View {
 
     private func timePickerRow(label: String, hour: Binding<Date>, note: String?) -> some View {
         CaelynCard(padding: CaelynSpacing.md) {
-            HStack(spacing: CaelynSpacing.sm) {
-                Image(systemName: "clock")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(CaelynColor.primaryPlum)
-                    .frame(width: 24)
-                Text(label)
-                    .font(CaelynFont.body)
-                    .foregroundStyle(CaelynColor.deepPlumText)
-                Spacer(minLength: 0)
-                DatePicker("", selection: hour, displayedComponents: .hourAndMinute)
-                    .labelsHidden()
-                    .tint(CaelynColor.primaryPlum)
+            VStack(alignment: .leading, spacing: CaelynSpacing.xs) {
+                HStack(spacing: CaelynSpacing.sm) {
+                    Image(systemName: "clock")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(CaelynColor.primaryPlum)
+                        .frame(width: 24)
+                    Text(label)
+                        .font(CaelynFont.body)
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                    Spacer(minLength: 0)
+                    DatePicker("", selection: hour, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
+                        .tint(CaelynColor.primaryPlum)
+                }
+                if let note {
+                    HStack(spacing: 6) {
+                        Image(systemName: "moon.zzz")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(CaelynColor.primaryPlum.opacity(0.7))
+                        Text(note)
+                            .font(CaelynFont.caption)
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.leading, 30)
+                }
             }
         }
         .padding(.top, 4)
+    }
+
+    private func quietHoursNote(hour: Int, minute: Int) -> String? {
+        let quietStart = NotificationService.quietHoursStart  // 22
+        let quietEnd   = NotificationService.quietHoursEnd    // 7
+        // Window wraps midnight: 22:00–07:00
+        let isQuiet = hour >= quietStart || hour < quietEnd
+        guard isQuiet else { return nil }
+        let fmt = DateFormatter()
+        fmt.dateFormat = "h:mm a"
+        var c = DateComponents()
+        c.hour = quietEnd
+        c.minute = 0
+        let wakeTime = fmt.string(from: Calendar.current.date(from: c) ?? .now)
+        return "Quiet hours (10 PM–7 AM) — will fire at \(wakeTime)"
     }
 
     // MARK: - Bindings + side effects

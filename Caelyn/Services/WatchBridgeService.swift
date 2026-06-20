@@ -71,6 +71,10 @@ extension WatchBridgeService: WCSessionDelegate {
             if let m = mood, let moodVal = Mood(rawValue: m) { entry.mood = moodVal }
             entry.updatedAt = .now
             context.saveOrLog()
+
+            let allEntries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
+            let captured = entry
+            Task { await HealthKitSync.syncIfConnected(captured, in: allEntries, modelContext: context) }
         }
     }
 }

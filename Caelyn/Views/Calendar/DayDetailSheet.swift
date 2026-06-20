@@ -46,19 +46,14 @@ struct DayDetailSheet: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(titleLabel)
-                    .font(.system(.title2, design: .rounded).weight(.semibold))
-                    .foregroundStyle(CaelynColor.deepPlumText)
-                Spacer()
-                if isFuture {
-                    futureBadge
-                }
-            }
+        HStack(alignment: .firstTextBaseline) {
             Text(relativeLabel)
                 .font(CaelynFont.subheadline)
                 .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+            Spacer()
+            if isFuture {
+                futureBadge
+            }
         }
     }
 

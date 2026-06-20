@@ -158,7 +158,12 @@ struct DailyLogForm: View {
                 Slider(
                     value: Binding(
                         get: { Double(entry?.pain ?? 0) },
-                        set: { newValue in withEntry { $0.pain = Int(newValue.rounded()) } }
+                        set: { newValue in
+                            let rounded = Int(newValue.rounded())
+                            if rounded > 0 || entry != nil {
+                                withEntry { $0.pain = rounded == 0 ? nil : rounded }
+                            }
+                        }
                     ),
                     in: 0...10,
                     step: 1
@@ -209,7 +214,7 @@ struct DailyLogForm: View {
     // MARK: - Symptoms
 
     private var visibleSymptoms: [Symptom] {
-        var base: [Symptom] = [.bloating, .acne, .cravings, .fatigue, .nausea, .dizziness, .sleepChanges, .tenderBreasts]
+        var base: [Symptom] = [.cramps, .bloating, .headache, .backPain, .acne, .cravings, .fatigue, .nausea, .dizziness, .sleepChanges, .tenderBreasts]
         if profile?.perimenoEnabled == true {
             base += Symptom.perimenoSymptoms.filter { !base.contains($0) }
         }
@@ -430,8 +435,9 @@ struct DailyLogForm: View {
 
     private var moodSection: some View {
         let visibleMoods: [Mood] = [
-            .calm, .happy, .focused, .sensitive,
-            .anxious, .sad, .irritable, .lowEnergy
+            .calm, .happy, .energetic, .focused,
+            .sensitive, .anxious, .tired, .moody,
+            .sad, .irritable, .lowEnergy
         ]
         return SectionContainer(title: "Mood") {
             FlexibleChipRow(items: visibleMoods) { mood in
@@ -801,12 +807,14 @@ struct DailyLogForm: View {
     }
 
     private func removeCustomSymptom(_ name: String) {
-        // Deselect from today's log if selected
-        withEntry { entry in
-            entry.loggedCustomSymptoms.removeAll { $0 == name }
-            entry.symptomSeverity.removeValue(forKey: "custom:\(name)")
+        // Deselect from this day's log only if there's already an entry with that symptom.
+        if let e = entry, e.loggedCustomSymptoms.contains(name) {
+            withEntry { e in
+                e.loggedCustomSymptoms.removeAll { $0 == name }
+                e.symptomSeverity.removeValue(forKey: "custom:\(name)")
+            }
         }
-        // Remove from the user's custom list
+        // Remove from the user's custom list regardless.
         profile?.customSymptoms.removeAll { $0 == name }
         modelContext.saveOrLog()
     }

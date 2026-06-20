@@ -44,11 +44,27 @@ struct MonthSummaryCard: View {
         entriesInMonth.filter { $0.hasContent }.count
     }
 
+    private var isFutureMonth: Bool {
+        let cal = Calendar.current
+        return cal.compare(month, to: .now, toGranularity: .month) == .orderedDescending
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.md) {
             SectionHeader(title: "\(monthLabel) summary")
 
-            if totalLogged == 0 {
+            if isFutureMonth {
+                CaelynCard {
+                    HStack(spacing: CaelynSpacing.sm) {
+                        Image(systemName: "calendar.badge.clock")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
+                        Text("This month hasn't started yet.")
+                            .font(CaelynFont.body)
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                    }
+                }
+            } else if totalLogged == 0 {
                 CaelynCard {
                     HStack(spacing: CaelynSpacing.sm) {
                         Image(systemName: "moon.stars.fill")

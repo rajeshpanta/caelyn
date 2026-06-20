@@ -107,9 +107,14 @@ enum HealthKitService {
 
     /// Write all logged flow days to Health, marking the first day of each
     /// streak as a cycle start (HKMetadataKeyMenstrualCycleStart).
+    /// Deletes all existing Caelyn-written flow samples first to prevent duplicates.
     @discardableResult
     static func backfillFlowToHealth(entries: [CycleEntry]) async throws -> Int {
         guard isAvailable else { throw HealthKitError.notAvailable }
+
+        // Delete all existing samples we wrote before re-writing to avoid duplicates.
+        await deleteAllOwnFlowSamples()
+
         let flowEntries = entries
             .filter { $0.flow != nil }
             .sorted { $0.date < $1.date }
@@ -138,6 +143,25 @@ enum HealthKitService {
         }
     }
 
+    private static func deleteAllOwnFlowSamples() async {
+        guard isAvailable else { return }
+        let bundleID = Bundle.main.bundleIdentifier ?? ""
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            let query = HKSampleQuery(
+                sampleType: menstrualFlowType,
+                predicate: nil,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: nil
+            ) { _, samples, _ in
+                let ours = (samples as? [HKCategorySample] ?? [])
+                    .filter { $0.sourceRevision.source.bundleIdentifier == bundleID }
+                guard !ours.isEmpty else { continuation.resume(); return }
+                store.delete(ours) { _, _ in continuation.resume() }
+            }
+            store.execute(query)
+        }
+    }
+
     /// Write all symptom + pain entries to Health, mapping pain levels to severity.
     @discardableResult
     static func backfillSymptomsToHealth(entries: [CycleEntry]) async throws -> Int {
@@ -159,21 +183,91 @@ enum HealthKitService {
 
     /// Write the latest version of one entry to Health. Caller passes the full
     /// entries list so we can determine if this entry is a cycle start.
+    /// When flow is nil (cleared), removes any Caelyn-written flow sample for
+    /// that date so HealthKit stays in sync with the user's actual log.
     static func syncEntryToHealth(_ entry: CycleEntry, in entries: [CycleEntry], profile: UserProfile) async {
         guard profile.healthKitConnected, isAvailable else { return }
 
         var samples: [HKCategorySample] = []
 
-        if profile.hkWriteFlow, let flow = entry.flow {
-            let isStart = isCycleStart(for: entry, in: entries)
-            samples.append(makeFlowSample(date: entry.date, flow: flow, isCycleStart: isStart))
+        if profile.hkWriteFlow {
+            if let flow = entry.flow {
+                let isStart = isCycleStart(for: entry, in: entries)
+                samples.append(makeFlowSample(date: entry.date, flow: flow, isCycleStart: isStart))
+            } else {
+                await deleteOwnFlowSamples(on: entry.date)
+            }
         }
         if profile.hkWriteSymptoms {
+            // Delete-then-rewrite: removes any stale samples for symptoms the
+            // user may have unchecked since the last sync.
+            await deleteOwnSymptomSamples(on: entry.date)
             samples.append(contentsOf: symptomSamples(from: entry))
         }
 
         guard !samples.isEmpty else { return }
         try? await store.save(samples)
+    }
+
+    /// Removes any menstrual-flow samples *this app* wrote for the given date.
+    /// Only deletes samples whose source bundle ID matches ours — never touches
+    /// samples the user added manually in the Health app.
+    static func deleteOwnFlowSamples(on date: Date) async {
+        guard isAvailable else { return }
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: date)
+        guard let end = cal.date(byAdding: .day, value: 1, to: start) else { return }
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            let query = HKSampleQuery(
+                sampleType: menstrualFlowType,
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: nil
+            ) { _, samples, _ in
+                let bundleID = Bundle.main.bundleIdentifier ?? ""
+                let ours = (samples as? [HKCategorySample] ?? [])
+                    .filter { $0.sourceRevision.source.bundleIdentifier == bundleID }
+                guard !ours.isEmpty else { continuation.resume(); return }
+                store.delete(ours) { _, _ in continuation.resume() }
+            }
+            store.execute(query)
+        }
+    }
+
+    /// Removes all symptom + pain category samples *this app* wrote for the given date.
+    /// Queries each mapped HK type in parallel, filtered by bundle ID.
+    static func deleteOwnSymptomSamples(on date: Date) async {
+        guard isAvailable else { return }
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: date)
+        guard let end = cal.date(byAdding: .day, value: 1, to: start) else { return }
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
+        let bundleID = Bundle.main.bundleIdentifier ?? ""
+
+        // Deduplicate types shared between the two maps (cramps, backPain, headache)
+        let types = Array(Set(Array(symptomCategoryMap.values) + Array(painCategoryMap.values)))
+
+        await withTaskGroup(of: Void.self) { group in
+            for type in types {
+                group.addTask {
+                    await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                        let query = HKSampleQuery(
+                            sampleType: type,
+                            predicate: predicate,
+                            limit: HKObjectQueryNoLimit,
+                            sortDescriptors: nil
+                        ) { _, samples, _ in
+                            let ours = (samples as? [HKCategorySample] ?? [])
+                                .filter { $0.sourceRevision.source.bundleIdentifier == bundleID }
+                            guard !ours.isEmpty else { continuation.resume(); return }
+                            store.delete(ours) { _, _ in continuation.resume() }
+                        }
+                        store.execute(query)
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Import: Health → Caelyn
@@ -190,7 +284,7 @@ enum HealthKitService {
 
         for sample in samples {
             let day = cal.startOfDay(for: sample.startDate)
-            guard let caelynFlow = caelynFlow(fromHKRawValue: sample.value) else { continue }
+            guard let caelynFlow = caelynFlow(fromSample: sample) else { continue }
             if let entry = existing.first(where: { cal.isDate($0.date, inSameDayAs: day) }) {
                 if entry.flow != caelynFlow {
                     entry.flow = caelynFlow
@@ -228,9 +322,14 @@ enum HealthKitService {
 
     // MARK: - Mapping helpers (internal — exposed for tests)
 
+    private static let metadataFlowLevelKey = "CaelynFlowLevel"
+
     static func makeFlowSample(date: Date, flow: FlowLevel, isCycleStart: Bool) -> HKCategorySample {
         let value = mapFlowToHK(flow)
-        let metadata: [String: Any] = [HKMetadataKeyMenstrualCycleStart: isCycleStart]
+        let metadata: [String: Any] = [
+            HKMetadataKeyMenstrualCycleStart: isCycleStart,
+            metadataFlowLevelKey: flow.rawValue
+        ]
         return HKCategorySample(
             type: menstrualFlowType,
             value: value.rawValue,
@@ -247,6 +346,15 @@ enum HealthKitService {
         case .medium:   return .medium
         case .heavy:    return .heavy
         }
+    }
+
+    static func caelynFlow(fromSample sample: HKCategorySample) -> FlowLevel? {
+        // Check our custom metadata key first — preserves spotting vs light distinction.
+        if let rawString = sample.metadata?[metadataFlowLevelKey] as? String,
+           let level = FlowLevel(rawValue: rawString) {
+            return level
+        }
+        return caelynFlow(fromHKRawValue: sample.value)
     }
 
     static func caelynFlow(fromHKRawValue rawValue: Int) -> FlowLevel? {
@@ -273,12 +381,19 @@ enum HealthKitService {
     private static func symptomSamples(from entry: CycleEntry) -> [HKCategorySample] {
         var samples: [HKCategorySample] = []
 
-        // Symptoms (severity defaults to mild — Caelyn doesn't track severity per symptom)
         for symptom in entry.symptoms {
             guard let type = symptomCategoryMap[symptom] else { continue }
+            let severityLevel = entry.symptomSeverity[symptom.rawValue] ?? 2
+            let hkSeverity: HKCategoryValueSeverity = {
+                switch severityLevel {
+                case 1:  return .mild
+                case 3:  return .severe
+                default: return .moderate
+                }
+            }()
             samples.append(HKCategorySample(
                 type: type,
-                value: HKCategoryValueSeverity.mild.rawValue,
+                value: hkSeverity.rawValue,
                 start: entry.date,
                 end: entry.date
             ))

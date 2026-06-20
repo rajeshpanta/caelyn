@@ -78,8 +78,8 @@ struct MonthGridView: View {
 
     private var weekdayRow: some View {
         HStack(spacing: 0) {
-            ForEach(weekdays, id: \.self) { symbol in
-                Text(symbol)
+            ForEach(weekdays.indices, id: \.self) { index in
+                Text(weekdays[index])
                     .font(CaelynFont.caption.weight(.semibold))
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
                     .frame(maxWidth: .infinity)

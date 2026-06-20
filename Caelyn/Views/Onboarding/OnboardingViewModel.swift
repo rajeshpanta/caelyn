@@ -19,7 +19,7 @@ final class OnboardingViewModel {
 
     var trackingGoals: Set<TrackingGoal> = [.period, .symptoms, .mood, .pms]
 
-    var remindPeriodStart: Bool = true
+    var remindPeriodStart: Bool = false
     var remindDailyCheckIn: Bool = false
     var remindMedication: Bool = false
     var remindOvulation: Bool = false
@@ -84,8 +84,8 @@ final class OnboardingViewModel {
             return
         }
         let profile = UserProfile(
-            averageCycleLength: cycleLength,
-            averagePeriodLength: periodLength,
+            averageCycleLength: notSureCycleLength ? 28 : cycleLength,
+            averagePeriodLength: notSurePeriodLength ? 5 : periodLength,
             trackingGoals: Array(trackingGoals),
             lockEnabled: enableLock,
             hidePreview: false,
@@ -101,6 +101,11 @@ final class OnboardingViewModel {
             remindOvulation: remindOvulation,
             isPro: false
         )
+        if healthKitConnected {
+            profile.hkReadFlow = true
+            profile.hkWriteFlow = true
+            profile.hkWriteSymptoms = true
+        }
         modelContext.insert(profile)
         modelContext.saveOrLog()
     }

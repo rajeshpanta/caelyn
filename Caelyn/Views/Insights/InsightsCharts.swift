@@ -78,7 +78,7 @@ struct PeriodLengthChart: View {
                 } else {
                     Chart(series) { point in
                         BarMark(
-                            x: .value("Cycle", point.cycleStartDate, unit: .month),
+                            x: .value("Cycle", point.cycleStartDate),
                             y: .value("Length", point.length),
                             width: .ratio(0.55)
                         )
@@ -144,7 +144,7 @@ struct SymptomFrequencyChart: View {
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
                             .font(CaelynFont.caption)
                     } }
-                    .frame(height: CGFloat(counts.count) * 28 + 20)
+                    .frame(height: min(CGFloat(counts.count) * 28 + 20, 300))
                     .accessibilityLabel(a11yLabel)
                 }
             }
@@ -189,7 +189,7 @@ struct MoodPatternChart: View {
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
                             .font(CaelynFont.caption)
                     } }
-                    .frame(height: CGFloat(counts.count) * 28 + 20)
+                    .frame(height: min(CGFloat(counts.count) * 28 + 20, 300))
                     .accessibilityLabel(a11yLabel)
                 }
             }

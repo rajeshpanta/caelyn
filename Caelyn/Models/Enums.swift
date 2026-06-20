@@ -52,7 +52,7 @@ enum Symptom: String, Codable, CaseIterable, Identifiable {
         case .heartburn:        return "Heartburn"
         case .swelling:         return "Swelling"
         case .shortBreath:      return "Shortness of breath"
-        case .backPainPreg:     return "Back pain"
+        case .backPainPreg:     return "Back pain (pregnancy)"
         case .breastEngorgement:return "Breast engorgement"
         case .postpartumFatigue:return "Postpartum fatigue"
         case .moodLow:          return "Low mood"

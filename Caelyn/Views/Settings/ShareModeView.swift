@@ -8,9 +8,35 @@ struct ShareModeView: View {
     @State private var isLoading = false
     @State private var activeShare: CKShare? = nil
     @State private var showingRevokeConfirm = false
+    @State private var purchase = PurchaseService.shared
+    @State private var showingPaywall = false
 
     var body: some View {
-        List {
+        guard purchase.isPro else {
+            return AnyView(
+                ScrollView {
+                    VStack(spacing: CaelynSpacing.lg) {
+                        ProUpsellCard(
+                            title: "Partner access is a Pro feature",
+                            subtitle: "Upgrade to share your cycle phase and upcoming events with a trusted partner via iCloud.",
+                            icon: "person.2.fill",
+                            highlights: [
+                                "Read-only view for your partner",
+                                "End-to-end encrypted via iCloud",
+                                "Revoke access anytime",
+                            ],
+                            onUnlock: { showingPaywall = true }
+                        )
+                    }
+                    .padding(CaelynSpacing.lg)
+                }
+                .background(CaelynColor.backgroundCream.ignoresSafeArea())
+                .navigationTitle("Partner Access")
+                .navigationBarTitleDisplayMode(.inline)
+                .sheet(isPresented: $showingPaywall) { PaywallView() }
+            )
+        }
+        return AnyView(List {
             introSection
             if let share = activeShare {
                 activeShareSection(share: share)
@@ -36,7 +62,7 @@ struct ShareModeView: View {
             if let share = activeShare {
                 CloudSharingView(share: share)
             }
-        }
+        })
     }
 
     // MARK: - Sections
@@ -130,7 +156,8 @@ struct ShareModeView: View {
         do {
             let zones = try await db.allRecordZones()
             for zone in zones {
-                if let share = try? await db.record(for: CKRecord.ID(zoneID: zone.zoneID)) as? CKShare {
+                let shareID = CKRecord.ID(recordName: CKRecordNameZoneWideShare, zoneID: zone.zoneID)
+                if let share = try? await db.record(for: shareID) as? CKShare {
                     await MainActor.run { activeShare = share }
                     return
                 }

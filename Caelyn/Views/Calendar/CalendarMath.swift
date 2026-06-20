@@ -90,8 +90,10 @@ enum CalendarMath {
 
         // Active period window: if there's a recent flow streak whose expected
         // duration covers `day`, mark it as "expected — fill me in".
+        // Only applies to past/today — future days cannot be logged yet.
         let periodLength = profile?.averagePeriodLength ?? 5
-        if let activeWindow = activePeriodWindow(in: entries, periodLength: periodLength, today: today),
+        if !isFuture,
+           let activeWindow = activePeriodWindow(in: entries, periodLength: periodLength, today: today),
            activeWindow.contains(day) {
             return DayState(
                 date: day,

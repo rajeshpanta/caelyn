@@ -6,6 +6,7 @@ struct LogView: View {
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
 
     @State private var selectedDate: Date = Calendar.current.startOfDay(for: .now)
+    @State private var showingDeleteConfirm = false
 
     private var today: Date { Calendar.current.startOfDay(for: .now) }
     private var isToday: Bool { Calendar.current.isDate(selectedDate, inSameDayAs: today) }
@@ -74,11 +75,7 @@ struct LogView: View {
                 if hasEntryOnSelectedDate {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            if let entry = entryOnSelectedDate {
-                                modelContext.delete(entry)
-                                try? modelContext.save()
-                                Haptics.selection()
-                            }
+                            showingDeleteConfirm = true
                         } label: {
                             Image(systemName: "trash")
                                 .font(.system(size: 14, weight: .medium))
@@ -87,6 +84,20 @@ struct LogView: View {
                     }
                 }
             }
+        }
+        .confirmationDialog("Delete this log entry?", isPresented: $showingDeleteConfirm, titleVisibility: .visible) {
+            Button("Delete", role: .destructive) {
+                if let entry = entryOnSelectedDate {
+                    let dateToClean = entry.date
+                    modelContext.delete(entry)
+                    modelContext.saveOrLog()
+                    Task { await HealthKitSync.deleteFlowIfConnected(on: dateToClean, modelContext: modelContext) }
+                    Haptics.selection()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently remove all logged data for \(selectedDateLabel).")
         }
     }
 

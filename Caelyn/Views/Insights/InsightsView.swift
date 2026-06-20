@@ -38,7 +38,7 @@ struct InsightsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
-                    if cycles.count < 3 {
+                    if cycles.count < 2 {
                         InsightsEmptyState(cyclesLogged: cycles.count, confidence: confidence)
                     } else {
                         loadedContent

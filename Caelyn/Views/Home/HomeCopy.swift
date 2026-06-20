@@ -61,12 +61,14 @@ enum HomeCopy {
                 accent: "lavender"
             ))
         }
-        if currentPhase != .menstrual && daysUntilPeriod > 0 {
+        if currentPhase != .menstrual && daysUntilPeriod >= 0 {
             let base = "Period expected in \(daysUntilPeriod) day\(daysUntilPeriod == 1 ? "" : "s")"
             let label = variation > 1 ? "\(base) (±\(variation) days)" : base
             events.append((icon: "drop.fill", label: label, accent: "rose"))
         }
-        if currentPhase != .ovulation, let window = fertileWindow, daysUntilFertileWindowStart <= 14 {
+        let today = Calendar.current.startOfDay(for: .now)
+        if currentPhase != .ovulation, let window = fertileWindow,
+           daysUntilFertileWindowStart <= 14, window.upperBound >= today {
             let label: String
             if daysUntilFertileWindowStart <= 0 {
                 label = "Fertile window: \(shortDateRange(window))"

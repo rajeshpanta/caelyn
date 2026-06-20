@@ -102,6 +102,7 @@ final class PurchaseService {
     }
 
     func restore() async {
+        lastError = nil
         do {
             try await AppStore.sync()
             await refreshPurchasedProducts()

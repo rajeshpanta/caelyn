@@ -145,7 +145,9 @@ struct WidgetDataSyncModifier: ViewModifier {
         )
         WidgetDataStore.write(snapshot)
         WidgetCenter.shared.reloadAllTimelines()
-        WatchBridgeService.shared.pushSnapshot(snapshot)
+        if PurchaseService.shared.isPro {
+            WatchBridgeService.shared.pushSnapshot(snapshot)
+        }
     }
 }
 

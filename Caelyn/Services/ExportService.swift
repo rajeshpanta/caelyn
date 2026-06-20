@@ -56,7 +56,11 @@ enum ExportService {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
 
-        var headers = ["date", "flow", "pain", "pain_types", "symptoms", "mood", "medication", "basal_temperature", "cervical_mucus"]
+        var headers = [
+            "date", "flow", "pain", "pain_types", "symptoms", "mood",
+            "energy_level", "medication", "basal_temperature", "cervical_mucus",
+            "sexual_activity", "ovulation_test", "pregnancy_test", "custom_symptoms"
+        ]
         if includeNotes { headers.append("note") }
         var lines: [String] = [headers.joined(separator: ",")]
 
@@ -68,9 +72,14 @@ enum ExportService {
             fields.append(entry.painTypes.map(\.rawValue).joined(separator: ";"))
             fields.append(entry.symptoms.map(\.rawValue).joined(separator: ";"))
             fields.append(entry.mood?.rawValue ?? "")
+            fields.append(entry.energyLevel?.rawValue ?? "")
             fields.append(escape(entry.medication ?? ""))
             fields.append(entry.basalTemperature.map { String(format: "%.2f", $0) } ?? "")
             fields.append(entry.cervicalMucus?.rawValue ?? "")
+            fields.append(entry.sexualActivity.map { $0 ? "yes" : "no" } ?? "")
+            fields.append(entry.ovulationTestResult?.rawValue ?? "")
+            fields.append(entry.pregnancyTest.map { $0 ? "positive" : "negative" } ?? "")
+            fields.append(entry.loggedCustomSymptoms.joined(separator: ";"))
             if includeNotes {
                 fields.append(escape(entry.note ?? ""))
             }

@@ -58,6 +58,8 @@ struct HomeMoodCheckIn: View {
                     .padding(.vertical, 2)
                 }
                 .scrollClipDisabled()
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel("Mood options")
             }
         }
         .overlay(
@@ -70,6 +72,9 @@ struct HomeMoodCheckIn: View {
                 .animation(.easeInOut(duration: 0.6).repeatCount(3, autoreverses: true), value: pulseFlag)
                 .allowsHitTesting(false)
         )
+        .onAppear {
+            if isHighlighted { pulseFlag = true }
+        }
         .onChange(of: isHighlighted) { _, newValue in
             if newValue { pulseFlag.toggle() }
         }

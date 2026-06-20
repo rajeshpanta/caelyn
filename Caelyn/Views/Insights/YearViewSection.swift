@@ -28,12 +28,19 @@ struct YearViewSection: View {
 
             let months = isPro ? monthsToShow : Array(monthsToShow.suffix(3))
 
+            let nextPeriodStart: Date? = {
+                guard let last = profile?.lastPeriodStart else { return nil }
+                let cycles = PredictionEngine.cycles(from: entries)
+                let avgCycleLength = PredictionEngine.averageCycleLength(of: cycles, fallback: profile?.averageCycleLength ?? 28)
+                return PredictionEngine.nextPeriodStart(lastPeriodStart: last, today: .now, cycleLength: avgCycleLength)
+            }()
+
             LazyVGrid(
                 columns: Array(repeating: GridItem(.flexible()), count: hSizeClass == .regular ? 3 : 2),
                 spacing: CaelynSpacing.md
             ) {
                 ForEach(months, id: \.self) { month in
-                    MiniMonthView(month: month, entries: entries, profile: profile, firstDayOfWeek: firstDayOfWeek)
+                    MiniMonthView(month: month, entries: entries, profile: profile, firstDayOfWeek: firstDayOfWeek, nextPeriodStart: nextPeriodStart)
                 }
             }
 
@@ -67,6 +74,7 @@ private struct MiniMonthView: View {
     let entries: [CycleEntry]
     let profile: UserProfile?
     let firstDayOfWeek: Int
+    let nextPeriodStart: Date?
 
     private let dotSize: CGFloat = 7
     private let spacing: CGFloat = 3
@@ -87,15 +95,6 @@ private struct MiniMonthView: View {
                 return (d, entry)
             },
             uniquingKeysWith: { first, _ in first }
-        )
-    }
-
-    private var nextPeriodStart: Date? {
-        guard let last = profile?.lastPeriodStart else { return nil }
-        return PredictionEngine.nextPeriodStart(
-            lastPeriodStart: last,
-            today: .now,
-            cycleLength: profile?.averageCycleLength ?? 28
         )
     }
 
@@ -141,8 +140,10 @@ private struct MiniMonthView: View {
         // Has any log
         let hasLog = entry?.hasContent ?? false
 
-        // Predicted future events
-        if let next = nextPeriodStart {
+        // Predicted future events — only paint on actual future days to avoid
+        // retroactively coloring past days with predictions that never came true.
+        let today = cal.startOfDay(for: .now)
+        if day >= today, let next = nextPeriodStart {
             let periodLength = profile?.averagePeriodLength ?? 5
             let predicted = PredictionEngine.predictedPeriodWindow(nextPeriodStart: next, periodLength: periodLength)
             let pms = PredictionEngine.pmsWindow(nextPeriodStart: next)

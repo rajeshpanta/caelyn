@@ -18,12 +18,12 @@ final class UserProfile {
     var hkWriteSymptoms: Bool = false
 
     var firstDayOfWeek: Int = 1
-    var theme: AppTheme
+    var theme: AppTheme = .system
 
     var hasOnboarded: Bool = false
     var lastPeriodStart: Date?
 
-    var remindPeriodStart: Bool = true
+    var remindPeriodStart: Bool = false
     var remindDailyCheckIn: Bool = false
     var remindMedication: Bool = false
     var remindOvulation: Bool = false
@@ -59,7 +59,7 @@ final class UserProfile {
 
     // Birth Control Mode
     var birthControlEnabled: Bool = false
-    var birthControlMethod: BirthControlMethod
+    var birthControlMethod: BirthControlMethod = .pill
     var birthControlReminderEnabled: Bool = false
     var birthControlReminderHour: Int = 8
     var birthControlReminderMinute: Int = 0
@@ -80,7 +80,7 @@ final class UserProfile {
         theme: AppTheme = .system,
         hasOnboarded: Bool = false,
         lastPeriodStart: Date? = nil,
-        remindPeriodStart: Bool = true,
+        remindPeriodStart: Bool = false,
         remindDailyCheckIn: Bool = false,
         remindMedication: Bool = false,
         remindOvulation: Bool = false,
