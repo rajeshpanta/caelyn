@@ -843,4 +843,44 @@ final class CaelynTests: XCTestCase {
         let learned = PredictionEngine.ovulationEstimate(nextPeriodStart: nextStart, lutealLength: 12) // −12
         XCTAssertEqual(cal.dateComponents([.day], from: def, to: learned).day, 2)
     }
+
+    // MARK: - Phase 4 (int-2): lag-aware cross-metric correlation
+
+    func testSymptomLeadTimeCorrelation() {
+        let cal = Calendar.current
+        let base = cal.startOfDay(for: cal.date(byAdding: .day, value: -120, to: .now)!)
+        var cycles: [Cycle] = []
+        var entries: [CycleEntry] = []
+        for i in 0..<3 {
+            let start = cal.date(byAdding: .day, value: i * 28, to: base)!
+            cycles.append(Cycle(start: start, length: 28, periodLength: 5))
+            // Headache consistently 2 days before the next period start.
+            let day = cal.date(byAdding: .day, value: 26, to: start)!
+            entries.append(CycleEntry(date: day, symptoms: [.headache]))
+        }
+        let results = PatternEngine.insights(from: entries, cycles: cycles, profile: UserProfile())
+        XCTAssertTrue(
+            results.contains { ($0.supportingValue?.contains("~2d") ?? false) },
+            "Expected a ~2-day lead-time correlation insight"
+        )
+    }
+
+    // MARK: - Phase 4 (int-5): condition-mode insights
+
+    func testConditionInsightsSurfaceForEnabledModes() {
+        let cal = Calendar.current
+        let base = cal.startOfDay(for: cal.date(byAdding: .day, value: -90, to: .now)!)
+        let cycles = [
+            Cycle(start: base, length: 28, periodLength: 5),
+            Cycle(start: cal.date(byAdding: .day, value: 28, to: base)!, length: 30, periodLength: 5)
+        ]
+        let profile = UserProfile()
+        profile.pcosEnabled = true
+        let results = PatternEngine.insights(from: [], cycles: cycles, profile: profile)
+        XCTAssertTrue(results.contains { $0.category == .condition }, "PCOS mode should surface a condition insight")
+
+        let noMode = UserProfile()
+        let none = PatternEngine.insights(from: [], cycles: cycles, profile: noMode)
+        XCTAssertFalse(none.contains { $0.category == .condition }, "No condition insight without an enabled mode")
+    }
 }

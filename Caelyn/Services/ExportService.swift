@@ -123,6 +123,7 @@ enum ExportService {
 
             drawReportHeader(page: &page, range: range, ctx: ctx.cgContext)
             drawClinicalSummary(page: &page, entries: entries, cycles: cycles, profile: profile, ctx: ctx)
+            drawInsightsSection(page: &page, entries: entries, cycles: cycles, profile: profile, ctx: ctx)
             drawCycleTimeline(page: &page, cycles: cycles, ctx: ctx)
             drawSymptomBarChart(page: &page, entries: entries, ctx: ctx)
             drawEntryTable(page: &page, entries: entries, ctx: ctx)
@@ -240,6 +241,37 @@ enum ExportService {
             page.advance(17)
         }
         page.advance(8)
+        drawDivider(page: &page, ctx: ctx.cgContext)
+    }
+
+    // MARK: - Patterns & insights (doctor-visit prep, int-2)
+
+    /// On-device pattern insights rendered into the clinical report so the user can
+    /// hand their doctor the timing signals Caelyn noticed. Computed locally — no
+    /// network. The report-wide disclaimer already states it is not a diagnosis.
+    private static func drawInsightsSection(page: inout PDFPageContext, entries: [CycleEntry], cycles: [Cycle], profile: UserProfile?, ctx: UIGraphicsPDFRendererContext) {
+        let insights = PatternEngine.insights(from: entries, cycles: cycles, profile: profile)
+        guard !insights.isEmpty else { return }
+        if page.y > page.contentBottom - 70 { breakPage(page: &page, ctx: ctx) }
+        drawSectionHeader("Patterns Caelyn Noticed", page: &page, ctx: ctx.cgContext)
+
+        let titleFont = UIFont.systemFont(ofSize: 11, weight: .semibold)
+        for insight in insights.prefix(6) {
+            let bodyText = insight.supportingValue.map { "\(insight.body)  (\($0))" } ?? insight.body
+            let bodyAttr = NSAttributedString(string: bodyText, attributes: [.font: smallFont, .foregroundColor: mutedColor])
+            let bodyH = ceil(bodyAttr.boundingRect(
+                with: CGSize(width: page.contentWidth, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil).height)
+            // Keep title + body together on a page (no orphaned title).
+            if page.y + 15 + bodyH > page.contentBottom { breakPage(page: &page, ctx: ctx) }
+
+            insight.title.draw(at: CGPoint(x: page.margin, y: page.y),
+                               withAttributes: [.font: titleFont, .foregroundColor: bodyColor])
+            page.advance(15)
+            bodyAttr.draw(in: CGRect(x: page.margin, y: page.y, width: page.contentWidth, height: bodyH))
+            page.advance(bodyH + 9)
+        }
+        page.advance(2)
         drawDivider(page: &page, ctx: ctx.cgContext)
     }
 

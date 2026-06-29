@@ -5,12 +5,18 @@ struct PatternInsightsSection: View {
     let isPro: Bool
     var onUpgrade: () -> Void = {}
 
+    @State private var dismissedKeys = DismissedInsights.all()
+
+    private var activeInsights: [PatternInsight] {
+        insights.filter { !dismissedKeys.contains($0.stableKey) }
+    }
+
     private var visibleInsights: [PatternInsight] {
-        isPro ? insights : Array(insights.prefix(2))
+        isPro ? activeInsights : Array(activeInsights.prefix(2))
     }
 
     var body: some View {
-        if insights.isEmpty { return AnyView(EmptyView()) }
+        if activeInsights.isEmpty { return AnyView(EmptyView()) }
         return AnyView(content)
     }
 
@@ -18,19 +24,24 @@ struct PatternInsightsSection: View {
         VStack(alignment: .leading, spacing: CaelynSpacing.md) {
             SectionHeader(
                 title: "Your Patterns",
-                subtitle: "\(insights.count) insight\(insights.count == 1 ? "" : "s") from your cycle history"
+                subtitle: "\(activeInsights.count) insight\(activeInsights.count == 1 ? "" : "s") from your cycle history"
             )
 
             VStack(spacing: CaelynSpacing.sm) {
                 ForEach(visibleInsights) { insight in
-                    PatternInsightCard(insight: insight)
+                    PatternInsightCard(insight: insight) { dismiss(insight) }
                 }
 
-                if !isPro && insights.count > 2 {
-                    lockedInsightsTeaser(remaining: insights.count - 2)
+                if !isPro && activeInsights.count > 2 {
+                    lockedInsightsTeaser(remaining: activeInsights.count - 2)
                 }
             }
         }
+    }
+
+    private func dismiss(_ insight: PatternInsight) {
+        DismissedInsights.dismiss(insight.stableKey)
+        withAnimation { _ = dismissedKeys.insert(insight.stableKey) }
     }
 
     private func lockedInsightsTeaser(remaining: Int) -> some View {
@@ -64,6 +75,7 @@ struct PatternInsightsSection: View {
 
 struct PatternInsightCard: View {
     let insight: PatternInsight
+    var onDismiss: (() -> Void)? = nil
 
     private var accent: Color {
         switch insight.relatedPhase {
@@ -85,6 +97,7 @@ struct PatternInsightCard: View {
         case .pmsPredictorSymptom: return "exclamationmark.circle.fill"
         case .painTrend:          return "heart.text.square.fill"
         case .frequentSymptom:    return "list.bullet.circle.fill"
+        case .condition:          return "stethoscope"
         }
     }
 
@@ -107,6 +120,19 @@ struct PatternInsightCard: View {
                             .font(CaelynFont.subheadline)
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
                             .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    if let onDismiss {
+                        Spacer(minLength: 0)
+                        Button(action: onDismiss) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.35))
+                                .padding(6)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Dismiss insight")
                     }
                 }
 

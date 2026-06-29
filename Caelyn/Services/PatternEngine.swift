@@ -10,6 +10,18 @@ enum InsightCategory: String, CaseIterable {
     case pmsPredictorSymptom
     case painTrend
     case frequentSymptom
+    case condition          // perimenopause / PCOS / endometriosis depth (int-5)
+}
+
+/// Persisted set of dismissed insight keys, so a user can clear an insight they
+/// don't want to see and it stays gone across launches (int-2 dismissible feed).
+enum DismissedInsights {
+    private static let key = "caelyn.dismissedInsights"
+    static func all() -> Set<String> { Set(UserDefaults.standard.stringArray(forKey: key) ?? []) }
+    static func dismiss(_ k: String) {
+        var s = all(); s.insert(k)
+        UserDefaults.standard.set(Array(s), forKey: key)
+    }
 }
 
 struct PatternInsight: Identifiable {
@@ -40,6 +52,11 @@ struct PatternInsight: Identifiable {
         self.relatedPhase = relatedPhase
         self.discoveredAt = discoveredAt
     }
+
+    /// Stable identity for persistence (dismissal), resilient to the fresh UUID
+    /// generated on each recompute — the same underlying pattern yields the same
+    /// key, while a genuinely different pattern (new title) is not dismissed (int-2).
+    var stableKey: String { "\(category.rawValue)|\(title)" }
 }
 
 // MARK: - Engine
@@ -76,12 +93,16 @@ enum PatternEngine {
         if let insight = pmsPredictorSymptom(entries: entries, cycles: cycles) {
             results.append(insight)
         }
+        if let insight = symptomLeadTime(entries: entries, cycles: cycles) {
+            results.append(insight)
+        }
         if let insight = painTrend(entries: entries, cycles: cycles) {
             results.append(insight)
         }
         if let insight = frequentSymptomInsight(entries: entries) {
             results.append(insight)
         }
+        results.append(contentsOf: conditionInsights(cycles: cycles, profile: profile))
 
         return results.sorted { $0.confidence > $1.confidence }
     }
@@ -126,7 +147,7 @@ enum PatternEngine {
         return PatternInsight(
             category: .phaseSymptom,
             title: "\(b.symptom.displayName) peaks in your \(b.phase.displayName) phase",
-            body: "You've logged \(b.symptom.displayName.lowercased()) during your \(b.phase.displayName.lowercased()) phase in \(b.count) of your last cycles.",
+            body: "You've logged \(b.symptom.displayName.lowercased()) during your \(b.phase.displayName.lowercased()) phase \(b.count) time\(b.count == 1 ? "" : "s").",
             supportingValue: "\(pct)% of occurrences",
             confidence: confidence,
             relatedPhase: b.phase
@@ -276,6 +297,53 @@ enum PatternEngine {
         )
     }
 
+    /// Lag-aware cross-metric correlation (int-2): the symptom whose appearance
+    /// clusters most tightly at a consistent number of days before the period,
+    /// across ≥3 DISTINCT cycles with low day-to-day spread. Surfaces a timing
+    /// signal ("X tends to appear ~N days before your period") the other
+    /// presence-only detectors don't.
+    private static func symptomLeadTime(entries: [CycleEntry], cycles: [Cycle]) -> PatternInsight? {
+        var lags: [Symptom: [Int]] = [:]
+        var cyclesSeen: [Symptom: Set<Date>] = [:]
+        for cycle in cycles {
+            guard let nextStart = calendar.date(byAdding: .day, value: cycle.length, to: cycle.start) else { continue }
+            for entry in entries {
+                let d = calendar.startOfDay(for: entry.date)
+                guard d >= cycle.start && d < nextStart else { continue }
+                let lag = calendar.dateComponents([.day], from: d, to: nextStart).day ?? 0
+                guard lag >= 1 && lag <= 14 else { continue }
+                for s in entry.symptoms {
+                    lags[s, default: []].append(lag)
+                    cyclesSeen[s, default: []].insert(cycle.start)
+                }
+            }
+        }
+
+        var best: (symptom: Symptom, days: Int, cycles: Int, sd: Double)?
+        for (symptom, values) in lags {
+            let cycleCount = cyclesSeen[symptom]?.count ?? 0
+            guard cycleCount >= 3, values.count >= 3 else { continue }
+            let mean = Double(values.reduce(0, +)) / Double(values.count)
+            let sd = (values.reduce(0.0) { $0 + pow(Double($1) - mean, 2) } / Double(values.count)).squareRoot()
+            guard sd <= 2.0 else { continue }   // only report a TIGHT cluster
+            let days = max(1, Int(mean.rounded()))
+            if best == nil || cycleCount > best!.cycles || (cycleCount == best!.cycles && sd < best!.sd) {
+                best = (symptom, days, cycleCount, sd)
+            }
+        }
+
+        guard let b = best else { return nil }
+        let confidence = min(1.0, Double(b.cycles) / 6.0) * 0.8
+        return PatternInsight(
+            category: .pmsPredictorSymptom,
+            title: "\(b.symptom.displayName) tends to appear ~\(b.days) day\(b.days == 1 ? "" : "s") before your period",
+            body: "Across \(b.cycles) of your recent cycles, \(b.symptom.displayName.lowercased()) has clustered about \(b.days) day\(b.days == 1 ? "" : "s") before your period starts — a possible early signal for you.",
+            supportingValue: "~\(b.days)d before · \(b.cycles) cycles",
+            confidence: confidence,
+            relatedPhase: .pms
+        )
+    }
+
     /// Compares average period pain between recent and older cycles.
     private static func painTrend(entries: [CycleEntry], cycles: [Cycle]) -> PatternInsight? {
         guard cycles.count >= 6 else { return nil }
@@ -310,6 +378,50 @@ enum PatternEngine {
             supportingValue: "\(count) times logged",
             confidence: min(1.0, Double(count) / 12.0) * 0.6
         )
+    }
+
+    /// Condition-mode depth (int-5): observational, never-alarming insights for
+    /// users who've enabled Perimenopause / PCOS / Endometriosis mode. Copy is
+    /// strictly observational — it never asserts a diagnosis or a false single date.
+    private static func conditionInsights(cycles: [Cycle], profile: UserProfile?) -> [PatternInsight] {
+        guard let profile else { return [] }
+        var out: [PatternInsight] = []
+        let status = PredictionEngine.irregularCycleStatus(from: cycles)
+
+        if profile.perimenoEnabled {
+            if case .irregular = status {
+                out.append(PatternInsight(
+                    category: .condition,
+                    title: "Cycle changes worth noting",
+                    body: "Your recent cycles show some irregularity. Variability is common during perimenopause — this log is useful to share with your clinician.",
+                    supportingValue: "Perimenopause",
+                    confidence: 0.6))
+            } else {
+                out.append(PatternInsight(
+                    category: .condition,
+                    title: "Tracking your transition",
+                    body: "Caelyn is following your cycle patterns for perimenopause. Note any new symptoms (hot flushes, sleep changes) to discuss with your doctor.",
+                    supportingValue: "Perimenopause",
+                    confidence: 0.5))
+            }
+        }
+        if profile.pcosEnabled {
+            out.append(PatternInsight(
+                category: .condition,
+                title: "Longer, less predictable cycles are common with PCOS",
+                body: "Your cycle-length history is the most valuable thing to bring to appointments — Caelyn keeps it all on your device.",
+                supportingValue: "PCOS",
+                confidence: 0.55))
+        }
+        if profile.endoEnabled {
+            out.append(PatternInsight(
+                category: .condition,
+                title: "Your pain log is doctor-ready",
+                body: "Caelyn records pain level and type each cycle. Export the PDF report before appointments to give your specialist a clear picture.",
+                supportingValue: "Endometriosis",
+                confidence: 0.55))
+        }
+        return out
     }
 
     // MARK: - Helpers
