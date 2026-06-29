@@ -8,6 +8,9 @@ struct PaywallView: View {
     @State private var purchaseError: String?
     @State private var showRestoreNotice = false
     @State private var showPendingNotice = false
+    @State private var hasAttemptedLoad = false
+    @State private var yearlyTrialText: String?
+    @State private var restoreFailed = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -22,7 +25,7 @@ struct PaywallView: View {
                         if productsAreReady {
                             tierCards
                             ctaButton
-                        } else if purchase.isLoadingProducts {
+                        } else if !hasAttemptedLoad || purchase.isLoadingProducts {
                             loadingState
                         } else {
                             unavailableState
@@ -46,11 +49,24 @@ struct PaywallView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
         }
-        .task { await purchase.loadProducts() }
+        .task {
+            // A review prompt in the same session as a paywall reads as pressure (mon-7).
+            RatingService.suppressForThisSession()
+            await purchase.loadProducts()
+            if let yearly = purchase.yearlyProduct {
+                yearlyTrialText = await purchase.freeTrialLabel(for: yearly)
+            }
+            hasAttemptedLoad = true
+        }
         .alert("Purchase failed", isPresented: errorBinding) {
             Button("OK") { purchaseError = nil }
         } message: {
             Text(purchaseError ?? "")
+        }
+        .alert("Restore failed", isPresented: $restoreFailed) {
+            Button("OK") { restoreFailed = false }
+        } message: {
+            Text("Couldn't reach the App Store to restore your purchases. Check your connection and try again.")
         }
         .alert("Restored", isPresented: $showRestoreNotice) {
             Button("OK") { showRestoreNotice = false }
@@ -141,8 +157,6 @@ struct PaywallView: View {
                 featureRow("Condition modes (endo, PCOS…)", inFree: false, inPro: true)
                 featureDivider
                 featureRow("Apple Watch companion", inFree: false, inPro: true)
-                featureDivider
-                featureRow("Partner view access", inFree: false, inPro: true)
             }
         }
     }
@@ -221,12 +235,29 @@ struct PaywallView: View {
                     displayPrice: yearlyDisplayPrice,
                     strikethroughPrice: nil,
                     perMonthLabel: yearlyPerMonthLabel,
-                    badgeText: yearlySavingsBadgeText,
+                    badgeText: yearlyTrialText != nil ? "FREE TRIAL" : yearlySavingsBadgeText,
                     badgeBackground: CaelynColor.successSage,
                     isSelected: selectedTier == .yearly,
                     isBestValue: true
                 ) {
                     selectedTier = .yearly
+                }
+            }
+
+            // Lifetime: a one-time "own it forever" tier — leans into local-only
+            // (nothing recurring, nothing in the cloud). Shown only if it loaded (mon-3).
+            if purchase.lifetimeProduct != nil {
+                PaywallTierCard(
+                    kind: .lifetime,
+                    displayPrice: lifetimeDisplayPrice,
+                    strikethroughPrice: nil,
+                    perMonthLabel: "One time · no subscription, nothing in the cloud",
+                    badgeText: "OWN IT FOREVER",
+                    badgeBackground: CaelynColor.primaryPlum,
+                    isSelected: selectedTier == .lifetime,
+                    isBestValue: false
+                ) {
+                    selectedTier = .lifetime
                 }
             }
         }
@@ -254,7 +285,7 @@ struct PaywallView: View {
                 .padding(.horizontal, CaelynSpacing.lg)
                 .foregroundStyle(.white)
                 .background(CaelynColor.primaryPlum, in: RoundedRectangle(cornerRadius: CaelynRadius.button, style: .continuous))
-                .opacity(isPurchasing ? 0.8 : 1.0)
+                .opacity(purchase.isPro ? 0.5 : (isPurchasing ? 0.8 : 1.0))   // dim when already Pro (mon-6)
             }
             .buttonStyle(.plain)
             .disabled(isPurchasing || selectedProduct == nil || purchase.isPro)
@@ -287,8 +318,7 @@ struct PaywallView: View {
                 Text("Your core cycle data stays yours.")
                     .font(CaelynFont.footnote)
             }
-            let renewalPrice = selectedTier == .monthly ? monthlyDisplayPrice : yearlyDisplayPrice
-            Text("Auto-renewable subscription. Renews at \(renewalPrice) unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions.")
+            Text(disclosureText)
                 .font(CaelynFont.footnote)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -299,8 +329,11 @@ struct PaywallView: View {
 
     // MARK: - Empty / loading states
 
+    // Require BOTH subscription tiers before showing the picker, so a tier card can
+    // never appear selected-but-unpurchasable when only one product loads (mon-6).
+    // Lifetime is optional and shown only when it also loads.
     private var productsAreReady: Bool {
-        purchase.monthlyProduct != nil || purchase.yearlyProduct != nil
+        purchase.monthlyProduct != nil && purchase.yearlyProduct != nil
     }
 
     private var loadingState: some View {
@@ -351,17 +384,24 @@ struct PaywallView: View {
 
     private var selectedProduct: Product? {
         switch selectedTier {
-        case .monthly: return purchase.monthlyProduct
-        case .yearly:  return purchase.yearlyProduct
+        case .monthly:  return purchase.monthlyProduct
+        case .yearly:   return purchase.yearlyProduct
+        case .lifetime: return purchase.lifetimeProduct
         }
     }
 
     private var ctaTitle: String {
         if purchase.isPro { return "You're already Pro" }
         switch selectedTier {
-        case .monthly: return isPurchasing ? "Subscribing…" : "Continue with Monthly"
-        case .yearly:  return isPurchasing ? "Subscribing…" : "Continue with Yearly"
+        case .monthly:  return isPurchasing ? "Subscribing…" : "Continue with Monthly"
+        case .yearly:   return isPurchasing ? "Subscribing…" : (yearlyTrialText != nil ? "Start free trial" : "Continue with Yearly")
+        case .lifetime: return isPurchasing ? "Purchasing…" : "Buy Lifetime"
         }
+    }
+
+    private var lifetimeDisplayPrice: String {
+        guard let product = purchase.lifetimeProduct else { return "—" }
+        return product.displayPrice
     }
 
     /// All price-display computeds below are only rendered when
@@ -428,9 +468,27 @@ struct PaywallView: View {
         }
     }
 
+    private var disclosureText: String {
+        switch selectedTier {
+        case .lifetime:
+            return "One-time purchase — no subscription and no auto-renewal. Yours forever on this Apple ID."
+        case .monthly:
+            return "Auto-renewable subscription. Renews at \(monthlyDisplayPrice) unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions."
+        case .yearly:
+            let lead = yearlyTrialText.map { "\($0), then renews at " } ?? "Renews at "
+            return "Auto-renewable subscription. \(lead)\(yearlyDisplayPrice) unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions."
+        }
+    }
+
     private func runRestore() async {
         await purchase.restore()
-        showRestoreNotice = true
+        // Distinguish a genuine failure (network) from "nothing to restore" so we
+        // don't tell a user with a connection error that they have no subscription (mon-6).
+        if purchase.lastError != nil && !purchase.isPro {
+            restoreFailed = true
+        } else {
+            showRestoreNotice = true
+        }
     }
 }
 

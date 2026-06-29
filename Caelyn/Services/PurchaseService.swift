@@ -19,8 +19,9 @@ final class PurchaseService {
     static let shared = PurchaseService()
 
     enum ProductID: String, CaseIterable {
-        case monthly = "smallpanta-icould.com.caelynperiodtracker.pro.monthly"
-        case yearly  = "smallpanta-icould.com.caelynperiodtracker.pro.yearly"
+        case monthly  = "smallpanta-icould.com.caelynperiodtracker.pro.monthly"
+        case yearly   = "smallpanta-icould.com.caelynperiodtracker.pro.yearly"
+        case lifetime = "smallpanta-icould.com.caelynperiodtracker.pro.lifetime"
     }
 
     private(set) var products: [Product] = []
@@ -32,6 +33,10 @@ final class PurchaseService {
 
     private init() {
         transactionListener = listenForTransactions()
+        // Resolve entitlements from the local StoreKit cache at launch, independent of
+        // any product network fetch. Otherwise an offline cold launch leaves a paying
+        // Pro user downgraded to free until loadProducts() succeeds (stz-005).
+        Task { await refreshPurchasedProducts() }
     }
 
     // MARK: - Derived state
@@ -42,8 +47,38 @@ final class PurchaseService {
     /// Forces isPro to a fixed value — used in screenshot mode only.
     func overridePro(_ value: Bool) { proOverride = value }
 
-    var monthlyProduct: Product? { products.first(where: { $0.id == ProductID.monthly.rawValue }) }
-    var yearlyProduct:  Product? { products.first(where: { $0.id == ProductID.yearly.rawValue  }) }
+    var monthlyProduct:  Product? { products.first(where: { $0.id == ProductID.monthly.rawValue  }) }
+    var yearlyProduct:   Product? { products.first(where: { $0.id == ProductID.yearly.rawValue   }) }
+    var lifetimeProduct: Product? { products.first(where: { $0.id == ProductID.lifetime.rawValue }) }
+
+    /// Whether the product's introductory (free-trial) offer is still available to
+    /// this Apple ID. Non-subscription products (lifetime) always return false, and
+    /// ineligible users must never be shown trial copy (mon-2).
+    func isEligibleForIntroOffer(_ product: Product) async -> Bool {
+        guard let sub = product.subscription else { return false }
+        return await sub.isEligibleForIntroOffer
+    }
+
+    /// A user-facing free-trial label derived from the product's ACTUAL introductory
+    /// offer — only when the user is eligible AND the offer is a genuine free trial.
+    /// Returns nil otherwise, so the paywall never advertises a trial (or a duration)
+    /// that App Store Connect didn't actually grant (review — App-Review 3.1.2/2.3.1).
+    func freeTrialLabel(for product: Product) async -> String? {
+        guard let sub = product.subscription,
+              let offer = sub.introductoryOffer,
+              offer.paymentMode == .freeTrial,
+              await sub.isEligibleForIntroOffer else { return nil }
+        let value = offer.period.value
+        let unit: String
+        switch offer.period.unit {
+        case .day:   unit = value == 1 ? "day" : "days"
+        case .week:  unit = value == 1 ? "week" : "weeks"
+        case .month: unit = value == 1 ? "month" : "months"
+        case .year:  unit = value == 1 ? "year" : "years"
+        @unknown default: unit = "days"
+        }
+        return "\(value)-\(unit) free trial"
+    }
 
     /// "Save N%" badge for the yearly tier, derived from monthly × 12 vs yearly.
     var yearlySavingsPercent: Int {
@@ -106,6 +141,9 @@ final class PurchaseService {
         do {
             try await AppStore.sync()
             await refreshPurchasedProducts()
+        } catch StoreKitError.userCancelled {
+            // User dismissed the Apple ID sign-in sheet — not a failure, don't
+            // surface a connectivity error for it (review).
         } catch {
             lastError = error.localizedDescription
         }

@@ -5,9 +5,9 @@ struct DayDetailSheet: View {
     @Binding var isPresented: Bool
 
     private var titleLabel: String {
-        let f = DateFormatter()
-        f.dateFormat = "EEEE, MMM d"
-        return f.string(from: date)
+        // Date.formatted uses a cached, locale-aware formatter under the hood —
+        // no per-render DateFormatter allocation (plat-9).
+        date.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())
     }
 
     private var relativeLabel: String {

@@ -335,7 +335,15 @@ struct CycleSettingsView: View {
                     }
                     .tint(CaelynColor.primaryPlum)
                     .onChange(of: profile.pregnancyEnabled) { _, newValue in
-                        if newValue { profile.postpartumEnabled = false }
+                        if newValue {
+                            profile.postpartumEnabled = false
+                            // Persist a default due date on enable so the Home card
+                            // renders immediately, even if the user never opens the
+                            // picker (stz-013). Matches the picker's default below.
+                            if profile.pregnancyDueDate == nil {
+                                profile.pregnancyDueDate = Calendar.current.date(byAdding: .day, value: 280, to: .now)
+                            }
+                        }
                         modelContext.saveOrLog()
                     }
 
@@ -380,7 +388,14 @@ struct CycleSettingsView: View {
                     }
                     .tint(CaelynColor.primaryPlum)
                     .onChange(of: profile.postpartumEnabled) { _, newValue in
-                        if newValue { profile.pregnancyEnabled = false }
+                        if newValue {
+                            profile.pregnancyEnabled = false
+                            // Persist a default birth date on enable so the Home card
+                            // renders immediately (stz-013). Matches the picker default.
+                            if profile.postpartumBirthDate == nil {
+                                profile.postpartumBirthDate = Calendar.current.startOfDay(for: .now)
+                            }
+                        }
                         modelContext.saveOrLog()
                     }
 

@@ -20,41 +20,49 @@ extension ModelContext {
 enum Persistence {
     static let schema = Schema([CycleEntry.self, UserProfile.self])
 
-    /// Private CloudKit container — data syncs to the user's own iCloud account,
-    /// not to any Caelyn server. If the user isn't signed in to iCloud or the
-    /// CloudKit container isn't provisioned yet, we fall back to local-only
-    /// storage so the app stays fully functional either way.
-    private static let cloudKitContainerID = "iCloud.smallpanta-icould.com.caelynperiodtracker"
+    /// The live SwiftData container. Caelyn is **local-only**: all data stays on
+    /// this device, with no CloudKit sync and no Caelyn account. We pass
+    /// `.none` explicitly so the store is deterministically local and never
+    /// attempts to mirror to iCloud. (Real, opt-in private-CloudKit backup is a
+    /// later phase — see docs/BUILD_PLAN.md. The store URL is unchanged, so any
+    /// existing on-device data opens with zero loss.) A total failure is
+    /// unrecoverable — fatalError so the crash log captures the exact error.
+    /// UserDefaults flag set when the live store failed to open normally, so the
+    /// UI can warn the user and point them to Export (data-inmemory-safety).
+    static let storeFailedKey = "caelyn.storeFailed"
 
-    /// The live SwiftData container. Tries CloudKit first; falls back to
-    /// local-only if unavailable (no iCloud account, unprovisioned container,
-    /// simulator, etc.). A failure on both paths is unrecoverable — fatalError
-    /// so the crash log captures the exact storage error.
+    /// How the live store actually opened — honest status for diagnostics/UI.
+    enum StoreMode { case ok, recoveredFresh, inMemory }
+    private(set) static var storeMode: StoreMode = .ok
+
     static let live: ModelContainer = {
         let log = Logger(subsystem: "smallpanta-icould.com.caelynperiodtracker", category: "swiftdata")
+        let localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, cloudKitDatabase: .none)
 
-        let cloudConfig = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false,
-            cloudKitDatabase: .private(cloudKitContainerID)
-        )
-        if let container = try? ModelContainer(for: schema, configurations: [cloudConfig]) {
-            log.info("SwiftData: using CloudKit-backed store")
-            return container
+        // 1. Normal path — open the on-disk store (SwiftData attempts automatic
+        //    lightweight migration here for any compatible schema change).
+        do {
+            return try ModelContainer(for: schema, configurations: [localConfig])
+        } catch {
+            log.error("SwiftData: local store failed to open: \(error.localizedDescription, privacy: .public)")
         }
 
-        // Fallback: local-only. CloudKit may be unavailable on this device.
-        log.warning("SwiftData: CloudKit unavailable, falling back to local store")
-        let localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        // 2. Preserve the unreadable store aside (NEVER silently discard it — the
+        //    user may be able to recover it / we can export it later) and try a
+        //    FRESH local store so new data still persists to disk rather than
+        //    living only in memory for the session (data-inmemory-safety).
+        preserveStoreAside(log: log)
         if let container = try? ModelContainer(for: schema, configurations: [localConfig]) {
+            storeMode = .recoveredFresh
+            UserDefaults.standard.set(true, forKey: storeFailedKey)
+            log.warning("SwiftData: opened a fresh local store; previous store preserved aside.")
             return container
         }
 
-        // Last resort: in-memory store so the app stays alive. User data will
-        // not persist this session. We log critically so the error surfaces in
-        // Console.app and any attached crash reporter.
-        log.critical("SwiftData: local store failed — using in-memory fallback. User data will not persist.")
-        UserDefaults.standard.set(true, forKey: "caelyn.storeFailed")
+        // 3. Last resort: in-memory so the app stays alive (data won't persist).
+        log.critical("SwiftData: local store unrecoverable — in-memory fallback. Data will not persist this session.")
+        storeMode = .inMemory
+        UserDefaults.standard.set(true, forKey: storeFailedKey)
         let memConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         do {
             return try ModelContainer(for: schema, configurations: [memConfig])
@@ -62,6 +70,30 @@ enum Persistence {
             fatalError("SwiftData: even in-memory ModelContainer failed: \(error)")
         }
     }()
+
+    /// SwiftData's default on-disk store location.
+    private static func defaultStoreURL() -> URL? {
+        try? FileManager.default
+            .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            .appending(path: "default.store")
+    }
+
+    /// Rename an unreadable store (and its -shm/-wal sidecars) to `.corrupt-<ts>`
+    /// so it is preserved for recovery instead of being overwritten/lost.
+    private static func preserveStoreAside(log: Logger) {
+        guard let url = defaultStoreURL() else { return }
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: url.path) else { return }
+        let stamp = Int(Date().timeIntervalSince1970)
+        for suffix in ["", "-shm", "-wal"] {
+            let src = URL(fileURLWithPath: url.path + suffix)
+            guard fm.fileExists(atPath: src.path) else { continue }
+            let dst = URL(fileURLWithPath: url.path + ".corrupt-\(stamp)" + suffix)
+            do { try fm.moveItem(at: src, to: dst) }
+            catch { log.error("SwiftData: couldn't preserve store sidecar: \(error.localizedDescription, privacy: .public)") }
+        }
+        log.error("SwiftData: preserved unreadable store aside as default.store.corrupt-\(stamp).")
+    }
 
     static let preview: ModelContainer = {
         let config = ModelConfiguration(

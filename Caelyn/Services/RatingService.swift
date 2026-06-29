@@ -11,7 +11,6 @@ import SwiftUI
 enum RatingService {
 
     private enum Keys {
-        static let sessionCount        = "caelyn.rating.sessionCount"
         static let lastPromptDate      = "caelyn.rating.lastPromptDate"
         static let timesPrompted       = "caelyn.rating.timesPrompted"
         static let firstLaunchDate     = "caelyn.rating.firstLaunchDate"
@@ -21,12 +20,22 @@ enum RatingService {
     private static let maxPromptsLifetime: Int     = 3
     private static let minDaysSinceInstall: Int    = 2
 
+    /// Set when the user hits a non-celebratory monetization moment this session
+    /// (paywall shown or a purchase failed). We never ask for an App Store review
+    /// in the same session as one of those — a review prompt right after a paywall
+    /// reads as pressure and tanks ratings (mon-7).
+    @MainActor private static var suppressedThisSession = false
+
+    @MainActor
+    static func suppressForThisSession() { suppressedThisSession = true }
+
     // MARK: - Public API
 
     /// Call this after a meaningful user action (e.g. saving a log entry).
     /// Internally decides whether the timing is right to show the prompt.
     @MainActor
     static func considerRequestingReview(loggedEntryCount: Int) {
+        guard !suppressedThisSession else { return }
         recordFirstLaunchIfNeeded()
         guard shouldPrompt(entryCount: loggedEntryCount) else { return }
         requestReview()

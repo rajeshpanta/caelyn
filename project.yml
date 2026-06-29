@@ -38,10 +38,9 @@ targets:
       properties:
         com.apple.security.application-groups:
           - group.smallpanta-icould.com.caelynperiodtracker
-        com.apple.developer.icloud-services:
-          - CloudKit
-        com.apple.developer.icloud-container-identifiers:
-          - iCloud.smallpanta-icould.com.caelynperiodtracker
+        # iCloud entitlements intentionally removed — Caelyn is local-only until
+        # the real private-CloudKit backup lands (stz-003 / Phase 6). Keep this in
+        # sync with Caelyn/Caelyn.entitlements.
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
         com.apple.developer.usernotifications.time-sensitive: true

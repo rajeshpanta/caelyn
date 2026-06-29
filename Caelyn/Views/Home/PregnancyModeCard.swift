@@ -20,6 +20,11 @@ struct PregnancyModeCard: View {
         max(0, cal.dateComponents([.day], from: today, to: dueDate).day ?? 0)
     }
 
+    /// True once the due date has passed — the card stops counting down and
+    /// nudges the user to switch to Postpartum mode instead of freezing at
+    /// "Week 42 · 0 days left" (stz-013).
+    private var isPastDue: Bool { today > cal.startOfDay(for: dueDate) }
+
     private var trimester: Int {
         switch weeksPregnant {
         case 0..<13: return 1
@@ -37,6 +42,7 @@ struct PregnancyModeCard: View {
     }
 
     private var milestone: String {
+        if isPastDue { return "Your due date has passed — switch to Postpartum in Settings" }
         switch weeksPregnant {
         case 0..<4:   return "Implantation week"
         case 4..<8:   return "Heart forming"
@@ -64,18 +70,24 @@ struct PregnancyModeCard: View {
                         Text("Pregnancy")
                             .font(CaelynFont.caption.weight(.semibold))
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
-                        Text("Week \(weeksPregnant) · Trimester \(trimester)")
+                        Text(isPastDue ? "Past your due date" : "Week \(weeksPregnant) · Trimester \(trimester)")
                             .font(CaelynFont.headline)
                             .foregroundStyle(CaelynColor.deepPlumText)
                     }
                     Spacer()
-                    VStack(alignment: .trailing, spacing: 1) {
-                        Text("\(daysRemaining)")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                    if isPastDue {
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 24, weight: .light))
                             .foregroundStyle(trimesterColor)
-                        Text("days left")
-                            .font(CaelynFont.caption)
-                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                    } else {
+                        VStack(alignment: .trailing, spacing: 1) {
+                            Text("\(daysRemaining)")
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .foregroundStyle(trimesterColor)
+                            Text("days left")
+                                .font(CaelynFont.caption)
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                        }
                     }
                 }
 
@@ -91,7 +103,9 @@ struct PregnancyModeCard: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Pregnancy: week \(weeksPregnant), trimester \(trimester). \(milestone). \(daysRemaining) days until due date.")
+        .accessibilityLabel(isPastDue
+            ? "Pregnancy: past your due date. \(milestone)."
+            : "Pregnancy: week \(weeksPregnant), trimester \(trimester). \(milestone). \(daysRemaining) days until due date.")
     }
 }
 
@@ -101,12 +115,23 @@ struct PostpartumModeCard: View {
     private var cal: Calendar { Calendar.current }
     private var today: Date { cal.startOfDay(for: .now) }
 
+    /// Recovery-tracking window (~6 months). Past this, the card stops counting
+    /// up open-endedly (no "Week 230 postpartum") and nudges to turn the mode off.
+    private static let windowWeeks = 26
+
     private var weeksPostpartum: Int {
         let days = cal.dateComponents([.day], from: cal.startOfDay(for: birthDate), to: today).day ?? 0
         return max(0, days / 7)
     }
 
+    private var isPastWindow: Bool { weeksPostpartum > Self.windowWeeks }
+
+    private var weekLabel: String {
+        isPastWindow ? "\(Self.windowWeeks)+ weeks postpartum" : "Week \(weeksPostpartum) postpartum"
+    }
+
     private var milestone: String {
+        if isPastWindow { return "Recovery window complete — turn off Postpartum in Settings any time" }
         switch weeksPostpartum {
         case 0..<1: return "First week — rest and recover"
         case 1..<2: return "Milk supply establishing"
@@ -128,7 +153,7 @@ struct PostpartumModeCard: View {
                         Text("Postpartum")
                             .font(CaelynFont.caption.weight(.semibold))
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
-                        Text("Week \(weeksPostpartum) postpartum")
+                        Text(weekLabel)
                             .font(CaelynFont.headline)
                             .foregroundStyle(CaelynColor.deepPlumText)
                     }
@@ -144,6 +169,6 @@ struct PostpartumModeCard: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Postpartum: week \(weeksPostpartum). \(milestone).")
+        .accessibilityLabel("Postpartum: \(weekLabel). \(milestone).")
     }
 }

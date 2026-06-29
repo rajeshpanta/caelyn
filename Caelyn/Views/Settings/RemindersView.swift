@@ -253,18 +253,20 @@ private struct RemindersForm: View {
     }
 
     private func quietHoursNote(hour: Int, minute: Int) -> String? {
-        let quietStart = NotificationService.quietHoursStart  // 22
-        let quietEnd   = NotificationService.quietHoursEnd    // 7
-        // Window wraps midnight: 22:00–07:00
+        let quietStart = NotificationService.quietHoursStart
+        let quietEnd   = NotificationService.quietHoursEnd
+        // Window wraps midnight (e.g. 22:00–07:00).
         let isQuiet = hour >= quietStart || hour < quietEnd
         guard isQuiet else { return nil }
-        let fmt = DateFormatter()
-        fmt.dateFormat = "h:mm a"
-        var c = DateComponents()
-        c.hour = quietEnd
-        c.minute = 0
-        let wakeTime = fmt.string(from: Calendar.current.date(from: c) ?? .now)
-        return "Quiet hours (10 PM–7 AM) — will fire at \(wakeTime)"
+        let cal = Calendar.current
+        let shortFmt = DateFormatter(); shortFmt.dateFormat = "h a"
+        let longFmt = DateFormatter();  longFmt.dateFormat = "h:mm a"
+        // Derive the displayed window + wake time from the constants so the label
+        // can never drift from the scheduling logic (priv-5).
+        let startLabel = cal.date(from: DateComponents(hour: quietStart)).map { shortFmt.string(from: $0) } ?? "\(quietStart):00"
+        let endLabel   = cal.date(from: DateComponents(hour: quietEnd)).map { shortFmt.string(from: $0) } ?? "\(quietEnd):00"
+        let wakeTime   = cal.date(from: DateComponents(hour: quietEnd, minute: 0)).map { longFmt.string(from: $0) } ?? endLabel
+        return "Quiet hours (\(startLabel)–\(endLabel)) — will fire at \(wakeTime)"
     }
 
     // MARK: - Bindings + side effects

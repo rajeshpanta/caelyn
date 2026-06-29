@@ -8,9 +8,14 @@ enum PredictionEngine {
     /// the next flow streak begins. The most recent (in-progress) cycle has length 0
     /// and is excluded from this list — use `currentCycleDay` for the live cycle.
     static func cycles(from entries: [CycleEntry], today: Date = .now) -> [Cycle] {
+        // Exclude future-dated flow: a flow tap dated ahead of today must not be
+        // treated as a period start, or it fabricates a huge phantom cycle that
+        // skews every average and can false-trigger the irregular banner (stz-014).
+        let cutoff = calendar.startOfDay(for: today)
         let dayStarts: [Date] = entries
             .filter { $0.flow != nil }
             .map { calendar.startOfDay(for: $0.date) }
+            .filter { $0 <= cutoff }
             .sorted()
 
         guard !dayStarts.isEmpty else { return [] }
@@ -53,23 +58,29 @@ enum PredictionEngine {
     /// when the user's cycle changes. Falls back to user-entered value when fewer
     /// than 2 cycles logged.
     static func averageCycleLength(of cycles: [Cycle], fallback: Int) -> Int {
-        guard cycles.count >= 2 else { return fallback }
+        guard cycles.count >= 2 else { return clampCycleLength(fallback) }
         let recent = Array(cycles.suffix(6))
-        return weightedMean(recent.map(\.length))
+        return clampCycleLength(weightedMean(recent.map(\.length)))
     }
 
     static func averagePeriodLength(of cycles: [Cycle], fallback: Int) -> Int {
-        guard cycles.count >= 2 else { return fallback }
+        guard cycles.count >= 2 else { return clampPeriodLength(fallback) }
         let recent = Array(cycles.suffix(6))
-        return weightedMean(recent.map(\.periodLength))
+        return clampPeriodLength(weightedMean(recent.map(\.periodLength)))
     }
 
-    /// Variation: half the spread of recent cycle lengths (±N days).
+    /// Realistic bounds (mirroring the Settings sliders) so noisy or sparse logging
+    /// can't yield impossible predictions like "Day 7 of 3" (int-1).
+    static func clampCycleLength(_ v: Int) -> Int { min(45, max(18, v)) }
+    static func clampPeriodLength(_ v: Int) -> Int { min(12, max(1, v)) }
+
+    /// Variation: half the spread of recent cycle lengths (±N days), rounded so a
+    /// 15-day spread reads ±8, not ±7 (int-1).
     static func cycleLengthVariation(of cycles: [Cycle]) -> Int {
         guard cycles.count >= 2 else { return 0 }
         let lengths = cycles.suffix(6).map(\.length)
-        guard let min = lengths.min(), let max = lengths.max() else { return 0 }
-        return (max - min) / 2
+        guard let minLen = lengths.min(), let maxLen = lengths.max() else { return 0 }
+        return Int((Double(maxLen - minLen) / 2.0).rounded())
     }
 
     /// Exponentially-weighted mean: newest value has weight 1.0, each prior step
@@ -112,6 +123,41 @@ enum PredictionEngine {
         return nextStart
     }
 
+    /// The *un-rolled* expected period start: lastPeriodStart + one cycle.
+    /// Unlike `nextPeriodStart`, this is NOT advanced past today — so it can be in
+    /// the past, which is exactly what late-period detection needs (stz-009).
+    static func expectedPeriodStart(lastPeriodStart: Date, cycleLength: Int) -> Date {
+        let lp = calendar.startOfDay(for: lastPeriodStart)
+        let safeLen = max(cycleLength, 1)
+        return calendar.date(byAdding: .day, value: safeLen, to: lp) ?? lp
+    }
+
+    /// Start of the most recent flow streak on or before `today` — used to recover
+    /// the period anchor after an entry is removed, instead of blindly clearing it.
+    /// Tolerates 1-day gaps (matches activePeriodWindow). nil if no flow remains.
+    static func mostRecentPeriodStart(from entries: [CycleEntry], today: Date = .now) -> Date? {
+        let cutoff = calendar.startOfDay(for: today)
+        let dayStarts = entries
+            .filter { $0.flow != nil }
+            .map { calendar.startOfDay(for: $0.date) }
+            .filter { $0 <= cutoff }
+            .sorted()
+        guard let last = dayStarts.last else { return nil }
+        var streakStart = last
+        for i in stride(from: dayStarts.count - 2, through: 0, by: -1) {
+            let gap = calendar.dateComponents([.day], from: dayStarts[i], to: dayStarts[i + 1]).day ?? 0
+            if gap <= 2 { streakStart = dayStarts[i] } else { break }
+        }
+        return streakStart
+    }
+
+    /// How many days past the expected start the period is, or 0 if not late.
+    static func daysLate(lastPeriodStart: Date, today: Date = .now, cycleLength: Int) -> Int {
+        let expected = expectedPeriodStart(lastPeriodStart: lastPeriodStart, cycleLength: cycleLength)
+        let t = calendar.startOfDay(for: today)
+        return max(0, calendar.dateComponents([.day], from: expected, to: t).day ?? 0)
+    }
+
     /// Predicted period window: nextStart through nextStart + (periodLength - 1).
     static func predictedPeriodWindow(nextPeriodStart: Date, periodLength: Int) -> ClosedRange<Date> {
         let safeLen = max(periodLength, 1)
@@ -119,19 +165,43 @@ enum PredictionEngine {
         return nextPeriodStart...end
     }
 
-    /// Estimated ovulation day: nextStart - 14 (standard 14-day luteal phase model).
-    static func ovulationEstimate(nextPeriodStart: Date) -> Date {
-        calendar.date(byAdding: .day, value: -14, to: nextPeriodStart) ?? nextPeriodStart
+    /// Estimated ovulation day: nextStart − lutealLength. Defaults to the standard
+    /// 14-day luteal model; pass `learnedLutealLength(...)` to personalise (int-1).
+    static func ovulationEstimate(nextPeriodStart: Date, lutealLength: Int = 14) -> Date {
+        calendar.date(byAdding: .day, value: -max(1, lutealLength), to: nextPeriodStart) ?? nextPeriodStart
     }
 
     /// Fertile window: the 5-day window where conception is most likely.
     /// Sperm survive up to 5 days; the egg lives ~12-24 hours post-ovulation.
     /// Window spans ovulation-day-4 through ovulation-day+1 (peak = ovulation day).
-    static func fertileWindow(nextPeriodStart: Date) -> ClosedRange<Date> {
-        let ovulation = ovulationEstimate(nextPeriodStart: nextPeriodStart)
+    static func fertileWindow(nextPeriodStart: Date, lutealLength: Int = 14) -> ClosedRange<Date> {
+        let ovulation = ovulationEstimate(nextPeriodStart: nextPeriodStart, lutealLength: lutealLength)
         let start = calendar.date(byAdding: .day, value: -4, to: ovulation) ?? ovulation
         let end   = calendar.date(byAdding: .day, value: 1,  to: ovulation) ?? ovulation
         return start...end
+    }
+
+    /// Per-user luteal-phase length learned from confirmed ovulation signals (LH
+    /// positive / surge): days from the peak LH day to the next period start,
+    /// averaged over cycles. Returns nil — so callers use the 14-day default —
+    /// until ≥3 cycles carry a usable signal. Clamped to a physiologic 9–17 days (int-1).
+    static func learnedLutealLength(entries: [CycleEntry], cycles: [Cycle]) -> Int? {
+        var lengths: [Int] = []
+        for cycle in cycles {
+            guard let cycleEnd = calendar.date(byAdding: .day, value: cycle.length, to: cycle.start) else { continue }
+            let markers = entries.compactMap { e -> Date? in
+                let d = calendar.startOfDay(for: e.date)
+                guard d >= cycle.start && d < cycleEnd else { return nil }
+                guard e.ovulationTestResult == .positive || e.ovulationTestResult == .lhSurge else { return nil }
+                return d
+            }.sorted()
+            if let ovulation = markers.last {
+                let luteal = calendar.dateComponents([.day], from: ovulation, to: cycleEnd).day ?? 0
+                if luteal >= 9 && luteal <= 17 { lengths.append(luteal) }
+            }
+        }
+        guard lengths.count >= 3 else { return nil }
+        return Int((Double(lengths.reduce(0, +)) / Double(lengths.count)).rounded())
     }
 
     /// PMS window ending the day before the predicted period.
@@ -173,7 +243,7 @@ enum PredictionEngine {
         }
 
         guard onsets.count >= 3 else { return nil }
-        let avg = Int(Double(onsets.reduce(0, +)) / Double(onsets.count))
+        let avg = Int((Double(onsets.reduce(0, +)) / Double(onsets.count)).rounded())   // round, not truncate (int-1)
         return max(2, min(14, avg))
     }
 
@@ -186,10 +256,10 @@ enum PredictionEngine {
     /// or junk data) we report `.menstrual` while the user is bleeding and
     /// `.unknown` for the remainder, instead of returning overlapping/garbled
     /// phase labels that aren't medically meaningful.
-    static func phase(forCycleDay day: Int, periodLength: Int, cycleLength: Int) -> CyclePhase {
+    static func phase(forCycleDay day: Int, periodLength: Int, cycleLength: Int, lutealLength: Int = 14) -> CyclePhase {
         guard cycleLength > 0 else { return .unknown }
         let safePeriod = max(1, periodLength)
-        let ovulation = cycleLength - 14
+        let ovulation = cycleLength - max(1, lutealLength)
 
         guard ovulation > safePeriod else {
             return (day >= 1 && day <= safePeriod) ? .menstrual : .unknown

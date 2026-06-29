@@ -23,7 +23,6 @@ struct SettingsView: View {
     @State private var showingReminders = false
     @State private var showingHealthKit = false
     @State private var showingBirthControl = false
-    @State private var showingShareMode = false
     @State private var showingPaywall = false
     @State private var showingThemePicker = false
     @State private var purchase = PurchaseService.shared
@@ -74,7 +73,7 @@ struct SettingsView: View {
                 PrivacyTrustView()
             }
             .navigationDestination(isPresented: $showingCloudSync) {
-                iCloudSyncView()
+                BackupInfoView()
             }
             .navigationDestination(isPresented: $showingReminders) {
                 RemindersView()
@@ -84,9 +83,6 @@ struct SettingsView: View {
             }
             .navigationDestination(isPresented: $showingBirthControl) {
                 BirthControlView()
-            }
-            .navigationDestination(isPresented: $showingShareMode) {
-                ShareModeView()
             }
         }
         .sheet(isPresented: $showingExportSheet) {
@@ -342,26 +338,14 @@ struct SettingsView: View {
 
     // MARK: - Data section
 
-    private var iCloudStatusDetail: String {
-        FileManager.default.ubiquityIdentityToken != nil ? "On" : "Off — sign in to iCloud"
-    }
-
     private var dataSection: some View {
         SettingsSectionCard(title: "Data") {
             SettingsRow(
-                icon: "icloud.fill",
+                icon: "lock.iphone",
                 iconColor: CaelynColor.primaryPlum,
-                title: "iCloud backup",
-                detail: iCloudStatusDetail,
+                title: "Backup",
+                detail: "On this device",
                 action: { showingCloudSync = true }
-            )
-            SettingsDivider()
-            SettingsRow(
-                icon: "person.2",
-                iconColor: CaelynColor.primaryPlum,
-                title: "Share with a partner",
-                detail: purchase.isPro ? nil : "Pro",
-                action: { purchase.isPro ? (showingShareMode = true) : (showingPaywall = true) }
             )
             SettingsDivider()
             SettingsRow(
@@ -405,14 +389,14 @@ struct SettingsView: View {
                 )
                 SettingsDivider()
             }
+            // Birth Control (incl. contraceptive reminders) is free: Apple flags
+            // paywalling safety-adjacent health features (stz-006).
             SettingsRow(
                 icon: "pills",
                 iconColor: CaelynColor.successSage,
                 title: "Birth Control",
-                detail: purchase.isPro
-                    ? (profile?.birthControlEnabled == true ? (profile?.birthControlMethod.displayName ?? "On") : "Off")
-                    : "Pro",
-                action: { purchase.isPro ? (showingBirthControl = true) : (showingPaywall = true) }
+                detail: profile?.birthControlEnabled == true ? (profile?.birthControlMethod.displayName ?? "On") : "Off",
+                action: { showingBirthControl = true }
             )
             SettingsDivider()
             SettingsRow(

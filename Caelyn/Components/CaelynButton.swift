@@ -43,7 +43,7 @@ struct CaelynButton: View {
 
     private var foreground: Color {
         switch variant {
-        case .primary: return .white
+        case .primary: return CaelynColor.onPrimary   // AA-contrast on plum in both modes (plat-6)
         case .secondary, .tertiary: return CaelynColor.primaryPlum
         }
     }

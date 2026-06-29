@@ -91,7 +91,13 @@ enum WidgetSnapshotBuilder {
             upcomingLine2: lines.count > 1 ? lines[1] : "",
             upcomingLine3: lines.count > 2 ? lines[2] : "",
             isPro: isPro,
-            updatedAt: Date()
+            updatedAt: Date(),
+            // Anchors so the widget/watch can recompute the day across midnight
+            // without the app running (plat-2). nil anchor = no prediction.
+            anchorPeriodStart: lastStart,
+            periodLength: periodLength,
+            fertilityStatusRaw: WidgetCycleMath.fertilityStatus(cycleDay: cycleDay, cycleLength: cycleLength),
+            hidePreview: profile?.hidePreview ?? false
         )
     }
 }

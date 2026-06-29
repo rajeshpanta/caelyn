@@ -18,7 +18,7 @@ final class UserProfile {
     var hkWriteSymptoms: Bool = false
 
     var firstDayOfWeek: Int = 1
-    var theme: AppTheme = .system
+    var theme: AppTheme = AppTheme.system
 
     var hasOnboarded: Bool = false
     var lastPeriodStart: Date?
@@ -59,7 +59,7 @@ final class UserProfile {
 
     // Birth Control Mode
     var birthControlEnabled: Bool = false
-    var birthControlMethod: BirthControlMethod = .pill
+    var birthControlMethod: BirthControlMethod = BirthControlMethod.pill
     var birthControlReminderEnabled: Bool = false
     var birthControlReminderHour: Int = 8
     var birthControlReminderMinute: Int = 0

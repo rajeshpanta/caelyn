@@ -653,6 +653,26 @@ struct RemindersStep: View {
                 )
                 .staggeredAppear(delay: 0.38)
                 ToggleCard(
+                    title: "Period start",
+                    subtitle: "A heads-up a couple of days before your period is predicted.",
+                    icon: "drop.fill",
+                    isOn: Binding(
+                        get: { vm.remindPeriodStart },
+                        set: { vm.updateReminder(period: $0) }
+                    )
+                )
+                .staggeredAppear(delay: 0.46)
+                ToggleCard(
+                    title: "Ovulation",
+                    subtitle: "A nudge around your estimated fertile window.",
+                    icon: "sparkles",
+                    isOn: Binding(
+                        get: { vm.remindOvulation },
+                        set: { vm.updateReminder(ovulation: $0) }
+                    )
+                )
+                .staggeredAppear(delay: 0.54)
+                ToggleCard(
                     title: "No reminders for now",
                     subtitle: "Caelyn stays completely quiet — you come to it when you're ready.",
                     icon: "bell.slash.fill",
@@ -661,7 +681,7 @@ struct RemindersStep: View {
                         set: { vm.setNoReminders($0) }
                     )
                 )
-                .staggeredAppear(delay: 0.46)
+                .staggeredAppear(delay: 0.62)
             }
         } footer: {
             CaelynButton(title: "Continue", variant: .primary) {
@@ -919,8 +939,12 @@ struct HealthStep: View {
             }
         }
         .onAppear {
-            // Auto-skip if HealthKit isn't available on this device/build
-            if !HealthKitService.isAvailable { vm.next() }
+            // Auto-skip if HealthKit isn't available (e.g. iPad). Respect the nav
+            // direction so the Back button from a later step skips BACKWARD past
+            // this step instead of bouncing the user forward — the old code always
+            // called next(), trapping iPad users (plat-8).
+            guard !HealthKitService.isAvailable else { return }
+            if vm.navigationDirection == .backward { vm.back() } else { vm.next() }
         }
     }
 

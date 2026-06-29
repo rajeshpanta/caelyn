@@ -153,6 +153,7 @@ enum CalendarMath {
         let flowDates = entries
             .filter { $0.flow != nil }
             .map { calendar.startOfDay(for: $0.date) }
+            .filter { $0 <= calendar.startOfDay(for: today) }   // exclude future-dated flow (stz-014)
             .sorted()
         guard let lastFlow = flowDates.last else { return nil }
 

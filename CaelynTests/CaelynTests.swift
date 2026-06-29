@@ -583,4 +583,264 @@ final class CaelynTests: XCTestCase {
             "1-day gap (logged Day 1, skipped Day 2, logged Day 3) should still be one streak starting Day 1"
         )
     }
+
+    // MARK: - Phase 0 regressions (P0 fixes)
+
+    /// stz-014: a future-dated flow tap must not be reconstructed into a cycle
+    /// (otherwise it fabricates a huge phantom cycle that skews every average).
+    func testCyclesExcludeFutureDatedFlow() {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let c1 = cal.date(byAdding: .day, value: -57, to: today)!
+        let c2 = cal.date(byAdding: .day, value: -29, to: today)!
+        let future = cal.date(byAdding: .day, value: 30, to: today)!
+        let entries: [CycleEntry] = [
+            CycleEntry(date: c1, flow: .medium),
+            CycleEntry(date: c2, flow: .medium),
+            CycleEntry(date: future, flow: .medium)   // future tap — must be ignored
+        ]
+        let cycles = PredictionEngine.cycles(from: entries, today: today)
+        XCTAssertEqual(cycles.count, 1, "Future flow must not add a phantom cycle")
+        XCTAssertEqual(cycles[0].length, 28)
+    }
+
+    /// stz-009: expected start is NOT rolled past today, so it can be in the past
+    /// — which is what makes late-period detection possible.
+    func testExpectedPeriodStartIsUnrolled() {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let last = cal.date(byAdding: .day, value: -40, to: today)!   // 28-day cycle → overdue
+        let expected = PredictionEngine.expectedPeriodStart(lastPeriodStart: last, cycleLength: 28)
+        XCTAssertEqual(expected, cal.date(byAdding: .day, value: 28, to: cal.startOfDay(for: last)))
+        XCTAssertLessThan(expected, today, "Expected start should be in the past for an overdue cycle")
+    }
+
+    /// stz-009: daysLate is positive for an overdue cycle and zero otherwise.
+    func testDaysLateDetectsOverdue() {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let overdue = cal.date(byAdding: .day, value: -40, to: today)!   // 12 days late
+        XCTAssertEqual(PredictionEngine.daysLate(lastPeriodStart: overdue, today: today, cycleLength: 28), 12)
+        let onTime = cal.date(byAdding: .day, value: -20, to: today)!    // not yet due
+        XCTAssertEqual(PredictionEngine.daysLate(lastPeriodStart: onTime, today: today, cycleLength: 28), 0)
+    }
+
+    /// priv-5: private-mode notifications never leak a health term for ANY category.
+    func testPrivateNotificationsNeverLeakHealthTerms() {
+        let leaks = ["period", "ovulat", "medication", "birth control", "fertil", "pregnan"]
+        for category in NotificationService.Category.allCases {
+            let content = NotificationService.content(for: category, isPrivate: true)
+            let text = (content.title + " " + content.body).lowercased()
+            for term in leaks {
+                XCTAssertFalse(text.contains(term), "Private \(category.rawValue) notification leaked '\(term)': \(text)")
+            }
+        }
+    }
+
+    // MARK: - Phase 1 regressions (plat-13 export, plat-1 shared math)
+
+    /// plat-13: a custom symptom containing a comma must be CSV-quoted so it
+    /// doesn't break the row.
+    func testCSVEscapesCommasInCustomSymptoms() {
+        let entry = CycleEntry(date: Date())
+        entry.loggedCustomSymptoms = ["Joint pain, knees"]
+        let csv = ExportService.generateCSV(entries: [entry], includeNotes: false)
+        XCTAssertTrue(csv.contains("\"Joint pain, knees\""), "Comma in a custom symptom must be quoted")
+    }
+
+    /// plat-13: machine-readable CSV dates are Gregorian yyyy-MM-dd.
+    func testCSVDateUsesGregorianYYYYMMDD() {
+        let date = Calendar(identifier: .gregorian).date(from: DateComponents(year: 2026, month: 3, day: 5))!
+        let entry = CycleEntry(date: date, flow: .light)
+        let csv = ExportService.generateCSV(entries: [entry], includeNotes: false)
+        XCTAssertTrue(csv.contains("2026-03-05"), "CSV should emit Gregorian yyyy-MM-dd")
+    }
+
+    /// plat-13: the boundary day is included even when "now" has a time component.
+    func testFilterEntriesIncludesBoundaryDay() {
+        let cal = Calendar.current
+        let now = cal.date(bySettingHour: 23, minute: 0, second: 0, of: Date())!
+        let boundary = cal.startOfDay(for: cal.date(byAdding: .day, value: -90, to: now)!)
+        let entry = CycleEntry(date: boundary, mood: .calm)
+        let filtered = ExportService.filterEntries([entry], range: .last3Months, today: now)
+        XCTAssertEqual(filtered.count, 1, "Boundary day (90 days ago) should be included")
+    }
+
+    /// plat-1: the shared widget/watch recompute matches PredictionEngine for the
+    /// day-sensitive fields, so the two never diverge.
+    func testWidgetCycleMathMatchesPredictionEngine() {
+        for cycleLength in [21, 26, 28, 31, 35] {
+            for periodLength in [3, 5, 7] {
+                for day in 1...cycleLength {
+                    let engine = PredictionEngine.phase(forCycleDay: day, periodLength: periodLength, cycleLength: cycleLength).rawValue
+                    let shared = WidgetCycleMath.phaseRaw(cycleDay: day, periodLength: periodLength, cycleLength: cycleLength)
+                    XCTAssertEqual(shared, engine, "phase mismatch at day \(day), period \(periodLength), cycle \(cycleLength)")
+                }
+            }
+        }
+    }
+
+    /// plat-1/3/4: recompute advances the cycle day as the date moves past midnight.
+    func testWidgetSnapshotRecomputesDayAcrossMidnight() {
+        let cal = Calendar.current
+        let anchor = cal.startOfDay(for: cal.date(byAdding: .day, value: -3, to: .now)!)
+        var snap = WidgetSnapshot.placeholder()
+        snap.anchorPeriodStart = anchor
+        snap.cycleLength = 28
+        snap.periodLength = 5
+        let today = cal.startOfDay(for: .now)
+        let tomorrow = cal.date(byAdding: .day, value: 1, to: today)!
+        XCTAssertEqual(snap.recomputed(for: today).cycleDay, 4)       // day 0..3 → cycle day 4
+        XCTAssertEqual(snap.recomputed(for: tomorrow).cycleDay, 5)    // advances across midnight
+    }
+
+    // MARK: - qa-4: Date / time-zone / DST / leap / year-boundary robustness
+
+    private func snapshot(anchor: Date, cycleLength: Int = 28, periodLength: Int = 5) -> WidgetSnapshot {
+        var s = WidgetSnapshot.placeholder()
+        s.anchorPeriodStart = anchor
+        s.cycleLength = cycleLength
+        s.periodLength = periodLength
+        return s
+    }
+
+    func testRecomputeStableAcrossTimeZones() {
+        for tzID in ["America/New_York", "Asia/Tokyo", "Pacific/Kiritimati" /* UTC+14 */, "Pacific/Honolulu"] {
+            var cal = Calendar(identifier: .gregorian)
+            cal.timeZone = TimeZone(identifier: tzID)!
+            let anchor = cal.date(from: DateComponents(year: 2026, month: 1, day: 1))!
+            let later = cal.date(from: DateComponents(year: 2026, month: 1, day: 6))!  // +5 days
+            XCTAssertEqual(snapshot(anchor: anchor).recomputed(for: later, calendar: cal).cycleDay, 6, "TZ \(tzID)")
+        }
+    }
+
+    func testRecomputeAcrossDSTSpringForward() {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "America/New_York")!   // DST begins 2026-03-08
+        let anchor = cal.date(from: DateComponents(year: 2026, month: 3, day: 1))!
+        let snap = snapshot(anchor: anchor)
+        let mar7 = cal.date(from: DateComponents(year: 2026, month: 3, day: 7))!
+        let mar9 = cal.date(from: DateComponents(year: 2026, month: 3, day: 9))!
+        XCTAssertEqual(snap.recomputed(for: mar7, calendar: cal).cycleDay, 7)
+        XCTAssertEqual(snap.recomputed(for: mar9, calendar: cal).cycleDay, 9, "Day count must survive the DST transition")
+    }
+
+    func testRecomputeAcrossLeapDay() {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC")!
+        let anchor = cal.date(from: DateComponents(year: 2028, month: 2, day: 26))! // 2028 is a leap year
+        let mar2 = cal.date(from: DateComponents(year: 2028, month: 3, day: 2))!    // 26→Mar2 spans Feb 29 = 5 days
+        XCTAssertEqual(snapshot(anchor: anchor, cycleLength: 30).recomputed(for: mar2, calendar: cal).cycleDay, 6)
+    }
+
+    func testRecomputeAcrossYearBoundary() {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC")!
+        let anchor = cal.date(from: DateComponents(year: 2026, month: 12, day: 28))!
+        let jan3 = cal.date(from: DateComponents(year: 2027, month: 1, day: 3))!     // +6 days across New Year
+        XCTAssertEqual(snapshot(anchor: anchor).recomputed(for: jan3, calendar: cal).cycleDay, 7)
+    }
+
+    func testRecomputeDaysUntilPeriodNonNegativeAcrossTimeZones() {
+        for tzID in ["Asia/Tokyo", "Pacific/Kiritimati", "America/Los_Angeles"] {
+            var cal = Calendar(identifier: .gregorian)
+            cal.timeZone = TimeZone(identifier: tzID)!
+            let anchor = cal.date(from: DateComponents(year: 2026, month: 6, day: 1))!
+            let now = cal.date(from: DateComponents(year: 2026, month: 6, day: 20))!
+            let r = snapshot(anchor: anchor).recomputed(for: now, calendar: cal)
+            XCTAssertGreaterThanOrEqual(r.daysUntilPeriod, 0, "TZ \(tzID)")
+            XCTAssertLessThanOrEqual(r.daysUntilPeriod, 28, "TZ \(tzID)")
+        }
+    }
+
+    // MARK: - Review fixes: anchor recovery + fertility parity
+
+    /// HIGH fix: undoing today's period log must recover the prior baseline, not nil it.
+    /// mostRecentPeriodStart is the fallback that recovers the anchor from flow history.
+    func testMostRecentPeriodStartFindsStreakStart() {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let priorStart = cal.date(byAdding: .day, value: -28, to: today)!
+        let entries: [CycleEntry] = [
+            CycleEntry(date: priorStart, flow: .medium),
+            CycleEntry(date: cal.date(byAdding: .day, value: 1, to: priorStart)!, flow: .light)
+        ]
+        XCTAssertEqual(PredictionEngine.mostRecentPeriodStart(from: entries, today: today), priorStart)
+    }
+
+    func testMostRecentPeriodStartNilWhenNoFlow() {
+        let entries = [CycleEntry(date: .now, mood: .calm)]   // no flow
+        XCTAssertNil(PredictionEngine.mostRecentPeriodStart(from: entries))
+    }
+
+    func testMostRecentPeriodStartExcludesFutureFlow() {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        let future = cal.date(byAdding: .day, value: 5, to: today)!
+        let entries = [CycleEntry(date: future, flow: .medium)]
+        XCTAssertNil(PredictionEngine.mostRecentPeriodStart(from: entries, today: today),
+                     "Future-dated flow must not become the recovered anchor")
+    }
+
+    /// Review fix: watch/widget fertility status aligns with the app's date-based
+    /// fertile window (ovulation cycle day = cycleLength − 13).
+    func testFertilityStatusMatchesDateBasedFertileWindow() {
+        let cal = Calendar.current
+        let cycleLength = 28
+        let lastStart = cal.startOfDay(for: cal.date(byAdding: .day, value: -2, to: .now)!)
+        let today = cal.startOfDay(for: .now)
+        let nextStart = PredictionEngine.nextPeriodStart(lastPeriodStart: lastStart, today: today, cycleLength: cycleLength)
+        let fertile = PredictionEngine.fertileWindow(nextPeriodStart: nextStart)
+        let ovulationDate = PredictionEngine.ovulationEstimate(nextPeriodStart: nextStart)
+        func cycleDay(_ d: Date) -> Int {
+            let days = cal.dateComponents([.day], from: lastStart, to: cal.startOfDay(for: d)).day ?? 0
+            return ((days % cycleLength + cycleLength) % cycleLength) + 1
+        }
+        XCTAssertEqual(WidgetCycleMath.fertilityStatus(cycleDay: cycleDay(ovulationDate), cycleLength: cycleLength), "ovulation")
+        XCTAssertEqual(WidgetCycleMath.fertilityStatus(cycleDay: cycleDay(fertile.lowerBound), cycleLength: cycleLength), "fertile")
+    }
+
+    // MARK: - Phase 4 (int-1): adaptive prediction engine
+
+    func testAverageCycleLengthClampedToRealisticBounds() {
+        let longCycles = [Cycle(start: .now, length: 90, periodLength: 5), Cycle(start: .now, length: 90, periodLength: 5)]
+        XCTAssertEqual(PredictionEngine.averageCycleLength(of: longCycles, fallback: 28), 45, "clamped to max 45")
+        let shortCycles = [Cycle(start: .now, length: 5, periodLength: 2), Cycle(start: .now, length: 5, periodLength: 2)]
+        XCTAssertEqual(PredictionEngine.averageCycleLength(of: shortCycles, fallback: 28), 18, "clamped to min 18")
+    }
+
+    func testCycleLengthVariationRoundsNotTruncates() {
+        // spread 15 (21…36) → 7.5 → rounds to 8 (was truncated to 7).
+        let cycles = [Cycle(start: .now, length: 21, periodLength: 5), Cycle(start: .now, length: 36, periodLength: 5)]
+        XCTAssertEqual(PredictionEngine.cycleLengthVariation(of: cycles), 8)
+    }
+
+    func testLearnedLutealLengthFromLHSignals() {
+        let cal = Calendar.current
+        let base = cal.startOfDay(for: cal.date(byAdding: .day, value: -120, to: .now)!)
+        var cycles: [Cycle] = []
+        var entries: [CycleEntry] = []
+        for i in 0..<3 {
+            let start = cal.date(byAdding: .day, value: i * 28, to: base)!
+            cycles.append(Cycle(start: start, length: 28, periodLength: 5))
+            let lhDay = cal.date(byAdding: .day, value: 15, to: start)!   // luteal = 28 − 15 = 13
+            let e = CycleEntry(date: lhDay)
+            e.ovulationTestResult = .positive
+            entries.append(e)
+        }
+        XCTAssertEqual(PredictionEngine.learnedLutealLength(entries: entries, cycles: cycles), 13)
+    }
+
+    func testLearnedLutealLengthNilWithoutEnoughSignals() {
+        let cycles = [Cycle(start: .now, length: 28, periodLength: 5)]
+        XCTAssertNil(PredictionEngine.learnedLutealLength(entries: [], cycles: cycles))
+    }
+
+    func testLearnedLutealShiftsOvulationEstimate() {
+        let cal = Calendar.current
+        let nextStart = cal.startOfDay(for: cal.date(byAdding: .day, value: 10, to: .now)!)
+        let def = PredictionEngine.ovulationEstimate(nextPeriodStart: nextStart)                       // −14
+        let learned = PredictionEngine.ovulationEstimate(nextPeriodStart: nextStart, lutealLength: 12) // −12
+        XCTAssertEqual(cal.dateComponents([.day], from: def, to: learned).day, 2)
+    }
 }

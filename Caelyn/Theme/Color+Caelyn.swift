@@ -55,6 +55,15 @@ enum CaelynColor {
             : UIColor(hex: 0x6F3D74)
     })
 
+    /// Foreground for content placed on a `primaryPlum` fill. White in light mode;
+    /// in dark mode the plum fill is light (0xBB82C3) so white drops to ~3:1 — use a
+    /// dark plum ink instead to clear WCAG-AA (plat-6).
+    static let onPrimary = Color(UIColor { t in
+        t.userInterfaceStyle == .dark
+            ? UIColor(hex: 0x1A0E1E)
+            : UIColor(hex: 0xFFFFFF)
+    })
+
     static let softRose = Color(UIColor { t in
         t.userInterfaceStyle == .dark
             ? UIColor(hex: 0xC87B8E)

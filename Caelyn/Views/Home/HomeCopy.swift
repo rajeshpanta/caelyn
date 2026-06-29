@@ -50,9 +50,15 @@ enum HomeCopy {
         daysUntilFertileWindowStart: Int,
         fertileWindow: ClosedRange<Date>?,
         currentPhase: CyclePhase,
-        variation: Int = 0
+        variation: Int = 0,
+        isLate: Bool = false
     ) -> [(icon: String, label: String, accent: String)] {
         var events: [(icon: String, label: String, accent: String)] = []
+        // No real prediction yet (first run / "not sure"), OR the period is overdue:
+        // in both cases a forward "Period expected in N days" would contradict the
+        // screen — for a late user it fights the late banner (review). Show nothing;
+        // HomeComingUp renders its "Nothing on the horizon" empty state (stz-010).
+        guard currentPhase != .unknown, !isLate else { return events }
 
         if currentPhase != .pms && daysUntilPMS > 0 && daysUntilPMS <= 14 {
             events.append((

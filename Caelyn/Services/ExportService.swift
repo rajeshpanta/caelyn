@@ -43,7 +43,11 @@ enum ExportService {
 
     static func filterEntries(_ entries: [CycleEntry], range: ExportRange, today: Date = .now) -> [CycleEntry] {
         guard let lookback = range.lookbackDays else { return entries.sorted { $0.date < $1.date } }
-        let cutoff = Calendar.current.date(byAdding: .day, value: -lookback, to: today) ?? today
+        // Normalize to start-of-day before subtracting so the boundary day (whose
+        // entry.date is midnight) is always included regardless of the current
+        // time of day (plat-13).
+        let base = Calendar.current.startOfDay(for: today)
+        let cutoff = Calendar.current.date(byAdding: .day, value: -lookback, to: base) ?? base
         return entries
             .filter { $0.date >= cutoff }
             .sorted { $0.date < $1.date }
@@ -53,7 +57,11 @@ enum ExportService {
 
     /// Generate a CSV string. Uses RFC 4180-style quoting for fields containing commas, quotes, or newlines.
     static func generateCSV(entries: [CycleEntry], includeNotes: Bool) -> String {
+        // Pin to the Gregorian calendar + POSIX locale so machine-readable dates
+        // are stable across devices set to non-Gregorian calendars (plat-13).
         let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
 
         var headers = [
@@ -79,7 +87,7 @@ enum ExportService {
             fields.append(entry.sexualActivity.map { $0 ? "yes" : "no" } ?? "")
             fields.append(entry.ovulationTestResult?.rawValue ?? "")
             fields.append(entry.pregnancyTest.map { $0 ? "positive" : "negative" } ?? "")
-            fields.append(entry.loggedCustomSymptoms.joined(separator: ";"))
+            fields.append(escape(entry.loggedCustomSymptoms.joined(separator: ";")))
             if includeNotes {
                 fields.append(escape(entry.note ?? ""))
             }
@@ -170,8 +178,7 @@ enum ExportService {
         ]
         "Caelyn · Cycle Report".draw(at: CGPoint(x: page.margin, y: 20), withAttributes: titleAttrs)
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy"
+        let formatter = pdfDateFormatter("MMMM d, yyyy")
         let subLine = "Range: \(range.displayName)  ·  Generated \(formatter.string(from: .now))"
         let subAttrs: [NSAttributedString.Key: Any] = [.font: smallFont, .foregroundColor: UIColor.white.withAlphaComponent(0.8)]
         subLine.draw(at: CGPoint(x: page.margin, y: 50), withAttributes: subAttrs)
@@ -250,8 +257,7 @@ enum ExportService {
         let maxWidth: CGFloat = page.contentWidth
         let maxLen = max(cycles.map(\.length).max() ?? 28, 1)
         let scale = maxWidth / CGFloat(maxLen)
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
+        let formatter = pdfDateFormatter("MMM d")
 
         for cycle in cycles.suffix(8) {
             if page.y > page.contentBottom - 20 { breakPage(page: &page, ctx: ctx) }
@@ -333,8 +339,7 @@ enum ExportService {
         if page.y > page.contentBottom - 60 { breakPage(page: &page, ctx: ctx) }
         drawSectionHeader("Detailed Entries", page: &page, ctx: ctx.cgContext)
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d, yyyy"
+        let formatter = pdfDateFormatter("MMM d, yyyy")
         let columns: [(title: String, width: CGFloat)] = [
             ("Date", 90), ("Flow", 52), ("Pain", 38), ("Symptoms", 180), ("Mood", 82), ("Energy", 70)
         ]
@@ -345,8 +350,7 @@ enum ExportService {
 
         for (i, entry) in entries.enumerated() {
             if page.y > page.contentBottom - 20 {
-                ctx.beginPage()
-                page.y = page.margin
+                breakPage(page: &page, ctx: ctx)   // draws the footer before paging (plat-13)
                 drawTableRow(cells: columns.map(\.title), widths: columns.map(\.width),
                              page: &page, font: sectionFont, color: plumColor)
                 drawDivider(page: &page, ctx: ctx.cgContext, thin: true)
@@ -383,16 +387,40 @@ enum ExportService {
         if page.y > page.contentBottom - 60 { breakPage(page: &page, ctx: ctx) }
         drawSectionHeader("Notes", page: &page, ctx: ctx.cgContext)
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
+        let formatter = pdfDateFormatter("MMM d")
+        let noteAttrs: [NSAttributedString.Key: Any] = [.font: bodyFont, .foregroundColor: bodyColor]
+        let headerH: CGFloat = 16
         for (date, note) in withNotes {
-            if page.y > page.contentBottom - 40 { ctx.beginPage(); page.y = page.margin }
-            let hdr = formatter.string(from: date)
-            hdr.draw(at: CGPoint(x: page.margin, y: page.y), withAttributes: [.font: sectionFont, .foregroundColor: plumColor])
-            page.advance(16)
-            let textRect = CGRect(x: page.margin, y: page.y, width: page.contentWidth, height: page.contentBottom - page.y)
-            NSAttributedString(string: note, attributes: [.font: bodyFont, .foregroundColor: bodyColor]).draw(in: textRect)
-            page.advance(36)
+            let attributed = NSAttributedString(string: note, attributes: noteAttrs)
+            let fullHeight = ceil(attributed.boundingRect(
+                with: CGSize(width: page.contentWidth, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil).height)
+
+            // Decide the page break BEFORE drawing the header, so the date header is
+            // never orphaned on the previous page above the next note (review).
+            let fullPageBody = page.contentBottom - page.margin - headerH
+            let needed = headerH + min(fullHeight, fullPageBody)
+            if page.y + needed > page.contentBottom { breakPage(page: &page, ctx: ctx) }
+
+            formatter.string(from: date).draw(at: CGPoint(x: page.margin, y: page.y),
+                                              withAttributes: [.font: sectionFont, .foregroundColor: plumColor])
+            page.advance(headerH)
+
+            let available = page.contentBottom - page.y
+            if fullHeight <= available {
+                // Advance by the measured height so notes never overlap (plat-13).
+                attributed.draw(in: CGRect(x: page.margin, y: page.y, width: page.contentWidth, height: fullHeight))
+                page.advance(fullHeight + 14)
+            } else {
+                // Note longer than a whole page (rare): draw what fits and mark it
+                // continued rather than silently truncating mid-overlap.
+                attributed.draw(in: CGRect(x: page.margin, y: page.y, width: page.contentWidth, height: available))
+                page.advance(available)
+                "… (note continues — view the full note in Caelyn)".draw(
+                    at: CGPoint(x: page.margin, y: page.y),
+                    withAttributes: [.font: captionFont, .foregroundColor: mutedColor])
+                page.advance(16)
+            }
         }
     }
 
@@ -428,6 +456,16 @@ enum ExportService {
         page.advance(thin ? 4 : 10)
     }
 
+    /// A DateFormatter pinned to the Gregorian calendar so the clinical PDF shows
+    /// the correct era/year even when the device uses a non-Gregorian calendar
+    /// (plat-13). Locale is left default so month names still localize.
+    private static func pdfDateFormatter(_ format: String) -> DateFormatter {
+        let f = DateFormatter()
+        f.calendar = Calendar(identifier: .gregorian)
+        f.dateFormat = format
+        return f
+    }
+
     private static func breakPage(page: inout PDFPageContext, ctx: UIGraphicsPDFRendererContext) {
         drawFooter(page: &page, ctx: ctx.cgContext)
         ctx.beginPage()
@@ -449,6 +487,8 @@ enum ExportService {
     /// Write export data to a temp file. Returns the URL — caller hands it to `ShareLink`.
     static func writeToTempFile(data: Data, format: ExportFormat, range: ExportRange) throws -> URL {
         let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
         let basename = "Caelyn-\(rangeFilenameFragment(range))-\(formatter.string(from: .now))"
         let url = FileManager.default.temporaryDirectory

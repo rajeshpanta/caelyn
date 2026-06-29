@@ -41,7 +41,7 @@ struct DailyLogForm: View {
         .onAppear {
             noteDraft = entry?.note ?? ""
             medicationDraft = entry?.medication ?? ""
-            basalTempDraft = entry?.basalTemperature.map { String(format: "%.1f", $0) } ?? ""
+            basalTempDraft = entry?.basalTemperature.map { String(format: "%.2f", $0) } ?? ""
         }
         .onDisappear {
             commitNote()
@@ -77,7 +77,11 @@ struct DailyLogForm: View {
         let isSelected = entry?.flow == flow
         return Button {
             Haptics.selection()
-            withEntry { $0.flow = ($0.flow == flow) ? nil : flow }
+            // Don't create an entry just to set flow to nil (e.g. tapping "None"
+            // on a day with no log) — that would be a phantom entry (stz-011).
+            let newValue: FlowLevel? = (entry?.flow == flow) ? nil : flow
+            guard newValue != nil || entry != nil else { return }
+            withEntry { $0.flow = newValue }
         } label: {
             VStack(spacing: 6) {
                 ZStack {
@@ -467,7 +471,9 @@ struct DailyLogForm: View {
         let isSelected = entry?.energyLevel == level
         return Button {
             Haptics.selection()
-            withEntry { $0.energyLevel = $0.energyLevel == level ? nil : level }
+            let newValue: EnergyLevel? = (entry?.energyLevel == level) ? nil : level
+            guard newValue != nil || entry != nil else { return }   // no phantom entry (stz-011)
+            withEntry { $0.energyLevel = newValue }
         } label: {
             VStack(spacing: 5) {
                 Image(systemName: level.icon)
@@ -594,7 +600,9 @@ struct DailyLogForm: View {
         }()
         return Button {
             Haptics.selection()
-            withEntry { $0.ovulationTestResult = $0.ovulationTestResult == result ? nil : result }
+            let newValue: OvulationTestResult? = (entry?.ovulationTestResult == result) ? nil : result
+            guard newValue != nil || entry != nil else { return }   // no phantom entry (stz-011)
+            withEntry { $0.ovulationTestResult = newValue }
         } label: {
             HStack(spacing: 5) {
                 Image(systemName: result.icon)
@@ -837,22 +845,34 @@ struct DailyLogForm: View {
     }
 
     private func commitNote() {
-        withEntry { $0.note = noteDraft.isEmpty ? nil : noteDraft }
+        let value = noteDraft.isEmpty ? nil : noteDraft
+        guard value != nil || entry != nil else { return }   // don't create an empty entry (stz-011)
+        guard entry?.note != value else { return }           // skip no-op rewrite
+        withEntry { $0.note = value }
     }
 
     private func commitMedication() {
-        withEntry { $0.medication = medicationDraft.isEmpty ? nil : medicationDraft }
+        let value = medicationDraft.isEmpty ? nil : medicationDraft
+        guard value != nil || entry != nil else { return }   // don't create an empty entry (stz-011)
+        guard entry?.medication != value else { return }     // skip no-op rewrite
+        withEntry { $0.medication = value }
     }
 
     private func commitBasalTemp() {
         let trimmed = basalTempDraft.trimmingCharacters(in: .whitespaces)
         if trimmed.isEmpty {
+            // Nothing to clear and no entry → don't create a phantom one (stz-011).
+            guard entry?.basalTemperature != nil else { return }
             withEntry { $0.basalTemperature = nil }
         } else if let value = Double(trimmed), value >= 35.0, value <= 42.0 {
+            // Skip the write when unchanged so merely revisiting a day never
+            // rewrites (and never re-rounds) the stored temperature (stz-012).
+            guard entry?.basalTemperature != value else { return }
             withEntry { $0.basalTemperature = value }
         } else {
-            // Out of realistic range — reset to last saved value
-            basalTempDraft = entry?.basalTemperature.map { String(format: "%.1f", $0) } ?? ""
+            // Out of realistic range — reset the field to the last saved value
+            // at full precision so a 2-decimal reading isn't truncated (stz-012).
+            basalTempDraft = entry?.basalTemperature.map { String(format: "%.2f", $0) } ?? ""
         }
     }
 }

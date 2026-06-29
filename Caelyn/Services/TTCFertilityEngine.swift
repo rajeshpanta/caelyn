@@ -13,17 +13,16 @@ enum TTCFertilityEngine {
 
     static func result(
         todayEntry: CycleEntry?,
-        cycleDay: Int,
         nextPeriodStart: Date?,
-        cycleLength: Int
+        lutealLength: Int = 14
     ) -> FertilityResult {
         var score = 0
         var signals: [String] = []
 
         // 1. Cycle-day position relative to fertile window
         if let next = nextPeriodStart {
-            let fertile = PredictionEngine.fertileWindow(nextPeriodStart: next)
-            let ovulationDay = PredictionEngine.ovulationEstimate(nextPeriodStart: next)
+            let fertile = PredictionEngine.fertileWindow(nextPeriodStart: next, lutealLength: lutealLength)
+            let ovulationDay = PredictionEngine.ovulationEstimate(nextPeriodStart: next, lutealLength: lutealLength)
             let today = Calendar.current.startOfDay(for: Date.now)
             if Calendar.current.isDate(today, inSameDayAs: ovulationDay) {
                 score += 45

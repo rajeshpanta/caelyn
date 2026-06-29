@@ -75,6 +75,7 @@ struct SmallWidgetView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
     }
 
     private var countdownLine: some View {
@@ -289,19 +290,36 @@ struct AccessoryCircularView: View {
     var body: some View {
         ZStack {
             AccessoryWidgetBackground()
-            if snapshot.isPro {
-                VStack(spacing: 0) {
-                    Text("\(snapshot.cycleDay)")
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                    Text("DAY")
-                        .font(.system(size: 8, weight: .semibold, design: .rounded))
-                        .opacity(0.65)
-                }
-            } else {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 16, weight: .medium))
-            }
+            content
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityText)
+    }
+
+    @ViewBuilder private var content: some View {
+        if snapshot.hidePreview == true {
+            // Lock-screen widgets are visible without unlocking — mask cycle
+            // data when the user enabled hide-preview (plat-5).
+            Image(systemName: "drop.fill")
+                .font(.system(size: 16, weight: .medium))
+        } else if snapshot.isPro {
+            VStack(spacing: 0) {
+                Text("\(snapshot.cycleDay)")
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                Text("DAY")
+                    .font(.system(size: 8, weight: .semibold, design: .rounded))
+                    .opacity(0.65)
+            }
+        } else {
+            Image(systemName: "sparkles")
+                .font(.system(size: 16, weight: .medium))
+        }
+    }
+
+    private var accessibilityText: String {
+        if snapshot.hidePreview == true { return "Caelyn" }
+        if snapshot.isPro { return "Cycle day \(snapshot.cycleDay)" }
+        return "Caelyn Pro"
     }
 }
 
@@ -311,13 +329,25 @@ struct AccessoryRectangularView: View {
     let snapshot: WidgetSnapshot
 
     var body: some View {
-        if !snapshot.isPro {
+        if snapshot.hidePreview == true {
+            // Masked on the lock screen when hide-preview is on (plat-5).
+            HStack(spacing: 5) {
+                Image(systemName: "drop.fill")
+                    .font(.system(size: 11))
+                Text("Caelyn")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Caelyn")
+        } else if !snapshot.isPro {
             HStack(spacing: 5) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 11))
                 Text("Upgrade to Pro")
                     .font(.system(size: 12, weight: .medium, design: .rounded))
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Caelyn Pro — upgrade")
         } else {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 4) {
@@ -329,6 +359,7 @@ struct AccessoryRectangularView: View {
                 }
                 periodLine
             }
+            .accessibilityElement(children: .combine)
         }
     }
 
@@ -345,5 +376,50 @@ struct AccessoryRectangularView: View {
         .font(.system(size: 11, weight: .regular, design: .rounded))
         .opacity(0.65)
         .lineLimit(1)
+    }
+}
+
+// MARK: - Empty state (no real cycle data yet)
+
+/// Shown when there is no snapshot / no prediction yet, so the widget never
+/// displays fabricated sample numbers on the user's home or lock screen (plat-3).
+struct WidgetEmptyView: View {
+    let family: WidgetFamily
+
+    var body: some View {
+        switch family {
+        case .accessoryCircular:
+            ZStack {
+                AccessoryWidgetBackground()
+                Image(systemName: "drop.fill").font(.system(size: 15, weight: .medium))
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Open Caelyn to set up")
+        case .accessoryRectangular:
+            HStack(spacing: 5) {
+                Image(systemName: "drop.fill").font(.system(size: 11))
+                Text("Open Caelyn to set up")
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .lineLimit(1)
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Open Caelyn to set up")
+        default:
+            VStack(spacing: 8) {
+                Image(systemName: "drop.fill")
+                    .font(.system(size: 26, weight: .light))
+                    .foregroundStyle(Color.widgetPlum)
+                Text("Set up Caelyn")
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.widgetDeepText)
+                Text("Open the app and log your period to see your cycle here.")
+                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                    .foregroundStyle(Color.widgetDeepText.opacity(0.55))
+                    .multilineTextAlignment(.center)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .accessibilityElement(children: .combine)
+        }
     }
 }

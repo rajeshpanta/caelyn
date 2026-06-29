@@ -11,6 +11,13 @@ struct HomeView: View {
     @State private var periodStartDraft: Date = .now
     @State private var purchase = PurchaseService.shared
 
+    @AppStorage("caelyn.softPaywallShown") private var softPaywallShown = false
+    @State private var showSoftPaywall = false
+
+    /// The period anchor as it was just before "Log Period today" moved it to today,
+    /// so an immediate undo can restore it rather than wiping the baseline (review HIGH).
+    @State private var anchorBeforeTodayLog: Date?
+
     private var profile: UserProfile? { profiles.first }
 
     private var today: Date { Calendar.current.startOfDay(for: .now) }
@@ -29,6 +36,12 @@ struct HomeView: View {
 
     private var periodLength: Int {
         PredictionEngine.averagePeriodLength(of: cycles, fallback: profile?.averagePeriodLength ?? 5)
+    }
+
+    /// Per-user luteal length learned from confirmed ovulation signals; 14-day
+    /// default until enough data (int-1).
+    private var lutealLength: Int {
+        PredictionEngine.learnedLutealLength(entries: entries, cycles: cycles) ?? 14
     }
 
     private var lastPeriodStart: Date? {
@@ -55,7 +68,7 @@ struct HomeView: View {
 
     private var phase: CyclePhase {
         guard lastPeriodStart != nil else { return .unknown }
-        return PredictionEngine.phase(forCycleDay: cycleDay, periodLength: periodLength, cycleLength: cycleLength)
+        return PredictionEngine.phase(forCycleDay: cycleDay, periodLength: periodLength, cycleLength: cycleLength, lutealLength: lutealLength)
     }
 
     private var daysUntilPeriod: Int {
@@ -79,13 +92,13 @@ struct HomeView: View {
 
     private var daysUntilOvulation: Int {
         guard let nextStart else { return 0 }
-        let ovulation = PredictionEngine.ovulationEstimate(nextPeriodStart: nextStart)
+        let ovulation = PredictionEngine.ovulationEstimate(nextPeriodStart: nextStart, lutealLength: lutealLength)
         return PredictionEngine.daysUntil(ovulation, from: today)
     }
 
     private var fertileWindow: ClosedRange<Date>? {
         guard let nextStart else { return nil }
-        return PredictionEngine.fertileWindow(nextPeriodStart: nextStart)
+        return PredictionEngine.fertileWindow(nextPeriodStart: nextStart, lutealLength: lutealLength)
     }
 
     private var daysUntilFertileWindowStart: Int {
@@ -105,9 +118,8 @@ struct HomeView: View {
     private var ttcResult: TTCFertilityEngine.FertilityResult {
         TTCFertilityEngine.result(
             todayEntry: todayEntry,
-            cycleDay: cycleDay,
             nextPeriodStart: nextStart,
-            cycleLength: cycleLength
+            lutealLength: lutealLength
         )
     }
 
@@ -193,7 +205,8 @@ struct HomeView: View {
                         daysUntilFertileWindowStart: daysUntilFertileWindowStart,
                         fertileWindow: fertileWindow,
                         currentPhase: phase,
-                        variation: PredictionEngine.cycleLengthVariation(of: cycles)
+                        variation: PredictionEngine.cycleLengthVariation(of: cycles),
+                        isLate: isPeriodLate
                     )
                 )
 
@@ -209,6 +222,19 @@ struct HomeView: View {
             .frame(maxWidth: .infinity)
         }
         .background(backgroundLayer.ignoresSafeArea())
+        .onAppear { maybeShowSoftPaywall() }
+        .sheet(isPresented: $showSoftPaywall) { PaywallView() }
+    }
+
+    /// Show the Pro paywall ONCE, the first time the user actually has a real
+    /// prediction to look at — a dismissible soft prompt at the value moment, never
+    /// on a blank first launch and never for existing Pro users (mon-4).
+    private func maybeShowSoftPaywall() {
+        guard !softPaywallShown, !purchase.isPro, phase != .unknown else { return }
+        softPaywallShown = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            if !purchase.isPro { showSoftPaywall = true }
+        }
     }
 
     private var backgroundLayer: some View {
@@ -243,15 +269,24 @@ struct HomeView: View {
     }
 
     private var isPeriodLate: Bool {
-        guard lastPeriodStart != nil, let next = nextStart else { return false }
-        // Late if today is past predicted start AND nothing in active window.
-        return today > next && activePeriodWindow == nil
+        guard let lastPeriodStart else { return false }
+        // Late if today is past the *un-rolled* expected start AND nothing has
+        // been logged in the active period window. `nextStart` is rolled forward
+        // to always be >= today, so it could never detect lateness (stz-009).
+        let expected = PredictionEngine.expectedPeriodStart(
+            lastPeriodStart: lastPeriodStart,
+            cycleLength: cycleLength
+        )
+        return today > expected && activePeriodWindow == nil
     }
 
     private var daysLate: Int {
-        guard lastPeriodStart != nil, let next = nextStart else { return 0 }
-        let diff = Calendar.current.dateComponents([.day], from: next, to: today).day ?? 0
-        return max(0, diff)
+        guard let lastPeriodStart else { return 0 }
+        return PredictionEngine.daysLate(
+            lastPeriodStart: lastPeriodStart,
+            today: today,
+            cycleLength: cycleLength
+        )
     }
 
     @ViewBuilder
@@ -303,8 +338,9 @@ struct HomeView: View {
     }
 
     private var latePromptTitle: String {
+        // daysLate is always >= 1 here (periodStatePrompt gates on it), so there
+        // is no `case 0` — it would be dead (stz-009).
         switch daysLate {
-        case 0:       return "Your period may start any day now"
         case 1:       return "Your period might be a day late"
         case 2...3:   return "Your period might be \(daysLate) days late"
         case 4...14:  return "Your period is \(daysLate) days late"
@@ -482,7 +518,8 @@ struct HomeView: View {
             entryToSync = entry
         }
         if cal.isDateInToday(profile?.lastPeriodStart ?? .distantPast) {
-            profile?.lastPeriodStart = nil
+            // Recompute from remaining flow rather than blindly nil-ing (review HIGH).
+            profile?.lastPeriodStart = PredictionEngine.mostRecentPeriodStart(from: entries, today: today)
         }
         modelContext.saveOrLog()
         Haptics.selection()
@@ -502,6 +539,15 @@ struct HomeView: View {
             if existing.flow != nil {
                 existing.flow = nil
                 existing.updatedAt = .now
+                // If today was the recorded period start, RESTORE the prior anchor
+                // rather than nil-ing it — nil-ing wipes an established user's whole
+                // baseline on an accidental-tap undo (review HIGH). Prefer the value
+                // captured before this tap; else the most recent prior flow streak.
+                if Calendar.current.isDateInToday(profile?.lastPeriodStart ?? .distantPast) {
+                    profile?.lastPeriodStart = anchorBeforeTodayLog
+                        ?? PredictionEngine.mostRecentPeriodStart(from: entries, today: today)
+                }
+                anchorBeforeTodayLog = nil
                 modelContext.saveOrLog()
                 let snapshot = entries
                 let captured = existing
@@ -535,6 +581,7 @@ struct HomeView: View {
                 return daysSince >= 0 && daysSince <= periodLen
             }()
             if !recentlyStarted {
+                anchorBeforeTodayLog = profile?.lastPeriodStart   // remember for an undo
                 profile?.lastPeriodStart = today
             }
         }

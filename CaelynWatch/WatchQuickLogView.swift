@@ -127,7 +127,9 @@ struct WatchQuickLogView: View {
     // MARK: - Save
 
     private var saveButton: some View {
-        let hasContent = selectedFlow != nil || pain > 0 || selectedMood != nil
+        // "None" flow uses an empty-string key; treat it as no content so an
+        // empty log can't be submitted (stz-018).
+        let hasContent = (selectedFlow?.isEmpty == false) || pain > 0 || selectedMood != nil
         return Button {
             model.sendQuickLog(
                 flow: selectedFlow.flatMap { $0.isEmpty ? nil : $0 },

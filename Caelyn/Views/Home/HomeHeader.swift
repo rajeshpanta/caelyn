@@ -12,16 +12,21 @@ struct HomeHeader: View {
                     .font(.system(.title, design: .rounded).weight(.bold))
                     .foregroundStyle(CaelynColor.deepPlumText)
 
-                HStack(spacing: 0) {
-                    Text("Day \(cycleDay)")
-                        .font(CaelynFont.subheadline.weight(.semibold))
-                        .foregroundStyle(phase.accentColor)
-                        .contentTransition(.numericText())
-                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: cycleDay)
+                // Hide the "Day N · phase" subline until there's a real cycle to
+                // describe — otherwise a brand-new user sees a fake "Day 1 · cycle"
+                // under "Welcome to Caelyn" (stz-010).
+                if phase != .unknown {
+                    HStack(spacing: 0) {
+                        Text("Day \(cycleDay)")
+                            .font(CaelynFont.subheadline.weight(.semibold))
+                            .foregroundStyle(phase.accentColor)
+                            .contentTransition(.numericText())
+                            .animation(.spring(response: 0.4, dampingFraction: 0.8), value: cycleDay)
 
-                    Text(" · \(phase.displayName.lowercased())")
-                        .font(CaelynFont.subheadline)
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                        Text(" · \(phase.displayName.lowercased())")
+                            .font(CaelynFont.subheadline)
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                    }
                 }
             }
             Spacer(minLength: 0)

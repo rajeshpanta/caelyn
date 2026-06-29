@@ -28,10 +28,8 @@ struct AppLockGate<Content: View>: View {
                     isAuthenticating: attemptingAuth,
                     onUnlock: { Task { await tryUnlock() } }
                 )
-                .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: showLockScreen)
         .task(id: lockEnabled) {
             if lockEnabled && isUnlocked == false {
                 await tryUnlock()
@@ -39,18 +37,25 @@ struct AppLockGate<Content: View>: View {
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background {
+                // Relock only when the app actually leaves the foreground.
                 isUnlocked = false
                 errorMessage = nil
-            } else if newPhase == .active && lockEnabled && !isUnlocked {
-                // Auto-prompt Face ID / Touch ID when returning from background
+            } else if newPhase == .active && lockEnabled && !isUnlocked && !attemptingAuth {
+                // Auto-prompt Face ID / Touch ID when returning from background.
+                // The !attemptingAuth guard prevents a relock/auth loop, because
+                // the biometric prompt itself drives the scene to .inactive.
                 Task { await tryUnlock() }
             }
         }
     }
 
     private var showLockScreen: Bool {
-        guard hasOnboarded else { return false }
-        return lockEnabled && !isUnlocked
+        guard hasOnboarded, lockEnabled else { return false }
+        // Cover whenever locked OR the app isn't active, so the app-switcher
+        // snapshot (captured at .inactive) never exposes content. Transient
+        // interruptions (Control Center, banners) are covered without forcing
+        // re-auth — we only clear isUnlocked on .background above.
+        return !isUnlocked || scenePhase != .active
     }
 
     @MainActor

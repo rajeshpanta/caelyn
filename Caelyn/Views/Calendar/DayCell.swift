@@ -5,9 +5,9 @@ struct DayCell: View {
     let onTap: () -> Void
 
     private var dayNumber: String {
-        let f = DateFormatter()
-        f.dateFormat = "d"
-        return f.string(from: state.date)
+        // Avoid allocating a DateFormatter on every cell render (×42 per month) —
+        // the day-of-month is just a calendar component (plat-9).
+        String(Calendar.current.component(.day, from: state.date))
     }
 
     var body: some View {

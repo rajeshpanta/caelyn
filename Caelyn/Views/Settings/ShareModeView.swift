@@ -22,7 +22,7 @@ struct ShareModeView: View {
                             icon: "person.2.fill",
                             highlights: [
                                 "Read-only view for your partner",
-                                "End-to-end encrypted via iCloud",
+                                "Shared privately through your iCloud",
                                 "Revoke access anytime",
                             ],
                             onUnlock: { showingPaywall = true }
@@ -142,7 +142,7 @@ struct ShareModeView: View {
             Label("They cannot edit or delete any of your data.", systemImage: "lock.fill")
                 .font(CaelynFont.caption)
                 .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
-            Label("All data is end-to-end encrypted via Apple's CloudKit private database.", systemImage: "shield.checkered")
+            Label("Sharing goes through Apple's CloudKit private database, readable only by the Apple IDs you invite.", systemImage: "shield.checkered")
                 .font(CaelynFont.caption)
                 .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
         }
@@ -177,7 +177,10 @@ struct ShareModeView: View {
             try await db.save(zone)
             // Create a CKShare for the zone
             let share = CKShare(recordZoneID: zone.zoneID)
-            share.publicPermission = .readOnly
+            // Defensive: never world-readable. Participants are added explicitly
+            // via UICloudSharingController. (Partner Share is disabled in Phase 0
+            // and rebuilt for real in Phase 6 — see docs/BUILD_PLAN.md.)
+            share.publicPermission = .none
             share[CKShare.SystemFieldKey.title] = "Caelyn Cycle Data" as CKRecordValue
             try await db.save(share)
             await MainActor.run {

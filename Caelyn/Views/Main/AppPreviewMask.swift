@@ -6,17 +6,19 @@ struct AppPreviewMask: ViewModifier {
     @Environment(\.scenePhase) private var scenePhase
 
     private var hidePreview: Bool { profiles.first?.hidePreview ?? false }
-    private var shouldMask: Bool { hidePreview && scenePhase == .background }
+    // Mask whenever the app is not active. The app-switcher snapshot is captured
+    // at `.inactive`, so masking only on `.background` leaks content into the
+    // switcher. No animation — the shield must be fully opaque in the snapshot,
+    // not mid-fade (stz-008).
+    private var shouldMask: Bool { hidePreview && scenePhase != .active }
 
     func body(content: Content) -> some View {
         ZStack {
             content
             if shouldMask {
                 CaelynPrivacyShield()
-                    .transition(.opacity)
             }
         }
-        .animation(.easeOut(duration: 0.15), value: shouldMask)
     }
 }
 

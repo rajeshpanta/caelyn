@@ -162,10 +162,43 @@ enum HealthKitService {
         }
     }
 
+    /// Removes every symptom + pain category sample *this app* wrote, across all
+    /// dates. Used before a full symptom backfill so re-running it can't create
+    /// duplicates. Only deletes samples whose source bundle ID matches ours —
+    /// never samples the user added manually in Health.
+    private static func deleteAllOwnSymptomSamples() async {
+        guard isAvailable else { return }
+        let bundleID = Bundle.main.bundleIdentifier ?? ""
+        let types = Array(Set(Array(symptomCategoryMap.values) + Array(painCategoryMap.values)))
+        await withTaskGroup(of: Void.self) { group in
+            for type in types {
+                group.addTask {
+                    await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                        let query = HKSampleQuery(
+                            sampleType: type,
+                            predicate: nil,
+                            limit: HKObjectQueryNoLimit,
+                            sortDescriptors: nil
+                        ) { _, samples, _ in
+                            let ours = (samples as? [HKCategorySample] ?? [])
+                                .filter { $0.sourceRevision.source.bundleIdentifier == bundleID }
+                            guard !ours.isEmpty else { continuation.resume(); return }
+                            store.delete(ours) { _, _ in continuation.resume() }
+                        }
+                        store.execute(query)
+                    }
+                }
+            }
+        }
+    }
+
     /// Write all symptom + pain entries to Health, mapping pain levels to severity.
     @discardableResult
     static func backfillSymptomsToHealth(entries: [CycleEntry]) async throws -> Int {
         guard isAvailable else { throw HealthKitError.notAvailable }
+        // Remove our previously-written samples first so re-running Backfill can't
+        // duplicate symptom/pain samples in Health (mirrors the flow path) (stz-015).
+        await deleteAllOwnSymptomSamples()
         var samples: [HKCategorySample] = []
         for entry in entries {
             samples.append(contentsOf: symptomSamples(from: entry))

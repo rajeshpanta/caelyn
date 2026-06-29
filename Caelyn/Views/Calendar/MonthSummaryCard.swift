@@ -5,9 +5,7 @@ struct MonthSummaryCard: View {
     let entries: [CycleEntry]
 
     private var monthLabel: String {
-        let f = DateFormatter()
-        f.dateFormat = "MMMM"
-        return f.string(from: month)
+        month.formatted(.dateTime.month(.wide))   // cached, locale-aware (plat-9)
     }
 
     private var entriesInMonth: [CycleEntry] {
@@ -24,10 +22,9 @@ struct MonthSummaryCard: View {
 
     private var periodRangeLabel: String? {
         guard let first = periodDays.first, let last = periodDays.last else { return nil }
-        let f = DateFormatter()
-        f.dateFormat = "MMM d"
-        if first == last { return f.string(from: first) }
-        return "\(f.string(from: first))–\(f.string(from: last))"
+        let style = Date.FormatStyle.dateTime.month(.abbreviated).day()   // cached (plat-9)
+        if first == last { return first.formatted(style) }
+        return "\(first.formatted(style))–\(last.formatted(style))"
     }
 
     private var topSymptoms: [(Symptom, Int)] {

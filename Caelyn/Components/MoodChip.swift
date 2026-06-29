@@ -14,7 +14,7 @@ struct MoodChip: View {
                 .font(CaelynFont.callout.weight(.medium))
                 .padding(.horizontal, CaelynSpacing.md)
                 .padding(.vertical, CaelynSpacing.xs + 2)
-                .foregroundStyle(isSelected ? .white : CaelynColor.deepPlumText)
+                .foregroundStyle(isSelected ? CaelynColor.onPrimary : CaelynColor.deepPlumText)
                 .background(isSelected ? CaelynColor.primaryPlum : CaelynColor.blush)
                 .clipShape(Capsule())
         }

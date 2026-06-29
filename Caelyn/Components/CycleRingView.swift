@@ -60,7 +60,11 @@ struct CycleRingView: View {
     }
 
     private var currentDayIndicator: some View {
-        let fraction = Double(cycleDay) / Double(cycleLength)
+        // Cycle day is 1-indexed but the phase arcs are 0-indexed (the period arc
+        // starts at fraction 0). Use cycleDay-1 so Day 1 sits at the ring origin
+        // instead of one day ahead of the arc it belongs to (plat-6).
+        let safeLen = max(1, cycleLength)
+        let fraction = Double(max(0, cycleDay - 1)) / Double(safeLen)
         let angleRad = (fraction * 2 * .pi) - .pi / 2
         let radius = (size - thickness) / 2
         let x = size / 2 + cos(angleRad) * radius

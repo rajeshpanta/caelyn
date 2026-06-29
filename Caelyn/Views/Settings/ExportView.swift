@@ -257,27 +257,24 @@ struct ExportView: View {
         isGenerating = true
         defer { isGenerating = false }
 
+        // Generate on the MainActor. SwiftData @Model objects (CycleEntry / UserProfile)
+        // are non-Sendable; reading them from a detached task while the main context or
+        // @Query can mutate the same rows is a data race (stz-002). A one-shot export is
+        // cheap enough to run inline; Phase 1 (qa-5) moves this to a Sendable snapshot.
         do {
-            let capturedEntries = filteredEntries
-            let capturedProfile = profile
-            let capturedRange = range
-            let capturedFormat = format
-            let capturedIncludeNotes = includeNotes
-
-            let data: Data = try await Task.detached(priority: .userInitiated) {
-                switch capturedFormat {
-                case .csv:
-                    guard let csvData = ExportService.generateCSV(entries: capturedEntries, includeNotes: capturedIncludeNotes).data(using: .utf8),
-                          !csvData.isEmpty else {
-                        throw CocoaError(.fileWriteUnknown)
-                    }
-                    return csvData
-                case .pdf:
-                    return ExportService.generatePDF(entries: capturedEntries, profile: capturedProfile, range: capturedRange, includeNotes: capturedIncludeNotes)
+            let data: Data
+            switch format {
+            case .csv:
+                guard let csvData = ExportService.generateCSV(entries: filteredEntries, includeNotes: includeNotes).data(using: .utf8),
+                      !csvData.isEmpty else {
+                    throw CocoaError(.fileWriteUnknown)
                 }
-            }.value
+                data = csvData
+            case .pdf:
+                data = ExportService.generatePDF(entries: filteredEntries, profile: profile, range: range, includeNotes: includeNotes)
+            }
 
-            let url = try ExportService.writeToTempFile(data: data, format: capturedFormat, range: capturedRange)
+            let url = try ExportService.writeToTempFile(data: data, format: format, range: range)
             generatedURL = url
             generationError = nil
         } catch {

@@ -26,9 +26,7 @@ struct DataStatusCard: View {
 
     private var latestDateString: String {
         guard let latest = entries.first else { return "—" }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
-        return formatter.string(from: latest.date)
+        return latest.date.formatted(.dateTime.month(.abbreviated).day())   // cached (plat-9)
     }
 
     private func statBlock(value: String, label: String) -> some View {
