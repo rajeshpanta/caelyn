@@ -260,4 +260,10 @@ enum WidgetDataStore {
         else { return nil }
         return try? JSONDecoder().decode(WidgetSnapshot.self, from: data)
     }
+
+    /// Remove the shared snapshot — used by the secure wipe so widgets/watch can't
+    /// keep showing data after a "Delete all data".
+    static func clear() {
+        UserDefaults(suiteName: caelynAppGroupID)?.removeObject(forKey: widgetSnapshotKey)
+    }
 }

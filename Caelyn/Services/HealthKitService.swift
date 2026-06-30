@@ -171,6 +171,14 @@ enum HealthKitService {
         }
     }
 
+    /// Delete EVERY Caelyn-authored sample (flow + symptoms + pain) from Apple
+    /// Health — used by the secure wipe. Only removes samples this app wrote.
+    static func deleteAllOwnSamples() async {
+        guard isAvailable else { return }
+        await deleteAllOwnFlowSamples()
+        await deleteAllOwnSymptomSamples()
+    }
+
     private static func deleteAllOwnFlowSamples() async {
         guard isAvailable else { return }
         let bundleID = Bundle.main.bundleIdentifier ?? ""

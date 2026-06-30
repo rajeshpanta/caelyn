@@ -576,12 +576,9 @@ struct SettingsView: View {
     }
 
     private func deleteAllData() {
-        for entry in entries { modelContext.delete(entry) }
-        for profile in profiles { modelContext.delete(profile) }
-        modelContext.saveOrLog()
-        // Pending local notifications would still fire and reference data
-        // that no longer exists — cancel them as part of the wipe.
-        Task { await NotificationService.cancelAll() }
+        // Complete secure wipe: SwiftData + notifications + Caelyn's Apple Health
+        // samples + widget snapshot + preference flags (Phase 5).
+        Task { await SecureWipeService.wipeEverything(modelContext: modelContext) }
         Haptics.warning()
     }
 }

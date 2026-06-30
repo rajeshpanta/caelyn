@@ -920,4 +920,15 @@ final class CaelynTests: XCTestCase {
         XCTAssertTrue(text.contains("7 day"))
         XCTAssertFalse(text.isEmpty)
     }
+
+    // MARK: - Phase 5: secure wipe
+
+    func testSecureWipeClearsSwiftData() async throws {
+        context.insert(CycleEntry(date: .now, flow: .medium))
+        context.insert(UserProfile())
+        try context.save()
+        await SecureWipeService.wipeEverything(modelContext: context)
+        XCTAssertEqual(try context.fetch(FetchDescriptor<CycleEntry>()).count, 0)
+        XCTAssertEqual(try context.fetch(FetchDescriptor<UserProfile>()).count, 0)
+    }
 }
