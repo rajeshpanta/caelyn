@@ -70,6 +70,11 @@ enum HealthKitService {
         var set: Set<HKObjectType> = [menstrualFlowType]
         for type in symptomCategoryMap.values { set.insert(type) }
         for type in painCategoryMap.values { set.insert(type) }
+        // Apple Watch sleeping wrist temperature, for retrospective ovulation
+        // confirmation (int-3). Read-only.
+        if let wrist = HKObjectType.quantityType(forIdentifier: .appleSleepingWristTemperature) {
+            set.insert(wrist)
+        }
         return set
     }
 
@@ -101,6 +106,29 @@ enum HealthKitService {
     /// Used purely as a status hint — not a substitute for handling write errors.
     static func canWriteMenstrualFlow() -> Bool {
         store.authorizationStatus(for: menstrualFlowType) == .sharingAuthorized
+    }
+
+    // MARK: - Wrist temperature (int-3)
+
+    /// Apple Watch sleeping wrist-temperature samples (°C) in [start, end], sorted
+    /// ascending. Returns empty when HealthKit is unavailable, unauthorized, or no
+    /// samples exist (e.g. no temperature-capable Apple Watch).
+    static func fetchWristTemperatures(from start: Date, to end: Date) async -> [(date: Date, temp: Double)] {
+        guard isAvailable,
+              let type = HKObjectType.quantityType(forIdentifier: .appleSleepingWristTemperature)
+        else { return [] }
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
+        let sort = [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+        return await withCheckedContinuation { (cont: CheckedContinuation<[(date: Date, temp: Double)], Never>) in
+            let query = HKSampleQuery(sampleType: type, predicate: predicate,
+                                      limit: HKObjectQueryNoLimit, sortDescriptors: sort) { _, samples, _ in
+                let out = (samples as? [HKQuantitySample] ?? []).map {
+                    (date: $0.startDate, temp: $0.quantity.doubleValue(for: .degreeCelsius()))
+                }
+                cont.resume(returning: out)
+            }
+            store.execute(query)
+        }
     }
 
     // MARK: - Backfill: Caelyn → Health

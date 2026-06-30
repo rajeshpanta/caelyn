@@ -883,4 +883,41 @@ final class CaelynTests: XCTestCase {
         let none = PatternEngine.insights(from: [], cycles: cycles, profile: noMode)
         XCTAssertFalse(none.contains { $0.category == .condition }, "No condition insight without an enabled mode")
     }
+
+    // MARK: - Phase 4 (int-3): wrist-temp biphasic shift
+
+    func testWristTempBiphasicShiftDetected() {
+        let cal = Calendar.current
+        let base = cal.startOfDay(for: cal.date(byAdding: .day, value: -20, to: .now)!)
+        let temps = [36.30, 36.32, 36.28, 36.31, 36.29, 36.33, 36.58, 36.60, 36.62, 36.59]
+        let series = temps.enumerated().map { (i, t) in
+            (date: cal.date(byAdding: .day, value: i, to: base)!, temp: t)
+        }
+        let r = WristTempOvulationEngine.detectShift(in: series)
+        XCTAssertTrue(r.detected)
+        XCTAssertEqual(r.shiftDate, cal.date(byAdding: .day, value: 6, to: base))
+        XCTAssertEqual(r.estimatedOvulation, cal.date(byAdding: .day, value: 5, to: base))
+    }
+
+    func testWristTempNoShiftOnFlatSeries() {
+        let cal = Calendar.current
+        let base = cal.startOfDay(for: .now)
+        let series = (0..<12).map { (date: cal.date(byAdding: .day, value: $0, to: base)!, temp: 36.3) }
+        XCTAssertFalse(WristTempOvulationEngine.detectShift(in: series).detected)
+    }
+
+    // MARK: - Phase 4 (int-4): on-device summary fallback
+
+    func testCycleSummaryFallbackProducesUsableText() {
+        let facts = CycleSummaryService.Facts(
+            avgCycle: 29, avgPeriod: 5, variation: 2,
+            phaseName: "Luteal", cycleDay: 22, daysUntilPeriod: 7,
+            topInsight: "Headache tends to appear ~2 days before your period."
+        )
+        let text = CycleSummaryService.fallback(facts: facts)
+        XCTAssertTrue(text.contains("day 22"))
+        XCTAssertTrue(text.contains("luteal"))
+        XCTAssertTrue(text.contains("7 day"))
+        XCTAssertFalse(text.isEmpty)
+    }
 }

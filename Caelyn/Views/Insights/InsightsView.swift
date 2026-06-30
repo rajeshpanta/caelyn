@@ -34,6 +34,39 @@ struct InsightsView: View {
         PredictionEngine.confidence(cycleCount: cycles.count)
     }
 
+    // Current-state facts for the on-device summary (int-4) + temperature (int-3).
+    private var lastStart: Date? { profile?.lastPeriodStart }
+    private var currentCycleDay: Int {
+        guard let l = lastStart else { return 1 }
+        return PredictionEngine.currentCycleDay(lastPeriodStart: l, cycleLength: avgCycleLength)
+    }
+    private var nextStart: Date? {
+        guard let l = lastStart else { return nil }
+        return PredictionEngine.nextPeriodStart(lastPeriodStart: l, cycleLength: avgCycleLength)
+    }
+    private var currentPhase: CyclePhase {
+        guard lastStart != nil else { return .unknown }
+        return PredictionEngine.phase(forCycleDay: currentCycleDay, periodLength: avgPeriodLength, cycleLength: avgCycleLength)
+    }
+    private var daysUntilPeriod: Int {
+        guard let n = nextStart else { return 0 }
+        return PredictionEngine.daysUntil(n, from: .now)
+    }
+    private var bbtSeries: [(date: Date, temp: Double)] {
+        entries.compactMap { e in e.basalTemperature.map { (date: e.date, temp: $0) } }
+    }
+    private var summaryFacts: CycleSummaryService.Facts {
+        CycleSummaryService.Facts(
+            avgCycle: avgCycleLength,
+            avgPeriod: avgPeriodLength,
+            variation: cycleVariation,
+            phaseName: currentPhase.displayName,
+            cycleDay: currentCycleDay,
+            daysUntilPeriod: daysUntilPeriod,
+            topInsight: patternInsights.first?.title
+        )
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -98,6 +131,11 @@ struct InsightsView: View {
         CycleHistorySection(cycles: cycles, entries: entries)
 
         if purchase.isPro {
+            CycleSummaryCard(facts: summaryFacts)
+            TemperatureShiftCard(
+                windowStart: Calendar.current.date(byAdding: .day, value: -40, to: .now) ?? .now,
+                bbtSeries: bbtSeries
+            )
             CycleLengthChart(series: CycleAnalytics.cycleLengthSeries(from: cycles))
             PeriodLengthChart(series: CycleAnalytics.periodLengthSeries(from: cycles))
             SymptomFrequencyChart(counts: CycleAnalytics.symptomFrequency(in: entries))
@@ -122,6 +160,70 @@ struct InsightsView: View {
             ) {
                 showingPaywall = true
             }
+        }
+    }
+}
+
+// MARK: - Private Intelligence cards (Pro)
+
+/// On-device natural-language cycle summary (Foundation Models when available,
+/// deterministic template otherwise) — int-4.
+private struct CycleSummaryCard: View {
+    let facts: CycleSummaryService.Facts
+    @State private var text: String?
+
+    var body: some View {
+        CaelynCard {
+            VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
+                Label("Your cycle in words", systemImage: "sparkles")
+                    .font(CaelynFont.headline)
+                    .foregroundStyle(CaelynColor.primaryPlum)
+                Text(text ?? CycleSummaryService.fallback(facts: facts))
+                    .font(CaelynFont.body)
+                    .foregroundStyle(CaelynColor.deepPlumText)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("Generated privately on your device.")
+                    .font(CaelynFont.caption)
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+            }
+        }
+        .task { text = await CycleSummaryService.summary(for: facts) }
+    }
+}
+
+/// Retrospective ovulation confirmation from Apple Watch wrist temperature (or
+/// logged BBT). Renders nothing unless a clear biphasic shift is found — int-3.
+private struct TemperatureShiftCard: View {
+    let windowStart: Date
+    let bbtSeries: [(date: Date, temp: Double)]
+    @State private var result: WristTempOvulationEngine.Result?
+
+    var body: some View {
+        Group {
+            if let r = result, r.detected, let ovulation = r.estimatedOvulation {
+                CaelynCard {
+                    HStack(alignment: .top, spacing: CaelynSpacing.sm) {
+                        Image(systemName: "thermometer.sun.fill")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(CaelynColor.successSage)
+                            .frame(width: 28)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Temperature shift detected")
+                                .font(CaelynFont.callout.weight(.semibold))
+                                .foregroundStyle(CaelynColor.deepPlumText)
+                            Text("Your temperature rose around \(ovulation.formatted(.dateTime.month(.abbreviated).day())), which usually follows ovulation. Observational only — not a medical or contraceptive method.")
+                                .font(CaelynFont.subheadline)
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+            }
+        }
+        .task {
+            let wrist = await HealthKitService.fetchWristTemperatures(from: windowStart, to: .now)
+            let series = wrist.isEmpty ? bbtSeries : wrist
+            result = WristTempOvulationEngine.detectShift(in: series)
         }
     }
 }
