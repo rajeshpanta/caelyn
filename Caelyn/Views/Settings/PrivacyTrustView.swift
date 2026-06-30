@@ -22,6 +22,18 @@ struct PrivacyTrustView: View {
             color: CaelynColor.primaryPlum
         ),
         (
+            icon: "list.bullet.rectangle.portrait",
+            title: "Exactly what's stored, and where",
+            body: "Your cycle logs live in an on-device database. If you set a PIN, only a salted hash of it is kept in the device Keychain — never the PIN itself. Preferences sit in local app storage. None of it is in any cloud of ours.",
+            color: CaelynColor.primaryPlum
+        ),
+        (
+            icon: "wifi.slash",
+            title: "The only data that leaves your phone",
+            body: "Caelyn makes no network calls of its own and runs no servers. The only things that ever leave are what you choose to export, what you sync to Apple Health (which stays in your Health app), and purchase checks handled by Apple.",
+            color: CaelynColor.primaryPlum
+        ),
+        (
             icon: BiometricService.availableKind() == .none ? "lock.fill" : BiometricService.availableKind().icon,
             title: "\(BiometricService.availableKind() == .none ? "App" : BiometricService.availableKind().displayName) lock",
             body: "Optional but built in. Enable it in Settings and the app locks itself whenever it moves to the background.",

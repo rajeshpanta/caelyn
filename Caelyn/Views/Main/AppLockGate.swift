@@ -4,15 +4,23 @@ import SwiftData
 struct AppLockGate<Content: View>: View {
     @Query private var profiles: [UserProfile]
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.modelContext) private var modelContext
 
     @State private var isUnlocked = false
     @State private var attemptingAuth = false
     @State private var errorMessage: String?
+    @State private var showingPINPad = false
+    @State private var pinError: String?
 
     let content: () -> Content
 
     private var lockEnabled: Bool { profiles.first?.lockEnabled ?? false }
     private var hasOnboarded: Bool { profiles.first?.hasOnboarded ?? false }
+
+    /// When there's no biometrics but a PIN exists, go straight to the PIN pad.
+    private var showPINEntry: Bool {
+        showingPINPad || (!BiometricService.canAuthenticate && PINService.isSet)
+    }
 
     var body: some View {
         ZStack {
@@ -21,50 +29,97 @@ struct AppLockGate<Content: View>: View {
                 .allowsHitTesting(!showLockScreen)
 
             if showLockScreen {
-                LockScreen(
-                    biometricKind: BiometricService.availableKind(),
-                    canAuthenticate: BiometricService.canAuthenticate,
-                    errorMessage: errorMessage,
-                    isAuthenticating: attemptingAuth,
-                    onUnlock: { Task { await tryUnlock() } }
-                )
+                if showPINEntry {
+                    PINPadView(
+                        title: "Enter PIN",
+                        subtitle: "Unlock Caelyn",
+                        length: 4,
+                        errorMessage: pinError,
+                        onSubmit: verifyPIN,
+                        onCancel: BiometricService.canAuthenticate ? { showingPINPad = false; pinError = nil } : nil
+                    )
+                    .background(CaelynColor.backgroundCream.ignoresSafeArea())
+                } else {
+                    LockScreen(
+                        biometricKind: BiometricService.availableKind(),
+                        canAuthenticate: BiometricService.canAuthenticate,
+                        pinAvailable: PINService.isSet,
+                        errorMessage: errorMessage,
+                        isAuthenticating: attemptingAuth,
+                        onUnlock: { Task { await tryUnlock() } },
+                        onUsePIN: { showingPINPad = true; pinError = nil }
+                    )
+                }
             }
         }
+        .task { await sweepThenRecordActivity() }   // launch: auto-sweep if the window elapsed
         .task(id: lockEnabled) {
-            if lockEnabled && isUnlocked == false {
+            if lockEnabled && !isUnlocked && BiometricService.canAuthenticate {
                 await tryUnlock()
             }
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background {
-                // Relock only when the app actually leaves the foreground.
+                // Relock when the app actually leaves the foreground.
                 isUnlocked = false
                 errorMessage = nil
-            } else if newPhase == .active && lockEnabled && !isUnlocked && !attemptingAuth {
-                // Auto-prompt Face ID / Touch ID when returning from background.
-                // The !attemptingAuth guard prevents a relock/auth loop, because
-                // the biometric prompt itself drives the scene to .inactive.
-                Task { await tryUnlock() }
+                pinError = nil
+                showingPINPad = false
+            } else if newPhase == .active {
+                Task { await sweepThenRecordActivity() }
+                if lockEnabled && !isUnlocked && !attemptingAuth && BiometricService.canAuthenticate {
+                    Task { await tryUnlock() }
+                }
             }
         }
     }
 
     private var showLockScreen: Bool {
         guard hasOnboarded, lockEnabled else { return false }
+        // Fail OPEN if there's no way to unlock (no biometrics AND no PIN) — a user
+        // must never be permanently locked out of their own data.
+        guard BiometricService.canAuthenticate || PINService.isSet else { return false }
         // Cover whenever locked OR the app isn't active, so the app-switcher
-        // snapshot (captured at .inactive) never exposes content. Transient
-        // interruptions (Control Center, banners) are covered without forcing
-        // re-auth — we only clear isUnlocked on .background above.
+        // snapshot never exposes content. We only clear isUnlocked on .background.
         return !isUnlocked || scenePhase != .active
+    }
+
+    /// Run the opt-in auto-sweep using the PREVIOUS activity timestamp, then stamp
+    /// the new one. No-op unless the user enabled auto-wipe (priv-4).
+    @MainActor
+    private func sweepThenRecordActivity() async {
+        await AutoSweepService.checkAndSweep(profile: profiles.first, modelContext: modelContext)
+        AutoSweepService.recordActivity(profile: profiles.first, modelContext: modelContext)
+    }
+
+    private func verifyPIN(_ pin: String) {
+        switch PINService.verify(pin) {
+        case .correct:
+            pinError = nil
+            showingPINPad = false
+            isUnlocked = true
+        case .duress:
+            // Silently wipe everything, then unlock into a fresh, empty app so the
+            // wipe is indistinguishable from a brand-new install (priv-3).
+            showingPINPad = false
+            Task {
+                await SecureWipeService.wipeEverything(modelContext: modelContext)
+                isUnlocked = true
+            }
+        case .wrong(let remaining):
+            pinError = "Incorrect PIN — \(remaining) attempt\(remaining == 1 ? "" : "s") left."
+        case .lockedOut(let retry):
+            pinError = "Too many attempts. Try again in \(Int(retry.rounded())) seconds."
+        }
     }
 
     @MainActor
     private func tryUnlock() async {
-        guard !attemptingAuth else { return }
+        guard !attemptingAuth, BiometricService.canAuthenticate else { return }
         attemptingAuth = true
         errorMessage = nil
 
-        // Spawn a timeout that resets auth state if biometrics hangs for > 30 s
+        // Reset auth state if biometrics hangs for > 30 s.
         let timeoutTask = Task { @MainActor in
             try? await Task.sleep(for: .seconds(30))
             if attemptingAuth { attemptingAuth = false }
@@ -86,9 +141,11 @@ struct AppLockGate<Content: View>: View {
 private struct LockScreen: View {
     let biometricKind: BiometricKind
     let canAuthenticate: Bool
+    let pinAvailable: Bool
     let errorMessage: String?
     let isAuthenticating: Bool
     let onUnlock: () -> Void
+    let onUsePIN: () -> Void
 
     private var primaryIcon: String {
         biometricKind == .none ? "lock.fill" : biometricKind.icon
@@ -122,7 +179,7 @@ private struct LockScreen: View {
                         .foregroundStyle(CaelynColor.deepPlumText)
                     Text(canAuthenticate
                          ? "Unlock with \(primaryLabel) to continue."
-                         : "This device has no passcode set up. Add one in iOS Settings to access Caelyn.")
+                         : "Enter your PIN to continue.")
                         .font(CaelynFont.body)
                         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
                         .multilineTextAlignment(.center)
@@ -139,16 +196,26 @@ private struct LockScreen: View {
 
                 Spacer()
 
-                CaelynButton(
-                    title: isAuthenticating ? "Unlocking…" : "Unlock with \(primaryLabel)",
-                    variant: .primary,
-                    icon: primaryIcon
-                ) {
-                    onUnlock()
+                if canAuthenticate {
+                    CaelynButton(
+                        title: isAuthenticating ? "Unlocking…" : "Unlock with \(primaryLabel)",
+                        variant: .primary,
+                        icon: primaryIcon
+                    ) {
+                        onUnlock()
+                    }
+                    .disabled(isAuthenticating)
+                    .padding(.horizontal, CaelynSpacing.lg)
                 }
-                .disabled(isAuthenticating || !canAuthenticate)
-                .padding(.horizontal, CaelynSpacing.lg)
-                .padding(.bottom, CaelynSpacing.lg)
+
+                if pinAvailable {
+                    Button(canAuthenticate ? "Use PIN instead" : "Enter PIN") { onUsePIN() }
+                        .font(CaelynFont.body.weight(.medium))
+                        .foregroundStyle(CaelynColor.primaryPlum)
+                        .padding(.bottom, CaelynSpacing.lg)
+                } else {
+                    Color.clear.frame(height: 1).padding(.bottom, CaelynSpacing.lg)
+                }
             }
         }
     }

@@ -65,6 +65,11 @@ final class UserProfile {
     var birthControlReminderMinute: Int = 0
     var birthControlStartDate: Date?
 
+    // Auto-sweep (opt-in privacy — wipe all data after long inactivity)
+    var autoWipeEnabled: Bool = false
+    var autoWipeAfterDays: Int = 30
+    var lastActiveAt: Date = Date()
+
     var isPro: Bool = false
     var createdAt: Date = Date()
 

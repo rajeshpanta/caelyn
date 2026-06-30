@@ -9,6 +9,7 @@ struct SettingsView: View {
 
     @State private var showingCycleSettings = false
     @State private var showingPrivacyTrust = false
+    @State private var showingPINManage = false
     @State private var showingCloudSync = false
     @State private var showingFirstDayPicker = false
     @State private var showingResetOnboardingConfirm = false
@@ -71,6 +72,9 @@ struct SettingsView: View {
             }
             .navigationDestination(isPresented: $showingPrivacyTrust) {
                 PrivacyTrustView()
+            }
+            .navigationDestination(isPresented: $showingPINManage) {
+                PINManageView()
             }
             .navigationDestination(isPresented: $showingCloudSync) {
                 BackupInfoView()
@@ -300,7 +304,15 @@ struct SettingsView: View {
                     title: lockTitle,
                     subtitle: lockSubtitle,
                     isOn: lockBinding(profile: profile),
-                    disabled: !BiometricService.canAuthenticate
+                    disabled: !BiometricService.canAuthenticate && !PINService.isSet
+                )
+                SettingsDivider()
+                SettingsRow(
+                    icon: "key.fill",
+                    iconColor: CaelynColor.primaryPlum,
+                    title: "App PIN",
+                    detail: PINService.isSet ? "On" : "Off",
+                    action: { showingPINManage = true }
                 )
                 SettingsDivider()
                 SettingsToggleRow(
@@ -317,6 +329,17 @@ struct SettingsView: View {
                     title: "Private notifications",
                     subtitle: "Notifications show 'Caelyn' — not your cycle details.",
                     isOn: privateNotificationsBinding(profile: profile)
+                )
+                SettingsDivider()
+                SettingsToggleRow(
+                    icon: "clock.badge.exclamationmark",
+                    iconColor: CaelynColor.alertRose,
+                    title: "Auto-erase if inactive",
+                    subtitle: "Permanently deletes all data if Caelyn isn't opened for \(profile.autoWipeAfterDays) days.",
+                    isOn: Binding(
+                        get: { profile.autoWipeEnabled },
+                        set: { profile.autoWipeEnabled = $0; modelContext.saveOrLog() }
+                    )
                 )
             }
         }

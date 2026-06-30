@@ -931,4 +931,24 @@ final class CaelynTests: XCTestCase {
         XCTAssertEqual(try context.fetch(FetchDescriptor<CycleEntry>()).count, 0)
         XCTAssertEqual(try context.fetch(FetchDescriptor<UserProfile>()).count, 0)
     }
+
+    // MARK: - Phase 5: PIN hashing + auto-sweep window
+
+    func testPINHashIsDeterministicAndSaltSensitive() {
+        let salt1 = Data(repeating: 7, count: 32)
+        let salt2 = Data(repeating: 9, count: 32)
+        XCTAssertEqual(PINService.hash("1234", salt: salt1), PINService.hash("1234", salt: salt1))
+        XCTAssertNotEqual(PINService.hash("1234", salt: salt1), PINService.hash("1234", salt: salt2), "salt must change the hash")
+        XCTAssertNotEqual(PINService.hash("1234", salt: salt1), PINService.hash("9999", salt: salt1), "different PIN → different hash")
+        XCTAssertEqual(PINService.hash("1234", salt: salt1).count, 32, "SHA-256 is 32 bytes")
+    }
+
+    func testAutoSweepWindow() {
+        let cal = Calendar.current
+        let last = cal.startOfDay(for: cal.date(byAdding: .day, value: -40, to: .now)!)
+        let now = Date()
+        XCTAssertTrue(AutoSweepService.shouldSweep(autoWipeEnabled: true, autoWipeAfterDays: 30, lastActiveAt: last, now: now))
+        XCTAssertFalse(AutoSweepService.shouldSweep(autoWipeEnabled: true, autoWipeAfterDays: 60, lastActiveAt: last, now: now))
+        XCTAssertFalse(AutoSweepService.shouldSweep(autoWipeEnabled: false, autoWipeAfterDays: 1, lastActiveAt: last, now: now))
+    }
 }

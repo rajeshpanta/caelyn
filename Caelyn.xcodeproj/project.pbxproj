@@ -44,6 +44,7 @@
 		4B39AAED1E1CF8F4249DFEAB /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95030A62CE85285A1B7447CE /* ExportView.swift */; };
 		4C1A020F3CF0DC2503614A10 /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE228FE95D6CFB5B6AA94AA /* WidgetDataStore.swift */; };
 		545420A041759717671D6019 /* AppPreviewMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = E88754596ACA60C51D4EC8D3 /* AppPreviewMask.swift */; };
+		57C4D01E401B503A86FA4018 /* PINService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDE263BD03594FD4C68D7A0 /* PINService.swift */; };
 		58B3689F2054DF67F23594B9 /* CaelynButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29AD7A95A766A2973718AE3D /* CaelynButton.swift */; };
 		5B981B698B655F0DF9F07190 /* WidgetDataSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6011FB7860B910ED48584777 /* WidgetDataSync.swift */; };
 		5C104A68E2609F5ECD9CFC95 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5322159624E05FC0C7C1686B /* ExportService.swift */; };
@@ -62,6 +63,7 @@
 		6EE73517CCFF174B7DF6F843 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CB27B600CFE9B63241AD672 /* HomeView.swift */; };
 		6F7F7FCCFD8D2218EE459484 /* CaelynWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 50974342C78D7073C7C2389C /* CaelynWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7346A991F2E84C669EEC8729 /* CycleAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893A18A5E786299D456D8D29 /* CycleAnalytics.swift */; };
+		74BDA36CDF822EC344FDF372 /* PINViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D583843EB06C575EF3737512 /* PINViews.swift */; };
 		752A55857B59D33AE4CA8258 /* CaelynWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032976BC579EC7C7A9617A56 /* CaelynWidgetProvider.swift */; };
 		76A85E09A594126D2B6DFAA8 /* CaelynWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7964B2E44B79AC36776C09E4 /* CaelynWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		776A3C2C7F8086C9E1FB0D1D /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */; };
@@ -90,6 +92,7 @@
 		B1D468BAD909A0179142179E /* SettingsPickerSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3931C56DD039472FB7265FA2 /* SettingsPickerSheets.swift */; };
 		B2DAD96CCD4FE630BC6C8944 /* HomeCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60AD87ED1BAC8968B70FAE43 /* HomeCopy.swift */; };
 		B3020FFD85C22E7A2ADC1A63 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A35FB178BD6C178286935B2 /* WidgetViews.swift */; };
+		B33B8CADB43134E7122C16E6 /* AutoSweepService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375F0D5CCAB4D6211329C3FB /* AutoSweepService.swift */; };
 		B54C125DD9E05A5CB548105D /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A45E9FE5A677D4562C59DE7 /* HealthKitService.swift */; };
 		B55E9B9C29B97A83CDA636CF /* ShareModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D23DEB9259E2A475E1B467D /* ShareModeView.swift */; };
 		BAFF08D9C8C782AA2497E59D /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A27162A4340D1998A09B11 /* DayCell.swift */; };
@@ -222,6 +225,7 @@
 		354545D943378E53A1B935B7 /* CaelynTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynTests.swift; sourceTree = "<group>"; };
 		3631FAF209987A1704C78F36 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		368EA8FCC339D47BDE93020F /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		375F0D5CCAB4D6211329C3FB /* AutoSweepService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoSweepService.swift; sourceTree = "<group>"; };
 		3931C56DD039472FB7265FA2 /* SettingsPickerSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPickerSheets.swift; sourceTree = "<group>"; };
 		3A35FB178BD6C178286935B2 /* WidgetViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetViews.swift; sourceTree = "<group>"; };
 		3D5D74DF250AA8A6396C3896 /* CyclePrediction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclePrediction.swift; sourceTree = "<group>"; };
@@ -305,6 +309,7 @@
 		CD588403958052343C310525 /* WatchBridgeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBridgeService.swift; sourceTree = "<group>"; };
 		CEDF7284C85E89A58176F940 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		D237A741F754AC1F6FD0AC64 /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
+		D583843EB06C575EF3737512 /* PINViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINViews.swift; sourceTree = "<group>"; };
 		D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
 		E2702E1D3675E82E5037E3F5 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		E2BF3402959D855BEA0096A3 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -326,6 +331,7 @@
 		FCA40AC122A9C30B1AA5B101 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		FDA214E11FC745FFBCD83EC1 /* OnboardingScaffold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScaffold.swift; sourceTree = "<group>"; };
 		FEAD398D65E99ED782B4FA33 /* CaelynUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CaelynUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FFDE263BD03594FD4C68D7A0 /* PINService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -388,6 +394,7 @@
 			isa = PBXGroup;
 			children = (
 				5B5C57C3693134752F42ED43 /* .gitkeep */,
+				375F0D5CCAB4D6211329C3FB /* AutoSweepService.swift */,
 				5A6D8A6D5E649BC3272BA4A4 /* BiometricService.swift */,
 				893A18A5E786299D456D8D29 /* CycleAnalytics.swift */,
 				46C3CD32C072709AFB2F6B44 /* CycleSummaryService.swift */,
@@ -398,6 +405,7 @@
 				F727008BDD9FE097F46B549E /* NotificationService.swift */,
 				0B69A196D7954169CBDBA685 /* PatternEngine.swift */,
 				133DA567417FA320181DEB05 /* Persistence.swift */,
+				FFDE263BD03594FD4C68D7A0 /* PINService.swift */,
 				8C1F783DA3E9B4345CA306AC /* PredictionEngine.swift */,
 				B5AE5BF45B9E75202940D8F7 /* PurchaseService.swift */,
 				6F84C422C7D1A98ABB737858 /* RatingService.swift */,
@@ -649,6 +657,7 @@
 			children = (
 				6ABB74AEF2C2F9EAD97CDA2C /* AppLockGate.swift */,
 				E88754596ACA60C51D4EC8D3 /* AppPreviewMask.swift */,
+				D583843EB06C575EF3737512 /* PINViews.swift */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -885,6 +894,7 @@
 				45D7233A755B333BD1199215 /* AppLockGate.swift in Sources */,
 				545420A041759717671D6019 /* AppPreviewMask.swift in Sources */,
 				5F745BA64C443BC266F66445 /* AppURLs.swift in Sources */,
+				B33B8CADB43134E7122C16E6 /* AutoSweepService.swift in Sources */,
 				E25279A0EFD42D53F2D1CAEF /* BiometricService.swift in Sources */,
 				E1405D0F37C12568BA24BFFD /* BirthControlView.swift in Sources */,
 				AC374C70C11C05D3B5C002D4 /* CaelynApp.swift in Sources */,
@@ -943,6 +953,8 @@
 				9793F7ACFFB971F837581A8D /* OnboardingStep.swift in Sources */,
 				661515C66A81E3DF7ABA7CE9 /* OnboardingSteps.swift in Sources */,
 				B1C2EAF40578A39A58085C5C /* OnboardingViewModel.swift in Sources */,
+				57C4D01E401B503A86FA4018 /* PINService.swift in Sources */,
+				74BDA36CDF822EC344FDF372 /* PINViews.swift in Sources */,
 				EFC09BEAD7BE4DCDEF97ED5C /* PatternEngine.swift in Sources */,
 				AB33C36A895225740A42866E /* PatternInsightsSection.swift in Sources */,
 				25564C308FDA9E6CB89F7542 /* PatternsSection.swift in Sources */,
