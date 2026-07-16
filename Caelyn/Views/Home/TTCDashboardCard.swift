@@ -55,7 +55,7 @@ struct TTCDashboardCard: View {
 
                 Text("Log your BBT, LH strip, and cervical mucus for a more accurate score.")
                     .font(CaelynFont.caption)
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
             }
         }
     }

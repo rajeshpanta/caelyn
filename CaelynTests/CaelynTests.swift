@@ -959,6 +959,102 @@ final class CaelynTests: XCTestCase {
         XCTAssertFalse(Persistence.isSyncEnabled, "iCloud sync must be OFF on a fresh install — the privacy default")
     }
 
+    // MARK: - Stand-out plan: CSV import (Switch Kit)
+
+    func testImportRoundTripsCaelynCSV() throws {
+        let cal = Calendar.current
+        let day = cal.startOfDay(for: cal.date(byAdding: .day, value: -40, to: .now)!)
+        let e = CycleEntry(date: day, flow: .heavy, pain: 6, painTypes: [.cramps],
+                           symptoms: [.headache, .bloating], mood: .irritable,
+                           note: "rough day, extra \"quotes\" and, commas")
+        e.basalTemperature = 36.42
+        e.cervicalMucus = .eggWhite
+        e.sexualActivity = true
+        e.ovulationTestResult = .positive
+        e.pregnancyTest = false
+        context.insert(e)
+        try context.save()
+
+        let csv = ExportService.generateCSV(entries: [e], includeNotes: true)
+        try context.delete(model: CycleEntry.self)
+        try context.save()
+
+        let result = try ImportService.importCSV(text: csv, into: context)
+        XCTAssertEqual(result.entriesCreated, 1)
+        let imported = try context.fetch(FetchDescriptor<CycleEntry>())
+        XCTAssertEqual(imported.count, 1)
+        let i = imported[0]
+        XCTAssertEqual(i.flow, .heavy)
+        XCTAssertEqual(i.pain, 6)
+        XCTAssertEqual(Set(i.symptoms), Set([.headache, .bloating]))
+        XCTAssertEqual(i.mood, .irritable)
+        XCTAssertEqual(i.basalTemperature ?? 0, 36.42, accuracy: 0.001)
+        XCTAssertEqual(i.cervicalMucus, .eggWhite)
+        XCTAssertEqual(i.sexualActivity, true)
+        XCTAssertEqual(i.ovulationTestResult, .positive)
+        XCTAssertEqual(i.pregnancyTest, false)
+        XCTAssertEqual(i.note, "rough day, extra \"quotes\" and, commas")
+        XCTAssertEqual(cal.startOfDay(for: i.date), day)
+    }
+
+    func testImportGenericAppCSV() throws {
+        let csv = """
+        Date,Period Intensity,Notes
+        2025-03-02,heavy,whatever
+        2025-03-03,medium,
+        2025-03-04,LIGHT,
+        2025-03-20,,
+        """
+        let result = try ImportService.importCSV(text: csv, into: context)
+        XCTAssertEqual(result.entriesCreated, 3, "three rows carry usable flow data")
+        XCTAssertEqual(result.rowsSkipped, 1, "the empty-flow row is skipped, not fabricated")
+        let flows = try context.fetch(FetchDescriptor<CycleEntry>())
+            .sorted { $0.date < $1.date }
+            .compactMap(\.flow)
+        XCTAssertEqual(flows, [.heavy, .medium, .light])
+    }
+
+    func testImportNeverOverwritesLoggedData() throws {
+        let day = Calendar.current.startOfDay(for: .now)
+        let f = DateFormatter()
+        f.calendar = Calendar(identifier: .gregorian)
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd"
+        context.insert(CycleEntry(date: day, flow: .light))
+        try context.save()
+
+        let csv = "date,period\n\(f.string(from: day)),heavy"
+        XCTAssertThrowsError(try ImportService.importCSV(text: csv, into: context),
+                             "a row that can't change anything imports nothing")
+        let all = try context.fetch(FetchDescriptor<CycleEntry>())
+        XCTAssertEqual(all.count, 1)
+        XCTAssertEqual(all[0].flow, .light, "import must never overwrite hand-logged data")
+    }
+
+    // MARK: - Stand-out plan: streak grace (S6)
+
+    func testLoggingStreakGrace() {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: .now)
+        func logged(_ daysAgo: Int) -> CycleEntry {
+            let e = CycleEntry(date: cal.date(byAdding: .day, value: -daysAgo, to: today)!)
+            e.mood = .calm
+            return e
+        }
+        // Today unlogged: the day isn't over — yesterday's run still counts.
+        XCTAssertEqual(CycleAnalytics.loggingStreak(in: [logged(1), logged(2)], today: today), 2)
+        // A single missed day freezes the streak instead of resetting it.
+        XCTAssertEqual(CycleAnalytics.loggingStreak(in: [logged(1), logged(2), logged(4), logged(5)], today: today), 4)
+        // Two consecutive missed days do end the run.
+        XCTAssertEqual(CycleAnalytics.loggingStreak(in: [logged(1), logged(4)], today: today), 1)
+    }
+
+    // MARK: - Stand-out plan: free-tier caps (S1)
+
+    func testFreeTierCaps() {
+        XCTAssertEqual(PatternInsightsSection.freeInsightCap, 5, "free users see up to 5 insights")
+    }
+
     // MARK: - Phase 6 hardening: same-day dedup (post .unique removal)
 
     func testDedupeMergesSameDayDuplicates() throws {

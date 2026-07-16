@@ -79,7 +79,7 @@ struct LogView: View {
                         } label: {
                             Image(systemName: "trash")
                                 .font(.system(size: 14, weight: .medium))
-                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                         }
                     }
                 }

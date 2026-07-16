@@ -21,7 +21,7 @@ struct SettingsSectionCard<Content: View>: View {
                 if let subtitle {
                     Text(subtitle)
                         .font(CaelynFont.caption)
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                 }
             }
             CaelynCard(padding: 0) {

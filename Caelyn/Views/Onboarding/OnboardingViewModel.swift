@@ -28,6 +28,12 @@ final class OnboardingViewModel {
     var enableLock: Bool = false
     var healthKitConnected: Bool = false
 
+    // Switch Kit: history imported from Apple Health during onboarding, so a
+    // switcher's first prediction is grounded in their real past cycles.
+    var healthImportedEntries: Int = 0
+    var healthImportedCycles: Int = 0
+    var importedLastPeriodStart: Date?
+
     func skipHealthStep() {
         // Skip the health step if HealthKit isn't available on this device
         guard let next = OnboardingStep(rawValue: step.rawValue + 1) else { return }
@@ -94,7 +100,9 @@ final class OnboardingViewModel {
             firstDayOfWeek: Calendar.current.firstWeekday,
             theme: .system,
             hasOnboarded: true,
-            lastPeriodStart: notSureLastPeriod ? nil : lastPeriodStart,
+            // If the user was unsure of their last period but we imported their
+            // Apple Health history, anchor predictions to the imported data.
+            lastPeriodStart: notSureLastPeriod ? importedLastPeriodStart : lastPeriodStart,
             remindPeriodStart: remindPeriodStart,
             remindDailyCheckIn: remindDailyCheckIn,
             remindMedication: remindMedication,

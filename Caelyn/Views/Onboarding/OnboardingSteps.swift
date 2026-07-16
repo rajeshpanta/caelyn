@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 // MARK: - Welcome
 
@@ -116,7 +117,7 @@ struct WelcomeStep: View {
                     Text("Your data stays private, always.")
                         .font(CaelynFont.footnote)
                 }
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
             }
             .opacity(buttonAppear ? 1 : 0)
             .offset(y: buttonAppear ? 0 : 12)
@@ -315,7 +316,7 @@ struct PrivacyStep: View {
 
                 Text("Caelyn is a personal tracker, not a medical device. Predictions are estimates. For health concerns, please talk to a healthcare professional.")
                     .font(CaelynFont.caption)
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, CaelynSpacing.xs)
             }
@@ -860,6 +861,34 @@ struct DoneStep: View {
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, CaelynSpacing.lg)
+
+                // Day-1 aha: reveal the first prediction BEFORE the funnel exits —
+                // the core value shouldn't be a surprise waiting on the other side.
+                if let predicted = firstPrediction {
+                    CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.lavender.opacity(0.45)) {
+                        HStack(alignment: .top, spacing: CaelynSpacing.sm) {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 17, weight: .medium))
+                                .foregroundStyle(CaelynColor.primaryPlum)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Your first prediction")
+                                    .font(CaelynFont.caption.weight(.semibold))
+                                    .foregroundStyle(CaelynColor.primaryPlum)
+                                    .tracking(0.4)
+                                Text("Next period around \(predicted.formatted(.dateTime.month(.wide).day()))")
+                                    .font(CaelynFont.callout.weight(.semibold))
+                                    .foregroundStyle(CaelynColor.deepPlumText)
+                                Text(vm.healthImportedCycles > 0
+                                     ? "Based on the \(vm.healthImportedCycles) cycles imported from Apple Health. Caelyn sharpens this every cycle."
+                                     : "Based on what you shared. Caelyn sharpens this with every cycle you log.")
+                                    .font(CaelynFont.caption)
+                                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, CaelynSpacing.lg)
+                }
             }
             .opacity(textAppear ? 1 : 0)
             .offset(y: textAppear ? 0 : 20)
@@ -872,6 +901,16 @@ struct DoneStep: View {
                 .opacity(textAppear ? 1 : 0)
         }
     }
+
+    /// The anchor for the day-1 prediction: what the user told us, or — if they
+    /// were unsure — what the Apple Health import found. Nil = no reveal (never
+    /// fabricate a date).
+    private var firstPrediction: Date? {
+        let anchor = vm.notSureLastPeriod ? vm.importedLastPeriodStart : vm.lastPeriodStart
+        guard let anchor else { return nil }
+        let cycleLength = vm.notSureCycleLength ? 28 : vm.cycleLength
+        return PredictionEngine.nextPeriodStart(lastPeriodStart: anchor, cycleLength: cycleLength)
+    }
 }
 
 // MARK: - Apple Health
@@ -879,6 +918,7 @@ struct DoneStep: View {
 struct HealthStep: View {
     let vm: OnboardingViewModel
 
+    @Environment(\.modelContext) private var modelContext
     @State private var isConnecting = false
     @State private var connected = false
     @State private var denied = false
@@ -900,12 +940,27 @@ struct HealthStep: View {
 
                 if connected {
                     CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.successSage.opacity(0.12)) {
-                        HStack(spacing: 8) {
+                        HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(CaelynColor.successSage)
-                            Text("Apple Health connected")
-                                .font(CaelynFont.subheadline.weight(.medium))
-                                .foregroundStyle(CaelynColor.deepPlumText)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(vm.healthImportedCycles > 0
+                                     ? "Imported \(vm.healthImportedCycles) cycle\(vm.healthImportedCycles == 1 ? "" : "s") of history"
+                                     : "Apple Health connected")
+                                    .font(CaelynFont.subheadline.weight(.semibold))
+                                    .foregroundStyle(CaelynColor.deepPlumText)
+                                if vm.healthImportedCycles > 0 {
+                                    // The Switch-Kit payoff: their history is already here.
+                                    Text("Caelyn already knows your rhythm — predictions start from your real history, not from zero.")
+                                        .font(CaelynFont.caption)
+                                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
+                                        .fixedSize(horizontal: false, vertical: true)
+                                } else if vm.healthImportedEntries > 0 {
+                                    Text("Imported \(vm.healthImportedEntries) day\(vm.healthImportedEntries == 1 ? "" : "s") of period data.")
+                                        .font(CaelynFont.caption)
+                                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
+                                }
+                            }
                         }
                     }
                 } else if denied {
@@ -976,11 +1031,26 @@ struct HealthStep: View {
             if granted {
                 vm.healthKitConnected = true
                 connected = true
+                await importHistory()
             } else {
                 denied = true
             }
         } catch {
             denied = true
         }
+    }
+
+    /// Switch Kit: pull the user's existing period history out of Apple Health
+    /// right here in onboarding, so their first prediction is grounded in real
+    /// cycles instead of starting from zero. Failure is silent — the plain
+    /// "connected" state still shows and the app works exactly as before.
+    private func importHistory() async {
+        guard let result = try? await HealthKitService.importFlowFromHealth(into: modelContext) else { return }
+        vm.healthImportedEntries = result.total
+        guard result.total > 0 else { return }
+        let entries = (try? modelContext.fetch(FetchDescriptor<CycleEntry>())) ?? []
+        let cycles = PredictionEngine.cycles(from: entries)
+        vm.healthImportedCycles = cycles.count
+        vm.importedLastPeriodStart = PredictionEngine.mostRecentPeriodStart(from: entries)
     }
 }

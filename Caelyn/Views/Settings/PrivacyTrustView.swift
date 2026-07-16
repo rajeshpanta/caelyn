@@ -65,6 +65,31 @@ struct PrivacyTrustView: View {
         )
     ]
 
+    /// The threat model, in plain language: concrete "what if" scenarios and what
+    /// actually happens in each. Privacy must be PROVABLE, not promised (S7).
+    private let threatModel: [(q: String, a: String)] = [
+        (
+            q: "Someone picks up my phone",
+            a: "With App Lock on, Caelyn locks itself the moment it leaves the foreground — Face ID, Touch ID, or your PIN to get back in. \"Hide app preview\" blanks it in the app switcher, and private notifications never show cycle details on your lock screen."
+        ),
+        (
+            q: "Someone forces me to open Caelyn",
+            a: "If you've set a duress PIN, entering it instead of your real PIN silently and permanently erases everything — the app opens looking brand new, with no sign anything was deleted."
+        ),
+        (
+            q: "A court orders Caelyn to hand over my data",
+            a: "There is nothing to hand over. We run no servers and keep no copies. With sync off, your data exists in exactly one place: your device. With sync on, it's in your own Apple iCloud account — under Apple's policies, never ours."
+        ),
+        (
+            q: "I lose my phone",
+            a: "Your data is locked behind your device passcode and Caelyn's own lock. If you enabled \"Auto-erase if inactive,\" the next time anyone opens Caelyn after your chosen idle period, it erases everything before showing a thing. (If the app is never opened again, the data simply stays locked behind your passcode.)"
+        ),
+        (
+            q: "Caelyn (the company) disappears",
+            a: "The app keeps working — it never depended on a server. Your data stays on your device, and Export (CSV/PDF) is always there to take it anywhere else."
+        ),
+    ]
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
@@ -72,6 +97,7 @@ struct PrivacyTrustView: View {
                 ForEach(promises.indices, id: \.self) { idx in
                     promiseCard(promises[idx])
                 }
+                threatModelSection
                 legalNote
             }
             .padding(.horizontal, CaelynSpacing.lg)
@@ -123,15 +149,45 @@ struct PrivacyTrustView: View {
         }
     }
 
+    private var threatModelSection: some View {
+        VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
+            Text("WHAT IF…")
+                .font(CaelynFont.caption.weight(.semibold))
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+                .tracking(0.6)
+
+            CaelynCard(padding: CaelynSpacing.md) {
+                VStack(alignment: .leading, spacing: CaelynSpacing.md) {
+                    ForEach(threatModel.indices, id: \.self) { idx in
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(threatModel[idx].q)
+                                .font(CaelynFont.body.weight(.medium))
+                                .foregroundStyle(CaelynColor.deepPlumText)
+                            Text(threatModel[idx].a)
+                                .font(CaelynFont.subheadline)
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        if idx < threatModel.count - 1 {
+                            Rectangle()
+                                .fill(CaelynColor.deepPlumText.opacity(0.06))
+                                .frame(height: 1)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private var legalNote: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 Image(systemName: "stethoscope")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                 Text("Health disclaimer")
                     .font(CaelynFont.caption.weight(.semibold))
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                     .tracking(0.4)
             }
             Text("Caelyn is a personal cycle tracker, not a medical device. Predictions are estimates based on your logs. For medical concerns, please consult a healthcare provider.")

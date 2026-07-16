@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @Query private var profiles: [UserProfile]
@@ -10,6 +11,10 @@ struct SettingsView: View {
     @State private var showingCycleSettings = false
     @State private var showingPrivacyTrust = false
     @State private var showingPINManage = false
+    @State private var showingImporter = false
+    @State private var showingImportResult = false
+    @State private var importMessage = ""
+    @State private var showingParanoidConfirm = false
     @State private var showingCloudSync = false
     @State private var showingFirstDayPicker = false
     @State private var showingResetOnboardingConfirm = false
@@ -341,7 +346,25 @@ struct SettingsView: View {
                         set: { profile.autoWipeEnabled = $0; modelContext.saveOrLog() }
                     )
                 )
+                SettingsDivider()
+                SettingsRow(
+                    icon: "shield.lefthalf.filled",
+                    iconColor: CaelynColor.alertRose,
+                    title: "Paranoid Mode",
+                    detail: "Maximum privacy in one tap",
+                    action: { showingParanoidConfirm = true }
+                )
             }
+        }
+        .confirmationDialog(
+            "Turn on Paranoid Mode?",
+            isPresented: $showingParanoidConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Lock everything down", role: .destructive) { enableParanoidMode() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("One tap: turns OFF iCloud Sync and Apple Health sharing, cancels all reminders, hides the app preview, and switches notifications to private. App Lock and PIN stay under your control in this list.")
         }
     }
 
@@ -380,6 +403,14 @@ struct SettingsView: View {
             )
             SettingsDivider()
             SettingsRow(
+                icon: "square.and.arrow.down",
+                iconColor: CaelynColor.primaryPlum,
+                title: "Import data",
+                detail: "CSV from Caelyn or another app",
+                action: { showingImporter = true }
+            )
+            SettingsDivider()
+            SettingsRow(
                 icon: "trash",
                 iconColor: CaelynColor.alertRose,
                 title: "Delete all data",
@@ -387,6 +418,73 @@ struct SettingsView: View {
                 action: { showingDeleteFirst = true },
                 isDestructive: true
             )
+        }
+        .fileImporter(
+            isPresented: $showingImporter,
+            allowedContentTypes: [.commaSeparatedText, .plainText],
+            allowsMultipleSelection: false
+        ) { result in
+            handleImport(result)
+        }
+        .alert("Import", isPresented: $showingImportResult) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(importMessage)
+        }
+    }
+
+    /// Paranoid Mode: one tap that flips every data-egress and visibility setting
+    /// to its most private position (S7). Reversible — each switch can be turned
+    /// back on individually.
+    private func enableParanoidMode() {
+        guard let profile else { return }
+        // Data egress off.
+        UserDefaults.standard.set(false, forKey: Persistence.syncEnabledKey)
+        profile.healthKitConnected = false
+        profile.hkReadFlow = false
+        profile.hkWriteFlow = false
+        profile.hkReadSymptoms = false
+        profile.hkWriteSymptoms = false
+        // Nothing on the lock screen, nothing in the app switcher.
+        profile.hidePreview = true
+        profile.privateNotifications = true
+        profile.remindPeriodStart = false
+        profile.remindDailyCheckIn = false
+        profile.remindMedication = false
+        profile.remindOvulation = false
+        profile.birthControlReminderEnabled = false
+        modelContext.saveOrLog()
+        Task { await NotificationService.cancelAll() }
+        Haptics.success()
+    }
+
+    /// Switch Kit: read the picked CSV (Caelyn's own export or another app's) and
+    /// merge it into the store. Never overwrites hand-logged data.
+    private func handleImport(_ result: Result<[URL], Error>) {
+        switch result {
+        case .failure:
+            importMessage = "Couldn't open that file."
+            showingImportResult = true
+        case .success(let urls):
+            guard let url = urls.first else { return }
+            let secured = url.startAccessingSecurityScopedResource()
+            defer { if secured { url.stopAccessingSecurityScopedResource() } }
+            guard let text = try? String(contentsOf: url, encoding: .utf8) else {
+                importMessage = ImportService.ImportError.unreadable.localizedDescription
+                showingImportResult = true
+                return
+            }
+            do {
+                let outcome = try ImportService.importCSV(text: text, into: modelContext)
+                var parts = ["Imported \(outcome.total) day\(outcome.total == 1 ? "" : "s") of data"]
+                if outcome.entriesCreated > 0 { parts.append("\(outcome.entriesCreated) new") }
+                if outcome.entriesUpdated > 0 { parts.append("\(outcome.entriesUpdated) merged") }
+                importMessage = parts.joined(separator: " — ") + ". Your predictions now use this history."
+                Haptics.success()
+            } catch {
+                importMessage = error.localizedDescription
+            }
+            showingImportResult = true
         }
     }
 

@@ -81,7 +81,7 @@ struct MonthGridView: View {
             ForEach(weekdays.indices, id: \.self) { index in
                 Text(weekdays[index])
                     .font(CaelynFont.caption.weight(.semibold))
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                     .frame(maxWidth: .infinity)
             }
         }

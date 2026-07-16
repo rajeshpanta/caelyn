@@ -7,6 +7,7 @@ struct CycleSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var purchase = PurchaseService.shared
     @State private var showingPaywall = false
+    @State private var showingPregnancyEnd = false
 
     private let cycleLengthRange = Array(18...45)
     private let periodLengthRange = Array(1...12)
@@ -77,7 +78,7 @@ struct CycleSettingsView: View {
                         Spacer(minLength: 0)
                         Text("From first day of one period to the next")
                             .font(CaelynFont.caption)
-                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                             .multilineTextAlignment(.trailing)
                             .frame(maxWidth: 120)
                     }
@@ -124,7 +125,7 @@ struct CycleSettingsView: View {
                         Spacer(minLength: 0)
                         Text("How long your period usually lasts")
                             .font(CaelynFont.caption)
-                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                             .multilineTextAlignment(.trailing)
                             .frame(maxWidth: 120)
                     }
@@ -322,7 +323,19 @@ struct CycleSettingsView: View {
 
             CaelynCard(padding: CaelynSpacing.md) {
                 VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
-                    Toggle(isOn: $profile.pregnancyEnabled) {
+                    // Turning the mode OFF routes through a gentle dialog instead of
+                    // flipping instantly — this moment can mean a birth or a loss,
+                    // and the app must never respond carelessly (stand-out plan S6).
+                    Toggle(isOn: Binding(
+                        get: { profile.pregnancyEnabled },
+                        set: { newValue in
+                            if newValue {
+                                profile.pregnancyEnabled = true
+                            } else {
+                                showingPregnancyEnd = true
+                            }
+                        }
+                    )) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Pregnancy mode")
                                 .font(CaelynFont.body)
@@ -345,6 +358,27 @@ struct CycleSettingsView: View {
                             }
                         }
                         modelContext.saveOrLog()
+                    }
+                    .confirmationDialog(
+                        "How would you like to close this chapter?",
+                        isPresented: $showingPregnancyEnd,
+                        titleVisibility: .visible
+                    ) {
+                        Button("I gave birth 💛") {
+                            profile.pregnancyEnabled = false
+                            profile.postpartumEnabled = true
+                            if profile.postpartumBirthDate == nil {
+                                profile.postpartumBirthDate = Calendar.current.startOfDay(for: .now)
+                            }
+                            modelContext.saveOrLog()
+                        }
+                        Button("I'm no longer pregnant") {
+                            profile.pregnancyEnabled = false
+                            modelContext.saveOrLog()
+                        }
+                        Button("Cancel", role: .cancel) {}
+                    } message: {
+                        Text("Either way, Caelyn quietly returns to cycle tracking — no questions asked, and nothing celebratory unless you choose it. Be gentle with yourself.")
                     }
 
                     if profile.pregnancyEnabled {

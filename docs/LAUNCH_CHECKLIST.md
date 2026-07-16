@@ -10,9 +10,10 @@ The code + `Caelyn.storekit` are internally consistent, but ASC products must be
 created and must match exactly, or the paywall shows nothing / review fails.
 
 - [ ] Create the **auto-renewable subscription group** and two subscriptions:
-  - `com.caelyn.monthly` — **$3.99 / month**, no intro offer.
-  - `com.caelyn.yearly` — **$19.99 / year**, **7-day free trial** intro offer.
-- [ ] Create the **non-consumable**: `com.caelyn.lifetime` — **$49.99**.
+  - `…pro.monthly` — **$3.99 / month**, **7-day free trial** intro offer.
+  - `…pro.yearly` — **$19.99 / year**, **7-day free trial** intro offer.
+- [ ] Create the **non-consumable**: `…pro.lifetime` — **$49.99**.
+- [ ] Turn **Family Sharing ON** for all three products (the local .storekit now has it on — ASC must match).
 - [ ] Confirm every product ID matches `PurchaseService.ProductID` **exactly**.
 - [ ] Fill in localized display name, description, review screenshot per product.
 - [ ] Complete **Paid Apps agreement**, banking, and tax forms (IAPs won't load otherwise).
@@ -59,7 +60,20 @@ Sync is opt-in and OFF by default; you can ship without it. To enable it:
 
 ## E. Known polish deferred (not blockers)
 
-- [ ] Dark-mode contrast pass on Home/Calendar (secondary text at low opacity).
+- [x] ~~Dark-mode contrast pass~~ — done (low-opacity informational text lifted app-wide).
+- [x] ~~Dead Partner Share~~ — `ShareModeView` deleted; rebuild on the CloudKit-sharing
+      foundation when that feature is genuinely scheduled.
 - [ ] Dynamic Type: ~129 fixed-size fonts don't scale — audit largest sizes for clipping.
-- [ ] Partner Share (`ShareModeView`) is built but **unreferenced/dead** — wire it up
-      (needs CloudKit sharing) or leave it inert; it's not reviewer-reachable.
+
+## F. Stand-out features shipped in code (verify on device)
+
+- [ ] **Switch Kit**: onboarding Apple Health history import + payoff card; Settings →
+      Import data (CSV from Caelyn's own export or another app's).
+- [ ] **Day-1 aha**: first prediction shown on the onboarding Done screen; one-time
+      "predictions are live" card on Home.
+- [ ] **What Caelyn learned about you** (Insights, free at 3+ cycles) + TTC signal points.
+- [ ] **Free tier**: 5 insights (was 2), 6 months of year view (was 3).
+- [ ] **Period-end recap** card; **streak grace** (no reset on a single missed day);
+      **compassionate pregnancy-mode close-out** dialog.
+- [ ] **Threat model** ("What if…") section in the Trust Center; **Paranoid Mode** in
+      Settings → Privacy.

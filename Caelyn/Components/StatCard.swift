@@ -26,7 +26,7 @@ struct StatCard: View {
                 if let hint {
                     Text(hint)
                         .font(CaelynFont.caption)
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.38))
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }

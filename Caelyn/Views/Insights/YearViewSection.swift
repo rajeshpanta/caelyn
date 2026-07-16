@@ -26,7 +26,8 @@ struct YearViewSection: View {
                 subtitle: "Last 12 months"
             )
 
-            let months = isPro ? monthsToShow : Array(monthsToShow.suffix(3))
+            // Free shows the last 6 months (raised from 3); Pro shows the full year.
+            let months = isPro ? monthsToShow : Array(monthsToShow.suffix(6))
 
             let nextPeriodStart: Date? = {
                 guard let last = profile?.lastPeriodStart else { return nil }

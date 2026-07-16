@@ -47,7 +47,7 @@ struct HomeHeroCard: View {
                         Text(HomeCopy.windowText(predictedWindow))
                         if variation > 1 {
                             Text("±\(variation) days")
-                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.38))
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                         }
                     }
                     .font(CaelynFont.caption)
@@ -56,7 +56,7 @@ struct HomeHeroCard: View {
                 if confidence == .low {
                     Text("Log a few more cycles and predictions will improve")
                         .font(CaelynFont.caption)
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.38))
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                 }
             }
             .padding(.horizontal, CaelynSpacing.sm)

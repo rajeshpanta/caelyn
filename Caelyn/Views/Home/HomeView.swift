@@ -12,6 +12,8 @@ struct HomeView: View {
     @State private var purchase = PurchaseService.shared
 
     @AppStorage("caelyn.softPaywallShown") private var softPaywallShown = false
+    @AppStorage("caelyn.firstPredictionCelebrated") private var firstPredictionCelebrated = false
+    @AppStorage("caelyn.periodRecapDismissedFor") private var recapDismissedFor: Double = 0
     @State private var showSoftPaywall = false
 
     /// The period anchor as it was just before "Log Period today" moved it to today,
@@ -143,6 +145,12 @@ struct HomeView: View {
                     confidence: confidence
                 )
 
+                // One-time celebration the first time a real prediction exists —
+                // the "it works" moment (stand-out plan S4). Dismiss persists.
+                if !firstPredictionCelebrated, lastPeriodStart != nil {
+                    firstPredictionCard
+                }
+
                 HomeQuickActions(
                     onLogPeriod: { logPeriodToday() },
                     onAddSymptoms: { showingLogSheet = true },
@@ -176,6 +184,12 @@ struct HomeView: View {
                 )
 
                 periodStatePrompt
+
+                // "This cycle" recap, shown for a few days after a period ends —
+                // the #1 churn cliff is right after period week (stand-out plan S6).
+                if let recap = periodRecap, recapDismissedFor != recap.start.timeIntervalSince1970 {
+                    periodRecapCard(recap)
+                }
 
                 periodStartEditRow
 
@@ -246,6 +260,130 @@ struct HomeView: View {
             startPoint: .top,
             endPoint: .bottom
         )
+    }
+
+    // MARK: - Period-end recap (S6)
+
+    private struct PeriodRecap {
+        let start: Date
+        let length: Int
+        let cycleLength: Int?
+        let topSymptom: Symptom?
+        let avgPain: Int?
+    }
+
+    /// The just-finished period, if it ended 1–3 days ago (and ran ≥ 2 days, so a
+    /// one-off spotting day doesn't trigger it). Nil otherwise.
+    private var periodRecap: PeriodRecap? {
+        let cal = Calendar.current
+        guard let start = PredictionEngine.mostRecentPeriodStart(from: entries, today: today) else { return nil }
+        let flowDays = Set(entries.filter { $0.flow != nil }.map { cal.startOfDay(for: $0.date) })
+
+        var length = 0
+        var cursor = start
+        while flowDays.contains(cursor) {
+            length += 1
+            guard let next = cal.date(byAdding: .day, value: 1, to: cursor) else { break }
+            cursor = next
+        }
+        guard length >= 2,
+              let lastFlowDay = cal.date(byAdding: .day, value: length - 1, to: start)
+        else { return nil }
+
+        let daysSinceEnd = cal.dateComponents([.day], from: lastFlowDay, to: today).day ?? 99
+        guard (1...3).contains(daysSinceEnd) else { return nil }
+
+        // The cycle that ENDED at this period's start, if we have it.
+        let completedLength: Int? = cycles.last.flatMap { last in
+            cal.date(byAdding: .day, value: last.length, to: last.start)
+                .flatMap { cal.isDate($0, inSameDayAs: start) ? last.length : nil }
+        }
+
+        let periodEntries = entries.filter {
+            let d = cal.startOfDay(for: $0.date)
+            return d >= start && d <= lastFlowDay
+        }
+        let topSymptom = periodEntries
+            .flatMap(\.symptoms)
+            .reduce(into: [Symptom: Int]()) { $0[$1, default: 0] += 1 }
+            .max { $0.value < $1.value }?.key
+        let pains = periodEntries.compactMap(\.pain)
+        let avgPain = pains.isEmpty ? nil : Int((Double(pains.reduce(0, +)) / Double(pains.count)).rounded())
+
+        return PeriodRecap(start: start, length: length, cycleLength: completedLength, topSymptom: topSymptom, avgPain: avgPain)
+    }
+
+    private func periodRecapCard(_ recap: PeriodRecap) -> some View {
+        var lines: [String] = ["Your period ran \(recap.length) day\(recap.length == 1 ? "" : "s")."]
+        if let cycleLength = recap.cycleLength { lines.append("The full cycle was \(cycleLength) days.") }
+        if let symptom = recap.topSymptom { lines.append("Most-logged symptom: \(symptom.displayName.lowercased()).") }
+        if let pain = recap.avgPain, pain > 0 { lines.append("Average pain \(pain)/10.") }
+
+        return CaelynCard(padding: CaelynSpacing.md) {
+            HStack(alignment: .top, spacing: CaelynSpacing.sm) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(CaelynColor.successSage)
+                    .frame(width: 26)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("That cycle, in review")
+                        .font(CaelynFont.callout.weight(.semibold))
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                    Text(lines.joined(separator: " "))
+                        .font(CaelynFont.subheadline)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Button {
+                    withAnimation { recapDismissedFor = recap.start.timeIntervalSince1970 }
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                        .padding(6)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Dismiss recap")
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    // MARK: - First-prediction celebration (one-time)
+
+    private var firstPredictionCard: some View {
+        CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.lavender.opacity(0.45)) {
+            HStack(alignment: .top, spacing: CaelynSpacing.sm) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(CaelynColor.primaryPlum)
+                    .frame(width: 26)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Your predictions are live 🎉")
+                        .font(CaelynFont.callout.weight(.semibold))
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                    Text(nextStart.map { "Next period expected around \($0.formatted(.dateTime.month(.wide).day())). Every log from here makes Caelyn smarter about your body." }
+                         ?? "Every log from here makes Caelyn smarter about your body.")
+                        .font(CaelynFont.subheadline)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Button {
+                    withAnimation { firstPredictionCelebrated = true }
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                        .padding(6)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Dismiss")
+            }
+        }
     }
 
     // MARK: - Active period awareness

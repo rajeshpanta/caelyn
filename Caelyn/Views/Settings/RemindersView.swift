@@ -125,7 +125,7 @@ private struct RemindersForm: View {
     private func sectionHeader(_ title: String) -> some View {
         Text(title.uppercased())
             .font(CaelynFont.caption.weight(.semibold))
-            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
             .tracking(0.6)
             .padding(.top, 4)
     }

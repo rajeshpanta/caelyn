@@ -23,7 +23,7 @@ struct PhaseGuideView: View {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 22))
-                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.35))
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                     }
                     .accessibilityLabel("Close")
                 }

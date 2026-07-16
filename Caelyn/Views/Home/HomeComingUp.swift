@@ -14,7 +14,7 @@ struct HomeComingUp: View {
                     HStack(spacing: CaelynSpacing.sm) {
                         Image(systemName: "moon.stars.fill")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                         Text("Nothing on the horizon — Caelyn will let you know.")
                             .font(CaelynFont.body)
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))

@@ -144,7 +144,7 @@ struct BackupInfoView: View {
         VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
             Text("FAQ")
                 .font(CaelynFont.caption.weight(.semibold))
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                 .tracking(0.6)
 
             CaelynCard(padding: CaelynSpacing.md) {
@@ -193,10 +193,10 @@ struct BackupInfoView: View {
             HStack(spacing: 6) {
                 Image(systemName: "info.circle")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                 Text("Note")
                     .font(CaelynFont.caption.weight(.semibold))
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                     .tracking(0.4)
             }
             Text("Syncing requires being signed into iCloud on this device. If iCloud isn't available, Caelyn keeps working locally and your data stays safe on this device.")

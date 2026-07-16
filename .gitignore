@@ -49,3 +49,7 @@ fastlane/test_output/
 .vscode/
 *.swp
 *~
+
+# Build/test artifacts
+*.xcresult/
+screenshots/

@@ -119,7 +119,7 @@ struct PaywallTierCard: View {
             Text(strikethroughPrice)
                 .strikethrough()
                 .font(CaelynFont.caption)
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
         }
     }
 

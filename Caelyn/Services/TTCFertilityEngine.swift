@@ -26,10 +26,10 @@ enum TTCFertilityEngine {
             let today = Calendar.current.startOfDay(for: Date.now)
             if Calendar.current.isDate(today, inSameDayAs: ovulationDay) {
                 score += 45
-                signals.append("Ovulation day")
+                signals.append("Ovulation day · +45")
             } else if fertile.contains(today) {
                 score += 30
-                signals.append("Fertile window")
+                signals.append("Fertile window · +30")
             } else {
                 score += 5
             }
@@ -40,9 +40,9 @@ enum TTCFertilityEngine {
         // 2. LH strip result
         if let lh = todayEntry?.ovulationTestResult {
             switch lh {
-            case .positive: score += 30; signals.append("LH test positive")
-            case .lhSurge:  score += 20; signals.append("LH surge detected")
-            case .rising:   score += 10; signals.append("LH rising")
+            case .positive: score += 30; signals.append("LH test positive · +30")
+            case .lhSurge:  score += 20; signals.append("LH surge detected · +20")
+            case .rising:   score += 10; signals.append("LH rising · +10")
             case .negative: score -= 5
             }
         }
@@ -50,8 +50,8 @@ enum TTCFertilityEngine {
         // 3. Cervical mucus
         if let cm = todayEntry?.cervicalMucus {
             switch cm {
-            case .eggWhite: score += 20; signals.append("Egg-white mucus (most fertile)")
-            case .watery:   score += 12; signals.append("Watery mucus")
+            case .eggWhite: score += 20; signals.append("Egg-white mucus (most fertile) · +20")
+            case .watery:   score += 12; signals.append("Watery mucus · +12")
             case .creamy:   score += 5
             case .sticky:   score -= 5
             case .dry:      score -= 10
@@ -62,10 +62,10 @@ enum TTCFertilityEngine {
         if let bbt = todayEntry?.basalTemperature {
             if bbt >= 36.7 {
                 score -= 15
-                signals.append("BBT elevated (post-ovulation)")
+                signals.append("BBT elevated (post-ovulation) · −15")
             } else if bbt >= 36.3 && bbt < 36.7 {
                 score += 8
-                signals.append("BBT pre-shift (fertile range)")
+                signals.append("BBT pre-shift (fertile range) · +8")
             }
         }
 

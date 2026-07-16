@@ -150,7 +150,7 @@ struct DailyLogForm: View {
                         } label: {
                             Image(systemName: "xmark.circle")
                                 .font(.system(size: 14, weight: .medium))
-                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.35))
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                         }
                         .buttonStyle(.plain)
                     }
@@ -294,7 +294,7 @@ struct DailyLogForm: View {
                     } else {
                         Text("5 max")
                             .font(CaelynFont.caption)
-                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.35))
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 7)
                     }
@@ -317,7 +317,7 @@ struct DailyLogForm: View {
         VStack(alignment: .leading, spacing: CaelynSpacing.xs) {
             Text("How severe?")
                 .font(CaelynFont.caption.weight(.semibold))
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                 .tracking(0.3)
                 .padding(.top, 4)
 
@@ -560,7 +560,7 @@ struct DailyLogForm: View {
                         } label: {
                             Image(systemName: "xmark.circle")
                                 .font(.system(size: 13, weight: .medium))
-                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                         }
                         .buttonStyle(.plain)
                     }
@@ -636,7 +636,7 @@ struct DailyLogForm: View {
                 if noteDraft.isEmpty {
                     Text("What's on your mind? Just for you 🔒")
                         .font(CaelynFont.body)
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.35))
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                         .padding(.top, 8)
                         .padding(.leading, 4)
                         .allowsHitTesting(false)
@@ -731,7 +731,7 @@ struct DailyLogForm: View {
                         .foregroundStyle(CaelynColor.deepPlumText)
                     Text("Helps track fertile days")
                         .font(CaelynFont.caption)
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                 }
                 Spacer()
                 Menu {
@@ -894,7 +894,7 @@ private struct SectionContainer<Content: View>: View {
                 if let subtitle {
                     Text(subtitle)
                         .font(CaelynFont.caption)
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.38))
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                 }
             }
             CaelynCard(padding: CaelynSpacing.md) {

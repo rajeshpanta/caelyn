@@ -344,7 +344,7 @@ private func chartHeader(title: String, subtitle: String) -> some View {
 private func emptyChartCopy(_ text: String) -> some View {
     HStack(spacing: 8) {
         Image(systemName: "sparkles")
-            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
+            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
         Text(text)
             .font(CaelynFont.body)
             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))

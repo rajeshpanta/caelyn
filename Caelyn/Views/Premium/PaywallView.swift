@@ -10,6 +10,7 @@ struct PaywallView: View {
     @State private var showPendingNotice = false
     @State private var hasAttemptedLoad = false
     @State private var yearlyTrialText: String?
+    @State private var monthlyTrialText: String?
     @State private var restoreFailed = false
     @Environment(\.dismiss) private var dismiss
 
@@ -42,7 +43,7 @@ struct PaywallView: View {
                     Button { dismiss() } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 22, weight: .regular))
-                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.35))
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                     }
                     .accessibilityLabel("Close")
                 }
@@ -55,6 +56,9 @@ struct PaywallView: View {
             await purchase.loadProducts()
             if let yearly = purchase.yearlyProduct {
                 yearlyTrialText = await purchase.freeTrialLabel(for: yearly)
+            }
+            if let monthly = purchase.monthlyProduct {
+                monthlyTrialText = await purchase.freeTrialLabel(for: monthly)
             }
             hasAttemptedLoad = true
         }
@@ -222,8 +226,8 @@ struct PaywallView: View {
                     displayPrice: monthlyDisplayPrice,
                     strikethroughPrice: nil,
                     perMonthLabel: nil,
-                    badgeText: "FLEXIBLE",
-                    badgeBackground: CaelynColor.deepPlumText.opacity(0.45),
+                    badgeText: monthlyTrialText != nil ? "FREE TRIAL" : "FLEXIBLE",
+                    badgeBackground: monthlyTrialText != nil ? CaelynColor.successSage : CaelynColor.deepPlumText.opacity(0.45),
                     isSelected: selectedTier == .monthly,
                     isBestValue: false
                 ) {
@@ -393,7 +397,7 @@ struct PaywallView: View {
     private var ctaTitle: String {
         if purchase.isPro { return "You're already Pro" }
         switch selectedTier {
-        case .monthly:  return isPurchasing ? "Subscribing…" : "Continue with Monthly"
+        case .monthly:  return isPurchasing ? "Subscribing…" : (monthlyTrialText != nil ? "Start free trial" : "Continue with Monthly")
         case .yearly:   return isPurchasing ? "Subscribing…" : (yearlyTrialText != nil ? "Start free trial" : "Continue with Yearly")
         case .lifetime: return isPurchasing ? "Purchasing…" : "Buy Lifetime"
         }
@@ -473,7 +477,8 @@ struct PaywallView: View {
         case .lifetime:
             return "One-time purchase — no subscription and no auto-renewal. Yours forever on this Apple ID."
         case .monthly:
-            return "Auto-renewable subscription. Renews at \(monthlyDisplayPrice) unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions."
+            let monthlyLead = monthlyTrialText.map { "\($0), then renews at " } ?? "Renews at "
+            return "Auto-renewable subscription. \(monthlyLead)\(monthlyDisplayPrice) unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions."
         case .yearly:
             let lead = yearlyTrialText.map { "\($0), then renews at " } ?? "Renews at "
             return "Auto-renewable subscription. \(lead)\(yearlyDisplayPrice) unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions."

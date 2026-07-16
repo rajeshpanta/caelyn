@@ -11,8 +11,12 @@ struct PatternInsightsSection: View {
         insights.filter { !dismissedKeys.contains($0.stableKey) }
     }
 
+    /// Free users see up to 5 insights (raised from 2 — let people FEEL the
+    /// depth before paying); Pro unlocks the full feed.
+    static let freeInsightCap = 5
+
     private var visibleInsights: [PatternInsight] {
-        isPro ? activeInsights : Array(activeInsights.prefix(2))
+        isPro ? activeInsights : Array(activeInsights.prefix(Self.freeInsightCap))
     }
 
     var body: some View {
@@ -32,8 +36,8 @@ struct PatternInsightsSection: View {
                     PatternInsightCard(insight: insight) { dismiss(insight) }
                 }
 
-                if !isPro && activeInsights.count > 2 {
-                    lockedInsightsTeaser(remaining: activeInsights.count - 2)
+                if !isPro && activeInsights.count > Self.freeInsightCap {
+                    lockedInsightsTeaser(remaining: activeInsights.count - Self.freeInsightCap)
                 }
             }
         }
@@ -127,7 +131,7 @@ struct PatternInsightCard: View {
                         Button(action: onDismiss) {
                             Image(systemName: "xmark")
                                 .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.35))
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                                 .padding(6)
                                 .contentShape(Rectangle())
                         }

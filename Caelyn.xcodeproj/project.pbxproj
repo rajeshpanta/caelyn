@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		036BA33CD4D86A7FBC7EB83A /* Color+Caelyn.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5B21C55B9209C096D76941E /* Color+Caelyn.swift */; };
 		059ECBD2B5D95637170E757D /* CycleSummaryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46C3CD32C072709AFB2F6B44 /* CycleSummaryService.swift */; };
+		06AEC260294F6042F9C5CA33 /* ImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E8D2776DED77063C07F64 /* ImportService.swift */; };
 		07E5A710DF8ECD1462E692D1 /* HomeHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8CB13185D631BA4005CD6C /* HomeHeader.swift */; };
 		0AC306E91FF45E3C2DBEE4E5 /* PhaseGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 715D50A0310476EA79B2472B /* PhaseGuideView.swift */; };
 		0B85370248819A80B49F144C /* WatchDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED14730ACF6862A0890288B1 /* WatchDataModel.swift */; };
@@ -95,7 +96,6 @@
 		B3020FFD85C22E7A2ADC1A63 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A35FB178BD6C178286935B2 /* WidgetViews.swift */; };
 		B33B8CADB43134E7122C16E6 /* AutoSweepService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375F0D5CCAB4D6211329C3FB /* AutoSweepService.swift */; };
 		B54C125DD9E05A5CB548105D /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A45E9FE5A677D4562C59DE7 /* HealthKitService.swift */; };
-		B55E9B9C29B97A83CDA636CF /* ShareModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D23DEB9259E2A475E1B467D /* ShareModeView.swift */; };
 		BAFF08D9C8C782AA2497E59D /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A27162A4340D1998A09B11 /* DayCell.swift */; };
 		BBC23E6131EC21D7AF843BFB /* PrivacyChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = F482876413250EE67CC8E266 /* PrivacyChip.swift */; };
 		BC1FAD63656CEE74524FA352 /* iCloudSyncView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0CE13176EDA61E7E405D69 /* iCloudSyncView.swift */; };
@@ -206,6 +206,7 @@
 		12EB370D7339101CB7E5FBC2 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		1324749F9ED0476DABEC79C3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		133DA567417FA320181DEB05 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		134E8D2776DED77063C07F64 /* ImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportService.swift; sourceTree = "<group>"; };
 		1422566B4DB4AAE611110E36 /* CycleHistorySection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleHistorySection.swift; sourceTree = "<group>"; };
 		147DB92677049A03D13E8143 /* TTCFertilityEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTCFertilityEngine.swift; sourceTree = "<group>"; };
 		1525588F818995E2E60CF533 /* HealthKitConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitConnectView.swift; sourceTree = "<group>"; };
@@ -219,7 +220,6 @@
 		29AD7A95A766A2973718AE3D /* CaelynButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynButton.swift; sourceTree = "<group>"; };
 		29C32A52D52FD6E8FB154FCE /* MonthSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthSummaryCard.swift; sourceTree = "<group>"; };
 		2A45E9FE5A677D4562C59DE7 /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
-		2D23DEB9259E2A475E1B467D /* ShareModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareModeView.swift; sourceTree = "<group>"; };
 		3238D5E5DA356783A9A2BA1F /* ToggleCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleCard.swift; sourceTree = "<group>"; };
 		3393953805D85FD844EA1DDC /* Shapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shapes.swift; sourceTree = "<group>"; };
 		33A60D37340B385B8608B8CB /* TTCDashboardCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTCDashboardCard.swift; sourceTree = "<group>"; };
@@ -404,6 +404,7 @@
 				5322159624E05FC0C7C1686B /* ExportService.swift */,
 				2A45E9FE5A677D4562C59DE7 /* HealthKitService.swift */,
 				59064BE929C94D1B84DE947C /* HealthKitSync.swift */,
+				134E8D2776DED77063C07F64 /* ImportService.swift */,
 				483D4ABE3B0FBDCFACE74186 /* NotificationRouter.swift */,
 				F727008BDD9FE097F46B549E /* NotificationService.swift */,
 				0B69A196D7954169CBDBA685 /* PatternEngine.swift */,
@@ -472,7 +473,6 @@
 				3931C56DD039472FB7265FA2 /* SettingsPickerSheets.swift */,
 				F19182C4F23C467AC50DDED0 /* SettingsRows.swift */,
 				1324749F9ED0476DABEC79C3 /* SettingsView.swift */,
-				2D23DEB9259E2A475E1B467D /* ShareModeView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -938,6 +938,7 @@
 				D32410CB7EF599104D4AFAA4 /* HomeQuickActions.swift in Sources */,
 				A07388C20552EFA03BDA067A /* HomeStreakCard.swift in Sources */,
 				6EE73517CCFF174B7DF6F843 /* HomeView.swift in Sources */,
+				06AEC260294F6042F9C5CA33 /* ImportService.swift in Sources */,
 				30D0ECE98187C5E88F4B4FEF /* InsightCard.swift in Sources */,
 				F62CF1A517E50F8D1FBD5C69 /* InsightsCharts.swift in Sources */,
 				2630C7CF38701E169675A5A2 /* InsightsEmptyState.swift in Sources */,
@@ -985,7 +986,6 @@
 				8F9FBACA1AB4B3CF19B97FFA /* SettingsView.swift in Sources */,
 				11FEBA53A510B9DFDBE35CFD /* Shadows.swift in Sources */,
 				8F40B2801D830BE5BD40BCED /* Shapes.swift in Sources */,
-				B55E9B9C29B97A83CDA636CF /* ShareModeView.swift in Sources */,
 				14FC48433AA3511A592FBFE6 /* Spacing.swift in Sources */,
 				DD549E00756CE802FF125BB9 /* StatCard.swift in Sources */,
 				79E714A8CB6876CD2F78846E /* SymptomChip.swift in Sources */,

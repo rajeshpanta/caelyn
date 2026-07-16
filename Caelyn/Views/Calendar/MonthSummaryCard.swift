@@ -55,7 +55,7 @@ struct MonthSummaryCard: View {
                     HStack(spacing: CaelynSpacing.sm) {
                         Image(systemName: "calendar.badge.clock")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                         Text("This month hasn't started yet.")
                             .font(CaelynFont.body)
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
@@ -66,7 +66,7 @@ struct MonthSummaryCard: View {
                     HStack(spacing: CaelynSpacing.sm) {
                         Image(systemName: "moon.stars.fill")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.4))
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                         Text("Nothing logged this month yet.")
                             .font(CaelynFont.body)
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))

@@ -175,8 +175,10 @@ enum CycleAnalytics {
         return entries.filter { $0.hasContent && $0.date >= start }.count
     }
 
-    /// Current consecutive logging streak (days in a row with any content logged,
-    /// counting backwards from today inclusive). Returns 0 if today has no log.
+    /// Current logging streak with GRACE (stand-out plan S6): an unlogged *today*
+    /// doesn't zero the streak (the day isn't over yet), and one missed day inside
+    /// the run freezes the count instead of resetting it. Bodies and lives are
+    /// irregular — punishing a single gap is how other apps lose people.
     static func loggingStreak(in entries: [CycleEntry], today: Date = .now) -> Int {
         let cal = Calendar.current
         let loggedDays = Set(
@@ -184,10 +186,22 @@ enum CycleAnalytics {
                 .filter { $0.hasContent }
                 .map { cal.startOfDay(for: $0.date) }
         )
-        var streak = 0
         var cursor = cal.startOfDay(for: today)
-        while loggedDays.contains(cursor) {
-            streak += 1
+        // Today not logged yet? Start counting from yesterday — no penalty.
+        if !loggedDays.contains(cursor) {
+            guard let yesterday = cal.date(byAdding: .day, value: -1, to: cursor) else { return 0 }
+            cursor = yesterday
+        }
+        var streak = 0
+        var graceUsed = false
+        while true {
+            if loggedDays.contains(cursor) {
+                streak += 1
+            } else if streak > 0 && !graceUsed {
+                graceUsed = true   // freeze across one missed day instead of resetting
+            } else {
+                break
+            }
             guard let prev = cal.date(byAdding: .day, value: -1, to: cursor) else { break }
             cursor = prev
         }

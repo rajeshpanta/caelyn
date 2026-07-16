@@ -113,6 +113,19 @@ struct InsightsView: View {
             cycleVariation: cycleVariation
         )
 
+        // FREE proof-of-intelligence: what Caelyn has personally learned about
+        // this user's body vs the one-size-fits-all defaults every other app
+        // assumes. Shown once 3 cycles exist (stand-out plan S3).
+        if cycles.count >= 3 {
+            LearnedAboutYouSection(
+                cycleCount: cycles.count,
+                avgCycleLength: avgCycleLength,
+                cycleVariation: cycleVariation,
+                learnedLuteal: PredictionEngine.learnedLutealLength(entries: entries, cycles: cycles),
+                learnedPmsDays: PredictionEngine.adaptivePmsDaysBefore(entries: entries, cycles: cycles)
+            )
+        }
+
         if !patternInsights.isEmpty {
             PatternInsightsSection(
                 insights: patternInsights,
@@ -164,6 +177,90 @@ struct InsightsView: View {
     }
 }
 
+// MARK: - What Caelyn learned about you (free)
+
+/// The proof-of-intelligence panel: the user's PERSONAL numbers vs the
+/// one-size-fits-all defaults other apps assume. Free — showing is what
+/// converts; the deeper "why" lives in Pro.
+private struct LearnedAboutYouSection: View {
+    let cycleCount: Int
+    let avgCycleLength: Int
+    let cycleVariation: Int
+    let learnedLuteal: Int?
+    let learnedPmsDays: Int?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: CaelynSpacing.md) {
+            SectionHeader(
+                title: "What Caelyn learned about you",
+                subtitle: "Your numbers — not the textbook's — from \(cycleCount) cycles"
+            )
+            CaelynCard(padding: CaelynSpacing.md) {
+                VStack(alignment: .leading, spacing: CaelynSpacing.md) {
+                    learnedRow(
+                        icon: "arrow.triangle.2.circlepath",
+                        title: "Your cycle length",
+                        value: cycleVariation > 1 ? "\(avgCycleLength) days ± \(cycleVariation)" : "\(avgCycleLength) days",
+                        note: avgCycleLength == 28 ? "Right on the textbook 28." : "The textbook assumes 28 — yours is \(avgCycleLength)."
+                    )
+                    divider
+                    learnedRow(
+                        icon: "moon.circle.fill",
+                        title: "Your luteal phase",
+                        value: learnedLuteal.map { "\($0) days" } ?? "Still learning",
+                        note: learnedLuteal.map { luteal in
+                            luteal == 14
+                                ? "Matches the 14-day default most apps assume."
+                                : "Most apps assume 14 days — yours runs \(luteal). Caelyn times your fertile window with YOUR number."
+                        } ?? "Log ovulation tests (LH) across 3 cycles and Caelyn learns your real luteal length instead of assuming 14 days."
+                    )
+                    divider
+                    learnedRow(
+                        icon: "cloud.moon.fill",
+                        title: "Your PMS window",
+                        value: learnedPmsDays.map { "~\($0) days before" } ?? "Still learning",
+                        note: learnedPmsDays.map { days in
+                            "Your PMS symptoms tend to start ~\(days) day\(days == 1 ? "" : "s") before your period (default assumption: 5)."
+                        } ?? "Keep logging symptoms and moods — Caelyn learns when YOUR PMS actually starts instead of assuming 5 days."
+                    )
+                }
+            }
+            Text("Learned privately on this device — nothing is sent anywhere.")
+                .font(CaelynFont.caption)
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+        }
+    }
+
+    private var divider: some View {
+        Rectangle().fill(CaelynColor.deepPlumText.opacity(0.06)).frame(height: 1)
+    }
+
+    private func learnedRow(icon: String, title: String, value: String, note: String) -> some View {
+        HStack(alignment: .top, spacing: CaelynSpacing.sm) {
+            Image(systemName: icon)
+                .font(.system(size: 17, weight: .medium))
+                .foregroundStyle(CaelynColor.primaryPlum)
+                .frame(width: 26)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(title)
+                        .font(CaelynFont.callout.weight(.semibold))
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                    Spacer(minLength: 0)
+                    Text(value)
+                        .font(CaelynFont.callout.weight(.semibold))
+                        .foregroundStyle(CaelynColor.primaryPlum)
+                }
+                Text(note)
+                    .font(CaelynFont.caption)
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
 // MARK: - Private Intelligence cards (Pro)
 
 /// On-device natural-language cycle summary (Foundation Models when available,
@@ -184,7 +281,7 @@ private struct CycleSummaryCard: View {
                     .fixedSize(horizontal: false, vertical: true)
                 Text("Generated privately on your device.")
                     .font(CaelynFont.caption)
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.45))
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
             }
         }
         .task { text = await CycleSummaryService.summary(for: facts) }
