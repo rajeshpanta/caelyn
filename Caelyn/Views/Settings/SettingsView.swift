@@ -364,10 +364,10 @@ struct SettingsView: View {
     private var dataSection: some View {
         SettingsSectionCard(title: "Data") {
             SettingsRow(
-                icon: "lock.iphone",
+                icon: "arrow.triangle.2.circlepath.icloud",
                 iconColor: CaelynColor.primaryPlum,
-                title: "Backup",
-                detail: "On this device",
+                title: "iCloud Sync",
+                detail: Persistence.isSyncEnabled ? "On" : "Off · local",
                 action: { showingCloudSync = true }
             )
             SettingsDivider()

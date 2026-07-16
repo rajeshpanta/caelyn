@@ -6,7 +6,7 @@ struct PrivacyTrustView: View {
         (
             icon: "iphone",
             title: "No server — ever",
-            body: "Every entry, every log, every note lives exclusively on your device. We have no database, no server, no cloud of our own.",
+            body: "Caelyn has no database, no server, and no cloud of its own. By default every entry stays only on your device; turn on iCloud Sync and it goes to your OWN private iCloud — still never to us.",
             color: CaelynColor.primaryPlum
         ),
         (
@@ -30,7 +30,7 @@ struct PrivacyTrustView: View {
         (
             icon: "wifi.slash",
             title: "The only data that leaves your phone",
-            body: "Caelyn makes no network calls of its own and runs no servers. The only things that ever leave are what you choose to export, what you sync to Apple Health (which stays in your Health app), and purchase checks handled by Apple.",
+            body: "Caelyn makes no network calls of its own and runs no servers. The only things that ever leave are what you export, what you sync to Apple Health, an encrypted copy to your OWN private iCloud if you turn on Sync, and purchase checks handled by Apple.",
             color: CaelynColor.primaryPlum
         ),
         (
@@ -60,7 +60,7 @@ struct PrivacyTrustView: View {
         (
             icon: "lock.shield.fill",
             title: "Subpoena-resistant by design",
-            body: "Because we hold no data on our servers, there is nothing for us to hand over — even if legally compelled. This isn't a policy. It's the architecture.",
+            body: "Because we hold no data and run no server, there is nothing for us to hand over — even if legally compelled. This isn't a policy; it's the architecture. (If you enable iCloud Sync, your copy lives in your Apple account, under Apple's policies — never ours.)",
             color: CaelynColor.alertRose
         )
     ]

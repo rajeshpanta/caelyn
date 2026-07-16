@@ -20,16 +20,26 @@ extension ModelContext {
 enum Persistence {
     static let schema = Schema([CycleEntry.self, UserProfile.self])
 
-    /// The live SwiftData container. Caelyn is **local-only**: all data stays on
-    /// this device, with no CloudKit sync and no Caelyn account. We pass
-    /// `.none` explicitly so the store is deterministically local and never
-    /// attempts to mirror to iCloud. (Real, opt-in private-CloudKit backup is a
-    /// later phase — see docs/BUILD_PLAN.md. The store URL is unchanged, so any
-    /// existing on-device data opens with zero loss.) A total failure is
-    /// unrecoverable — fatalError so the crash log captures the exact error.
-    /// UserDefaults flag set when the live store failed to open normally, so the
-    /// UI can warn the user and point them to Export (data-inmemory-safety).
+    /// The live SwiftData container. Caelyn is **local by default** — every entry
+    /// stays on-device with no Caelyn account and no Caelyn server, ever. iCloud
+    /// Sync is strictly **opt-in** (`syncEnabledKey`, off by default): when the
+    /// user turns it on, the store mirrors to *their own* private CloudKit
+    /// database (Apple end-to-end encrypted) — never through us. If the sync store
+    /// can't open (e.g. the CloudKit capability isn't provisioned yet, or no iCloud
+    /// account), we fall back to a plain local store so data always opens with zero
+    /// loss. A total failure is unrecoverable — fatalError so the crash log captures
+    /// the exact error.
     static let storeFailedKey = "caelyn.storeFailed"
+
+    /// Opt-in iCloud sync flag. OFF unless the user explicitly enables it. Changing
+    /// it takes effect on the next launch (the container is built once, here).
+    static let syncEnabledKey = "caelyn.syncEnabled"
+    static var isSyncEnabled: Bool { UserDefaults.standard.bool(forKey: syncEnabledKey) }
+
+    /// The user's PRIVATE CloudKit container. Provisioned via Xcode → Signing &
+    /// Capabilities → iCloud → CloudKit (needs the developer's account). Until then
+    /// the sync path fails closed to a local store.
+    static let cloudKitContainerID = "iCloud.smallpanta-icould.com.caelynperiodtracker"
 
     /// How the live store actually opened — honest status for diagnostics/UI.
     enum StoreMode { case ok, recoveredFresh, inMemory }
@@ -38,6 +48,21 @@ enum Persistence {
     static let live: ModelContainer = {
         let log = Logger(subsystem: "smallpanta-icould.com.caelynperiodtracker", category: "swiftdata")
         let localConfig = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false, cloudKitDatabase: .none)
+
+        // 0. Opt-in sync path — mirror to the user's own private CloudKit database.
+        //    On any failure (unprovisioned capability, signed-out iCloud, etc.) we
+        //    fall through to the identical LOCAL store below, so data still opens.
+        if isSyncEnabled {
+            let syncConfig = ModelConfiguration(
+                schema: schema,
+                isStoredInMemoryOnly: false,
+                cloudKitDatabase: .private(cloudKitContainerID)
+            )
+            if let container = try? ModelContainer(for: schema, configurations: [syncConfig]) {
+                return container
+            }
+            log.warning("SwiftData: iCloud sync store failed to open — falling back to local.")
+        }
 
         // 1. Normal path — open the on-disk store (SwiftData attempts automatic
         //    lightweight migration here for any compatible schema change).

@@ -951,4 +951,11 @@ final class CaelynTests: XCTestCase {
         XCTAssertFalse(AutoSweepService.shouldSweep(autoWipeEnabled: true, autoWipeAfterDays: 60, lastActiveAt: last, now: now))
         XCTAssertFalse(AutoSweepService.shouldSweep(autoWipeEnabled: false, autoWipeAfterDays: 1, lastActiveAt: last, now: now))
     }
+
+    // MARK: - Phase 6: iCloud sync is opt-in (off by default)
+
+    func testSyncIsOptInByDefault() {
+        UserDefaults.standard.removeObject(forKey: Persistence.syncEnabledKey)
+        XCTAssertFalse(Persistence.isSyncEnabled, "iCloud sync must be OFF on a fresh install — the privacy default")
+    }
 }
