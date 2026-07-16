@@ -11,4 +11,5 @@ import Foundation
 enum AppURLs {
     static let privacyPolicy = URL(string: "https://rajeshpanta.github.io/caelyn/privacy.html")!
     static let termsOfUse    = URL(string: "https://rajeshpanta.github.io/caelyn/terms.html")!
+    static let support       = URL(string: "https://rajeshpanta.github.io/caelyn/support.html")!
 }

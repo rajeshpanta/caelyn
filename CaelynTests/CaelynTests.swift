@@ -958,4 +958,34 @@ final class CaelynTests: XCTestCase {
         UserDefaults.standard.removeObject(forKey: Persistence.syncEnabledKey)
         XCTAssertFalse(Persistence.isSyncEnabled, "iCloud sync must be OFF on a fresh install — the privacy default")
     }
+
+    // MARK: - Phase 6 hardening: same-day dedup (post .unique removal)
+
+    func testDedupeMergesSameDayDuplicates() throws {
+        let day = Calendar.current.startOfDay(for: .now)
+        let a = CycleEntry(date: day)
+        a.flow = .medium
+        a.pain = 3
+        a.symptoms = [.cramps]
+        a.createdAt = Date(timeIntervalSince1970: 100)
+        a.updatedAt = Date(timeIntervalSince1970: 100)
+        let b = CycleEntry(date: day)          // same calendar day, created later
+        b.symptoms = [.headache]
+        b.basalTemperature = 36.5
+        b.createdAt = Date(timeIntervalSince1970: 200)
+        b.updatedAt = Date(timeIntervalSince1970: 200)
+        context.insert(a)
+        context.insert(b)
+        try context.save()
+
+        let removed = CycleStore.dedupeSameDay(in: context)
+        XCTAssertEqual(removed, 1, "one duplicate should be merged away")
+        let remaining = try context.fetch(FetchDescriptor<CycleEntry>())
+        XCTAssertEqual(remaining.count, 1, "exactly one entry per day survives")
+        let merged = remaining[0]
+        XCTAssertEqual(merged.flow, .medium)
+        XCTAssertEqual(merged.pain, 3)
+        XCTAssertEqual(merged.basalTemperature, 36.5)
+        XCTAssertEqual(Set(merged.symptoms), Set([.cramps, .headache]), "symptoms are unioned, not lost")
+    }
 }

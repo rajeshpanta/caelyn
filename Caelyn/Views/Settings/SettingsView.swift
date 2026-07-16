@@ -468,6 +468,15 @@ struct SettingsView: View {
             }
             .padding(CaelynSpacing.md)
 
+            SettingsDivider()
+            SettingsRow(
+                icon: "questionmark.circle",
+                iconColor: CaelynColor.primaryPlum,
+                title: "Contact Support",
+                detail: "Get help",
+                action: { openURL(AppURLs.support) }
+            )
+
             Rectangle()
                 .fill(CaelynColor.deepPlumText.opacity(0.07))
                 .frame(height: 1)

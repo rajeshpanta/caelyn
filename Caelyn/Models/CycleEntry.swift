@@ -4,9 +4,10 @@ import SwiftData
 @Model
 final class CycleEntry {
     // No `.unique` and a default value: both are required for CloudKit mirroring
-    // (Phase 6 opt-in sync). Uniqueness-by-day is enforced in code (log flow
-    // fetches-or-creates by date) rather than by the store, and a cross-device
-    // dedup pass guards against sync races.
+    // (Phase 6 opt-in sync). Uniqueness-by-day is enforced in code instead of by
+    // the store: every write path fetches-or-creates by day, and
+    // `CycleStore.dedupeSameDay` runs at launch to merge any same-day duplicates
+    // that a migration or sync race could introduce.
     var date: Date = Date()
     var flow: FlowLevel?
     var pain: Int?

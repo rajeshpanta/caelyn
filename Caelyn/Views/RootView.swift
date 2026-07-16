@@ -3,6 +3,7 @@ import SwiftData
 
 struct RootView: View {
     @Query private var profiles: [UserProfile]
+    @Environment(\.modelContext) private var modelContext
     @State private var isLoaded = false
     @State private var showStoreWarning = UserDefaults.standard.bool(forKey: Persistence.storeFailedKey)
 
@@ -27,6 +28,11 @@ struct RootView: View {
         }
         .animation(.easeInOut(duration: 0.4), value: hasOnboarded)
         .task {
+            // Merge any same-day duplicate entries an old-store migration or a
+            // sync race could have introduced (Phase 6 removed the `.unique`
+            // store constraint; uniqueness-by-day is enforced in code instead).
+            CycleStore.dedupeSameDay(in: modelContext)
+
             // Brief delay lets SwiftData hydrate from the store before we make
             // routing decisions. Without this, a brief [] from @Query would
             // incorrectly flash the onboarding screen on returning users.

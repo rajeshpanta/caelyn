@@ -55,17 +55,9 @@ extension WatchBridgeService: WCSessionDelegate {
 
         Task { @MainActor in
             let context = Persistence.live.mainContext
-            let cal = Calendar.current
-            let target = cal.startOfDay(for: date)
-            let descriptor = FetchDescriptor<CycleEntry>(
-                predicate: #Predicate { $0.date == target }
-            )
-            let existing = (try? context.fetch(descriptor))?.first
-            let entry = existing ?? {
-                let e = CycleEntry(date: date)
-                context.insert(e)
-                return e
-            }()
+            // Single fetch-or-create funnel (by calendar day) — never introduces a
+            // same-day duplicate, even if two watch messages arrive back-to-back.
+            let entry = CycleStore.entry(for: date, in: context)
             if let f = flow, let level = FlowLevel(rawValue: f) { entry.flow = level }
             if let p = pain { entry.pain = p }
             if let m = mood, let moodVal = Mood(rawValue: m) { entry.mood = moodVal }
