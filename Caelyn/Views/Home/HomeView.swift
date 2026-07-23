@@ -16,6 +16,7 @@ struct HomeView: View {
     @AppStorage("caelyn.periodRecapDismissedFor") private var recapDismissedFor: Double = 0
     @AppStorage("caelyn.firstFlowCelebrated") private var firstFlowCelebrated = false
     @AppStorage("caelyn.firstWeekCelebrated") private var firstWeekCelebrated = false
+    @State private var showingWeekShare = false
     @State private var showSoftPaywall = false
 
     /// The period anchor as it was just before "Log Period today" moved it to today,
@@ -445,7 +446,7 @@ struct HomeView: View {
 
     // MARK: - One-time milestone cards (dismiss-and-forget, no nag)
 
-    private func celebrationCard(icon: String, title: String, message: String, onDismiss: @escaping () -> Void) -> some View {
+    private func celebrationCard(icon: String, title: String, message: String, onShare: (() -> Void)? = nil, onDismiss: @escaping () -> Void) -> some View {
         CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.lavender.opacity(0.45)) {
             HStack(alignment: .top, spacing: CaelynSpacing.sm) {
                 Image(systemName: icon)
@@ -463,6 +464,17 @@ struct HomeView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 0)
+                if let onShare {
+                    Button { onShare() } label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(CaelynColor.primaryPlum)
+                            .padding(6)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Share this moment")
+                }
                 Button { withAnimation { onDismiss() } } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 11, weight: .semibold))
@@ -474,7 +486,6 @@ struct HomeView: View {
                 .accessibilityLabel("Dismiss")
             }
         }
-        .accessibilityElement(children: .combine)
     }
 
     private var firstFlowCard: some View {
@@ -489,8 +500,13 @@ struct HomeView: View {
         celebrationCard(
             icon: "heart.circle.fill",
             title: "One week of listening to yourself",
-            message: "Seven days of showing up for you. This is how Caelyn learns your rhythm — gently, and only for you."
+            message: "Seven days of showing up for you. This is how Caelyn learns your rhythm — gently, and only for you.",
+            onShare: { showingWeekShare = true }
         ) { firstWeekCelebrated = true }
+        .sheet(isPresented: $showingWeekShare) {
+            ShareCardSheet(moment: .oneWeek)
+                .presentationDetents([.large])
+        }
     }
 
     // MARK: - Active period awareness

@@ -27,6 +27,7 @@
 		1F55F3C99335A109FF917A65 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDF7284C85E89A58176F940 /* MainTabView.swift */; };
 		218A1D7F2C2FDC91289482A8 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 368EA8FCC339D47BDE93020F /* PaywallView.swift */; };
 		21AD8993561F27D1B5784D68 /* CaelynWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4BD2A286B2E8E8E9657261 /* CaelynWidgetBundle.swift */; };
+		233E86329710445DA151E88E /* ShareableCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04B6AD123314DD833715C223 /* ShareableCard.swift */; };
 		25564C308FDA9E6CB89F7542 /* PatternsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4676439157E4C2C4A31806B7 /* PatternsSection.swift */; };
 		2630C7CF38701E169675A5A2 /* InsightsEmptyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD48D14EB120165091660899 /* InsightsEmptyState.swift */; };
 		2769D9A192CDAF084FDB7688 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3631FAF209987A1704C78F36 /* ContentView.swift */; };
@@ -195,6 +196,7 @@
 		0188FEF8DFA34ECEDEE22AAB /* WatchHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHomeView.swift; sourceTree = "<group>"; };
 		01934B982642BD96A3984DF4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		032976BC579EC7C7A9617A56 /* CaelynWidgetProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynWidgetProvider.swift; sourceTree = "<group>"; };
+		04B6AD123314DD833715C223 /* ShareableCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareableCard.swift; sourceTree = "<group>"; };
 		0573AB74971CE763A3A4BD08 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		074FFFF68AC191D9677D35DB /* HomeQuickActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeQuickActions.swift; sourceTree = "<group>"; };
 		08F7B66C9C067BF416634B9E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -634,6 +636,7 @@
 				228D0F7284D3D497828E3735 /* Onboarding */,
 				966E3FBBF80A9E6C62377488 /* Premium */,
 				3D84A90295DB5D6C472D76B4 /* Settings */,
+				DCCB3F5BF3FD8F2668C28548 /* Share */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -666,6 +669,14 @@
 				D583843EB06C575EF3737512 /* PINViews.swift */,
 			);
 			path = Main;
+			sourceTree = "<group>";
+		};
+		DCCB3F5BF3FD8F2668C28548 /* Share */ = {
+			isa = PBXGroup;
+			children = (
+				04B6AD123314DD833715C223 /* ShareableCard.swift */,
+			);
+			path = Share;
 			sourceTree = "<group>";
 		};
 		EEE7CDCD19D0C0273D1F5F98 /* Components */ = {
@@ -989,6 +1000,7 @@
 				8F9FBACA1AB4B3CF19B97FFA /* SettingsView.swift in Sources */,
 				11FEBA53A510B9DFDBE35CFD /* Shadows.swift in Sources */,
 				8F40B2801D830BE5BD40BCED /* Shapes.swift in Sources */,
+				233E86329710445DA151E88E /* ShareableCard.swift in Sources */,
 				14FC48433AA3511A592FBFE6 /* Spacing.swift in Sources */,
 				DD549E00756CE802FF125BB9 /* StatCard.swift in Sources */,
 				79E714A8CB6876CD2F78846E /* SymptomChip.swift in Sources */,

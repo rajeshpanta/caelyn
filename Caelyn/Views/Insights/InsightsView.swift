@@ -189,6 +189,8 @@ private struct LearnedAboutYouSection: View {
     let learnedLuteal: Int?
     let learnedPmsDays: Int?
 
+    @State private var showingShare = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.md) {
             SectionHeader(
@@ -225,9 +227,25 @@ private struct LearnedAboutYouSection: View {
                     )
                 }
             }
-            Text("Learned privately on this device — nothing is sent anywhere.")
-                .font(CaelynFont.caption)
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+            HStack {
+                Text("Learned privately on this device — nothing is sent anywhere.")
+                    .font(CaelynFont.caption)
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: CaelynSpacing.sm)
+                Button { showingShare = true } label: {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                        .font(CaelynFont.caption.weight(.semibold))
+                        .foregroundStyle(CaelynColor.primaryPlum)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .sheet(isPresented: $showingShare) {
+            // A warm, non-clinical card — celebrates the "it gets me" feeling
+            // without ever exposing her actual numbers.
+            ShareCardSheet(moment: .learnedRhythm)
+                .presentationDetents([.large])
         }
     }
 
