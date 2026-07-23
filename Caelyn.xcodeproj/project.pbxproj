@@ -78,6 +78,7 @@
 		8365DE6D282CEB140AEA20BE /* ComponentGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 716AADA33C2AA6BA1134DF22 /* ComponentGallery.swift */; };
 		83B0DEEB56B767E74A81781D /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE228FE95D6CFB5B6AA94AA /* WidgetDataStore.swift */; };
 		87C388F7E2B1DF57EA5EB394 /* CyclePrediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D5D74DF250AA8A6396C3896 /* CyclePrediction.swift */; };
+		89E77462A3A3AC83DE2F1656 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96EC40E0931D0DEAB6685E5E /* Assets.xcassets */; };
 		8D226211ADD88F0D7513CF4F /* WatchHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0188FEF8DFA34ECEDEE22AAB /* WatchHomeView.swift */; };
 		8DC6C9845609FAA8F8411FAC /* CaelynWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51EC99CA13B2B3BCD725DBE4 /* CaelynWatchApp.swift */; };
 		8F40B2801D830BE5BD40BCED /* Shapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3393953805D85FD844EA1DDC /* Shapes.swift */; };
@@ -295,6 +296,7 @@
 		8ECDCA0268B520CF6DE71EE5 /* MoodChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodChip.swift; sourceTree = "<group>"; };
 		93D2C463E713B1341A1DDDCA /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		95030A62CE85285A1B7447CE /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
+		96EC40E0931D0DEAB6685E5E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97F0CABBB7635B472536C64A /* InsightsCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsCharts.swift; sourceTree = "<group>"; };
 		9955FAEDEE824E578BBD738C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9BBA80B3841E6E03E0EFB1EC /* OnboardingProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingProgress.swift; sourceTree = "<group>"; };
@@ -357,6 +359,7 @@
 		1820E8F4DE3DC558CAE189DE /* CaelynWatch */ = {
 			isa = PBXGroup;
 			children = (
+				96EC40E0931D0DEAB6685E5E /* Assets.xcassets */,
 				B0C166CBDCCBDA1702DCEE16 /* CaelynWatch.entitlements */,
 				51EC99CA13B2B3BCD725DBE4 /* CaelynWatchApp.swift */,
 				5C2D0C0DF903A769EEE2158B /* Info.plist */,
@@ -786,6 +789,7 @@
 			buildConfigurationList = AD4213F74CC5A0BD04FFE992 /* Build configuration list for PBXNativeTarget "CaelynWatch" */;
 			buildPhases = (
 				7CA5869A0A6D12A5F777A220 /* Sources */,
+				18684727444AF65F6C0558A1 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -852,6 +856,14 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		18684727444AF65F6C0558A1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				89E77462A3A3AC83DE2F1656 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		87448F3981F98349B1DA2D04 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
