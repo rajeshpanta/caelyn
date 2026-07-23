@@ -7,13 +7,16 @@ struct HomeStreakCard: View {
     @State private var breathe = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    private var hasPastLogs: Bool { recentDays.contains { $0.logged } }
+
     private var streakLabel: String {
         switch streak {
-        case 0:       return "Your first log starts here"
+        // Grace, not guilt: a returning user is "paused", never "broken".
+        case 0:       return hasPastLogs ? "Your streak paused — log whenever you're ready" : "Your first log starts here"
         case 1:       return "First log — great start!"
-        case 3:       return "3 days in a row 🔥"
-        case 7:       return "One week — you're glowing!"
-        case 14:      return "Two weeks — truly amazing! ✨"
+        case 3:       return "3 days in a row"
+        case 7:       return "One week of showing up"
+        case 14:      return "Two weeks of listening to yourself"
         default:      return "\(streak)-day streak 🌸"
         }
     }

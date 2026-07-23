@@ -19,7 +19,7 @@ struct HomeMoodCheckIn: View {
         switch selectedMood {
         // Light, positive moods → simple, warm confirmation.
         case .calm, .happy, .energetic, .focused:
-            return "Logged: feeling \(mood) today. ☺︎"
+            return "Logged: feeling \(mood) today."
         // Heavier moods → quiet acknowledgement, no advice, no preaching.
         case .tired, .lowEnergy:
             return "Logged: feeling \(mood). Rest is allowed."

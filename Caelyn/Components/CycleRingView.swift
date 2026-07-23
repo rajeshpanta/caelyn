@@ -8,7 +8,7 @@ struct CycleRingView: View {
     var size: CGFloat = 220
 
     @State private var hasAppeared = false
-    @State private var pulse = false
+    @State private var heartbeat = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var ovulationDay: Int { max(1, cycleLength - 14) }
@@ -32,6 +32,8 @@ struct CycleRingView: View {
                 Text("\(cycleDay)")
                     .font(CaelynFont.numberLarge)
                     .foregroundStyle(CaelynColor.deepPlumText)
+                    .contentTransition(.numericText())
+                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.4), value: cycleDay)
                 Text("of \(cycleLength)")
                     .font(CaelynFont.footnote)
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
@@ -71,25 +73,41 @@ struct CycleRingView: View {
         let x = size / 2 + cos(angleRad) * radius
         let y = size / 2 + sin(angleRad) * radius
         let dotSize = thickness + 4
-        return ZStack {
-            // A soft "heartbeat" halo — quietly says "this is you, right now".
+        let core = ZStack {
             Circle()
-                .fill(CaelynColor.primaryPlum.opacity(0.35))
-                .frame(width: dotSize, height: dotSize)
-                .scaleEffect(pulse ? 2.1 : 1.0)
-                .opacity(pulse ? 0 : 0.5)
+                .fill(CaelynColor.primaryPlum.opacity(0.22))
+                .frame(width: dotSize * 1.7, height: dotSize * 1.7)
             Circle()
                 .fill(CaelynColor.primaryPlum)
                 .frame(width: dotSize, height: dotSize)
                 .overlay(Circle().stroke(CaelynColor.cardWhite, lineWidth: 3))
         }
-        .position(x: x, y: y)
-        .onAppear {
-            guard !reduceMotion else { return }
-            withAnimation(.easeOut(duration: 1.8).repeatForever(autoreverses: false)) {
-                pulse = true
+
+        return Group {
+            if reduceMotion {
+                core
+            } else {
+                // A living FINITE heartbeat (lub-dub) that plays a couple of beats
+                // when the ring appears, then rests — "this is you, and you're alive."
+                KeyframeAnimator(initialValue: 1.0, trigger: heartbeat) { scale in
+                    core.scaleEffect(scale)
+                } keyframes: { _ in
+                    KeyframeTrack {
+                        LinearKeyframe(1.0, duration: 0.5)
+                        SpringKeyframe(1.24, duration: 0.13)   // lub
+                        SpringKeyframe(1.0, duration: 0.15)
+                        SpringKeyframe(1.13, duration: 0.10)    // dub
+                        SpringKeyframe(1.0, duration: 0.55)
+                        SpringKeyframe(1.24, duration: 0.13)    // lub
+                        SpringKeyframe(1.0, duration: 0.15)
+                        SpringKeyframe(1.13, duration: 0.10)    // dub
+                        SpringKeyframe(1.0, duration: 0.4)
+                    }
+                }
             }
         }
+        .position(x: x, y: y)
+        .onAppear { if !reduceMotion { heartbeat.toggle() } }
     }
 }
 

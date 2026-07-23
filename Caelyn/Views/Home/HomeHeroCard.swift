@@ -16,6 +16,8 @@ struct HomeHeroCard: View {
 
     @State private var showingPhaseGuide = false
     @State private var personalLine: String?
+    @State private var isThinking = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: CaelynSpacing.md) {
@@ -41,11 +43,18 @@ struct HomeHeroCard: View {
                 // unknown phase since the headline already says "Welcome to
                 // Caelyn" and the hint would be redundant.
                 if phase != .unknown {
-                    Text(personalLine ?? phase.hint)
-                        .font(CaelynFont.subheadline.weight(.medium))
-                        .foregroundStyle(phase.accentColor.opacity(0.85))
-                        .multilineTextAlignment(.center)
-                        .animation(.easeInOut(duration: 0.35), value: personalLine)
+                    Group {
+                        if isThinking {
+                            ThinkingIndicator(accent: phase.accentColor)
+                        } else {
+                            Text(personalLine ?? phase.hint)
+                                .font(CaelynFont.subheadline.weight(.medium))
+                                .foregroundStyle(phase.accentColor.opacity(0.85))
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    .animation(.easeInOut(duration: 0.3), value: isThinking)
+                    .animation(.easeInOut(duration: 0.35), value: personalLine)
                 }
 
                 if let predictedWindow {
@@ -100,8 +109,19 @@ struct HomeHeroCard: View {
         // first so a stale wrong-phase line never lingers during the reload.
         .task(id: "\(cycleDay)-\(phase)") {
             personalLine = nil
-            guard let facts = personal?.teaching else { return }
-            personalLine = await CycleSummaryService.dailyTeaching(facts: facts)
+            guard let facts = personal?.teaching else { isThinking = false; return }
+            guard !reduceMotion else {
+                personalLine = await CycleSummaryService.dailyTeaching(facts: facts)
+                return
+            }
+            // A brief "Caelyn is thinking about you" beat before the personalized
+            // line fades in — gives the app a mind that's paying attention to HER.
+            isThinking = true
+            async let line = CycleSummaryService.dailyTeaching(facts: facts)
+            try? await Task.sleep(for: .milliseconds(850))
+            let resolved = await line
+            personalLine = resolved
+            isThinking = false
         }
     }
 
@@ -147,5 +167,36 @@ struct HomeHeroCard: View {
                 .font(CaelynFont.caption)
                 .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
         }
+    }
+}
+
+/// A brief "Caelyn is thinking about you" indicator — three phase-tinted dots
+/// pulsing in sequence — shown while the personalized line is computed. Transient
+/// (lives < 1s), so its looping dots stop as soon as it disappears.
+private struct ThinkingIndicator: View {
+    let accent: Color
+    @State private var animating = false
+
+    var body: some View {
+        HStack(spacing: 7) {
+            Text("Caelyn is reading your cycle")
+                .font(CaelynFont.subheadline.weight(.medium))
+                .foregroundStyle(accent.opacity(0.75))
+            HStack(spacing: 4) {
+                ForEach(0..<3, id: \.self) { i in
+                    Circle()
+                        .fill(accent)
+                        .frame(width: 5, height: 5)
+                        .scaleEffect(animating ? 1.0 : 0.5)
+                        .opacity(animating ? 1.0 : 0.35)
+                        .animation(
+                            .easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(Double(i) * 0.18),
+                            value: animating
+                        )
+                }
+            }
+        }
+        .onAppear { animating = true }
+        .accessibilityLabel("Caelyn is reading your cycle")
     }
 }

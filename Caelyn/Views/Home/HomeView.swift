@@ -17,6 +17,8 @@ struct HomeView: View {
     @AppStorage("caelyn.firstFlowCelebrated") private var firstFlowCelebrated = false
     @AppStorage("caelyn.firstWeekCelebrated") private var firstWeekCelebrated = false
     @State private var showingWeekShare = false
+    @State private var appeared = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showSoftPaywall = false
 
     /// The period anchor as it was just before "Log Period today" moved it to today,
@@ -292,9 +294,16 @@ struct HomeView: View {
             .padding(.bottom, CaelynSpacing.xl)
             .caelynContentWidth()
             .frame(maxWidth: .infinity)
+            // A gentle "wake up for you" fade-in the first time Home appears.
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 12)
         }
         .background(backgroundLayer.ignoresSafeArea())
-        .onAppear { maybeShowSoftPaywall() }
+        .onAppear {
+            maybeShowSoftPaywall()
+            if reduceMotion { appeared = true }
+            else if !appeared { withAnimation(.easeOut(duration: 0.45)) { appeared = true } }
+        }
         .sheet(isPresented: $showSoftPaywall) { PaywallView() }
     }
 
@@ -412,7 +421,7 @@ struct HomeView: View {
     // MARK: - First-prediction celebration (one-time)
 
     private var firstPredictionCard: some View {
-        CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.lavender.opacity(0.45)) {
+        CaelynCard(padding: CaelynSpacing.md, background: phase.tintBackground.opacity(0.5)) {
             HStack(alignment: .top, spacing: CaelynSpacing.sm) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 18, weight: .medium))
@@ -447,7 +456,9 @@ struct HomeView: View {
     // MARK: - One-time milestone cards (dismiss-and-forget, no nag)
 
     private func celebrationCard(icon: String, title: String, message: String, onShare: (() -> Void)? = nil, onDismiss: @escaping () -> Void) -> some View {
-        CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.lavender.opacity(0.45)) {
+        // Phase-tinted: the celebration wears the color of where she is in her
+        // cycle (rose/sage/lavender/sand) — the ring's language, everywhere.
+        CaelynCard(padding: CaelynSpacing.md, background: phase.tintBackground.opacity(0.5)) {
             HStack(alignment: .top, spacing: CaelynSpacing.sm) {
                 Image(systemName: icon)
                     .font(.system(size: 18, weight: .medium))
@@ -491,7 +502,7 @@ struct HomeView: View {
     private var firstFlowCard: some View {
         celebrationCard(
             icon: "drop.fill",
-            title: "Period logged 🌸",
+            title: "Period logged",
             message: "Caelyn just learned something about your body. Keep logging and your predictions get sharper every cycle."
         ) { firstFlowCelebrated = true }
     }
@@ -499,7 +510,7 @@ struct HomeView: View {
     private var firstWeekCard: some View {
         celebrationCard(
             icon: "heart.circle.fill",
-            title: "One week of listening to yourself",
+            title: "One week of listening to yourself 🌙",
             message: "Seven days of showing up for you. This is how Caelyn learns your rhythm — gently, and only for you.",
             onShare: { showingWeekShare = true }
         ) { firstWeekCelebrated = true }

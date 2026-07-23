@@ -117,7 +117,7 @@ enum CycleSummaryService {
                           : "Day \(cycleDay) — progesterone is rising, which tends to feel calmer and more inward."
         case .pms:
             return gentle ? "Your period is close. Mood dips and cravings are common right now — be gentle with yourself."
-                          : "Day \(cycleDay) — hormones drop before your period, which can bring mood and energy dips."
+                          : "Day \(cycleDay) — hormones drop before your period, which can bring mood and energy dips. That's your biology, not laziness — rest is allowed."
         case .unknown:
             return ""
         }
