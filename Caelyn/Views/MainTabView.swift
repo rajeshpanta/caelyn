@@ -128,7 +128,7 @@ struct MainTabView: View {
     /// Tap routing: which tab a given notification opens.
     private func tab(for category: NotificationService.Category) -> Tab {
         switch category {
-        case .dailyCheckIn, .periodUpcoming, .ovulation:
+        case .dailyCheckIn, .periodUpcoming, .ovulation, .noteReminder:
             return .home
         case .medication, .birthControl:
             return .log

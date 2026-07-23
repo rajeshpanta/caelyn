@@ -28,6 +28,7 @@ enum NotificationService {
         case medication     = "caelyn.medication"
         case ovulation      = "caelyn.ovulation"
         case birthControl   = "caelyn.birthcontrol"
+        case noteReminder   = "caelyn.note.reminder"
     }
 
     /// Identifier prefixes used by earlier builds (pre-rebrand). Kept so
@@ -105,6 +106,14 @@ enum NotificationService {
             return NotificationContent(
                 title: isPrivate ? "Caelyn reminder" : "Birth control reminder",
                 body:  isPrivate ? "Tap to log." : "Don't forget your birth control today.",
+                identifier: category.rawValue
+            )
+        case .noteReminder:
+            // The note's TEXT is never put on the lock screen — only revealed
+            // in-app — so a glance shows nothing personal even when not private.
+            return NotificationContent(
+                title: isPrivate ? "Caelyn reminder" : "A note to yourself",
+                body:  "You left yourself a note. Tap to see it.",
                 identifier: category.rawValue
             )
         }
@@ -324,6 +333,58 @@ enum NotificationService {
         let today = cal.startOfDay(for: .now)
         let todayEntry = entries.first { cal.isDate($0.date, inSameDayAs: today) }
         await sync(profile: profile, todayEntry: todayEntry)
+
+        // Note-to-self reminders live in the same sync so cancelAll doesn't orphan
+        // them, and cycle-relative ones re-resolve against the current prediction.
+        let nextPeriodStart = profile.lastPeriodStart.map {
+            PredictionEngine.nextPeriodStart(lastPeriodStart: $0, today: today, cycleLength: profile.averageCycleLength)
+        }
+        await scheduleNoteReminders(
+            entries: entries,
+            context: context,
+            isPrivate: profile.privateNotifications,
+            nextPeriodStart: nextPeriodStart
+        )
+    }
+
+    /// (Re)schedule every active note-to-self reminder. Cycle-relative rules are
+    /// re-resolved here so they track the prediction; date rules fire as chosen.
+    /// The note text is never sent to the lock screen (see `content`).
+    static func scheduleNoteReminders(entries: [CycleEntry], context: ModelContext, isPrivate: Bool, nextPeriodStart: Date?) async {
+        guard await authorizationStatus() == .authorized else { return }
+        var changed = false
+        for entry in entries {
+            guard let raw = entry.noteReminderRule,
+                  let rule = NoteReminderRule(rawValue: raw),
+                  !entry.noteReminderDone,
+                  entry.note?.isEmpty == false
+            else { continue }
+
+            let fire = NoteReminder.fireDate(
+                rule: rule,
+                chosenDate: rule == .date ? entry.noteReminderAt : nil,
+                nextPeriodStart: nextPeriodStart
+            )
+            // Keep the stored resolved date fresh for cycle-relative rules (used by
+            // the Home due-card and for display).
+            if rule != .date, entry.noteReminderAt != fire {
+                entry.noteReminderAt = fire
+                changed = true
+            }
+            guard let fire, fire > .now else { continue }
+            await scheduleNoteOneShot(entryDay: entry.date, fireDate: fire, isPrivate: isPrivate)
+        }
+        if changed { context.saveOrLog() }
+    }
+
+    private static func scheduleNoteOneShot(entryDay: Date, fireDate: Date, isPrivate: Bool) async {
+        let content = makeContent(category: .noteReminder, isPrivate: isPrivate, interruptionLevel: .active)
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        // One reminder per note (one note per day) — id by the note's day.
+        let id = "\(Category.noteReminder.rawValue).\(dateSuffix(for: entryDay))"
+        let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
+        try? await UNUserNotificationCenter.current().add(request)
     }
 
     // MARK: - Internals (exposed `internal` for unit tests)

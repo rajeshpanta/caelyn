@@ -74,6 +74,7 @@
 		7BAFF729C4DBF3F64901E1D1 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F4166D3870A6F4C282B5832 /* Typography.swift */; };
 		7BDFA27E1EBA79E24E84F7EF /* CaelynCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7110E218D7376F63A078A1C /* CaelynCard.swift */; };
 		7DBE433603812776A07CD9F5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0573AB74971CE763A3A4BD08 /* Assets.xcassets */; };
+		7F1024C8295FD3DF972D0DD7 /* NoteReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156635F92B785405A30FC729 /* NoteReminder.swift */; };
 		8365DE6D282CEB140AEA20BE /* ComponentGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 716AADA33C2AA6BA1134DF22 /* ComponentGallery.swift */; };
 		83B0DEEB56B767E74A81781D /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE228FE95D6CFB5B6AA94AA /* WidgetDataStore.swift */; };
 		87C388F7E2B1DF57EA5EB394 /* CyclePrediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D5D74DF250AA8A6396C3896 /* CyclePrediction.swift */; };
@@ -213,6 +214,7 @@
 		1422566B4DB4AAE611110E36 /* CycleHistorySection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleHistorySection.swift; sourceTree = "<group>"; };
 		147DB92677049A03D13E8143 /* TTCFertilityEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTCFertilityEngine.swift; sourceTree = "<group>"; };
 		1525588F818995E2E60CF533 /* HealthKitConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitConnectView.swift; sourceTree = "<group>"; };
+		156635F92B785405A30FC729 /* NoteReminder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteReminder.swift; sourceTree = "<group>"; };
 		1627592A44213DFBF0ADE392 /* CaelynUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		1727D86385E84CE318EA3C08 /* TypicalRanges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypicalRanges.swift; sourceTree = "<group>"; };
 		17DEA117F0CC7A4A969A4459 /* WristTempOvulationEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WristTempOvulationEngine.swift; sourceTree = "<group>"; };
@@ -409,6 +411,7 @@
 				2A45E9FE5A677D4562C59DE7 /* HealthKitService.swift */,
 				59064BE929C94D1B84DE947C /* HealthKitSync.swift */,
 				134E8D2776DED77063C07F64 /* ImportService.swift */,
+				156635F92B785405A30FC729 /* NoteReminder.swift */,
 				483D4ABE3B0FBDCFACE74186 /* NotificationRouter.swift */,
 				F727008BDD9FE097F46B549E /* NotificationService.swift */,
 				0B69A196D7954169CBDBA685 /* PatternEngine.swift */,
@@ -963,6 +966,7 @@
 				14690102084C6BB10D47DA61 /* MonthGridView.swift in Sources */,
 				DDFD2FE65A7105E7154A3FFC /* MonthSummaryCard.swift in Sources */,
 				670A3218F030EAAF4D349B2D /* MoodChip.swift in Sources */,
+				7F1024C8295FD3DF972D0DD7 /* NoteReminder.swift in Sources */,
 				17A3409231A1A3244C342F0E /* NotificationRouter.swift in Sources */,
 				E770FCFA78B811972499CE97 /* NotificationService.swift in Sources */,
 				D2D1626B36290421AEC9C1E5 /* OnboardingAnimations.swift in Sources */,

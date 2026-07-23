@@ -632,23 +632,109 @@ struct DailyLogForm: View {
 
     private var noteSection: some View {
         SectionContainer(title: "Note") {
-            ZStack(alignment: .topLeading) {
-                if noteDraft.isEmpty {
-                    Text("What's on your mind? Just for you 🔒")
+            VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
+                ZStack(alignment: .topLeading) {
+                    if noteDraft.isEmpty {
+                        Text("What's on your mind? Just for you 🔒")
+                            .font(CaelynFont.body)
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                            .padding(.top, 8)
+                            .padding(.leading, 4)
+                            .allowsHitTesting(false)
+                    }
+                    TextEditor(text: $noteDraft)
                         .font(CaelynFont.body)
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
-                        .padding(.top, 8)
-                        .padding(.leading, 4)
-                        .allowsHitTesting(false)
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                        .scrollContentBackground(.hidden)
+                        .frame(minHeight: 80)
+                        .focused($noteFocused)
                 }
-                TextEditor(text: $noteDraft)
-                    .font(CaelynFont.body)
-                    .foregroundStyle(CaelynColor.deepPlumText)
-                    .scrollContentBackground(.hidden)
-                    .frame(minHeight: 80)
-                    .focused($noteFocused)
+                .padding(.horizontal, 4)
+
+                // Optional gentle reminder on this note — a date, or cycle-relative
+                // ("before my next period"), which only a period app can do.
+                if entry?.note?.isEmpty == false {
+                    noteReminderControl
+                }
             }
-            .padding(.horizontal, 4)
+        }
+    }
+
+    private var currentReminderRule: NoteReminderRule? {
+        entry?.noteReminderRule.flatMap(NoteReminderRule.init(rawValue:))
+    }
+
+    private var noteReminderControl: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Image(systemName: "bell")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(CaelynColor.primaryPlum)
+                Text("Remind me about this")
+                    .font(CaelynFont.subheadline)
+                    .foregroundStyle(CaelynColor.deepPlumText)
+                Spacer(minLength: 0)
+                Menu {
+                    Button("Off") { setReminder(nil) }
+                    ForEach(NoteReminderRule.allCases) { rule in
+                        Button(rule.label) { setReminder(rule) }
+                    }
+                } label: {
+                    HStack(spacing: 3) {
+                        Text(currentReminderRule?.label ?? "Off")
+                        Image(systemName: "chevron.up.chevron.down").font(.system(size: 10, weight: .semibold))
+                    }
+                    .font(CaelynFont.subheadline.weight(.medium))
+                    .foregroundStyle(CaelynColor.primaryPlum)
+                }
+            }
+            if currentReminderRule == .date {
+                DatePicker("When", selection: reminderDateBinding, in: Date()..., displayedComponents: [.date, .hourAndMinute])
+                    .font(CaelynFont.subheadline)
+                    .tint(CaelynColor.primaryPlum)
+            }
+            if let rule = currentReminderRule {
+                Text(rule.picked)
+                    .font(CaelynFont.caption)
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.horizontal, 4)
+    }
+
+    private var reminderDateBinding: Binding<Date> {
+        Binding(
+            get: { entry?.noteReminderAt ?? Calendar.current.date(byAdding: .day, value: 1, to: .now) ?? .now },
+            set: { newValue in
+                withEntry { $0.noteReminderAt = newValue; $0.noteReminderDone = false }
+                resyncReminders(requestPermission: false)
+            }
+        )
+    }
+
+    private func setReminder(_ rule: NoteReminderRule?) {
+        withEntry { e in
+            e.noteReminderRule = rule?.rawValue
+            e.noteReminderDone = false
+            switch rule {
+            case .none:
+                e.noteReminderAt = nil
+            case .beforePeriod, .atPeriod:
+                break   // cycle rules resolve their concrete date on sync
+            case .date:
+                if (e.noteReminderAt ?? .distantPast) <= .now {
+                    e.noteReminderAt = Calendar.current.date(byAdding: .day, value: 1, to: .now)
+                }
+            }
+        }
+        resyncReminders(requestPermission: rule != nil)
+    }
+
+    private func resyncReminders(requestPermission: Bool) {
+        Task {
+            if requestPermission { _ = await NotificationService.requestAuthorization() }
+            await NotificationService.syncFromLiveStore()
         }
     }
 

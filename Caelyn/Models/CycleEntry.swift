@@ -28,6 +28,13 @@ final class CycleEntry {
     var basalTemperature: Double?
     var sexualActivity: Bool?
 
+    // Note-to-self reminder (optional; attaches to this day's note).
+    // rule: nil / "date" / "beforePeriod" / "atPeriod". `noteReminderAt` is the
+    // resolved fire time (chosen for .date, recomputed for cycle-relative rules).
+    var noteReminderRule: String?
+    var noteReminderAt: Date?
+    var noteReminderDone: Bool = false
+
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
 

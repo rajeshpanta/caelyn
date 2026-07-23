@@ -959,6 +959,28 @@ final class CaelynTests: XCTestCase {
         XCTAssertFalse(Persistence.isSyncEnabled, "iCloud sync must be OFF on a fresh install — the privacy default")
     }
 
+    // MARK: - Note-to-self reminder resolver
+
+    func testNoteReminderFireDate() {
+        let cal = Calendar.current
+        let next = cal.date(byAdding: .day, value: 10, to: cal.startOfDay(for: .now))!
+
+        let before = NoteReminder.fireDate(rule: .beforePeriod, chosenDate: nil, nextPeriodStart: next)
+        XCTAssertNotNil(before)
+        let gap = cal.dateComponents([.day], from: cal.startOfDay(for: before!), to: cal.startOfDay(for: next)).day
+        XCTAssertEqual(gap, 2, "beforePeriod resolves to 2 days before the predicted period")
+
+        let at = NoteReminder.fireDate(rule: .atPeriod, chosenDate: nil, nextPeriodStart: next)
+        XCTAssertTrue(cal.isDate(at!, inSameDayAs: next), "atPeriod resolves to the period day")
+
+        let chosen = cal.date(byAdding: .day, value: 3, to: .now)!
+        XCTAssertEqual(NoteReminder.fireDate(rule: .date, chosenDate: chosen, nextPeriodStart: nil), chosen)
+
+        // No prediction yet → cycle-relative rules resolve to nil (nothing scheduled).
+        XCTAssertNil(NoteReminder.fireDate(rule: .beforePeriod, chosenDate: nil, nextPeriodStart: nil))
+        XCTAssertNil(NoteReminder.fireDate(rule: .atPeriod, chosenDate: nil, nextPeriodStart: nil))
+    }
+
     // MARK: - Tutor: TypicalRanges ("Is this normal?")
 
     func testTypicalRangesCycleLength() {

@@ -120,6 +120,19 @@ struct HomeView: View {
     /// imported history.
     private var loggedFlowToday: Bool { todayEntry?.flow != nil }
 
+    /// Note-to-self reminders that are due now and not yet cleared — they wait as
+    /// a gentle card on Home (belt-and-suspenders with the notification).
+    private var dueNoteReminders: [CycleEntry] {
+        let now = Date()
+        return entries
+            .filter { e in
+                !e.noteReminderDone
+                    && (e.note?.isEmpty == false)
+                    && (e.noteReminderAt.map { $0 <= now } ?? false)
+            }
+            .sorted { ($0.noteReminderAt ?? .distantPast) > ($1.noteReminderAt ?? .distantPast) }
+    }
+
     private var daysUntilPeriod: Int {
         guard let nextStart else { return 0 }
         return PredictionEngine.daysUntil(nextStart, from: today)
@@ -209,6 +222,11 @@ struct HomeView: View {
                 // for genuine week-long use, never day-1 for imported history.
                 if !firstWeekCelebrated, loggedDayCount >= 7, daysSinceOnboarding >= 6 {
                     firstWeekCard
+                }
+
+                // Due note-to-self reminders wait here as a gentle card.
+                ForEach(dueNoteReminders.prefix(2), id: \.date) { entry in
+                    noteReminderCard(entry)
                 }
 
                 HomeQuickActions(
@@ -497,6 +515,46 @@ struct HomeView: View {
                 .accessibilityLabel("Dismiss")
             }
         }
+    }
+
+    private func noteReminderCard(_ entry: CycleEntry) -> some View {
+        CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.blush.opacity(0.5)) {
+            HStack(alignment: .top, spacing: CaelynSpacing.sm) {
+                Image(systemName: "bell.fill")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(CaelynColor.primaryPlum)
+                    .frame(width: 24)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("A note to yourself")
+                        .font(CaelynFont.caption.weight(.semibold))
+                        .foregroundStyle(CaelynColor.primaryPlum)
+                        .tracking(0.3)
+                    Text(entry.note ?? "")
+                        .font(CaelynFont.callout)
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Button { markNoteReminderDone(entry) } label: {
+                    Text("Done")
+                        .font(CaelynFont.caption.weight(.semibold))
+                        .foregroundStyle(CaelynColor.onPrimary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(CaelynColor.primaryPlum, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Mark note reminder done")
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func markNoteReminderDone(_ entry: CycleEntry) {
+        withAnimation { entry.noteReminderDone = true }
+        modelContext.saveOrLog()
+        Task { await NotificationService.syncFromLiveStore() }
     }
 
     private var firstFlowCard: some View {
