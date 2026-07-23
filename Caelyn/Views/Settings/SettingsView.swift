@@ -568,10 +568,18 @@ struct SettingsView: View {
 
             SettingsDivider()
             SettingsRow(
-                icon: "questionmark.circle",
+                icon: "envelope",
                 iconColor: CaelynColor.primaryPlum,
                 title: "Contact Support",
-                detail: "Get help",
+                detail: "Email us",
+                action: { openURL(AppURLs.supportMailto(appVersion: appVersion)) }
+            )
+            SettingsDivider()
+            SettingsRow(
+                icon: "questionmark.circle",
+                iconColor: CaelynColor.primaryPlum,
+                title: "Help & FAQ",
+                detail: nil,
                 action: { openURL(AppURLs.support) }
             )
 
