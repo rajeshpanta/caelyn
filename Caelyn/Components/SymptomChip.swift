@@ -6,9 +6,16 @@ struct SymptomChip: View {
     let isSelected: Bool
     let action: () -> Void
 
+    @State private var pressed = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
         Button {
             Haptics.selection()
+            if !reduceMotion {
+                pressed = true
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) { pressed = false }
+            }
             action()
         } label: {
             VStack(spacing: 6) {
@@ -32,6 +39,10 @@ struct SymptomChip: View {
                         lineWidth: 1
                     )
             )
+            // Same "Caelyn heard you" beat as the mood chip: spring settle on tap,
+            // fill blooming into lavender over ~220ms.
+            .scaleEffect(pressed ? 0.95 : 1.0)
+            .animation(.easeOut(duration: 0.22), value: isSelected)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)

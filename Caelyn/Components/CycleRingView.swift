@@ -8,6 +8,7 @@ struct CycleRingView: View {
     var size: CGFloat = 220
 
     @State private var hasAppeared = false
+    @State private var pulse = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var ovulationDay: Int { max(1, cycleLength - 14) }
@@ -69,11 +70,26 @@ struct CycleRingView: View {
         let radius = (size - thickness) / 2
         let x = size / 2 + cos(angleRad) * radius
         let y = size / 2 + sin(angleRad) * radius
-        return Circle()
-            .fill(CaelynColor.primaryPlum)
-            .frame(width: thickness + 4, height: thickness + 4)
-            .overlay(Circle().stroke(CaelynColor.cardWhite, lineWidth: 3))
-            .position(x: x, y: y)
+        let dotSize = thickness + 4
+        return ZStack {
+            // A soft "heartbeat" halo — quietly says "this is you, right now".
+            Circle()
+                .fill(CaelynColor.primaryPlum.opacity(0.35))
+                .frame(width: dotSize, height: dotSize)
+                .scaleEffect(pulse ? 2.1 : 1.0)
+                .opacity(pulse ? 0 : 0.5)
+            Circle()
+                .fill(CaelynColor.primaryPlum)
+                .frame(width: dotSize, height: dotSize)
+                .overlay(Circle().stroke(CaelynColor.cardWhite, lineWidth: 3))
+        }
+        .position(x: x, y: y)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeOut(duration: 1.8).repeatForever(autoreverses: false)) {
+                pulse = true
+            }
+        }
     }
 }
 

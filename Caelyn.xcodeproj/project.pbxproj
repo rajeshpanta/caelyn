@@ -83,6 +83,7 @@
 		903D408B317900DB6B1E13B4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF78CFC55351ED7D33634AA0 /* RootView.swift */; };
 		94EF936F835F61CD2B65D964 /* HomePatternInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220787509170B408F4B03C6B /* HomePatternInsight.swift */; };
 		9793F7ACFFB971F837581A8D /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFE9A76ACD4C8CB6B8CE0C9 /* OnboardingStep.swift */; };
+		97A3A12A9A56E0E068EBADD4 /* TypicalRanges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1727D86385E84CE318EA3C08 /* TypicalRanges.swift */; };
 		A07388C20552EFA03BDA067A /* HomeStreakCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2633FDCD19F5767C2E1AAE90 /* HomeStreakCard.swift */; };
 		AA3741F22A064C92E2075BAF /* PregnancyModeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453885131B931155B977A629 /* PregnancyModeCard.swift */; };
 		AB33C36A895225740A42866E /* PatternInsightsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB14E5C47F9DA507113109 /* PatternInsightsSection.swift */; };
@@ -211,6 +212,7 @@
 		147DB92677049A03D13E8143 /* TTCFertilityEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTCFertilityEngine.swift; sourceTree = "<group>"; };
 		1525588F818995E2E60CF533 /* HealthKitConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitConnectView.swift; sourceTree = "<group>"; };
 		1627592A44213DFBF0ADE392 /* CaelynUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		1727D86385E84CE318EA3C08 /* TypicalRanges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypicalRanges.swift; sourceTree = "<group>"; };
 		17DEA117F0CC7A4A969A4459 /* WristTempOvulationEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WristTempOvulationEngine.swift; sourceTree = "<group>"; };
 		220787509170B408F4B03C6B /* HomePatternInsight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePatternInsight.swift; sourceTree = "<group>"; };
 		23413D59226D3A1BBCDC7148 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -415,6 +417,7 @@
 				6F84C422C7D1A98ABB737858 /* RatingService.swift */,
 				BFF130311725D11BC73F4242 /* SecureWipeService.swift */,
 				147DB92677049A03D13E8143 /* TTCFertilityEngine.swift */,
+				1727D86385E84CE318EA3C08 /* TypicalRanges.swift */,
 				CD588403958052343C310525 /* WatchBridgeService.swift */,
 				FAE228FE95D6CFB5B6AA94AA /* WidgetDataStore.swift */,
 				6011FB7860B910ED48584777 /* WidgetDataSync.swift */,
@@ -992,6 +995,7 @@
 				E1F1864BAE2A4CB918D23BD8 /* TTCDashboardCard.swift in Sources */,
 				472D89657740D27533BD03B3 /* TTCFertilityEngine.swift in Sources */,
 				126219ED6C31C5F6A97A5CAB /* ToggleCard.swift in Sources */,
+				97A3A12A9A56E0E068EBADD4 /* TypicalRanges.swift in Sources */,
 				7BAFF729C4DBF3F64901E1D1 /* Typography.swift in Sources */,
 				DE3270435FCD973820713D5C /* UserProfile.swift in Sources */,
 				E693D6A0AD58B675641DDC53 /* WatchBridgeService.swift in Sources */,

@@ -9,8 +9,13 @@ struct HomeHeroCard: View {
     let predictedWindow: ClosedRange<Date>?
     var variation: Int = 0
     var confidence: Confidence = .low
+    /// When present (1+ cycle), the phase hint becomes a personalized teaching
+    /// line, and tapping the badge opens the personalized guide. Nil = the static
+    /// hint + generic guide (day-1 users see exactly today's app).
+    var personal: PhaseGuidePersonal? = nil
 
     @State private var showingPhaseGuide = false
+    @State private var personalLine: String?
 
     var body: some View {
         VStack(spacing: CaelynSpacing.md) {
@@ -36,10 +41,11 @@ struct HomeHeroCard: View {
                 // unknown phase since the headline already says "Welcome to
                 // Caelyn" and the hint would be redundant.
                 if phase != .unknown {
-                    Text(phase.hint)
+                    Text(personalLine ?? phase.hint)
                         .font(CaelynFont.subheadline.weight(.medium))
                         .foregroundStyle(phase.accentColor.opacity(0.85))
                         .multilineTextAlignment(.center)
+                        .animation(.easeInOut(duration: 0.35), value: personalLine)
                 }
 
                 if let predictedWindow {
@@ -86,8 +92,16 @@ struct HomeHeroCard: View {
         )
         .caelynShadow(.card)
         .sheet(isPresented: $showingPhaseGuide) {
-            PhaseGuideView(phase: phase)
+            PhaseGuideView(phase: phase, personal: personal)
                 .presentationDetents([.large])
+        }
+        // Reload when the day OR the phase changes (phase can flip mid-session
+        // when logging shifts period/luteal length). Reset to the static hint
+        // first so a stale wrong-phase line never lingers during the reload.
+        .task(id: "\(cycleDay)-\(phase)") {
+            personalLine = nil
+            guard let facts = personal?.teaching else { return }
+            personalLine = await CycleSummaryService.dailyTeaching(facts: facts)
         }
     }
 

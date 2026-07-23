@@ -19,6 +19,7 @@ struct CycleSettingsView: View {
                 periodLengthSection
                 lastPeriodSection
                 irregularModeSection
+                gentleModeSection
 
                 if purchase.isPro {
                     perimenoModeSection
@@ -52,6 +53,34 @@ struct CycleSettingsView: View {
         }
         .sheet(isPresented: $showingPaywall) {
             PaywallView()
+        }
+    }
+
+    // MARK: - Gentle guidance (free; carries warmer copy + wider reassuring ranges)
+
+    private var gentleModeSection: some View {
+        VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
+            Text("GUIDANCE")
+                .font(CaelynFont.caption.weight(.semibold))
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                .tracking(0.6)
+            CaelynCard(padding: CaelynSpacing.md) {
+                Toggle(isOn: Binding(
+                    get: { profile.gentleModeEnabled },
+                    set: { profile.gentleModeEnabled = $0; modelContext.saveOrLog() }
+                )) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Gentle guidance")
+                            .font(CaelynFont.body)
+                            .foregroundStyle(CaelynColor.deepPlumText)
+                        Text("Softer, jargon-free explanations and wider, reassuring ranges. Lovely if you're new to periods — or just prefer a gentler voice.")
+                            .font(CaelynFont.caption)
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .tint(CaelynColor.primaryPlum)
+            }
         }
     }
 

@@ -4,9 +4,12 @@ struct HomeStreakCard: View {
     let streak: Int
     let recentDays: [(date: Date, logged: Bool)]
 
+    @State private var breathe = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private var streakLabel: String {
         switch streak {
-        case 0:       return "Log today to start your streak"
+        case 0:       return "Your first log starts here"
         case 1:       return "First log — great start!"
         case 3:       return "3 days in a row 🔥"
         case 7:       return "One week — you're glowing!"
@@ -17,7 +20,7 @@ struct HomeStreakCard: View {
 
     private var streakIcon: String {
         switch streak {
-        case 0:      return "circle.dotted"
+        case 0:      return "sparkles"
         case 1..<3:  return "flame"
         default:     return "flame.fill"
         }
@@ -64,8 +67,9 @@ struct HomeStreakCard: View {
                                         startPoint: .top,
                                         endPoint: .bottom
                                     )
+                                    // Day 0 is a doorway, not a dead end — warm plum, not gray.
                                     : LinearGradient(
-                                        colors: [CaelynColor.deepPlumText.opacity(0.3), CaelynColor.deepPlumText.opacity(0.3)],
+                                        colors: [CaelynColor.primaryPlum, CaelynColor.softRose],
                                         startPoint: .top,
                                         endPoint: .bottom
                                     )
@@ -108,6 +112,7 @@ struct HomeStreakCard: View {
     private var dotGrid: some View {
         HStack(spacing: 5) {
             ForEach(recentDays.reversed(), id: \.date) { day in
+                let isToday = Calendar.current.isDateInToday(day.date)
                 Circle()
                     .fill(
                         day.logged
@@ -124,12 +129,21 @@ struct HomeStreakCard: View {
                     )
                     .frame(width: 10, height: 10)
                     .overlay(
-                        Calendar.current.isDateInToday(day.date)
+                        isToday
                             ? Circle().stroke(CaelynColor.primaryPlum, lineWidth: 1.5)
                             : nil
                     )
+                    // Before her first log, today's dot gently breathes — an
+                    // invitation, not a scolding.
+                    .scaleEffect(streak == 0 && isToday && breathe ? 1.35 : 1.0)
             }
             Spacer(minLength: 0)
+        }
+        .onAppear {
+            guard streak == 0, !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {
+                breathe = true
+            }
         }
     }
 }

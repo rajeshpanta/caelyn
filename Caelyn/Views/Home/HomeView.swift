@@ -14,6 +14,8 @@ struct HomeView: View {
     @AppStorage("caelyn.softPaywallShown") private var softPaywallShown = false
     @AppStorage("caelyn.firstPredictionCelebrated") private var firstPredictionCelebrated = false
     @AppStorage("caelyn.periodRecapDismissedFor") private var recapDismissedFor: Double = 0
+    @AppStorage("caelyn.firstFlowCelebrated") private var firstFlowCelebrated = false
+    @AppStorage("caelyn.firstWeekCelebrated") private var firstWeekCelebrated = false
     @State private var showSoftPaywall = false
 
     /// The period anchor as it was just before "Log Period today" moved it to today,
@@ -72,6 +74,48 @@ struct HomeView: View {
         guard lastPeriodStart != nil else { return .unknown }
         return PredictionEngine.phase(forCycleDay: cycleDay, periodLength: periodLength, cycleLength: cycleLength, lutealLength: lutealLength)
     }
+
+    /// Everything the personalized hint + guide sheet need (nil until 1 cycle
+    /// exists, so day-1 users keep the static hint and generic guide).
+    private var guidePersonal: PhaseGuidePersonal? {
+        guard phase != .unknown, !cycles.isEmpty else { return nil }
+        let gentle = profile?.gentleModeEnabled ?? false
+        let insights = PatternEngine.insights(from: entries, cycles: cycles, profile: profile)
+        let patternLine = insights.first { $0.relatedPhase == phase }?.body
+        let teaching = CycleSummaryService.TeachingFacts(
+            phase: phase,
+            cycleDay: cycleDay,
+            cycleCount: cycles.count,
+            topPatternLine: patternLine,
+            gentle: gentle
+        )
+        return PhaseGuidePersonal(
+            teaching: teaching,
+            avgCycle: cycleLength,
+            periodLength: periodLength,
+            variation: PredictionEngine.cycleLengthVariation(of: cycles),
+            avgPain: CycleAnalytics.averagePeriodPain(entries: entries, cycles: cycles).map { Int($0.rounded()) },
+            learnedLuteal: PredictionEngine.learnedLutealLength(entries: entries, cycles: cycles),
+            pmsDaysBefore: PredictionEngine.adaptivePmsDaysBefore(entries: entries, cycles: cycles)
+        )
+    }
+
+    /// Distinct calendar days she has ever logged — powers the one-week milestone.
+    private var loggedDayCount: Int {
+        Set(entries.filter(\.hasContent).map { Calendar.current.startOfDay(for: $0.date) }).count
+    }
+
+    /// Days since onboarding — so imported history can't trigger a "one week"
+    /// milestone on day 1 (the account itself must be a week old).
+    private var daysSinceOnboarding: Int {
+        guard let created = profile?.createdAt else { return 0 }
+        return Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: created), to: today).day ?? 0
+    }
+
+    /// Only true when TODAY's entry has flow — so the "first period logged"
+    /// celebration fires on the real act of logging, never retroactively for
+    /// imported history.
+    private var loggedFlowToday: Bool { todayEntry?.flow != nil }
 
     private var daysUntilPeriod: Int {
         guard let nextStart else { return 0 }
@@ -142,13 +186,26 @@ struct HomeView: View {
                     daysUntilPeriod: daysUntilPeriod,
                     predictedWindow: predictedWindow,
                     variation: PredictionEngine.cycleLengthVariation(of: cycles),
-                    confidence: confidence
+                    confidence: confidence,
+                    personal: guidePersonal
                 )
 
                 // One-time celebration the first time a real prediction exists —
                 // the "it works" moment (stand-out plan S4). Dismiss persists.
                 if !firstPredictionCelebrated, lastPeriodStart != nil {
                     firstPredictionCard
+                }
+
+                // Celebrate the FIRST period log — the earliest, most fragile
+                // logs deserve a win, not just the end-of-cycle recap (delight S6).
+                if !firstFlowCelebrated, loggedFlowToday {
+                    firstFlowCard
+                }
+
+                // A gentle milestone at exactly the week-2 novelty cliff — but only
+                // for genuine week-long use, never day-1 for imported history.
+                if !firstWeekCelebrated, loggedDayCount >= 7, daysSinceOnboarding >= 6 {
+                    firstWeekCard
                 }
 
                 HomeQuickActions(
@@ -384,6 +441,56 @@ struct HomeView: View {
                 .accessibilityLabel("Dismiss")
             }
         }
+    }
+
+    // MARK: - One-time milestone cards (dismiss-and-forget, no nag)
+
+    private func celebrationCard(icon: String, title: String, message: String, onDismiss: @escaping () -> Void) -> some View {
+        CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.lavender.opacity(0.45)) {
+            HStack(alignment: .top, spacing: CaelynSpacing.sm) {
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(CaelynColor.primaryPlum)
+                    .frame(width: 26)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(CaelynFont.callout.weight(.semibold))
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                    Text(message)
+                        .font(CaelynFont.subheadline)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Button { withAnimation { onDismiss() } } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                        .padding(6)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Dismiss")
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var firstFlowCard: some View {
+        celebrationCard(
+            icon: "drop.fill",
+            title: "Period logged 🌸",
+            message: "Caelyn just learned something about your body. Keep logging and your predictions get sharper every cycle."
+        ) { firstFlowCelebrated = true }
+    }
+
+    private var firstWeekCard: some View {
+        celebrationCard(
+            icon: "heart.circle.fill",
+            title: "One week of listening to yourself",
+            message: "Seven days of showing up for you. This is how Caelyn learns your rhythm — gently, and only for you."
+        ) { firstWeekCelebrated = true }
     }
 
     // MARK: - Active period awareness

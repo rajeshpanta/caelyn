@@ -959,6 +959,75 @@ final class CaelynTests: XCTestCase {
         XCTAssertFalse(Persistence.isSyncEnabled, "iCloud sync must be OFF on a fresh install — the privacy default")
     }
 
+    // MARK: - Tutor: TypicalRanges ("Is this normal?")
+
+    func testTypicalRangesCycleLength() {
+        XCTAssertEqual(TypicalRanges.cycleLength(28).status, .inRange)
+        XCTAssertEqual(TypicalRanges.cycleLength(21).status, .inRange)
+        XCTAssertEqual(TypicalRanges.cycleLength(35).status, .inRange)
+        if case .watch = TypicalRanges.cycleLength(40).status {} else { XCTFail("40-day adult cycle should be a gentle 'watch'") }
+        // Gentle mode widens the reassuring range to 45.
+        XCTAssertEqual(TypicalRanges.cycleLength(40, gentle: true).status, .inRange)
+        // Unknown data never looks broken.
+        XCTAssertEqual(TypicalRanges.cycleLength(nil).status, .learning)
+        XCTAssertFalse(TypicalRanges.cycleLength(nil).known)
+        // Never uses the word "abnormal".
+        XCTAssertFalse(TypicalRanges.cycleLength(40).status.text.lowercased().contains("abnormal"))
+    }
+
+    func testTypicalRangesPeriodAndPain() {
+        XCTAssertEqual(TypicalRanges.periodLength(5).status, .inRange)
+        if case .watch = TypicalRanges.periodLength(9).status {} else { XCTFail("9-day period should be a 'watch'") }
+        XCTAssertNil(TypicalRanges.pain(nil), "no pain logged → no pain row")
+        XCTAssertNil(TypicalRanges.pain(0))
+        XCTAssertEqual(TypicalRanges.pain(4)?.status, .inRange)
+        if case .watch = TypicalRanges.pain(9)?.status {} else { XCTFail("severe pain should encourage a doctor chat") }
+    }
+
+    func testGuideQuestionsPhaseFirstAndProviderForward() {
+        let qs = GuideQuestions.forToday(phase: .pms, avgCycle: 29, variation: 3, gentle: false)
+        XCTAssertFalse(qs.isEmpty)
+        XCTAssertEqual(qs.first?.id, "mood-low", "PMS-relevant question should sort first")
+        // The safety-net "when to see a doctor" question is always present.
+        XCTAssertTrue(qs.contains { $0.id == "see-doctor" })
+        // Her real number is woven into the length answer.
+        XCTAssertTrue(qs.contains { $0.answer.contains("29 days") })
+    }
+
+    func testGentleModeWidensReassurance() {
+        // The "normal cycle" answer adapts to gentle (first-years) framing.
+        let adult = GuideQuestions.forToday(phase: .unknown, avgCycle: 30, variation: 3, gentle: false)
+        let teen = GuideQuestions.forToday(phase: .unknown, avgCycle: 30, variation: 3, gentle: true)
+        XCTAssertTrue(adult.first { $0.id == "normal-length" }!.answer.contains("21 to 35"))
+        XCTAssertTrue(teen.first { $0.id == "normal-length" }!.answer.contains("45"))
+    }
+
+    // MARK: - Tutor: daily teaching line
+
+    func testDailyTeachingFallback() {
+        let luteal = CycleSummaryService.TeachingFacts(
+            phase: .luteal, cycleDay: 22, cycleCount: 5,
+            topPatternLine: "You've logged low energy here in 4 of 5 cycles.", gentle: false)
+        let line = CycleSummaryService.teachingFallback(facts: luteal)
+        XCTAssertTrue(line.contains("Day 22"))
+        XCTAssertTrue(line.contains("4 of 5"))
+        XCTAssertTrue(line.contains("your pattern, not a flaw"))
+
+        // Gentle variant softens the framing.
+        let gentle = CycleSummaryService.teachingFallback(facts:
+            .init(phase: .menstrual, cycleDay: 2, cycleCount: 3, topPatternLine: nil, gentle: true))
+        XCTAssertTrue(gentle.lowercased().contains("rest and warmth"))
+    }
+
+    func testDailyTeachingNilAtColdStartAndUnknown() async {
+        let none = await CycleSummaryService.dailyTeaching(facts:
+            .init(phase: .luteal, cycleDay: 22, cycleCount: 0, topPatternLine: nil, gentle: false))
+        XCTAssertNil(none, "with <1 cycle the caller keeps the static phase hint")
+        let unknown = await CycleSummaryService.dailyTeaching(facts:
+            .init(phase: .unknown, cycleDay: 1, cycleCount: 3, topPatternLine: nil, gentle: false))
+        XCTAssertNil(unknown, "unknown phase → no teaching line")
+    }
+
     // MARK: - Stand-out plan: CSV import (Switch Kit)
 
     func testImportRoundTripsCaelynCSV() throws {

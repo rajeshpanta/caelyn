@@ -65,6 +65,10 @@ final class UserProfile {
     var birthControlReminderMinute: Int = 0
     var birthControlStartDate: Date?
 
+    // Gentle guidance: opt-in, softer + jargon-free tutor copy and wider,
+    // reassuring "typical" ranges (great when new to periods — never asks age).
+    var gentleModeEnabled: Bool = false
+
     // Auto-sweep (opt-in privacy — wipe all data after long inactivity)
     var autoWipeEnabled: Bool = false
     var autoWipeAfterDays: Int = 30
