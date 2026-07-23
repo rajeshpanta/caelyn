@@ -20,6 +20,16 @@ extension ModelContext {
 enum Persistence {
     static let schema = Schema([CycleEntry.self, UserProfile.self])
 
+    // MIGRATION POLICY — read before changing any @Model.
+    // v1.0 ships with no explicit SchemaMigrationPlan on purpose: the app has never
+    // been distributed, so every App Store install is a FRESH store of the current
+    // schema — no historical `.unique`/old-schema store exists in production to
+    // migrate. Additive changes rely on SwiftData lightweight migration, backstopped
+    // by `preserveStoreAside` (never loses data) + `CycleStore.dedupeSameDay`.
+    // The FIRST post-launch schema change that is NOT purely additive (renames,
+    // type changes, constraint changes) MUST introduce a VersionedSchema +
+    // SchemaMigrationPlan and be tested against a real pre-change store on device.
+
     /// The live SwiftData container. Caelyn is **local by default** — every entry
     /// stays on-device with no Caelyn account and no Caelyn server, ever. iCloud
     /// Sync is strictly **opt-in** (`syncEnabledKey`, off by default): when the

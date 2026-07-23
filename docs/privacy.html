@@ -16,12 +16,12 @@
     </nav>
   </header>
   <main>
-    <span class="effective">Effective April 27, 2026</span>
+    <span class="effective">Effective July 23, 2026</span>
     <h1>Privacy Policy</h1>
     <p class="lede">Caelyn is built so your cycle data stays on your device. This policy explains exactly what that means, what little information we may receive, and the rights you have over your data.</p>
 
     <div class="callout">
-      <strong>Plain‑English summary.</strong> Caelyn does not collect, transmit, sell, or share your cycle entries, symptoms, moods, notes, or any other health information. There are no analytics SDKs, no advertising trackers, and no third‑party data brokers in the app. Your cycle history lives in a private database on your device. If you delete the app, your cycle data is gone with it.
+      <strong>Plain‑English summary.</strong> Caelyn does not collect, sell, or share your cycle entries, symptoms, moods, notes, or any other health information, and we run no servers of our own. There are no analytics SDKs, no advertising trackers, and no third‑party data brokers in the app. By default your cycle history lives only in a private database on your device. If you choose to turn on the optional iCloud Sync, an encrypted copy is stored in <em>your own</em> private iCloud (through Apple) so it can appear on your other devices — never on a Caelyn server, because there is no Caelyn server. If you delete the app with sync off, your cycle data is gone with it.
     </div>
 
     <h2>1. Who we are</h2>
@@ -49,7 +49,16 @@
     <p>This data is sandboxed by iOS — no other app on your device can read it. Caelyn does not back this database up to any server we control.</p>
     <p>If you have iCloud Backup enabled in iOS Settings, Apple may include the app's container in your encrypted iCloud backup. That backup is controlled by Apple and your Apple ID, not by Caelyn. You can review or disable this in iOS Settings → [your name] → iCloud → iCloud Backup.</p>
 
-    <h2>4. Apple HealthKit</h2>
+    <h2>4. Optional iCloud Sync</h2>
+    <p>Caelyn includes an optional iCloud Sync feature that is <strong>off by default</strong>. You can turn it on in Settings → iCloud Sync. When it is on:</p>
+    <ul>
+      <li>Caelyn stores a copy of your cycle data in <em>your own</em> private iCloud database (Apple's CloudKit), tied to your Apple Account, so it can appear on your other Apple devices signed into the same account.</li>
+      <li>This copy lives in Apple's infrastructure under your Apple Account and Apple's encryption — <strong>not</strong> on any Caelyn server. Caelyn operates no servers and never receives or can read your synced data.</li>
+      <li>Leaving iCloud Sync off means nothing about your cycle ever leaves the device (apart from anything you explicitly export or sync to Apple Health).</li>
+      <li>Data in your iCloud is governed by Apple's privacy policy and your Apple Account security. You can review your app's iCloud data usage in iOS Settings → [your name] → iCloud.</li>
+    </ul>
+
+    <h2>5. Apple HealthKit</h2>
     <p>Caelyn integrates with Apple Health (HealthKit) only if you explicitly opt in from Settings → Apple Health. When you do:</p>
     <ul>
       <li>iOS shows you the standard HealthKit permission sheet, where you choose which categories Caelyn can read or write.</li>
@@ -58,11 +67,11 @@
     </ul>
     <p>HealthKit data is governed by Apple's privacy controls and your device passcode/biometrics. Caelyn never transmits your HealthKit data outside your device.</p>
 
-    <h2>5. Notifications</h2>
-    <p>Local reminders (daily check‑in, medication) are scheduled by the app on your device through Apple's local notification system. Nothing about these reminders is sent to a server. If you enable "Private notifications" in Settings, the lock‑screen text is replaced with a generic "Caelyn reminder" so a glance reveals nothing about your cycle.</p>
+    <h2>6. Notifications</h2>
+    <p>Local reminders — such as period, ovulation, daily check‑in, medication, birth‑control, and your own note‑to‑self reminders — are scheduled by the app on your device through Apple's local notification system. Nothing about these reminders is sent to a server. The text of a personal note is never placed on your lock screen. If you enable "Private notifications" in Settings, the lock‑screen text is replaced with a generic "Caelyn reminder" so a glance reveals nothing about your cycle.</p>
 
-    <h2>6. Subscriptions and payments</h2>
-    <p>Caelyn Pro is sold as an auto‑renewable subscription through Apple's In‑App Purchase system. When you subscribe:</p>
+    <h2>7. Subscriptions and payments</h2>
+    <p>Caelyn Pro is available as an auto‑renewable monthly or yearly subscription (with a free trial) or a one‑time lifetime purchase, sold through Apple's In‑App Purchase system, and may be shared through Apple Family Sharing. When you buy:</p>
     <ul>
       <li>Apple — not Caelyn — processes your payment, billing, and renewal. We never see your credit card number, billing address, Apple ID password, or other payment details.</li>
       <li>Apple shares with us a transaction identifier and the product ID you purchased so the app can verify your entitlement on this device. This transaction identifier is not tied to your name or email by Caelyn.</li>
@@ -70,13 +79,13 @@
     </ul>
     <p>Apple's privacy practices around the App Store and In‑App Purchase are described at <a href="https://www.apple.com/legal/privacy/" target="_blank" rel="noopener">apple.com/legal/privacy</a>.</p>
 
-    <h2>7. Crash reports and diagnostics</h2>
+    <h2>8. Crash reports and diagnostics</h2>
     <p>Caelyn does not include a third‑party crash reporting SDK. If you have iOS Analytics turned on (Settings → Privacy &amp; Security → Analytics &amp; Improvements → Share With App Developers), Apple may share an aggregated, anonymized crash log with the developer. That data is controlled and anonymized by Apple before we ever see it; it is not linked to your name, email, or cycle data. You can turn it off in iOS Settings at any time.</p>
 
-    <h2>8. Children's privacy</h2>
+    <h2>9. Children's privacy</h2>
     <p>Caelyn is rated 12+ on the App Store and is not directed at children under 13. We do not knowingly collect personal information from children under 13 — and because we do not collect personal information from anyone, this commitment is straightforward. If you are a parent or guardian and believe a child under 13 has been using Caelyn, you can delete the app to remove all on‑device data.</p>
 
-    <h2>9. Your rights</h2>
+    <h2>10. Your rights</h2>
     <p>Because all your cycle data is on your device, you have direct, immediate control over it without needing to ask us:</p>
     <ul>
       <li><strong>Access:</strong> open the app to view all data we hold; use Settings → Export data to generate a CSV (or PDF on Pro) of every entry.</li>
@@ -86,17 +95,18 @@
     </ul>
     <p>If you are in the European Economic Area, the United Kingdom, or Switzerland, the GDPR gives you these rights as a matter of law. If you are a California resident, the CCPA / CPRA gives you analogous rights, including the right to know, the right to delete, and the right to non‑discrimination. We do not sell or share personal information as those terms are defined in the CCPA / CPRA. For any rights request you cannot fulfil yourself in‑app, email <a href="mailto:rajesh.panta08@gmail.com">rajesh.panta08@gmail.com</a>.</p>
 
-    <h2>10. International users</h2>
+    <h2>11. International users</h2>
     <p>Caelyn is offered worldwide through the Apple App Store. Because the app does not transmit your cycle data to any server we control, there is no cross‑border transfer of your personal data by us. Apple's payment processing for subscriptions may involve cross‑border transfer governed by Apple's own privacy policy.</p>
 
-    <h2>11. Security</h2>
-    <p>Your cycle data lives in iOS's per‑app sandbox and benefits from the device‑level encryption iOS applies when your device is locked with a passcode or biometric. Caelyn additionally offers an in‑app lock (Face ID / Touch ID / passcode) which you can enable in Settings → Privacy.</p>
-    <p>Because we do not operate a server containing your cycle data, there is no server‑side breach scenario for that data. The risks that remain are device theft, malware on your device, and your iCloud Backup security — all of which are controlled by Apple's platform security and your Apple ID, not by us.</p>
+    <h2>12. Security</h2>
+    <p>Your cycle data lives in iOS's per‑app sandbox and benefits from the device‑level encryption iOS applies when your device is locked with a passcode or biometric. Caelyn additionally offers an in‑app lock (Face ID / Touch ID) and an optional app PIN, which you can enable in Settings → Privacy. If you set a PIN, only a salted hash of it is stored in the device Keychain — never the PIN itself.</p>
+    <p>For higher‑risk situations, Caelyn offers optional features you control: a duress PIN that, if entered instead of your normal one, silently and permanently erases all Caelyn data; an "auto‑erase if inactive" option; and "Delete all data," which removes every entry, your profile, and the data Caelyn wrote to Apple Health.</p>
+    <p>Because we do not operate a server containing your cycle data, there is no server‑side breach scenario for that data. The risks that remain are device theft, malware on your device, and your iCloud (Backup or Sync) security — all of which are controlled by Apple's platform security and your Apple Account, not by us.</p>
 
-    <h2>12. Changes to this policy</h2>
+    <h2>13. Changes to this policy</h2>
     <p>If we change this policy, we will update the "Effective" date at the top of this page and, for material changes, update the version inside the app. Continued use of Caelyn after an update means you accept the revised policy.</p>
 
-    <h2>13. Contact</h2>
+    <h2>14. Contact</h2>
     <p>For privacy questions, data requests, or anything else: <a href="mailto:rajesh.panta08@gmail.com">rajesh.panta08@gmail.com</a>.</p>
 
     <footer>
