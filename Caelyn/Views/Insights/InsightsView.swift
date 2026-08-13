@@ -71,6 +71,7 @@ struct InsightsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
+                    FirstVisitIntroCard(.insights)
                     if cycles.count < 2 {
                         InsightsEmptyState(cyclesLogged: cycles.count, confidence: confidence)
                     } else {

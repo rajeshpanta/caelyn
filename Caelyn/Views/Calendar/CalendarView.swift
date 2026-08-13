@@ -23,6 +23,7 @@ struct CalendarView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: CaelynSpacing.lg) {
+                    FirstVisitIntroCard(.calendar)
                     MonthGridView(
                         month: visibleMonth,
                         entries: entries,

@@ -142,23 +142,31 @@ struct FeatureHighlightsStep: View {
         FeatureHighlight(
             icon: "waveform.path.ecg.rectangle.fill",
             title: "Your cycle,\ndecoded 🌸",
-            description: "See exactly where you are — period, ovulation, PMS — every single day. No more guessing.",
+            description: "Where you are today — period, ovulation, PMS — and why you feel the way you do. No more guessing.",
             accentColor: Color(hex: 0xFB7185),
             backgroundStart: Color(hex: 0xFFF1F2),
             backgroundEnd: Color(hex: 0xFCE7F3)
         ),
+        // The real differentiator, and it is literally true: PredictionEngine's
+        // learnedLutealLength() derives the luteal phase from confirmed ovulation
+        // signals (clamped 9–17 days) and adaptivePmsDaysBefore() learns the PMS
+        // window, both wired into Home, Calendar and Insights. Don't soften this
+        // into a generic "smart predictions" line — it's the one claim the big
+        // cloud trackers can't make.
         FeatureHighlight(
-            icon: "heart.text.clipboard.fill",
-            title: "Feel it,\nlog it 💭",
-            description: "Moods, symptoms, energy, pain — track it all and spot the patterns your body is whispering.",
+            icon: "wand.and.stars",
+            title: "Learns you,\nnot an average 💫",
+            description: "Most apps assume everyone ovulates 14 days before their period. Caelyn learns your real timing from what you log — your luteal phase, your PMS window, your patterns.",
             accentColor: Color(hex: 0xA855F7),
             backgroundStart: Color(hex: 0xFAF5FF),
             backgroundEnd: Color(hex: 0xEDE9FE)
         ),
+        // Closes on usefulness and teases the privacy step that follows, without
+        // duplicating it — the dedicated PrivacyStep is the next screen.
         FeatureHighlight(
-            icon: "calendar.badge.checkmark",
-            title: "Stay one\nstep ahead ✨",
-            description: "Caelyn predicts your next period, PMS window, and fertile days — up to 3 months out.",
+            icon: "heart.text.clipboard.fill",
+            title: "Ready when\nit matters ✨",
+            description: "Predictions months ahead, symptom patterns you'd never spot alone, and a doctor-ready PDF for appointments — all worked out on your iPhone.",
             accentColor: Color(hex: 0x6E9B7B),
             backgroundStart: Color(hex: 0xF0FDF4),
             backgroundEnd: Color(hex: 0xDCFCE7)

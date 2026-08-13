@@ -65,6 +65,7 @@
 		6D3293F70DFD8C6B2B7280B7 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CF157977EC9D07CEDE4334 /* CalendarView.swift */; };
 		6EE73517CCFF174B7DF6F843 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CB27B600CFE9B63241AD672 /* HomeView.swift */; };
 		6F7F7FCCFD8D2218EE459484 /* CaelynWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 50974342C78D7073C7C2389C /* CaelynWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		703C12C08350CF3009961F11 /* FirstVisitIntroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18CAE0DBAEA415502AF29E09 /* FirstVisitIntroCard.swift */; };
 		7346A991F2E84C669EEC8729 /* CycleAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893A18A5E786299D456D8D29 /* CycleAnalytics.swift */; };
 		74BDA36CDF822EC344FDF372 /* PINViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D583843EB06C575EF3737512 /* PINViews.swift */; };
 		752A55857B59D33AE4CA8258 /* CaelynWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032976BC579EC7C7A9617A56 /* CaelynWidgetProvider.swift */; };
@@ -219,6 +220,7 @@
 		1627592A44213DFBF0ADE392 /* CaelynUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		1727D86385E84CE318EA3C08 /* TypicalRanges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypicalRanges.swift; sourceTree = "<group>"; };
 		17DEA117F0CC7A4A969A4459 /* WristTempOvulationEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WristTempOvulationEngine.swift; sourceTree = "<group>"; };
+		18CAE0DBAEA415502AF29E09 /* FirstVisitIntroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstVisitIntroCard.swift; sourceTree = "<group>"; };
 		220787509170B408F4B03C6B /* HomePatternInsight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePatternInsight.swift; sourceTree = "<group>"; };
 		23413D59226D3A1BBCDC7148 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		2633FDCD19F5767C2E1AAE90 /* HomeStreakCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeStreakCard.swift; sourceTree = "<group>"; };
@@ -694,6 +696,7 @@
 				716AADA33C2AA6BA1134DF22 /* ComponentGallery.swift */,
 				590EF59CCF6828268AE024A3 /* CycleRingView.swift */,
 				51F8759E4F031305F132899D /* DataStatusCard.swift */,
+				18CAE0DBAEA415502AF29E09 /* FirstVisitIntroCard.swift */,
 				0B3516961D449934550DCF93 /* Haptics.swift */,
 				A00731802B5C8B96D6AC55E9 /* InsightCard.swift */,
 				8ECDCA0268B520CF6DE71EE5 /* MoodChip.swift */,
@@ -953,6 +956,7 @@
 				62140E22137E9BFD253F7C3D /* Enums.swift in Sources */,
 				5C104A68E2609F5ECD9CFC95 /* ExportService.swift in Sources */,
 				4B39AAED1E1CF8F4249DFEAB /* ExportView.swift in Sources */,
+				703C12C08350CF3009961F11 /* FirstVisitIntroCard.swift in Sources */,
 				E2791BFAB11145A765840272 /* GoalCard.swift in Sources */,
 				433BD4EC552A95D00B4B7F07 /* Haptics.swift in Sources */,
 				1C566289B10118DEA3ABDCFA /* HealthKitConnectView.swift in Sources */,

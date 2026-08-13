@@ -41,6 +41,7 @@ struct LogView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
+                    FirstVisitIntroCard(.log)
                     dateSelectorRow
                     header
                     DailyLogForm(date: selectedDate)

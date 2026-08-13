@@ -53,6 +53,7 @@ struct SettingsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
+                    FirstVisitIntroCard(.settings)
                     proSection
                     cycleSection
                     privacySection
