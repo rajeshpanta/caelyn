@@ -812,9 +812,12 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 
 ---
 
-## K. iCLOUD SYNC (Two-Device Test, Optional)
+## K. iCLOUD SYNC — **NOT IN 1.0, SKIP THIS SECTION**
 
-**Note:** Sync is **opt-in and OFF by default**. Only test this if it's enabled in the build or you've manually turned it on.
+**1.0 ships local-only**: no iCloud/CloudKit entitlement and no sync UI. Section K is
+retained for the release that actually ships sync. The only 1.0 check is the opposite
+one: **Settings → Backup reads "On this device", there is no sync toggle anywhere in
+the app, and the Trust Center makes no cloud claim.**
 
 ### K1. Enable Sync
 
@@ -1116,7 +1119,7 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 - **Apple Watch:** Sync, quick log, home view, empty state.
 - **StoreKit Sandbox:** Product load, monthly/yearly/lifetime purchase, restore, trial eligibility.
 - **AI Summary:** Foundation Models (iOS 26+), fallback template, graceful failure.
-- **iCloud Sync (optional):** Two-device mirror, local-only when off.
+- **Backup (1.0):** Local-only — Settings → Backup states it, no sync toggle exists, Export/Import round-trips.
 - **Shareable Card:** Generate, share (no data leaves device).
 - **Export:** CSV, PDF report, format integrity.
 - **Accessibility:** Dynamic Type, VoiceOver.

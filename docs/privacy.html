@@ -16,12 +16,12 @@
     </nav>
   </header>
   <main>
-    <span class="effective">Effective July 23, 2026</span>
+    <span class="effective">Effective August 12, 2026</span>
     <h1>Privacy Policy</h1>
     <p class="lede">Caelyn is built so your cycle data stays on your device. This policy explains exactly what that means, what little information we may receive, and the rights you have over your data.</p>
 
     <div class="callout">
-      <strong>Plain‑English summary.</strong> Caelyn does not collect, sell, or share your cycle entries, symptoms, moods, notes, or any other health information, and we run no servers of our own. There are no analytics SDKs, no advertising trackers, and no third‑party data brokers in the app. By default your cycle history lives only in a private database on your device. If you choose to turn on the optional iCloud Sync, an encrypted copy is stored in <em>your own</em> private iCloud (through Apple) so it can appear on your other devices — never on a Caelyn server, because there is no Caelyn server. If you delete the app with sync off, your cycle data is gone with it.
+      <strong>Plain‑English summary.</strong> Caelyn does not collect, sell, or share your cycle entries, symptoms, moods, notes, or any other health information, and we run no servers of our own. There are no analytics SDKs, no advertising trackers, and no third‑party data brokers in the app. Your cycle history lives only in a private database on your device — there is no cloud sync and no Caelyn server, so there is no copy of it anywhere else. If you delete the app, your cycle data is gone with it, so export a copy first if you want to keep it.
     </div>
 
     <h2>1. Who we are</h2>
@@ -49,13 +49,12 @@
     <p>This data is sandboxed by iOS — no other app on your device can read it. Caelyn does not back this database up to any server we control.</p>
     <p>If you have iCloud Backup enabled in iOS Settings, Apple may include the app's container in your encrypted iCloud backup. That backup is controlled by Apple and your Apple ID, not by Caelyn. You can review or disable this in iOS Settings → [your name] → iCloud → iCloud Backup.</p>
 
-    <h2>4. Optional iCloud Sync</h2>
-    <p>Caelyn includes an optional iCloud Sync feature that is <strong>off by default</strong>. You can turn it on in Settings → iCloud Sync. When it is on:</p>
+    <h2>4. No cloud sync</h2>
+    <p>Caelyn does <strong>not</strong> sync your cycle data to iCloud or anywhere else. There is no cross-device sync feature in this version, and nothing about your cycle leaves the device apart from what you explicitly export or share with Apple Health.</p>
     <ul>
-      <li>Caelyn stores a copy of your cycle data in <em>your own</em> private iCloud database (Apple's CloudKit), tied to your Apple Account, so it can appear on your other Apple devices signed into the same account.</li>
-      <li>This copy lives in Apple's infrastructure under your Apple Account and Apple's encryption — <strong>not</strong> on any Caelyn server. Caelyn operates no servers and never receives or can read your synced data.</li>
-      <li>Leaving iCloud Sync off means nothing about your cycle ever leaves the device (apart from anything you explicitly export or sync to Apple Health).</li>
-      <li>Data in your iCloud is governed by Apple's privacy policy and your Apple Account security. You can review your app's iCloud data usage in iOS Settings → [your name] → iCloud.</li>
+      <li>Because there is no cloud copy, deleting the app (or erasing the device) deletes your cycle history with it. Settings → Export data saves a CSV or PDF you control, and Settings → Import data reads a Caelyn CSV back in — that export is your backup.</li>
+      <li>The one exception is Apple's own device backup described above, which is controlled by you and Apple, not by Caelyn.</li>
+      <li>If a private cross-device sync feature is added in a future version, it will be opt-in, clearly labelled in the app, and described here before it ships.</li>
     </ul>
 
     <h2>5. Apple HealthKit</h2>
@@ -101,7 +100,7 @@
     <h2>12. Security</h2>
     <p>Your cycle data lives in iOS's per‑app sandbox and benefits from the device‑level encryption iOS applies when your device is locked with a passcode or biometric. Caelyn additionally offers an in‑app lock (Face ID / Touch ID) and an optional app PIN, which you can enable in Settings → Privacy. If you set a PIN, only a salted hash of it is stored in the device Keychain — never the PIN itself.</p>
     <p>For higher‑risk situations, Caelyn offers optional features you control: a duress PIN that, if entered instead of your normal one, silently and permanently erases all Caelyn data; an "auto‑erase if inactive" option; and "Delete all data," which removes every entry, your profile, and the data Caelyn wrote to Apple Health.</p>
-    <p>Because we do not operate a server containing your cycle data, there is no server‑side breach scenario for that data. The risks that remain are device theft, malware on your device, and your iCloud (Backup or Sync) security — all of which are controlled by Apple's platform security and your Apple Account, not by us.</p>
+    <p>Because we do not operate a server containing your cycle data, there is no server‑side breach scenario for that data. The risks that remain are device theft, malware on your device, and your iCloud Backup security — all of which are controlled by Apple's platform security and your Apple Account, not by us.</p>
 
     <h2>13. Changes to this policy</h2>
     <p>If we change this policy, we will update the "Effective" date at the top of this page and, for material changes, update the version inside the app. Continued use of Caelyn after an update means you accept the revised policy.</p>

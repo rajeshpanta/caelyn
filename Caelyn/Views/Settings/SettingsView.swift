@@ -364,7 +364,7 @@ struct SettingsView: View {
             Button("Lock everything down", role: .destructive) { enableParanoidMode() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("One tap: turns OFF iCloud Sync and Apple Health sharing, cancels all reminders, hides the app preview, and switches notifications to private. App Lock and PIN stay under your control in this list.")
+            Text("One tap: turns OFF Apple Health sharing, cancels all reminders, hides the app preview, and switches notifications to private. App Lock and PIN stay under your control in this list.")
         }
     }
 
@@ -387,10 +387,10 @@ struct SettingsView: View {
     private var dataSection: some View {
         SettingsSectionCard(title: "Data") {
             SettingsRow(
-                icon: "arrow.triangle.2.circlepath.icloud",
+                icon: "iphone",
                 iconColor: CaelynColor.primaryPlum,
-                title: "iCloud Sync",
-                detail: Persistence.isSyncEnabled ? "On" : "Off · local",
+                title: "Backup",
+                detail: "On this device",
                 action: { showingCloudSync = true }
             )
             SettingsDivider()
@@ -438,7 +438,8 @@ struct SettingsView: View {
     /// back on individually.
     private func enableParanoidMode() {
         guard let profile else { return }
-        // Data egress off.
+        // Data egress off. The sync flag has no UI in 1.0 (see BackupInfoView) but
+        // is cleared anyway so Paranoid Mode stays correct if sync is ever restored.
         UserDefaults.standard.set(false, forKey: Persistence.syncEnabledKey)
         profile.healthKitConnected = false
         profile.hkReadFlow = false

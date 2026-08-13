@@ -6,7 +6,7 @@ struct PrivacyTrustView: View {
         (
             icon: "iphone",
             title: "No server — ever",
-            body: "Caelyn has no database, no server, and no cloud of its own. By default every entry stays only on your device; turn on iCloud Sync and it goes to your OWN private iCloud — still never to us.",
+            body: "Caelyn has no database, no server, and no cloud of its own. Every entry stays only on your device — there is no copy of it anywhere else, including with us.",
             color: CaelynColor.primaryPlum
         ),
         (
@@ -30,7 +30,7 @@ struct PrivacyTrustView: View {
         (
             icon: "wifi.slash",
             title: "The only data that leaves your phone",
-            body: "Caelyn makes no network calls of its own and runs no servers. The only things that ever leave are what you export, what you sync to Apple Health, an encrypted copy to your OWN private iCloud if you turn on Sync, and purchase checks handled by Apple.",
+            body: "Caelyn makes no network calls of its own and runs no servers. The only things that ever leave are what you export yourself, what you choose to share with Apple Health, and purchase checks handled by Apple.",
             color: CaelynColor.primaryPlum
         ),
         (
@@ -60,7 +60,7 @@ struct PrivacyTrustView: View {
         (
             icon: "lock.shield.fill",
             title: "Subpoena-resistant by design",
-            body: "Because we hold no data and run no server, there is nothing for us to hand over — even if legally compelled. This isn't a policy; it's the architecture. (If you enable iCloud Sync, your copy lives in your Apple account, under Apple's policies — never ours.)",
+            body: "Because we hold no data and run no server, there is nothing for us to hand over — even if legally compelled. This isn't a policy; it's the architecture.",
             color: CaelynColor.alertRose
         )
     ]
@@ -78,7 +78,7 @@ struct PrivacyTrustView: View {
         ),
         (
             q: "A court orders Caelyn to hand over my data",
-            a: "There is nothing to hand over. We run no servers and keep no copies. With sync off, your data exists in exactly one place: your device. With sync on, it's in your own Apple iCloud account — under Apple's policies, never ours."
+            a: "There is nothing to hand over. We run no servers and keep no copies. Your data exists in exactly one place: this device."
         ),
         (
             q: "I lose my phone",

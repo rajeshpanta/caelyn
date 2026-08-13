@@ -21,19 +21,33 @@ created and must match exactly, or the paywall shows nothing / review fails.
       returns all three, purchase + **restore** both work, and the trial shows only
       for eligible accounts.
 
-## B. iCloud Sync (Phase 6) — only if enabling sync at launch
+## B. iCloud Sync — NOT shipping in 1.0 (decided)
 
-Sync is opt-in and OFF by default; you can ship without it. To enable it:
+**1.0 is local-only.** The app carries no iCloud/CloudKit entitlement, so the sync
+UI was removed rather than left to fail silently — a toggle that reports "syncing"
+while data never leaves the device is a data-loss trap and inaccurate metadata.
+`BackupInfoView` now states the truth (local-only, Export is the backup), and the
+privacy policy, support page, listing copy, and privacy-label answers match it.
+
+The `Persistence.isSyncEnabled` branch remains as dormant scaffolding. **To ship
+sync in a later release, all of these, together:**
 
 - [ ] Xcode → Signing & Capabilities → **iCloud → CloudKit**, container
       `iCloud.smallpanta-icould.com.caelynperiodtracker` (matches `Persistence.cloudKitContainerID`).
 - [ ] Add **Background Modes → Remote notifications**.
 - [ ] Push the CloudKit schema to **Production** in the CloudKit console.
+- [ ] Restore a toggle in `BackupInfoView` driven by a **real "did the sync store
+      open" flag** — never by the preference alone (that was the original defect).
+- [ ] Re-add the sync language to privacy.html / support.html / listing / privacy label
+      in the same release, not before.
 - [ ] **Migration test** (do this even without sync — it affects every upgrade):
       install a **pre-Phase-6** build, add entries (incl. an intentional same-day
       pair), upgrade to this build, confirm entries survive and the launch
       `CycleStore.dedupeSameDay` collapses duplicates. See `PHASE6_CLOUDKIT_SETUP.md`.
 - [ ] Verify two-device sync, and that with sync OFF nothing leaves the device.
+
+**For 1.0, the only thing to confirm here:** Settings → Backup says "On this device",
+there is no sync toggle anywhere, and the Trust Center makes no cloud claim.
 
 ## C. On-device verification (can't be simulated)
 
@@ -51,10 +65,22 @@ Sync is opt-in and OFF by default; you can ship without it. To enable it:
 
 - [ ] Privacy Policy URL = `AppURLs.privacyPolicy`; add Support URL = `AppURLs.support`.
 - [ ] **App Privacy "nutrition label"**: declare Health & Fitness data as **not
-      linked, not used for tracking**, stored on device (and, if sync is on, in the
-      user's iCloud). No third-party SDKs — confirm.
-- [ ] Age rating (12+), screenshots (the screenshot seeder + `screenshots/` assets),
-      keywords, description (no medical-device / contraceptive-efficacy claims).
+      linked, not used for tracking**, stored on device only (1.0 has no sync — see
+      the banner in `PRIVACY_LABEL.md`). No third-party SDKs — confirm.
+- [ ] Age rating (12+), keywords, description (no medical-device /
+      contraceptive-efficacy claims, and **no sync/backup claims** — 1.0 is local-only).
+- [ ] **Screenshots** — all three sets are in `screenshots/`, at ASC-accepted sizes:
+      iPhone 6.9" `1320×2868`, iPad 13" `2064×2752`, Apple Watch `416×496`
+      (Series 10 46mm). The Watch set is required because a watchOS app is bundled.
+      To regenerate the Watch pair:
+      ```
+      xcodebuild -project Caelyn.xcodeproj -target CaelynWatch -sdk watchsimulator \
+        -configuration Debug SYMROOT=<dir> build CODE_SIGNING_ALLOWED=NO
+      xcrun simctl boot "Apple Watch Series 10 (46mm)"
+      xcrun simctl install booted <dir>/Debug-watchsimulator/CaelynWatch.app
+      xcrun simctl launch booted …watchapp --screenshot-mode   # then --screenshot-log
+      xcrun simctl io booted screenshot out.png
+      ```
 - [ ] Export-compliance: uses only Apple-provided encryption (HTTPS / CloudKit /
       Keychain) → standard exemption.
 

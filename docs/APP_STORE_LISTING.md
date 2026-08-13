@@ -92,7 +92,7 @@ No marketing promises. No fine print. Just honest building blocks:
 - Caelyn runs no servers and makes no network calls of its own
 - No account, no email, no phone number, no signup required
 - HealthKit export is one-way into Apple's health app (your choice)
-- Optional iCloud Sync sends an encrypted copy to *your* private iCloud—never Caelyn's
+- No cloud sync at all—your cycle history exists only on your device
 
 **No Tracking**
 - Zero third-party SDKs, zero analytics, zero ads, zero data selling
@@ -156,7 +156,7 @@ No marketing promises. No fine print. Just honest building blocks:
 - watchOS widgets (Pro)
 - Apple Health integration (read flow, write flow + symptoms + pain)
 - CSV import from Caelyn or other apps (Switch Kit)
-- iCloud Sync option (Pro, opt-in, off by default)
+- CSV / PDF export — your own portable backup
 
 #### On-Device Intelligence
 
@@ -204,8 +204,7 @@ Learn your body without leaking it. Caelyn is the first period tracker where the
 - TTC fertility dashboard, pregnancy & postpartum tracking (Pro)
 - Apple Watch app and widgets (small free, medium/large Pro)
 - Apple Health sync, CSV import (Switch Kit), PDF clinical export
-- iCloud Sync option—encrypted, opt-in, OFF by default
-- No account, no ads, no tracking, no servers
+- No account, no ads, no tracking, no servers, no cloud copy
 
 Install Caelyn and get the first prediction free. Everything learned about your cycle stays on your device unless you choose otherwise.
 
@@ -307,7 +306,7 @@ Caelyn's screenshots should demonstrate the "learns your body AND can't tell any
 | **Diagnostics** | No | No | Not Collected |
 | **Other Data** (optional Birth Control tracking) | No | No | On Device |
 
-**Summary:** Caelyn does not collect, track, or sell health data. Cycle logs and insights are generated and stored on the user's device. If iCloud Sync is enabled (opt-in, off by default), a copy is encrypted and sent to the user's own Apple account—never Caelyn's servers. Purchase checks are handled directly by Apple through StoreKit 2. No third-party SDKs or analytics.
+**Summary:** Caelyn does not collect, track, or sell health data. Cycle logs and insights are generated and stored on the user's device only — the app has no cloud sync and no servers. Purchase checks are handled directly by Apple through StoreKit 2. No third-party SDKs or analytics.
 
 ### Export Compliance
 

@@ -140,6 +140,13 @@ targets:
   CaelynWatch:
     type: application
     platform: watchOS
+    # NOTE: the `deploymentTarget:` key below does NOT reach the generated
+    # pbxproj (xcodegen emits no WATCHOS_DEPLOYMENT_TARGET for it), so the build
+    # silently fell back to the SDK version — shipping a Watch app installable
+    # only on the newest watchOS. WATCHOS_DEPLOYMENT_TARGET in settings.base
+    # below is the one that actually takes effect; keep the two in sync and
+    # verify `MinimumOSVersion` in the built Watch app's Info.plist after any
+    # change here.
     deploymentTarget:
       watchOS: "10.0"
     sources:
@@ -161,6 +168,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelynperiodtracker.watchapp
+        WATCHOS_DEPLOYMENT_TARGET: "10.0"
         SKIP_INSTALL: YES
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"

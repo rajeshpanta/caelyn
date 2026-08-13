@@ -1,24 +1,37 @@
 # Caelyn — App Store Connect Privacy Label (Exact Answers)
 
+> ## ⚠️ Read this first — v1.0 ships with NO iCloud sync
+>
+> Caelyn 1.0 has **no iCloud/CloudKit entitlement and no sync UI**. Cycle data is
+> **on-device only**, full stop. Every "if iCloud Sync is enabled…" passage below is
+> **inapplicable to 1.0** and is retained only as a template for a future release
+> that actually ships sync.
+>
+> **Practical effect on the ASC questionnaire:** wherever a conditional sync clause
+> would have changed an answer, take the **local-only branch** — in particular,
+> Health & Fitness is **not linked to identity** (there is no Apple-ID-linked copy,
+> because no data leaves the device). Do not describe any cloud mirroring in the
+> App Privacy answers, the app description, or the privacy policy.
+
 ## Executive Summary
 
 **Does the app collect data?** 
 No — with an important caveat about Apple's definition of "collection."
 
-All personal health data (cycle entries, symptoms, pain, mood, temperatures, etc.) is stored exclusively on the user's device in SwiftData. The app contains **zero external network calls** of its own, zero third-party SDKs, zero analytics, and zero trackers. HealthKit data is read from and written to the user's own Health app (not collected by Caelyn). Optional iCloud Sync (CloudKit, off by default) mirrors data to the user's own private iCloud container, end-to-end encrypted by Apple — never to Caelyn servers (there are none). App Store purchase data is handled entirely by StoreKit 2, managed by Apple, with no Caelyn involvement beyond verifying the receipt locally.
+All personal health data (cycle entries, symptoms, pain, mood, temperatures, etc.) is stored exclusively on the user's device in SwiftData. The app contains **zero external network calls** of its own, zero third-party SDKs, zero analytics, and zero trackers. HealthKit data is read from and written to the user's own Health app (not collected by Caelyn). There is no iCloud/CloudKit sync in 1.0 — no cycle data leaves the device at all. App Store purchase data is handled entirely by StoreKit 2, managed by Apple, with no Caelyn involvement beyond verifying the receipt locally.
 
 **The nuance:** Apple's App Store Connect privacy questionnaire distinguishes between:
 - Data the app **collects** (i.e., gathers from external sources or the user): HealthKit samples, Face ID biometric data, App Store transactions.
 - Data the app **stores** (i.e., persists locally): all user-entered cycle logs, settings, predictions.
-- Data the app **transmits** (i.e., sends off-device): optionally to the user's own iCloud via CloudKit sync (user's choice, off by default); never to Caelyn or third parties.
+- Data the app **transmits** (i.e., sends off-device): **none** of the user's cycle data. Nothing is sent to Caelyn, to Apple's CloudKit, or to any third party.
 
 In Caelyn's case:
-- **Cycle log entries** (flow, symptoms, pain, mood, energy, notes, etc.): on-device-only by default. Not "collected" — user-entered. If sync is on, mirrored to the user's private CloudKit. Never collected by Caelyn.
+- **Cycle log entries** (flow, symptoms, pain, mood, energy, notes, etc.): on-device only. Not "collected" — user-entered, and never transmitted anywhere by the app.
 - **HealthKit health data**: the user *grants permission* for Caelyn to read menstrual flow/symptoms from Health, or write Caelyn's logged data back to Health. Not collected by Caelyn — accessed with explicit permission.
 - **Face ID / biometrics**: accessed by Caelyn only to unlock the app-level PIN, never for analytics or tracking.
 - **App Store transactions**: handled by StoreKit 2 and Apple's servers; Caelyn receives only local verification results.
 
-Therefore: **Answer "No" to "Does your app collect any personal data?"** — Caelyn does not collect data in the sense the questionnaire means. It stores user-entered data on-device and optionally syncs it to the user's own iCloud. This is not collection.
+Therefore: **Answer "No" to "Does your app collect any personal data?"** — Caelyn does not collect data in the sense the questionnaire means. It stores user-entered data on-device and transmits none of it. This is not collection.
 
 ---
 
@@ -29,12 +42,12 @@ Therefore: **Answer "No" to "Does your app collect any personal data?"** — Cae
 **Answer: NO**
 
 **Justification:**
-Caelyn is designed to operate entirely on-device with no collection. All cycle tracking data (entries, notes, insights) is stored only in SwiftData on the user's device. The app makes no network requests of its own. When the user elects to use iCloud Sync (opt-in, off by default), their data is mirrored to their own private CloudKit database (end-to-end encrypted by Apple), not to Caelyn servers (none exist). The only external data flows are:
+Caelyn is designed to operate entirely on-device with no collection. All cycle tracking data (entries, notes, insights) is stored only in SwiftData on the user's device. The app makes no network requests of its own and has no cloud sync. The only external data flows are:
 - **HealthKit**: user grants Caelyn read/write access; Caelyn accesses the user's own Health app data with permission.
 - **App Store**: in-app purchase verification via StoreKit 2, managed entirely by Apple.
 - **Face ID**: used only locally to authenticate the app-level PIN.
 
-No data leaves the device except what the user explicitly opts into (iCloud Sync, Health export, manual export).
+No data leaves the device except what the user explicitly opts into (Apple Health sharing, manual CSV/PDF export).
 
 ---
 
@@ -61,7 +74,7 @@ Use the following declarations for each category in ASC's App Privacy questionna
 - Cervical mucus observations
 
 **Linked to User Identity:** NO  
-*Only if iCloud Sync is enabled does this data associate with the user's Apple ID (on their own private CloudKit, not Caelyn's); otherwise, stays device-local with no identity.*
+*This data never associates with the user's Apple ID — it stays device-local, with no identity attached.*
 
 **Used for Tracking:** NO  
 *Never used to track the user across apps or to build a profile sold to third parties. Purely for personal cycle analysis.*
@@ -71,13 +84,12 @@ Use the following declarations for each category in ASC's App Privacy questionna
 - To read/write data to Apple Health when the user grants permission
 - To compute cycle patterns, phase detection, and fertility predictions
 - To display cycle insights and patterns within the app
-- (If enabled) To sync data to the user's private iCloud CloudKit container for backup and cross-device access
 
 **Source:** User input + optional HealthKit read permission (user's own Health app data)  
-**Storage:** On-device SwiftData database; optionally mirrored to user's private CloudKit if Sync is enabled  
+**Storage:** On-device SwiftData database only — no cloud mirror  
 **Deletion:** User can clear all cycle data via "Secure Wipe"; data is also deleted from Health app if HealthKit write permission was granted
 
-**One-line justification:** Core health data for period tracking, stored on-device and optionally in the user's own iCloud; never transmitted to Caelyn or third parties.
+**One-line justification:** Core health data for period tracking, stored on-device only; never transmitted to Caelyn, Apple, or third parties.
 
 ---
 
@@ -178,7 +190,7 @@ None of these UUIDs are used for tracking or cross-app identification. They are 
 
 **Collected:** NO
 
-**Note:** While Caelyn handles highly sensitive health data (menstrual cycles, fertility details), this data is **user-entered** (not collected from external sources) and is stored on-device or in the user's own iCloud. It is not the kind of "sensitive info" Apple's questionnaire refers to (e.g., racial/ethnic origin, political views, sexual orientation, genetic data — none of which Caelyn collects).
+**Note:** While Caelyn handles highly sensitive health data (menstrual cycles, fertility details), this data is **user-entered** (not collected from external sources) and is stored on-device only. It is not the kind of "sensitive info" Apple's questionnaire refers to (e.g., racial/ethnic origin, political views, sexual orientation, genetic data — none of which Caelyn collects).
 
 ---
 
@@ -256,14 +268,14 @@ None of these UUIDs are used for tracking or cross-app identification. They are 
 
 | Data Type | Collected | Linked | Tracking | Purpose | Storage |
 |-----------|-----------|--------|----------|---------|---------|
-| Health & Fitness (flow, symptoms, pain, temp, wrist temp, ovulation/pregnancy tests, cervical mucus) | YES | NO* | NO | Cycle tracking, predictions, HealthKit sync | On-device; optional private CloudKit |
+| Health & Fitness (flow, symptoms, pain, temp, wrist temp, ovulation/pregnancy tests, cervical mucus) | YES | NO* | NO | Cycle tracking, predictions, HealthKit sync | On-device only |
 | Purchases | YES | YES** | NO | Entitlement verification, trial eligibility | Local verification only |
 | Identifiers | NO | N/A | NO | N/A | N/A |
 | Usage Data | NO | N/A | NO | N/A | N/A |
 | Diagnostics | NO | N/A | NO | N/A | N/A |
 | All others | NO | N/A | NO | N/A | N/A |
 
-\* *Linked only if iCloud Sync is enabled (user's choice, off by default) — to the user's Apple ID on their own CloudKit.*  
+\* *Never linked — no copy of this data is associated with an Apple ID or leaves the device in 1.0.*  
 \*\* *Linked by Apple via App Store / StoreKit 2; Caelyn only reads the local entitlement status.*
 
 ---
@@ -301,7 +313,7 @@ Caelyn's `PrivacyInfo.xcprivacy` currently declares:
 - `NSPrivacyTracking: false` — Caelyn does not use data for cross-app tracking.
 - `NSPrivacyTrackingDomains: []` — No tracking domains.
 - `NSPrivacyCollectedDataTypes: []` — No collected data types (cycle data is user-entered, not collected from external sources).
-- `NSPrivacyAccessedAPITypes: [UserDefaults]` — The app accesses `UserDefaults.standard` for settings (PIN lockout attempts, iCloud Sync toggle, theme preference, etc.). Reason code **CA92.1** (app or third-party SDK functionality) is correct.
+- `NSPrivacyAccessedAPITypes: [UserDefaults]` — The app accesses `UserDefaults.standard` for settings (PIN lockout attempts, theme preference, widget snapshot, etc.). Reason code **CA92.1** (app or third-party SDK functionality) is correct.
 
 ### Accessing APIs Used (No Required-Reason Codes Needed)
 
@@ -345,13 +357,13 @@ No. The App Store privacy questionnaire defines "collected" as data the app gath
 
 1. **Stored data (on-device)**: User enters cycle information directly into Caelyn → stored on-device → **not "collected"** (the user consciously provided it).
 2. **Accessed data (HealthKit)**: User grants Caelyn read/write access to Health → Caelyn accesses the user's own Health app → **this *is* "collected"** (the app retrieves it from an external system, even though the external system is the user's own device).
-3. **Synced data (iCloud)**: User enables Sync → data mirrored to the user's private CloudKit → **not "collected by Caelyn,"** but the data does leave the device (to Apple's servers, end-to-end encrypted). Declare this in the "data sharing" section as "stored on user's device and optionally mirrored to private iCloud CloudKit" — not as collection.
+3. **Synced data (iCloud)**: **Not applicable to 1.0** — there is no sync, so there is no off-device copy to declare anywhere.
 
 **Declaration strategy for ASC:**
 - **Health & Fitness**: YES, collected. Source: HealthKit (user-granted access to their own Health app data, plus user-entered data in Caelyn).
 - **Purchases**: YES, collected. Source: StoreKit 2 (App Store).
 - All others: NO.
-- Under "data retention": "Health & Fitness data is stored on-device and optionally mirrored to the user's private iCloud CloudKit if Sync is enabled (user's choice, off by default)."
+- Under "data retention": "Health & Fitness data is stored on the user's device only, for as long as the user keeps it; deleting the app deletes it."
 
 ---
 

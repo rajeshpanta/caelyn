@@ -30,19 +30,22 @@ enum Persistence {
     // type changes, constraint changes) MUST introduce a VersionedSchema +
     // SchemaMigrationPlan and be tested against a real pre-change store on device.
 
-    /// The live SwiftData container. Caelyn is **local by default** — every entry
-    /// stays on-device with no Caelyn account and no Caelyn server, ever. iCloud
-    /// Sync is strictly **opt-in** (`syncEnabledKey`, off by default): when the
-    /// user turns it on, the store mirrors to *their own* private CloudKit
-    /// database (Apple end-to-end encrypted) — never through us. If the sync store
-    /// can't open (e.g. the CloudKit capability isn't provisioned yet, or no iCloud
-    /// account), we fall back to a plain local store so data always opens with zero
-    /// loss. A total failure is unrecoverable — fatalError so the crash log captures
-    /// the exact error.
+    /// The live SwiftData container. Caelyn 1.0 is **local only** — every entry
+    /// stays on-device with no Caelyn account and no Caelyn server, ever, and no
+    /// cloud copy of any kind. The `isSyncEnabled` branch below is dormant
+    /// scaffolding for a future opt-in private-CloudKit mirror; nothing in the app
+    /// can set that flag today, and without the iCloud entitlement the branch would
+    /// fail closed to the local store anyway. If a store can't open we fall back so
+    /// data always opens with zero loss. A total failure is unrecoverable —
+    /// fatalError so the crash log captures the exact error.
     static let storeFailedKey = "caelyn.storeFailed"
 
-    /// Opt-in iCloud sync flag. OFF unless the user explicitly enables it. Changing
-    /// it takes effect on the next launch (the container is built once, here).
+    /// Opt-in iCloud sync flag. **Unreachable in 1.0** — there is no UI that can
+    /// set it (see `BackupInfoView`) because the app ships with no iCloud/CloudKit
+    /// entitlement, so the mirroring path below could only ever fail closed to the
+    /// local store. The plumbing is kept so restoring sync is a UI change plus a
+    /// capability, not a rewrite. Changing the flag takes effect on the next launch
+    /// (the container is built once, here).
     static let syncEnabledKey = "caelyn.syncEnabled"
     static var isSyncEnabled: Bool { UserDefaults.standard.bool(forKey: syncEnabledKey) }
 

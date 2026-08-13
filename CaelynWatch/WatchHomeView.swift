@@ -4,6 +4,10 @@ struct WatchHomeView: View {
     @EnvironmentObject private var model: WatchDataModel
     @State private var showQuickLog = false
 
+    /// Opens the quick-log sheet immediately, for App Store screenshot capture
+    /// (`--screenshot-log`). Always false in normal use.
+    var presentQuickLogOnAppear = false
+
     /// The synced snapshot, recomputed for the current day so the cycle day
     /// advances across local midnight without reopening (plat-4). nil when there
     /// is no real prediction yet → honest empty state (never fabricated data).
@@ -28,6 +32,7 @@ struct WatchHomeView: View {
             WatchQuickLogView()
                 .environmentObject(model)
         }
+        .onAppear { if presentQuickLogOnAppear { showQuickLog = true } }
     }
 
     // MARK: - Dashboard (real data only)

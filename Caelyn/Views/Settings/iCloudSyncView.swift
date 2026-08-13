@@ -1,21 +1,28 @@
 import SwiftUI
 
-/// iCloud Sync — **opt-in and off by default.** By default Caelyn keeps everything
-/// on-device with no account and no Caelyn server. If the user turns sync on, the
-/// store mirrors to *their own* private CloudKit database (Apple end-to-end
-/// encrypted) — never through us. The toggle takes effect on next launch because
-/// the SwiftData container is built once at startup (see Persistence).
+/// Backup — the honest state of where Caelyn's data lives.
+///
+/// **Why there is no sync toggle here.** Caelyn 1.0 ships with NO iCloud/CloudKit
+/// entitlement (see `Caelyn/Caelyn.entitlements` — no
+/// `com.apple.developer.icloud-container-identifiers` / `icloud-services`), so the
+/// opt-in mirroring path in `Persistence.live` can never open its container and
+/// always falls back to the local store. A toggle that silently does nothing while
+/// the UI reports "syncing" would tell users their data is backed up when it is
+/// not — the one lie a privacy-first app can never ship. So the switch is gone and
+/// this screen states exactly what is true: local-only, and Export is the backup.
+///
+/// To turn sync back on later: add the iCloud → CloudKit capability for
+/// `Persistence.cloudKitContainerID`, add Background Modes → Remote notifications,
+/// push the CloudKit schema to Production, then restore a toggle bound to
+/// `Persistence.syncEnabledKey` **driven by a real "did the sync store open"
+/// flag** — never by the preference alone. See docs/PHASE6_CLOUDKIT_SETUP.md.
 struct BackupInfoView: View {
-
-    @AppStorage(Persistence.syncEnabledKey) private var syncEnabled = false
-    @State private var changed = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
                 headline
-                toggleCard
-                if changed { restartNote }
+                statusCard
                 ForEach(promises.indices, id: \.self) { idx in
                     promiseCard(promises[idx])
                 }
@@ -27,7 +34,7 @@ struct BackupInfoView: View {
             .padding(.bottom, CaelynSpacing.xl)
         }
         .background(CaelynColor.backgroundCream.ignoresSafeArea())
-        .navigationTitle("iCloud Sync")
+        .navigationTitle("Backup")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -35,82 +42,64 @@ struct BackupInfoView: View {
 
     private var headline: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Local by default.\nSync only if you want it.")
+            Text("Your data lives here.\nNowhere else.")
                 .font(.system(size: 26, weight: .semibold, design: .rounded))
                 .foregroundStyle(CaelynColor.deepPlumText)
-            Text("Caelyn keeps everything on this device with no account and no server of ours. You can optionally sync across your own devices through your private iCloud — turned off unless you switch it on.")
+            Text("Caelyn keeps every entry on this device. There's no Caelyn account, no Caelyn server, and no cloud copy — which also means there is no automatic backup. Export is how you keep a copy.")
                 .font(CaelynFont.body)
                 .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
 
-    // MARK: - Toggle
+    // MARK: - Status
 
-    private var toggleCard: some View {
+    private var statusCard: some View {
         CaelynCard(padding: CaelynSpacing.md) {
-            VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
-                Toggle(isOn: $syncEnabled) {
-                    HStack(spacing: CaelynSpacing.md) {
-                        ZStack {
-                            Circle()
-                                .fill(CaelynColor.lavender)
-                                .frame(width: CaelynIconSize.xl, height: CaelynIconSize.xl)
-                            Image(systemName: "arrow.triangle.2.circlepath.icloud")
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundStyle(CaelynColor.primaryPlum)
-                        }
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Sync with iCloud")
-                                .font(CaelynFont.headline)
-                                .foregroundStyle(CaelynColor.deepPlumText)
-                            Text(syncEnabled ? "On — syncs to your private iCloud" : "Off — stored on this device only")
-                                .font(CaelynFont.subheadline)
-                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
-                        }
-                    }
+            HStack(alignment: .top, spacing: CaelynSpacing.md) {
+                ZStack {
+                    Circle()
+                        .fill(CaelynColor.lavender)
+                        .frame(width: CaelynIconSize.xl, height: CaelynIconSize.xl)
+                    Image(systemName: "iphone")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundStyle(CaelynColor.primaryPlum)
                 }
-                .tint(CaelynColor.primaryPlum)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Stored on this device")
+                        .font(CaelynFont.headline)
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                    Text("Nothing is uploaded anywhere — not to us, not to iCloud.")
+                        .font(CaelynFont.subheadline)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
-        .onChange(of: syncEnabled) { _, _ in changed = true }
-    }
-
-    private var restartNote: some View {
-        HStack(alignment: .top, spacing: CaelynSpacing.sm) {
-            Image(systemName: "arrow.clockwise.circle.fill")
-                .foregroundStyle(CaelynColor.primaryPlum)
-            Text("Reopen Caelyn to \(syncEnabled ? "start" : "stop") syncing. Your data stays safe on this device either way.")
-                .font(CaelynFont.subheadline)
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.8))
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(CaelynSpacing.md)
-        .background(CaelynColor.lavender.opacity(0.4), in: RoundedRectangle(cornerRadius: CaelynRadius.card, style: .continuous))
     }
 
     // MARK: - Promise cards
 
     private let promises: [(icon: String, title: String, body: String)] = [
         (
-            icon: "hand.raised.fill",
-            title: "Off unless you turn it on",
-            body: "Sync is opt-in. Leave it off and Caelyn behaves exactly as before — everything stays on this device, and nothing is uploaded anywhere."
+            icon: "square.and.arrow.up",
+            title: "Export is your backup",
+            body: "Settings → Export data saves a CSV or PDF of everything you've logged. Keep it wherever you like — Files, email, a drive of your own. A Caelyn CSV imports back in full, so an export is a genuine restore point."
         ),
         (
-            icon: "icloud.fill",
-            title: "Your own private iCloud",
-            body: "When on, Caelyn mirrors your data to YOUR private CloudKit database — Apple end-to-end encrypted, in your Apple account. We never see it, and we still run no server."
+            icon: "exclamationmark.triangle",
+            title: "Deleting the app deletes your data",
+            body: "Because there is no cloud copy, removing Caelyn (or erasing this iPhone) removes your history with it. Export before you delete the app, switch phones, or reset your device."
         ),
         (
             icon: "person.slash",
-            title: "No Caelyn account, ever",
-            body: "There's still no sign-up and no Caelyn backend. Sync uses the iCloud you're already signed into on this iPhone — nothing new to create."
+            title: "No account, no server",
+            body: "There's no sign-up and no Caelyn backend — that's the reason there's nothing of yours to breach, sell, or subpoena. The trade-off is that backing up is your call, not something we do quietly in the background."
         ),
         (
-            icon: "square.and.arrow.up",
-            title: "Export is still your backup",
-            body: "Whether sync is on or off, Settings → Export saves a CSV or PDF you fully control. That file remains a backup you can keep anywhere."
+            icon: "icloud.slash",
+            title: "Not in iCloud either",
+            body: "Caelyn doesn't put your cycle data in iCloud. Cross-device sync through your own private iCloud is planned, and when it arrives it will be opt-in and clearly labelled — never on without you choosing it."
         ),
     ]
 
@@ -150,18 +139,18 @@ struct BackupInfoView: View {
             CaelynCard(padding: CaelynSpacing.md) {
                 VStack(alignment: .leading, spacing: CaelynSpacing.md) {
                     faqRow(
-                        q: "Where does my data go when sync is on?",
-                        a: "Only to your own private iCloud (CloudKit), end-to-end encrypted. It never passes through a Caelyn server — we don't have one."
+                        q: "How do I move to a new iPhone?",
+                        a: "Export a CSV on the old phone, install Caelyn on the new one, then use Settings → Import data. Your history comes across without re-logging anything."
                     )
                     divider
                     faqRow(
-                        q: "Can Caelyn read my synced data?",
-                        a: "No. It lives in your private iCloud database tied to your Apple Account. We have no access to it."
+                        q: "Does an iPhone backup include Caelyn?",
+                        a: "An encrypted iPhone backup (iCloud Backup or a computer backup) does restore apps and their data when you restore the whole device. That's Apple's backup, not ours — we can't see it, and we can't promise how you've set it up. A Caelyn export is the copy you fully control."
                     )
                     divider
                     faqRow(
-                        q: "What if I delete the app with sync off?",
-                        a: "With sync off, data lives only on this device, so deleting the app deletes it. Export first, or turn on sync, if you want to keep it."
+                        q: "Can Caelyn read my data?",
+                        a: "No. It never leaves this device, so there's nothing for us to read. We run no servers."
                     )
                 }
             }
@@ -199,7 +188,7 @@ struct BackupInfoView: View {
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                     .tracking(0.4)
             }
-            Text("Syncing requires being signed into iCloud on this device. If iCloud isn't available, Caelyn keeps working locally and your data stays safe on this device.")
+            Text("A good habit: export once a month, and always before changing phones. It takes a few seconds and it's the only copy of your history that exists outside this device.")
                 .font(CaelynFont.caption)
                 .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                 .fixedSize(horizontal: false, vertical: true)
