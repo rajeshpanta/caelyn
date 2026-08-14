@@ -203,6 +203,8 @@ struct DailyLogForm: View {
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(painType.displayName) pain location")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     private func painLabel(_ pain: Int) -> String {
@@ -648,6 +650,7 @@ struct DailyLogForm: View {
                         .scrollContentBackground(.hidden)
                         .frame(minHeight: 80)
                         .focused($noteFocused)
+                        .accessibilityLabel("Private note")
                 }
                 .padding(.horizontal, 4)
 
@@ -835,6 +838,8 @@ struct DailyLogForm: View {
                     }
                     .foregroundStyle(CaelynColor.primaryPlum)
                 }
+                .accessibilityLabel("Cervical fluid")
+                .accessibilityValue(entry?.cervicalMucus?.displayName ?? "Not selected")
             }
         }
     }
@@ -852,6 +857,7 @@ struct DailyLogForm: View {
                 Toggle("", isOn: isOn)
                     .labelsHidden()
                     .tint(CaelynColor.primaryPlum)
+                    .accessibilityLabel(title)
             }
         }
     }

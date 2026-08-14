@@ -59,8 +59,10 @@ struct AppLockGate<Content: View>: View {
             }
         }
         .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .background {
-                // Relock when the app actually leaves the foreground.
+            if newPhase != .active {
+                // Relock as soon as Caelyn leaves the active foreground. Some
+                // transitions (including app switching and interruptions) can
+                // return from `.inactive` without delivering `.background` first.
                 isUnlocked = false
                 errorMessage = nil
                 pinError = nil
@@ -80,7 +82,7 @@ struct AppLockGate<Content: View>: View {
         // must never be permanently locked out of their own data.
         guard BiometricService.canAuthenticate || PINService.isSet else { return false }
         // Cover whenever locked OR the app isn't active, so the app-switcher
-        // snapshot never exposes content. We only clear isUnlocked on .background.
+        // snapshot never exposes content.
         return !isUnlocked || scenePhase != .active
     }
 

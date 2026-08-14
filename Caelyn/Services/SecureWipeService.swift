@@ -32,14 +32,31 @@ enum SecureWipeService {
         WidgetDataStore.clear()
         WidgetCenter.shared.reloadAllTimelines()
 
-        // 5. Reset preference flags so nothing stale is re-shown to a fresh user.
+        // 5. Remove app-lock secrets and failed-attempt state from the Keychain.
+        PINService.clearAll()
+
+        // 6. Reset preference flags so the next onboarding is genuinely fresh.
         let defaults = UserDefaults.standard
         for key in [
             "caelyn.dismissedInsights",
+            // Retired flags remain here so upgrades also remove old state.
             "caelyn.softPaywallShown",
+            "caelyn.firstPredictionCelebrated",
+            "caelyn.periodRecapDismissedFor",
+            "caelyn.firstFlowCelebrated",
+            "caelyn.firstWeekCelebrated",
+            "caelyn.seenIntro.home",
+            "caelyn.seenIntro.calendar",
+            "caelyn.seenIntro.log",
+            "caelyn.seenIntro.insights",
+            "caelyn.seenIntro.settings",
+            "caelyn.seenLearnedLuteal",
+            "caelyn.seenLearnedPms",
+            Persistence.syncEnabledKey,
             Persistence.storeFailedKey
         ] {
             defaults.removeObject(forKey: key)
         }
+        RatingService.reset()
     }
 }

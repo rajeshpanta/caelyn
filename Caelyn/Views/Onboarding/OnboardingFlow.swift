@@ -16,7 +16,7 @@ struct OnboardingFlow: View {
 
             VStack(spacing: 0) {
                 progressArea
-                    .frame(height: 36)
+                    .frame(height: 44)
                     .padding(.horizontal, CaelynSpacing.lg)
                     .padding(.top, CaelynSpacing.md)
 

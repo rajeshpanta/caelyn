@@ -80,6 +80,7 @@ struct CycleSettingsView: View {
                     }
                 }
                 .tint(CaelynColor.primaryPlum)
+                .accessibilityLabel("Gentle guidance")
             }
         }
     }
@@ -112,20 +113,26 @@ struct CycleSettingsView: View {
                             .frame(maxWidth: 120)
                     }
 
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: CaelynSpacing.xs) {
-                            ForEach(cycleLengthRange, id: \.self) { value in
-                                cyclePill(value, selected: profile.averageCycleLength == value) {
-                                    profile.averageCycleLength = value
-                                    modelContext.saveOrLog()
-                                    Haptics.selection()
+                    ScrollViewReader { proxy in
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: CaelynSpacing.xs) {
+                                ForEach(cycleLengthRange, id: \.self) { value in
+                                    cyclePill(value, selected: profile.averageCycleLength == value) {
+                                        profile.averageCycleLength = value
+                                        modelContext.saveOrLog()
+                                        Haptics.selection()
+                                    }
+                                    .id(value)
                                 }
                             }
+                            .padding(.horizontal, 2)
+                            .padding(.vertical, 2)
                         }
-                        .padding(.horizontal, 2)
-                        .padding(.vertical, 2)
+                        .scrollClipDisabled()
+                        .onAppear {
+                            proxy.scrollTo(profile.averageCycleLength, anchor: .center)
+                        }
                     }
-                    .scrollClipDisabled()
                 }
             }
         }
@@ -222,6 +229,7 @@ struct CycleSettingsView: View {
                         }
                     }
                     .tint(CaelynColor.primaryPlum)
+                    .accessibilityLabel("Irregular cycle mode")
                     .onChange(of: profile.irregularModeEnabled) { _, _ in
                         modelContext.saveOrLog()
                     }
@@ -261,6 +269,7 @@ struct CycleSettingsView: View {
                         }
                     }
                     .tint(CaelynColor.primaryPlum)
+                    .accessibilityLabel("Perimenopause mode")
                     .onChange(of: profile.perimenoEnabled) { _, _ in
                         modelContext.saveOrLog()
                     }
@@ -316,6 +325,7 @@ struct CycleSettingsView: View {
                     }
                 }
                 .tint(CaelynColor.primaryPlum)
+                .accessibilityLabel("Trying to Conceive")
                 .onChange(of: profile.ttcEnabled) { _, _ in
                     modelContext.saveOrLog()
                 }
@@ -336,6 +346,7 @@ struct CycleSettingsView: View {
             }
         }
         .tint(CaelynColor.primaryPlum)
+        .accessibilityLabel(title)
         .onChange(of: isOn.wrappedValue) { _, _ in
             modelContext.saveOrLog()
         }
@@ -376,6 +387,7 @@ struct CycleSettingsView: View {
                         }
                     }
                     .tint(CaelynColor.primaryPlum)
+                    .accessibilityLabel("Pregnancy mode")
                     .onChange(of: profile.pregnancyEnabled) { _, newValue in
                         if newValue {
                             profile.postpartumEnabled = false
@@ -450,6 +462,7 @@ struct CycleSettingsView: View {
                         }
                     }
                     .tint(CaelynColor.primaryPlum)
+                    .accessibilityLabel("Postpartum mode")
                     .onChange(of: profile.postpartumEnabled) { _, newValue in
                         if newValue {
                             profile.pregnancyEnabled = false

@@ -77,7 +77,7 @@ targets:
         # Services/. Apple's static analyzer rejects uploads (ITMS-90683)
         # without these strings. Re-comment these only if all HealthKit
         # symbols are removed from the binary.
-        INFOPLIST_KEY_NSHealthShareUsageDescription: "Caelyn reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync."
+        INFOPLIST_KEY_NSHealthShareUsageDescription: "Caelyn reads menstrual flow history and Apple Watch wrist temperature from Apple Health to improve cycle predictions when you choose to connect."
         INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to."
         SWIFT_EMIT_LOC_STRINGS: YES
         CODE_SIGN_STYLE: Automatic

@@ -27,7 +27,10 @@ struct ImportResult {
 @MainActor
 enum HealthKitService {
 
-    private static let store = HKHealthStore()
+    // HealthKit delivers query callbacks on its own queues. HKHealthStore is
+    // designed to be shared across those callbacks, so this reference must not
+    // inherit the service's MainActor isolation.
+    nonisolated private static let store = HKHealthStore()
 
     // MARK: - Type catalog
 
@@ -68,8 +71,6 @@ enum HealthKitService {
 
     static var allReadableTypes: Set<HKObjectType> {
         var set: Set<HKObjectType> = [menstrualFlowType]
-        for type in symptomCategoryMap.values { set.insert(type) }
-        for type in painCategoryMap.values { set.insert(type) }
         // Apple Watch sleeping wrist temperature, for retrospective ovulation
         // confirmation (int-3). Read-only.
         if let wrist = HKObjectType.quantityType(forIdentifier: .appleSleepingWristTemperature) {

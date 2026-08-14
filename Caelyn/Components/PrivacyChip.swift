@@ -9,6 +9,7 @@ struct PrivacyChip: View {
                 .font(.system(size: 10, weight: .semibold))
             Text(text)
                 .font(CaelynFont.footnote.weight(.medium))
+                .fixedSize(horizontal: false, vertical: true)
         }
         .foregroundStyle(CaelynColor.primaryPlum)
         .padding(.horizontal, CaelynSpacing.sm)

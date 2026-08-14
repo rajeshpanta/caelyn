@@ -11,15 +11,12 @@ struct HomeView: View {
     @State private var periodStartDraft: Date = .now
     @State private var purchase = PurchaseService.shared
 
-    @AppStorage("caelyn.softPaywallShown") private var softPaywallShown = false
-    @AppStorage("caelyn.firstPredictionCelebrated") private var firstPredictionCelebrated = false
     @AppStorage("caelyn.periodRecapDismissedFor") private var recapDismissedFor: Double = 0
     @AppStorage("caelyn.firstFlowCelebrated") private var firstFlowCelebrated = false
     @AppStorage("caelyn.firstWeekCelebrated") private var firstWeekCelebrated = false
     @State private var showingWeekShare = false
     @State private var appeared = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var showSoftPaywall = false
 
     /// The period anchor as it was just before "Log Period today" moved it to today,
     /// so an immediate undo can restore it rather than wiping the baseline (review HIGH).
@@ -194,6 +191,8 @@ struct HomeView: View {
                     phase: phase
                 )
 
+                FirstVisitIntroCard(.home)
+
                 HomeHeroCard(
                     cycleDay: cycleDay,
                     cycleLength: cycleLength,
@@ -205,12 +204,6 @@ struct HomeView: View {
                     confidence: confidence,
                     personal: guidePersonal
                 )
-
-                // One-time celebration the first time a real prediction exists —
-                // the "it works" moment (stand-out plan S4). Dismiss persists.
-                if !firstPredictionCelebrated, lastPeriodStart != nil {
-                    firstPredictionCard
-                }
 
                 // Celebrate the FIRST period log — the earliest, most fragile
                 // logs deserve a win, not just the end-of-cycle recap (delight S6).
@@ -318,21 +311,8 @@ struct HomeView: View {
         }
         .background(backgroundLayer.ignoresSafeArea())
         .onAppear {
-            maybeShowSoftPaywall()
             if reduceMotion { appeared = true }
             else if !appeared { withAnimation(.easeOut(duration: 0.45)) { appeared = true } }
-        }
-        .sheet(isPresented: $showSoftPaywall) { PaywallView() }
-    }
-
-    /// Show the Pro paywall ONCE, the first time the user actually has a real
-    /// prediction to look at — a dismissible soft prompt at the value moment, never
-    /// on a blank first launch and never for existing Pro users (mon-4).
-    private func maybeShowSoftPaywall() {
-        guard !softPaywallShown, !purchase.isPro, phase != .unknown else { return }
-        softPaywallShown = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            if !purchase.isPro { showSoftPaywall = true }
         }
     }
 
@@ -434,41 +414,6 @@ struct HomeView: View {
             }
         }
         .accessibilityElement(children: .combine)
-    }
-
-    // MARK: - First-prediction celebration (one-time)
-
-    private var firstPredictionCard: some View {
-        CaelynCard(padding: CaelynSpacing.md, background: phase.tintBackground.opacity(0.5)) {
-            HStack(alignment: .top, spacing: CaelynSpacing.sm) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(CaelynColor.primaryPlum)
-                    .frame(width: 26)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Your predictions are live 🎉")
-                        .font(CaelynFont.callout.weight(.semibold))
-                        .foregroundStyle(CaelynColor.deepPlumText)
-                    Text(nextStart.map { "Next period expected around \($0.formatted(.dateTime.month(.wide).day())). Every log from here makes Caelyn smarter about your body." }
-                         ?? "Every log from here makes Caelyn smarter about your body.")
-                        .font(CaelynFont.subheadline)
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 0)
-                Button {
-                    withAnimation { firstPredictionCelebrated = true }
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
-                        .padding(6)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Dismiss")
-            }
-        }
     }
 
     // MARK: - One-time milestone cards (dismiss-and-forget, no nag)

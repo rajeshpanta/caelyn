@@ -11,7 +11,7 @@ struct OnboardingProgress: View {
                 Image(systemName: "arrow.left")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.75))
-                    .frame(width: 36, height: 36)
+                    .frame(width: 44, height: 44)
                     .background(CaelynColor.cardWhite, in: Circle())
                     .caelynShadow(.subtle)
             }

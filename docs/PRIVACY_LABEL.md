@@ -27,7 +27,7 @@ All personal health data (cycle entries, symptoms, pain, mood, temperatures, etc
 
 In Caelyn's case:
 - **Cycle log entries** (flow, symptoms, pain, mood, energy, notes, etc.): on-device only. Not "collected" — user-entered, and never transmitted anywhere by the app.
-- **HealthKit health data**: the user *grants permission* for Caelyn to read menstrual flow/symptoms from Health, or write Caelyn's logged data back to Health. Not collected by Caelyn — accessed with explicit permission.
+- **HealthKit health data**: the user *grants permission* for Caelyn to read menstrual-flow history and sleeping wrist temperature, or write Caelyn's flow, symptom, and pain logs back to Health. Not collected by Caelyn — accessed with explicit permission.
 - **Face ID / biometrics**: accessed by Caelyn only to unlock the app-level PIN, never for analytics or tracking.
 - **App Store transactions**: handled by StoreKit 2 and Apple's servers; Caelyn receives only local verification results.
 
@@ -319,7 +319,7 @@ Caelyn's `PrivacyInfo.xcprivacy` currently declares:
 
 **HealthKit** (`import HealthKit`):
 - `HKHealthStore().requestAuthorization(toShare:read:)` — User grants permission via the standard iOS permission dialog. No privacy manifest entry needed; this is built-in.
-- Reads: `HKCategoryType(.menstrualFlow)`, symptoms, pain, wrist temperature.
+- Reads: `HKCategoryType(.menstrualFlow)` and wrist temperature.
 - Writes: Flow, symptoms, pain to Health.
 - **No required-reason API** — HealthKit is not a "required-reason API" in Apple's privacy manifest sense.
 
@@ -451,7 +451,7 @@ When the user initiates Secure Wipe (or enters the duress PIN):
 
 ### **Question: "What personal data is collected?"**
 **Answer:** (If the system requires this after clicking "No," respond with:)
-"Caelyn does not collect personal data. Health and Fitness data (cycle entries, symptoms, pain, temperatures, etc.) is stored only on the user's device. Users can optionally enable iCloud Sync to mirror their data to their own private CloudKit database. No data is shared with Caelyn or third parties. In-app purchase entitlements are managed by Apple via StoreKit 2."
+"Caelyn does not collect personal data. Health and Fitness data (cycle entries, symptoms, pain, temperatures, etc.) is stored only on the user's device. This version has no iCloud or cross-device sync. No data is shared with Caelyn or third parties. In-app purchase entitlements are managed by Apple via StoreKit 2."
 
 ---
 

@@ -927,9 +927,21 @@ final class CaelynTests: XCTestCase {
         context.insert(CycleEntry(date: .now, flow: .medium))
         context.insert(UserProfile())
         try context.save()
+        PINService.setPIN("2468")
+        for screen in FirstVisitIntroCard.Screen.allCases {
+            UserDefaults.standard.set(true, forKey: screen.storageKey)
+        }
+        // Unsigned simulator test bundles may not have Keychain access. When they
+        // do, also verify that the secure wipe removes the stored credential.
+        let keychainWasAvailable = PINService.isSet
         await SecureWipeService.wipeEverything(modelContext: context)
+
         XCTAssertEqual(try context.fetch(FetchDescriptor<CycleEntry>()).count, 0)
         XCTAssertEqual(try context.fetch(FetchDescriptor<UserProfile>()).count, 0)
+        if keychainWasAvailable { XCTAssertFalse(PINService.isSet) }
+        for screen in FirstVisitIntroCard.Screen.allCases {
+            XCTAssertNil(UserDefaults.standard.object(forKey: screen.storageKey))
+        }
     }
 
     // MARK: - Phase 5: PIN hashing + auto-sweep window

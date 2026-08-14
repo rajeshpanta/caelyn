@@ -45,8 +45,8 @@ struct InsightsEmptyState: View {
                         .multilineTextAlignment(.center)
 
                     Text(cyclesLogged == 0
-                         ? "Log a couple of cycles and Caelyn will start surfacing your patterns — averages, common symptoms, and trends, all in one place."
-                         : "You've logged \(cyclesLogged) cycle\(cyclesLogged == 1 ? "" : "s") — you're almost there! A couple more and your insights will unlock.")
+                         ? "Log two complete cycles and Caelyn will start surfacing averages and patterns in one place."
+                         : "You've logged one complete cycle — one more will begin unlocking your insights.")
                         .font(CaelynFont.subheadline)
                         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
                         .fixedSize(horizontal: false, vertical: true)
@@ -65,7 +65,7 @@ struct InsightsEmptyState: View {
                     .font(CaelynFont.caption.weight(.medium))
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                 Spacer()
-                Text("\(min(cyclesLogged, 3))/3 cycles")
+                Text("\(min(cyclesLogged, 2))/2 cycles")
                     .font(CaelynFont.caption.weight(.semibold))
                     .foregroundStyle(CaelynColor.primaryPlum.opacity(0.8))
             }
@@ -84,7 +84,7 @@ struct InsightsEmptyState: View {
                             )
                         )
                         .frame(
-                            width: geo.size.width * min(CGFloat(cyclesLogged) / 3.0, 1.0),
+                            width: geo.size.width * min(CGFloat(cyclesLogged) / 2.0, 1.0),
                             height: 8
                         )
                         .animation(.spring(response: 0.5, dampingFraction: 0.8), value: cyclesLogged)

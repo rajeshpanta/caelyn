@@ -71,7 +71,7 @@ private struct HealthKitConnectForm: View {
                     Text(profile.healthKitConnected ? "Connected to Apple Health" : "Sync with Apple Health")
                         .font(CaelynFont.headline)
                         .foregroundStyle(CaelynColor.deepPlumText)
-                    Text("You choose what to share. Caelyn reads or writes only what you turn on, and never anything else.")
+                    Text("You choose whether Caelyn imports flow or writes new flow and symptoms. iOS lets you change access anytime.")
                         .font(CaelynFont.subheadline)
                         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
                         .fixedSize(horizontal: false, vertical: true)
@@ -87,11 +87,12 @@ private struct HealthKitConnectForm: View {
         VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
             sectionTitle("What we'll ask for")
             VStack(spacing: CaelynSpacing.xs) {
-                whatRow("drop.fill", "Menstrual flow", "Light · Medium · Heavy")
-                whatRow("sparkles", "Symptoms", "Bloating, fatigue, cramps, and more")
+                whatRow("drop.fill", "Menstrual flow", "Import history or write new flow logs")
+                whatRow("sparkles", "Symptoms and pain", "Write the symptoms you log in Caelyn")
+                whatRow("thermometer.medium", "Wrist temperature", "Read Apple Watch sleeping temperature")
             }
             CaelynButton(
-                title: isAuthorizing ? "Connecting…" : (HealthKitService.isAvailable ? "Connect Apple Health" : "Coming soon"),
+                title: isAuthorizing ? "Connecting…" : (HealthKitService.isAvailable ? "Connect Apple Health" : "Unavailable on this device"),
                 variant: .primary,
                 icon: "heart.text.square"
             ) {
@@ -99,7 +100,7 @@ private struct HealthKitConnectForm: View {
             }
             .disabled(isAuthorizing || !HealthKitService.isAvailable)
             if !HealthKitService.isAvailable {
-                Text("Apple Health sync isn't enabled in this build of Caelyn. We'll turn it on in an upcoming release.")
+                Text("Apple Health sync isn't available on this device. Your Caelyn logs still work normally and stay on this device.")
                     .font(CaelynFont.subheadline)
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                     .fixedSize(horizontal: false, vertical: true)
@@ -149,14 +150,6 @@ private struct HealthKitConnectForm: View {
                     icon: "sparkles",
                     isOn: bind(\.hkWriteSymptoms)
                 )
-                ToggleCard(
-                    title: "Read symptoms from Health",
-                    subtitle: "Symptom import from Health is coming in a future update.",
-                    icon: "sparkle",
-                    isOn: bind(\.hkReadSymptoms)
-                )
-                .disabled(true)
-                .opacity(0.55)
             }
         }
     }

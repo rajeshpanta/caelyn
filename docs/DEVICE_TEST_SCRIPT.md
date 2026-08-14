@@ -8,27 +8,27 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 
 **Note:** Use a fresh simulator or test device reset to onboarding if testing all steps below. Pre-existing data can shortcut some flows.
 
-### A1. Welcome & Carousel
+### A1. Welcome & Workflow Overview
 
 - [ ] **App launches to Welcome screen** — logo and text fade in smoothly, floating icons animate.
-  - **Expected:** Tap "Let's begin ✨" → advances to Feature Highlights carousel.
+  - **Expected:** Tap "Let's begin" → advances to the workflow overview.
 
-- [ ] **Feature carousel (3 pages)** — swipe left or use next/back buttons to navigate all three slides.
-  - **Expected:** Page 1 (cycle decoded), Page 2 (private intelligence), Page 3 (for your body). Each page's copy and icon load cleanly.
+- [ ] **Workflow overview** — read the Home, Log, and Review cards.
+  - **Expected:** The three cards explain the daily rhythm clearly. "Set up my cycle" is the only primary action.
 
-- [ ] **Privacy promises grid** — tap Privacy-Promises screen.
-  - **Expected:** Shows 5–6 cards (no servers, no tracking, no account, on-device, data export, HealthKit optional). Each tap expands/collapses detail.
+- [ ] **Privacy promises** — tap "Set up my cycle".
+  - **Expected:** Four concise promises explain on-device storage, app protection, no tracking/selling, and export/delete. The health disclaimer is visible; cards are informational, not expandable.
 
 ### A2. Cycle & Period Config
 
 - [ ] **Last period picker** — select a date from 30–90 days ago (or "I'm not sure" to skip).
   - **Expected:** Date picker works smoothly. Selected date appears in summary. "Unsure" skips to sensible defaults (28-day cycle, 5-day period).
 
-- [ ] **Cycle length picker** — spin to select 18–45 days (default 28).
-  - **Expected:** Picker bounds are enforced. Tapping ± buttons increments by 1.
+- [ ] **Cycle length picker** — tap a value from 18–45 days (default 28).
+  - **Expected:** The selected value is centered initially, the large number updates, and every pill is reachable by horizontal scrolling.
 
-- [ ] **Period length picker** — spin to select 1–12 days (default 5).
-  - **Expected:** Works similarly to cycle length. Confirmation text updates.
+- [ ] **Period length picker** — tap a value from the 1–12 grid (default 5).
+  - **Expected:** All choices have comfortable tap targets and the large number updates.
 
 ### A3. Tracking Goals & Notifications
 
@@ -36,7 +36,7 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
   - **Expected:** Selection persists to summary. At least one goal can be checked.
 
 - [ ] **Reminder preferences** — toggle "daily check-in", "period start", "ovulation" (not all necessarily available on first screen).
-  - **Expected:** Tapping any toggle that is OFF shows the iOS permission prompt (first time only). After granting, toggle moves to ON. Device Settings → Notifications confirm Caelyn appears in notified apps.
+  - **Expected:** Toggles update immediately. After selecting at least one reminder, tapping "Continue" shows the iOS notification-permission prompt the first time. Device Settings → Notifications confirms Caelyn appears after granting.
 
 - [ ] **Permission requests are **not** mandatory** — dismiss any prompt without granting.
   - **Expected:** App continues; reminders toggle stays OFF. No crash.
@@ -44,35 +44,31 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 ### A4. HealthKit Integration (Onboarding)
 
 - [ ] **Apple Health opt-in screen** — shown before biometrics setup.
-  - **Expected:** iPad should skip this screen (auto-skip in code). iPhone shows two buttons: "Import" and "Skip".
+  - **Expected:** Devices without HealthKit skip this screen. Supported iPhones show "Connect Apple Health" and "Skip for now".
 
-- [ ] **Tap "Import"** (iPhone only):
+- [ ] **Tap "Connect Apple Health"** (supported iPhone only):
   - [ ] iOS permission prompt appears.
-  - [ ] Grant access to menstrual flow, symptoms, pain read/write.
-  - **Expected:** "Syncing..." briefly appears, then confirms "No prior history found" (if first run) or "Imported X entries" (if Apple Health has data).
+  - [ ] Grant read access to menstrual flow and wrist temperature; grant write access to menstrual flow, symptoms, and pain.
+  - **Expected:** The screen confirms Apple Health is connected and, when history exists, reports the number of imported cycles.
 
-- [ ] **Tap "Skip"** → advances without importing.
+- [ ] **Tap "Skip for now"** → advances without importing.
   - **Expected:** No error; onboarding continues.
 
-### A5. Biometric & PIN Setup
+### A5. App Lock Choice
 
 - [ ] **Biometric option screen** — button shows correct device capability ("Face ID / Touch ID / Passcode").
-  - **Expected:** Title matches device hardware; copy explains the lockdown will auto-lock when the app backgrounded.
+  - **Expected:** Title matches device hardware and explains that the choice can be changed later in Settings.
 
-- [ ] **Tap "Set up Face ID"** (or Touch ID):
-  - [ ] iOS biometric permission appears.
-  - [ ] Grant or deny.
-  - **Expected:**
-    - If **granted:** App lock is active. Gesture prompts for auth on next app open. Passcode is set to a random 4-digit code (shown once, not changeable here).
-    - If **denied:** App lock is NOT active; you can still set one later in Settings.
+- [ ] **Tap "Enable Face ID"** (or the device's equivalent), then "Continue".
+  - **Expected:** The screen changes to show that lock is on. After onboarding completes, the app requests authentication when the lock gate becomes active.
 
-- [ ] **Tap "Use Passcode instead"** → manually enter a 4-digit PIN.
-  - **Expected:** Prompts twice (set and confirm). Mismatch shows error. Confirmation → lock active.
+- [ ] **Alternatively, tap "Skip for now"**.
+  - **Expected:** Onboarding continues without a permission prompt. A separate App PIN can be configured later in Settings → Privacy.
 
 ### A6. Onboarding Completion
 
-- [ ] **Completion celebration screen** — shows confetti/animation, "You're ready!" message, and Caelyn logo.
-  - **Expected:** Tap "Let's go" or swipe up → transitions to Home tab.
+- [ ] **Completion celebration screen** — shows confetti/animation, "You're all set!" message, and Caelyn logo.
+  - **Expected:** A first prediction appears when enough information was provided. Tap "Open Caelyn" → transitions to Home.
 
 - [ ] **First-time Home arrival** — if last-period date was provided:
   - [ ] Cycle ring shows cycle day (e.g., "Day 14").
@@ -80,13 +76,16 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
   - [ ] "Next period in X days" appears.
   - **Expected:** If the onboarding data was sparse, "Low confidence" badge appears with a hint to log more cycles.
 
-### A7. First Prediction Reveal (One-Time Card)
+### A7. One-Time In-App Guidance
 
-- [ ] **After onboarding completion with a last-period date**, return to Home.
-  - **Expected:** A **one-time celebration card** appears: "Caelyn's predictions are now live" + close button. Card dismisses and does NOT reappear on later app opens.
+- [ ] **After onboarding completion**, verify the Home introduction.
+  - **Expected:** "Your daily snapshot" explains the phase card and quick actions. It can be dismissed and does not reappear automatically.
 
-- [ ] **Tap the card** → scrolls to the "Coming Up" timeline.
-  - **Expected:** Timeline shows predicted period, ovulation, fertile window (if applicable).
+- [ ] **Visit Calendar, Log, and Insights for the first time.**
+  - **Expected:** Each tab shows one concise, dismissible explanation of its first useful action. No paywall or multi-step tour interrupts navigation.
+
+- [ ] **Settings → About → How Caelyn works.**
+  - **Expected:** The permanent guide explains all five tabs, includes safe-use guidance, and "Show first-use tips again" restores the four contextual introductions.
 
 ---
 
@@ -100,7 +99,7 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 
 - [ ] **Reopen Caelyn**.
   - **Expected:**
-    - If **Face/Touch ID is set:** Face/Touch prompt appears immediately. App is **locked** (Home/Calendar/Insights are blurred/masked). Tap "Enter PIN" to bypass biometric.
+    - If **Face/Touch ID is set:** Face/Touch prompt appears immediately. App is **locked** (Home/Calendar/Insights are blurred/masked). Tap "Use PIN instead" to bypass biometric.
     - If **only PIN is set:** Numeric keypad appears (locked). Cycle ring is masked behind a lock shield.
 
 ### B2. Correct PIN Unlock
@@ -168,38 +167,43 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 
 - [ ] **Press Home, backgrounding Caelyn**.
 
-- [ ] **Wait 30+ seconds**.
-
-- [ ] **Reopen Caelyn**.
+- [ ] **Reopen Caelyn immediately**.
   - **Expected:** Lock screen reappears (or Face/Touch prompt). You must re-authenticate.
 
-- [ ] **Reopen Caelyn within 10 seconds** (adjust timing as implemented):
-  - **Expected:** May still be unlocked OR lock screen appears (depends on implementation; check LAUNCH_CHECKLIST.md for exact timeout). Consistency is what matters.
+- [ ] Repeat after leaving Caelyn in the background for 30+ seconds.
+  - **Expected:** The same lock screen appears. Caelyn relocks whenever it leaves the active foreground; there is no grace-period ambiguity.
 
 ---
 
-## C. AUTO-ERASE (PARANOID MODE) TOGGLE
+## C. AUTO-ERASE + PARANOID MODE
 
-**Location:** Settings → Privacy & Security → Paranoid Mode.
+### C1. Auto-Erase if Inactive
 
-- [ ] **Toggle is OFF by default**.
-  - **Expected:** Setting is visible, toggle shows OFF state. Copy explains "automatically erase cycle data if incorrect PIN entered N times."
+**Location:** Settings → Privacy → Auto-erase if inactive.
 
-- [ ] **Turn toggle ON**.
-  - [ ] Confirmation dialog appears: "Erase all data after 3 wrong PINs?"
-  - **Expected:** Tap "Confirm" → toggle moves to ON. Tap "Cancel" → toggle stays OFF.
+- [ ] **Toggle is OFF by default** and the row states the configured inactivity window.
 
-- [ ] **Close Settings, return to Home, log some data** (flow, mood, note).
+- [ ] **Turn the toggle ON**, close Settings, and reopen Caelyn before the window expires.
+  - **Expected:** Data remains and the toggle stays ON.
 
-- [ ] **Close app, reopen, and deliberately enter wrong PIN 3 times** (while Paranoid Mode is ON).
-  - **Expected:**
-    - After 3rd wrong attempt: No lockout timer shown (unlike normal PIN behavior).
-    - App appears to "reset" — onboarding Welcome screen appears.
-    - All cycle data, profile, settings are erased.
-    - PIN is still set (you can unlock with the correct PIN if you try again).
+- [ ] **Use a development build with an injected old activity timestamp** to test expiration without waiting the full window.
+  - **Expected:** On the next launch/foreground event, Caelyn securely deletes all records and returns to the Welcome screen.
 
-- [ ] **Turn Paranoid Mode OFF** → toggle in Settings.
-  - **Expected:** Setting persists OFF. No unwanted erases on subsequent wrong PINs.
+### C2. Paranoid Mode
+
+**Location:** Settings → Privacy → Paranoid Mode.
+
+- [ ] Tap **Paranoid Mode**.
+  - **Expected:** A confirmation explains that Apple Health sharing and reminders will be turned off, while private notifications and app-preview masking will be turned on.
+
+- [ ] Tap **Cancel**.
+  - **Expected:** No privacy or reminder setting changes.
+
+- [ ] Open it again and tap **Lock everything down**.
+  - **Expected:** Health sharing is disconnected, all reminders are canceled, Hide app preview is ON, and Private notifications is ON. App Lock and PIN are unchanged.
+
+- [ ] Re-enable an individual setting.
+  - **Expected:** Paranoid Mode is a one-time reversible action, not a persistent toggle.
 
 ---
 
@@ -337,20 +341,20 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 
 ## E. APPLE HEALTH INTEGRATION
 
-**Prerequisite:** HealthKit is available on the device (iPhone, Apple Watch; NOT iPad). Caelyn has requested and been granted HealthKit permissions in iOS Settings.
+**Prerequisite:** HealthKit is available on the device and Caelyn has requested permission.
 
 ### E1. Health Permissions Request
 
-- [ ] **Settings → Health Connect → toggle "Read flow data" ON** (or first time, tap "Connect").
-  - **Expected:** iOS permission sheet appears, asking for read access to Menstrual Flow.
-  - [ ] Grant: Sheet dismisses, toggle shows ON.
-  - [ ] Deny: Toggle stays OFF, no error.
+- [ ] **Settings → Apple Health → "Connect Apple Health"**.
+  - **Expected:** The iOS permission sheet asks to read menstrual flow and wrist temperature, and to write menstrual flow, supported symptoms, and pain.
+  - [ ] Grant: The sheet dismisses and the screen shows Connected.
+  - [ ] Deny menstrual-flow write access: the app explains that access was denied and points to iOS Settings; it does not crash.
 
-- [ ] **Toggle "Write flow data" ON**.
-  - **Expected:** iOS permission sheet for write access. Grant or deny. Toggle reflects state.
+- [ ] **After connecting, review Caelyn's three sync toggles**: write flow, read flow, and write symptoms.
+  - **Expected:** These control which already-authorized operations Caelyn performs. iOS remains the source of truth for category permission.
 
 - [ ] **Open iOS Settings → Health → Data Access & Devices → Caelyn**.
-  - **Expected:** Shows all three categories (read/write) that Caelyn requested. Toggles can be toggled here too (independent of Caelyn app's toggles).
+  - **Expected:** Shows the requested read/write categories. Permissions can be changed independently here.
 
 ### E2. Flow Export to Apple Health
 
@@ -380,13 +384,12 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 - [ ] **Use Apple Health app or a HealthKit-capable app** (e.g., Livia, Clue export to Apple Health) to manually add a flow entry for a past date (e.g., 10 days ago: Medium flow).
 
 - [ ] **Caelyn → Calendar → tap the past date**.
-  - **Expected:** Calendar may not show the imported entry immediately (Caelyn doesn't auto-import on every sync; import is opt-in via Settings → Import data).
+  - **Expected:** Calendar may not show the entry yet because Health import is user-initiated.
 
-- [ ] **Settings → Import data → "Import from Apple Health"**.
+- [ ] **Settings → Apple Health → "Import flow logs from Health"**.
   - **Expected:**
-    - Button opens a sheet or confirmation dialog.
     - Caelyn fetches flow data from Apple Health for the past 90+ days.
-    - "Importing..." → "Found X entries, imported Y (updated Z)."
+    - "Importing…" changes to a success message reporting imported or updated days, or that no new data was found.
     - Imported entries appear in Calendar and Daily Log for those dates.
 
 - [ ] **Verify imported data doesn't duplicate**:
@@ -397,10 +400,10 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 ### E5. HealthKit Availability Check
 
 - [ ] **On an iPad** (if available):
-  - **Expected:** HealthKit Connect section is **hidden or disabled** in Settings (Health Connect is iPhone-only).
+  - **Expected:** If HealthKit is unavailable, onboarding skips its Health step. Settings → Apple Health remains informational and disables connection with "Unavailable on this device."
 
 - [ ] **On an unsupported device**:
-  - **Expected:** "Apple Health isn't available on this device" message appears where Health Connect would be.
+  - **Expected:** "Unavailable on this device" appears and the screen explains that local Caelyn logging still works normally.
 
 ### E6. Wrist-Temperature (Apple Watch Series 8+ only)
 
@@ -672,7 +675,7 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 
 ### I1. Load Products
 
-- [ ] **Open Caelyn Paywall** → Settings → Upgrade to Pro (or Home → Soft Paywall card).
+- [ ] **Open Caelyn Paywall** → Settings → Upgrade to Pro.
 
 - [ ] **Paywall sheet appears**.
   - **Expected:**
@@ -1109,7 +1112,7 @@ the app, and the Trust Center makes no cloud claim.**
 
 ### Features Verified
 
-- **Onboarding:** Welcome, carousel, privacy, cycle config, health import, biometric setup.
+- **Onboarding:** Welcome, workflow overview, privacy, cycle config, health option, lock choice, completion, and contextual tab guidance.
 - **PIN / Duress / Unlock:** Set, change, remove, duress wipe, fail-open, timeout, biometric retry.
 - **Auto-Erase:** Paranoid mode toggle and erasing after N failed attempts.
 - **Notifications:** Daily check-in, period, ovulation, medication, BC, note reminders, private phrasing, quiet hours.

@@ -23,7 +23,7 @@
 16. "Coming Up" predictive timeline (PMS, period, fertile window) with empty state
 17. Pattern Insight card surfacing the top symptom for the current phase
 18. Phase-tinted background gradient and full accessibility annotations
-19. Soft paywall (ProUpsellCard) shown once on first real prediction (Pro)
+19. User-initiated Pro upgrade surfaces; no automatic first-run paywall
 20. TTC fertility dashboard: 0–100 score, signals, fertile countdown (Pro)
 21. Pregnancy mode card: weeks/trimester, milestones, due date (Pro)
 22. Postpartum mode card: weeks postpartum, milestones, 26-week cutoff prompt (Pro)
@@ -122,15 +122,15 @@
 95. WatchBridgeService and WatchDataModel two-way sync (Pro-gated push to watch)
 
 ### Onboarding
-96. Welcome, feature carousel, and privacy-promises screens
-97. Last-period picker (with "unsure" skip), cycle-length and period-length pickers with defaults
+96. Welcome, single-screen daily-workflow overview, and privacy-promises screens
+97. Last-period picker (with "unsure" skip), centered cycle-length selector, and 1–12 period-length grid
 98. Tracking-goals multi-select and reminder-preference toggles (requests permission)
-99. Optional Apple Health sync (auto-skips on iPad) and biometric/passcode setup
+99. Optional Apple Health sync (auto-skips when unavailable) and app-lock choice
 100. Completion celebration, progress indicator with back nav, UserProfile persistence
 
 ### Monetization
 101. Three tiers (Monthly $3.99 / Yearly $19.99 / Lifetime $49.99) with selector
-102. 1-week free trial on Yearly (eligibility-checked) (Pro)
+102. 1-week free trial on Monthly and Yearly (eligibility-checked) (Pro)
 103. StoreKit 2 purchase flow, JWS verification, transaction finish, restore purchases
 104. Pending-purchase handling and offline entitlement cache (prevents false downgrade)
 105. Feature comparison table, per-month/savings badges, loading/error states, already-Pro CTA
@@ -138,7 +138,8 @@
 ### Education & app shell
 106. Multi-tab navigation with iPad split-view and theme preference (light/dark/system)
 107. Full phase guides (menstrual, follicular, ovulation, luteal, PMS, unknown) with hormone notes and tips
-108. App Store review prompts (after 5 entries, capped, cooldown)
+108. One-time Home/Calendar/Log/Insights tips and a permanent "How Caelyn works" guide in Settings
+109. App Store review prompts (after 5 entries, capped, cooldown)
 
 ## B. Full feature & function inventory
 
@@ -162,7 +163,7 @@
 17. Pattern Insight card (single top symptom) — works
 18. Phase-aware background gradient — works
 19. Accessibility annotations — works
-20. Soft paywall card — works (Pro upsell)
+20. User-initiated Pro upgrade surfaces — works
 21. TTC fertility dashboard — works (Pro)
 22. Pregnancy mode card — works (Pro)
 23. Postpartum mode card — works (Pro)
@@ -326,15 +327,15 @@
 
 ### 12. Onboarding (free)
 161. Welcome screen — works
-162. Feature highlights carousel (3 slides) — works
-163. Privacy-promises grid — works
+162. Daily-workflow feature overview — works
+163. Privacy-promises cards and health disclaimer — works
 164. Last-period picker (with skip) — works
 165. Cycle-length config — works
 166. Period-length config — works
 167. Tracking-goals multi-select — works
 168. Reminder preferences (requests permission) — works
 169. Apple Health sync option (iPad auto-skip) — works
-170. Biometric/passcode setup — works
+170. Optional app-lock choice; separate PIN setup remains in Settings — works
 171. Completion celebration — works
 172. Progress indicator + back nav — works
 173. Uncertain-data handling (sensible defaults) — works
@@ -349,7 +350,7 @@
 180. Offline entitlement cache — works (Pro)
 181. Feature comparison table — works
 182. Pro status detection (screenshot override) — works
-183. Soft paywall (ProUpsellCard) — works
+183. Automatic soft paywall — deferred until payment setup; manual upgrade surfaces work
 184. Yearly per-month breakdown — works (Pro)
 185. Savings % / Best Value badge — works (Pro)
 186. Loading/error/retry states — works
@@ -361,7 +362,7 @@
 ### 14. App shell & education
 191. Multi-tab navigation + notification routing — works
 192. iPad split-view layout — works
-193. Theme preference (light/dark/system) — works (note: Home/Calendar surfaces still hardcoded light)
+193. Theme preference (light/dark/system) — works across all primary tabs
 194. Widget data sync on launch/resume — works
 195. watchOS connectivity activation — works
 196. Phase guides: menstrual, follicular, ovulation, luteal, PMS, unknown fallback — works
@@ -392,7 +393,7 @@
 
 ### Privacy, data & safety
 14. [ADD] Encryption at rest — CryptoKit/Secure Enclave for the SQLite store
-15. [ADD] CSV/JSON data import & restore — including bulk import from competitor apps (currently export-only / HealthKit one-way)
+15. [UPGRADE] Import/restore breadth — CSV import and merge work today; add JSON backup restore, conflict preview, and more competitor formats
 16. [ADD] Encrypted/password-protected exports + anonymized "for doctor" redaction mode (exports are plaintext)
 17. [ADD] Data integrity verification + persistent offline-entry queue — checksums; in-memory fallback data currently lost on kill
 18. [UPGRADE] Schema-migration visibility + HealthKit sync audit trail + data retention/archival policies
@@ -431,10 +432,9 @@
 45. [UPGRADE] In-form fertile-window/ovulation prediction; dedicated pregnancy-mode fields (weight gain, trimester symptoms)
 
 ### Polish, UX & education
-46. [UPGRADE] Adaptive dark mode for hardcoded-light Home/Calendar surfaces (theme setting exists but these ignore it)
-47. [ADD] Phase-guide inline health disclaimer + localization (i18n); deep links into guides from Home/Insights/Calendar
-48. [UPGRADE] Onboarding depth — contextual tooltips, notification-timing config, smart goal defaults, expanded feature highlights
-49. [ADD] Post-onboarding edit/revisit flow; first-time guided lock-setup; privacy-toggle explainers
-50. [UPGRADE] Biometric error context + auth-state VoiceOver hints
-51. [UPGRADE] iPad/landscape layout for charts, timeline, and year view
-52. [ADD] Chart captions/legends ("what this means") + insight grouping/filtering UI
+46. [ADD] Phase-guide inline health disclaimer + localization (i18n); deep links into guides from Home/Insights/Calendar
+47. [UPGRADE] Notification-timing configuration and smarter goal defaults (contextual tooltips and feature overview shipped)
+48. [UPGRADE] Guided lock setup and privacy-toggle explainers (revisitable app guide shipped)
+49. [UPGRADE] Biometric error context + auth-state VoiceOver hints
+50. [UPGRADE] iPad/landscape layout for charts, timeline, and year view
+51. [ADD] Chart captions/legends ("what this means") + insight grouping/filtering UI

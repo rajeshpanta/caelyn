@@ -1,86 +1,51 @@
 import SwiftUI
 
-/// A soft, one-time "here's what this screen is for" card.
-///
-/// **Why this shape and not a coach-mark tour.** A dark-overlay tour with arrows
-/// pointing at tab-bar items needs the tab bar's on-screen geometry, which SwiftUI
-/// doesn't expose — so it drifts with Dynamic Type and orientation, and has no
-/// meaning at all on iPad, where Caelyn uses a `NavigationSplitView` sidebar
-/// instead of a tab bar. It also lands right after an 11-step onboarding, which is
-/// exactly when people start tapping "skip".
-///
-/// This card instead arrives **in context**: the first time she opens a tab, at the
-/// top of that tab's own content, in her way not at all. One tap dismisses it
-/// forever. It's ordinary layout — no overlays, no measured frames — so it can't
-/// break across devices, text sizes, or orientations.
-///
-/// Home deliberately has no card: onboarding's finish already hands her a
-/// prediction and the hero card explains itself, so a card there would be the
-/// tour fatigue this design avoids.
+/// A concise, one-time hint for screens whose first action is not obvious.
 struct FirstVisitIntroCard: View {
+    private static let isScreenshotMode = CommandLine.arguments.contains("--screenshot-mode")
 
     enum Screen: String, CaseIterable {
-        case calendar, log, insights, settings
+        case home, calendar, log, insights
 
-        /// One AppStorage flag per screen: seen once, gone for good.
         var storageKey: String { "caelyn.seenIntro.\(rawValue)" }
 
         var icon: String {
             switch self {
+            case .home: return "house.fill"
             case .calendar: return "calendar"
-            case .log:      return "heart.text.square.fill"
-            case .insights: return "sparkles"
-            case .settings: return "hand.raised.fill"
+            case .log: return "heart.text.square.fill"
+            case .insights: return "chart.bar.fill"
             }
         }
 
         var title: String {
             switch self {
-            case .calendar: return "Your whole cycle, at a glance"
-            case .log:      return "However you're feeling today"
-            case .insights: return "The patterns, found for you"
-            case .settings: return "All of it, yours to control"
+            case .home: return "Your daily snapshot"
+            case .calendar: return "Using the calendar"
+            case .log: return "Logging is flexible"
+            case .insights: return "Patterns take time"
             }
         }
 
         var body: String {
             switch self {
-            // Deliberately does NOT re-explain the colours: the real legend sits
-            // directly under the grid (Logged / Tap to log / Predicted / PMS /
-            // Ovulation), and a second, differently-worded key would contradict it
-            // the moment either one changes.
+            case .home:
+                return "Home shows today's cycle estimate. Tap the phase card to learn more, or use a quick action to record how you feel."
             case .calendar:
-                return "Every day you've logged sits here beside what's coming — your predicted period, PMS window and ovulation. The legend under the grid decodes the colours."
+                return "Tap any day to review or add a log. The legend explains logged and predicted dates."
             case .log:
-                return "Flow, mood, energy, pain, symptoms, a private note — log as much or as little as you feel like. Even one tap teaches Caelyn something."
+                return "Choose a date, then add as much or as little as you like. Changes save automatically."
             case .insights:
-                return "After a couple of cycles, Caelyn starts noticing what your body actually does — which symptoms travel together, when your energy dips, how your cycle really runs."
-            case .settings:
-                return "Reminders, app lock, Apple Health, and a doctor-ready PDF of your history all live here."
+                return "After two complete cycles, Caelyn starts comparing your timing and logs. Patterns become more useful as you keep logging."
             }
         }
 
-        /// The warm one-liner under the divider — a tip, or the privacy truth.
-        var footnote: String {
-            switch self {
-            case .calendar: return "Tap any day to look back, or fill in one you missed."
-            case .log:      return "The more you log, the more your predictions become yours."
-            case .insights: return "All of it is worked out on your iPhone. Nothing is sent anywhere."
-            case .settings: return "Your data never leaves this device — tap Your privacy to see exactly how."
-            }
-        }
-
-        /// A **surface tint**, not a foreground colour. These palette entries are
-        /// near-black in dark mode (lavender is 0x281B40, sage 0x1B2E1E) because
-        /// they're designed to sit behind content — so they're only ever used here
-        /// as a fill, never for text or glyphs. Anything that has to stay legible
-        /// uses `primaryPlum` / `deepPlumText`, which adapt per theme.
         var tint: Color {
             switch self {
+            case .home: return CaelynColor.blush
             case .calendar: return CaelynColor.softRose
-            case .log:      return CaelynColor.lavender
+            case .log: return CaelynColor.lavender
             case .insights: return CaelynColor.sage
-            case .settings: return CaelynColor.primaryPlum
             }
         }
     }
@@ -98,75 +63,56 @@ struct FirstVisitIntroCard: View {
     }
 
     var body: some View {
-        if !seen {
-            card
-                .opacity(appeared ? 1 : 0)
-                .scaleEffect(appeared ? 1 : 0.96)
-                .onAppear {
-                    guard !appeared else { return }
-                    if reduceMotion {
-                        appeared = true
-                    } else {
-                        withAnimation(.spring(response: 0.55, dampingFraction: 0.82).delay(0.15)) {
-                            appeared = true
-                        }
-                    }
-                }
-                .transition(.opacity.combined(with: .scale(scale: 0.96)))
-        }
-    }
-
-    private var card: some View {
-        CaelynCard(padding: CaelynSpacing.md, radius: CaelynRadius.cardLarge) {
-            VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
-                header
-                Text(screen.body)
-                    .font(CaelynFont.subheadline)
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.72))
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Rectangle()
-                    .fill(CaelynColor.deepPlumText.opacity(0.07))
-                    .frame(height: 1)
-
-                HStack(alignment: .top, spacing: 6) {
-                    Image(systemName: "sparkle")
-                        .font(.caption2)
-                        .foregroundStyle(CaelynColor.primaryPlum.opacity(0.75))
-                        .accessibilityHidden(true)
-                    Text(screen.footnote)
-                        .font(CaelynFont.caption)
-                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+        if !seen && !Self.isScreenshotMode {
+            CaelynCard(padding: CaelynSpacing.md, radius: CaelynRadius.cardLarge) {
+                VStack(alignment: .leading, spacing: CaelynSpacing.xs) {
+                    header
+                    Text(screen.body)
+                        .font(CaelynFont.subheadline)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.72))
                         .fixedSize(horizontal: false, vertical: true)
                 }
-
-                dismissButton
             }
+            .background(
+                RoundedRectangle(cornerRadius: CaelynRadius.cardLarge, style: .continuous)
+                    .fill(screen.tint.opacity(0.14))
+                    .blur(radius: 10)
+                    .offset(y: 4)
+            )
+            .opacity(appeared ? 1 : 0)
+            .scaleEffect(appeared ? 1 : 0.98)
+            .onAppear {
+                guard !appeared else { return }
+                if reduceMotion {
+                    appeared = true
+                } else {
+                    withAnimation(.easeOut(duration: 0.3).delay(0.1)) {
+                        appeared = true
+                    }
+                }
+            }
+            .transition(.opacity)
+            .accessibilityElement(children: .contain)
         }
-        // A whisper of the screen's accent behind the card, so each tab's intro
-        // feels like it belongs to that tab without shouting.
-        .background(
-            RoundedRectangle(cornerRadius: CaelynRadius.cardLarge, style: .continuous)
-                .fill(screen.tint.opacity(0.14))
-                .blur(radius: 12)
-                .offset(y: 6)
-        )
-        .accessibilityElement(children: .contain)
     }
 
-    /// Badge beside the title normally; badge above it at accessibility sizes,
-    /// where a 3–4 line title next to a centred circle reads as a stray dot.
     @ViewBuilder
     private var header: some View {
         if dynamicTypeSize.isAccessibilitySize {
             VStack(alignment: .leading, spacing: CaelynSpacing.xs) {
-                badge
+                HStack {
+                    badge
+                    Spacer(minLength: 0)
+                    dismissButton
+                }
                 titleText
             }
         } else {
             HStack(spacing: CaelynSpacing.sm) {
                 badge
                 titleText
+                Spacer(minLength: 0)
+                dismissButton
             }
         }
     }
@@ -181,13 +127,7 @@ struct FirstVisitIntroCard: View {
     private var badge: some View {
         ZStack {
             Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [screen.tint.opacity(0.9), screen.tint.opacity(0.45)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(screen.tint.opacity(0.65))
                 .frame(width: CaelynIconSize.lg, height: CaelynIconSize.lg)
             Image(systemName: screen.icon)
                 .font(.system(size: 16, weight: .semibold))
@@ -202,30 +142,203 @@ struct FirstVisitIntroCard: View {
             if reduceMotion {
                 seen = true
             } else {
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.9)) { seen = true }
+                withAnimation(.easeOut(duration: 0.2)) { seen = true }
             }
         } label: {
-            Text("Got it")
-                .font(CaelynFont.subheadline.weight(.semibold))
-                .foregroundStyle(CaelynColor.primaryPlum)
-                .padding(.horizontal, CaelynSpacing.md)
-                .padding(.vertical, CaelynSpacing.xs)
-                .background(
-                    Capsule().fill(CaelynColor.primaryPlum.opacity(0.10))
-                )
+            Image(systemName: "xmark")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .frame(maxWidth: .infinity, alignment: .trailing)
-        .accessibilityLabel("Got it")
-        .accessibilityHint("Dismisses this introduction")
+        .accessibilityLabel("Dismiss tip")
+    }
+}
+
+// MARK: - Permanent in-app guide
+
+/// A short reference users can revisit from Settings after the one-time tips
+/// have been dismissed. This teaches the daily workflow without replaying the
+/// personal questions or permission prompts in onboarding.
+struct AppGuideView: View {
+    @State private var tipsReset = false
+
+    private struct GuideItem: Identifiable {
+        let id: Int
+        let icon: String
+        let title: String
+        let body: String
+        let tint: Color
+    }
+
+    private let items: [GuideItem] = [
+        GuideItem(
+            id: 1,
+            icon: "house.fill",
+            title: "Home · Understand today",
+            body: "See your estimated cycle day, phase, and what may be coming next. Tap the large phase card for a plain-language explanation.",
+            tint: CaelynColor.softRose
+        ),
+        GuideItem(
+            id: 2,
+            icon: "square.and.pencil.circle.fill",
+            title: "Log · Record what matters",
+            body: "Choose any date and add flow, symptoms, pain, mood, energy, temperature, or a private note. Add only what feels useful; changes save automatically.",
+            tint: CaelynColor.lavender
+        ),
+        GuideItem(
+            id: 3,
+            icon: "calendar.badge.checkmark",
+            title: "Calendar · Review your timeline",
+            body: "Tap a day to review or update it. Use the legend to distinguish your actual logs from Caelyn's predicted dates.",
+            tint: CaelynColor.blush
+        ),
+        GuideItem(
+            id: 4,
+            icon: "chart.bar.fill",
+            title: "Insights · Notice patterns",
+            body: "Once you have two complete cycles, Caelyn begins showing averages and patterns. More consistent logs make these summaries more meaningful.",
+            tint: CaelynColor.sage
+        ),
+        GuideItem(
+            id: 5,
+            icon: "gearshape.fill",
+            title: "Settings · Stay in control",
+            body: "Adjust reminders and privacy, connect Apple Health, export a copy of your data, or permanently delete everything.",
+            tint: CaelynColor.lavender
+        )
+    ]
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
+                hero
+
+                Text("Your daily rhythm")
+                    .font(CaelynFont.title2)
+                    .foregroundStyle(CaelynColor.deepPlumText)
+
+                VStack(spacing: CaelynSpacing.sm) {
+                    ForEach(items) { item in
+                        guideRow(item)
+                    }
+                }
+
+                CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.sage.opacity(0.45)) {
+                    HStack(alignment: .top, spacing: CaelynSpacing.sm) {
+                        Image(systemName: "heart.text.clipboard.fill")
+                            .font(.system(size: 19, weight: .medium))
+                            .foregroundStyle(CaelynColor.successSage)
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Use estimates as a guide")
+                                .font(CaelynFont.headline)
+                                .foregroundStyle(CaelynColor.deepPlumText)
+                            Text("Cycle predictions and patterns can help you prepare, but they are not a diagnosis or birth-control method. Contact a healthcare professional about symptoms or changes that concern you.")
+                                .font(CaelynFont.subheadline)
+                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.72))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+
+                CaelynButton(
+                    title: "Show first-use tips again",
+                    variant: .secondary,
+                    icon: "arrow.counterclockwise"
+                ) {
+                    for screen in FirstVisitIntroCard.Screen.allCases {
+                        UserDefaults.standard.removeObject(forKey: screen.storageKey)
+                    }
+                    tipsReset = true
+                    Haptics.soft()
+                }
+            }
+            .padding(.horizontal, CaelynSpacing.lg)
+            .padding(.top, CaelynSpacing.md)
+            .padding(.bottom, CaelynSpacing.xl)
+            .caelynContentWidth()
+            .frame(maxWidth: .infinity)
+        }
+        .background(CaelynColor.backgroundCream.ignoresSafeArea())
+        .navigationTitle("How Caelyn Works")
+        .navigationBarTitleDisplayMode(.inline)
+        .alert("Tips are ready", isPresented: $tipsReset) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Visit Home, Calendar, Log, and Insights to see each short introduction again.")
+        }
+    }
+
+    private var hero: some View {
+        CaelynCard(padding: CaelynSpacing.lg) {
+            VStack(spacing: CaelynSpacing.sm) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [CaelynColor.softRose, CaelynColor.lavender],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 68, height: 68)
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 28, weight: .light))
+                        .foregroundStyle(CaelynColor.primaryPlum)
+                }
+                .accessibilityHidden(true)
+
+                Text("Small logs become a clearer picture")
+                    .font(CaelynFont.title2)
+                    .foregroundStyle(CaelynColor.deepPlumText)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("Check today, log what matters, then look back for patterns. Everything is processed privately on this device.")
+                    .font(CaelynFont.body)
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.68))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+
+    private func guideRow(_ item: GuideItem) -> some View {
+        CaelynCard(padding: CaelynSpacing.md) {
+            HStack(alignment: .top, spacing: CaelynSpacing.md) {
+                ZStack {
+                    Circle()
+                        .fill(item.tint.opacity(0.65))
+                        .frame(width: CaelynIconSize.lg, height: CaelynIconSize.lg)
+                    Image(systemName: item.icon)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.82))
+                }
+                .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.title)
+                        .font(CaelynFont.headline)
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                    Text(item.body)
+                        .font(CaelynFont.subheadline)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.68))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+        }
     }
 }
 
 #Preview {
     ScrollView {
         VStack(spacing: CaelynSpacing.md) {
-            ForEach(FirstVisitIntroCard.Screen.allCases, id: \.self) { s in
-                FirstVisitIntroCard(s)
+            ForEach(FirstVisitIntroCard.Screen.allCases, id: \.self) { screen in
+                FirstVisitIntroCard(screen)
             }
         }
         .padding(CaelynSpacing.lg)

@@ -29,6 +29,16 @@ enum RatingService {
     @MainActor
     static func suppressForThisSession() { suppressedThisSession = true }
 
+    /// Return review-prompt state to a true first-install state after a secure wipe.
+    @MainActor
+    static func reset() {
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: Keys.lastPromptDate)
+        defaults.removeObject(forKey: Keys.timesPrompted)
+        defaults.removeObject(forKey: Keys.firstLaunchDate)
+        suppressedThisSession = false
+    }
+
     // MARK: - Public API
 
     /// Call this after a meaningful user action (e.g. saving a log entry).

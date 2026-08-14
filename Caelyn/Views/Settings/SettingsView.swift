@@ -29,6 +29,7 @@ struct SettingsView: View {
     @State private var showingReminders = false
     @State private var showingHealthKit = false
     @State private var showingBirthControl = false
+    @State private var showingAppGuide = false
     @State private var showingPaywall = false
     @State private var showingThemePicker = false
     @State private var purchase = PurchaseService.shared
@@ -53,7 +54,6 @@ struct SettingsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
-                    FirstVisitIntroCard(.settings)
                     proSection
                     cycleSection
                     privacySection
@@ -93,6 +93,9 @@ struct SettingsView: View {
             }
             .navigationDestination(isPresented: $showingBirthControl) {
                 BirthControlView()
+            }
+            .navigationDestination(isPresented: $showingAppGuide) {
+                AppGuideView()
             }
         }
         .sheet(isPresented: $showingExportSheet) {
@@ -578,6 +581,14 @@ struct SettingsView: View {
             )
             SettingsDivider()
             SettingsRow(
+                icon: "sparkles.rectangle.stack",
+                iconColor: CaelynColor.primaryPlum,
+                title: "How Caelyn works",
+                detail: "A quick guide to every tab",
+                action: { showingAppGuide = true }
+            )
+            SettingsDivider()
+            SettingsRow(
                 icon: "questionmark.circle",
                 iconColor: CaelynColor.primaryPlum,
                 title: "Help & FAQ",
@@ -632,8 +643,8 @@ struct SettingsView: View {
         Binding(
             get: { profile.lockEnabled },
             set: { newValue in
-                if newValue && !BiometricService.canAuthenticate {
-                    lockToggleError = "This device has no passcode or biometrics set up. Add one in iOS Settings, then try again."
+                if newValue && !BiometricService.canAuthenticate && !PINService.isSet {
+                    lockToggleError = "Set an App PIN or add a passcode in iOS Settings, then try again."
                     return
                 }
                 profile.lockEnabled = newValue
@@ -656,7 +667,9 @@ struct SettingsView: View {
 
     private var lockSubtitle: String {
         if !BiometricService.canAuthenticate {
-            return "Add a passcode in iOS Settings to enable lock."
+            return PINService.isSet
+                ? "Caelyn locks when backgrounded — use your App PIN to unlock."
+                : "Set an App PIN or add a passcode in iOS Settings to enable lock."
         }
         let kind = BiometricService.availableKind()
         if kind == .none {

@@ -1189,7 +1189,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads menstrual flow history and Apple Watch wrist temperature from Apple Health to improve cycle predictions when you choose to connect.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1266,7 +1266,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads your menstrual flow and symptoms from Apple Health to keep your cycle data in sync.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads menstrual flow history and Apple Watch wrist temperature from Apple Health to improve cycle predictions when you choose to connect.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

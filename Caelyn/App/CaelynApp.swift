@@ -11,6 +11,7 @@ struct CaelynApp: App {
     private static let isScreenshotMode = CommandLine.arguments.contains("--screenshot-mode")
                                         || CommandLine.arguments.contains("--screenshot-paywall")
     private static let isPaywallMode    = CommandLine.arguments.contains("--screenshot-paywall")
+    private static let isOnboardingUITest = CommandLine.arguments.contains("--ui-test-onboarding")
 
     var body: some Scene {
         WindowGroup {
@@ -20,7 +21,9 @@ struct CaelynApp: App {
                     .syncWidgetData()
             }
             .task {
-                if Self.isScreenshotMode {
+                if Self.isOnboardingUITest {
+                    return
+                } else if Self.isScreenshotMode {
                     if !Self.isPaywallMode {
                         PurchaseService.shared.overridePro(true)
                     }
@@ -30,9 +33,13 @@ struct CaelynApp: App {
                 }
             }
         }
-        .modelContainer(Self.isScreenshotMode ? Persistence.screenshot : Persistence.live)
+        .modelContainer(
+            Self.isOnboardingUITest
+                ? ModelContainer.firstLaunchPreview
+                : (Self.isScreenshotMode ? Persistence.screenshot : Persistence.live)
+        )
         .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .active && !Self.isScreenshotMode {
+            if newPhase == .active && !Self.isScreenshotMode && !Self.isOnboardingUITest {
                 Task { await NotificationService.syncFromLiveStore() }
                 Task { await PurchaseService.shared.loadProducts() }
             }

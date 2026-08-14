@@ -9,6 +9,7 @@ struct WelcomeStep: View {
     @State private var logoAppear = false
     @State private var textAppear = false
     @State private var buttonAppear = false
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     // Floating decorative icons: (systemName, xOffset, yOffset, delay, size, color)
     private let floaters: [(String, CGFloat, CGFloat, Double, CGFloat, Color)] = [
@@ -23,112 +24,126 @@ struct WelcomeStep: View {
     ]
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 0) {
+                Spacer().frame(height: dynamicTypeSize.isAccessibilitySize ? CaelynSpacing.md : CaelynSpacing.lg)
 
-            // Hero illustration
-            ZStack {
-                // Background glow orbs
-                PulsingGlow(color: CaelynColor.softRose.opacity(0.5), size: 220, delay: 0)
-                PulsingGlow(color: CaelynColor.lavender.opacity(0.4), size: 180, delay: 0.6)
-                    .offset(x: 30, y: 20)
-
-                // Floating icons
-                ForEach(Array(floaters.enumerated()), id: \.offset) { _, item in
-                    FloatingIcon(
-                        systemName: item.0,
-                        color: item.5.opacity(0.82),
-                        size: item.4,
-                        delay: item.3
-                    )
-                    .offset(x: item.1, y: item.2)
+                if dynamicTypeSize.isAccessibilitySize {
+                    compactLogo
+                } else {
+                    heroIllustration
                 }
 
-                // Main logo
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(hex: 0xF472B6),
-                                    Color(hex: 0xA855F7),
-                                    Color(hex: 0x6F3D74)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 148, height: 148)
-                        .shadow(
-                            color: Color(hex: 0x6F3D74).opacity(0.45),
-                            radius: 28, x: 0, y: 10
-                        )
+                Spacer().frame(height: dynamicTypeSize.isAccessibilitySize ? CaelynSpacing.md : 36)
 
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 62, weight: .light))
-                        .foregroundStyle(.white.opacity(0.92))
+                VStack(spacing: 10) {
+                    Text("Made just for you 🌸")
+                        .font(CaelynFont.subheadline.weight(.semibold))
+                        .foregroundStyle(CaelynColor.primaryPlum.opacity(0.85))
+                        .tracking(0.3)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text("Meet Caelyn")
+                        .font(.system(.largeTitle, design: .rounded).weight(.bold))
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text("Track your cycle, understand your patterns, and keep your health data private on this device.")
+                        .font(CaelynFont.body)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, CaelynSpacing.sm)
                 }
-                .scaleEffect(logoAppear ? 1.0 : 0.55)
-                .opacity(logoAppear ? 1 : 0)
+                .opacity(textAppear ? 1 : 0)
+                .offset(y: textAppear ? 0 : 18)
                 .onAppear {
-                    withAnimation(.spring(response: 0.75, dampingFraction: 0.62).delay(0.05)) {
-                        logoAppear = true
+                    withAnimation(.easeOut(duration: 0.55).delay(0.25)) {
+                        textAppear = true
+                    }
+                }
+
+                Spacer().frame(height: CaelynSpacing.lg)
+
+                VStack(spacing: CaelynSpacing.sm) {
+                    CaelynButton(title: "Let's begin", variant: .primary) { vm.next() }
+                    HStack(spacing: 6) {
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 11, weight: .semibold))
+                            .accessibilityHidden(true)
+                        Text("Your data stays on this device.")
+                            .font(CaelynFont.footnote)
+                    }
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+                }
+                .opacity(buttonAppear ? 1 : 0)
+                .offset(y: buttonAppear ? 0 : 12)
+                .onAppear {
+                    withAnimation(.easeOut(duration: 0.45).delay(0.4)) {
+                        buttonAppear = true
                     }
                 }
             }
-            .frame(height: 300)
+            .padding(.horizontal, CaelynSpacing.lg)
+            .padding(.bottom, CaelynSpacing.lg)
+            .frame(maxWidth: .infinity)
+        }
+        .scrollBounceBehavior(.basedOnSize)
+    }
 
-            Spacer().frame(height: 36)
+    private var heroIllustration: some View {
+        ZStack {
+            PulsingGlow(color: CaelynColor.softRose.opacity(0.5), size: 220, delay: 0)
+            PulsingGlow(color: CaelynColor.lavender.opacity(0.4), size: 180, delay: 0.6)
+                .offset(x: 30, y: 20)
 
-            // Text
-            VStack(spacing: 10) {
-                Text("Made just for you 🌸")
-                    .font(CaelynFont.subheadline.weight(.semibold))
-                    .foregroundStyle(CaelynColor.primaryPlum.opacity(0.85))
-                    .tracking(0.3)
-
-                Text("Meet Caelyn")
-                    .font(.system(size: 46, weight: .bold, design: .rounded))
-                    .foregroundStyle(CaelynColor.deepPlumText)
-
-                Text("Your personal cycle companion — understand your body, track how you feel, and love every day a little more.")
-                    .font(CaelynFont.body)
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, CaelynSpacing.sm)
-            }
-            .opacity(textAppear ? 1 : 0)
-            .offset(y: textAppear ? 0 : 18)
-            .onAppear {
-                withAnimation(.easeOut(duration: 0.55).delay(0.35)) {
-                    textAppear = true
-                }
+            ForEach(Array(floaters.enumerated()), id: \.offset) { _, item in
+                FloatingIcon(
+                    systemName: item.0,
+                    color: item.5.opacity(0.82),
+                    size: item.4,
+                    delay: item.3
+                )
+                .offset(x: item.1, y: item.2)
             }
 
-            Spacer()
+            logo(size: 148, symbolSize: 62)
+        }
+        .frame(height: 300)
+    }
 
-            // CTA
-            VStack(spacing: CaelynSpacing.sm) {
-                CaelynButton(title: "Let's begin ✨", variant: .primary) { vm.next() }
-                HStack(spacing: 6) {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 11, weight: .semibold))
-                    Text("Your data stays private, always.")
-                        .font(CaelynFont.footnote)
-                }
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
-            }
-            .opacity(buttonAppear ? 1 : 0)
-            .offset(y: buttonAppear ? 0 : 12)
-            .onAppear {
-                withAnimation(.easeOut(duration: 0.45).delay(0.6)) {
-                    buttonAppear = true
-                }
+    private var compactLogo: some View {
+        logo(size: 76, symbolSize: 30)
+            .frame(height: 92)
+            .accessibilityHidden(true)
+    }
+
+    private func logo(size: CGFloat, symbolSize: CGFloat) -> some View {
+        ZStack {
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [Color(hex: 0xF472B6), Color(hex: 0xA855F7), Color(hex: 0x6F3D74)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: size, height: size)
+                .shadow(color: Color(hex: 0x6F3D74).opacity(0.35), radius: 18, x: 0, y: 8)
+
+            Image(systemName: "sparkles")
+                .font(.system(size: symbolSize, weight: .light))
+                .foregroundStyle(.white.opacity(0.92))
+        }
+        .scaleEffect(logoAppear ? 1.0 : 0.55)
+        .opacity(logoAppear ? 1 : 0)
+        .onAppear {
+            withAnimation(.spring(response: 0.75, dampingFraction: 0.62).delay(0.05)) {
+                logoAppear = true
             }
         }
-        .padding(.horizontal, CaelynSpacing.lg)
-        .padding(.bottom, CaelynSpacing.lg)
     }
 }
 
@@ -136,165 +151,67 @@ struct WelcomeStep: View {
 
 struct FeatureHighlightsStep: View {
     let vm: OnboardingViewModel
-    @State private var currentPage = 0
 
-    private let features: [FeatureHighlight] = [
-        FeatureHighlight(
-            icon: "waveform.path.ecg.rectangle.fill",
-            title: "Your cycle,\ndecoded 🌸",
-            description: "Where you are today — period, ovulation, PMS — and why you feel the way you do. No more guessing.",
-            accentColor: Color(hex: 0xFB7185),
-            backgroundStart: Color(hex: 0xFFF1F2),
-            backgroundEnd: Color(hex: 0xFCE7F3)
+    private let features: [(icon: String, title: String, description: String, color: Color)] = [
+        (
+            icon: "house.fill",
+            title: "Home · Understand today",
+            description: "See your estimated cycle day, phase, and what may be coming next.",
+            color: Color(hex: 0xFB7185)
         ),
-        // The real differentiator, and it is literally true: PredictionEngine's
-        // learnedLutealLength() derives the luteal phase from confirmed ovulation
-        // signals (clamped 9–17 days) and adaptivePmsDaysBefore() learns the PMS
-        // window, both wired into Home, Calendar and Insights. Don't soften this
-        // into a generic "smart predictions" line — it's the one claim the big
-        // cloud trackers can't make.
-        FeatureHighlight(
-            icon: "wand.and.stars",
-            title: "Learns you,\nnot an average 💫",
-            description: "Most apps assume everyone ovulates 14 days before their period. Caelyn learns your real timing from what you log — your luteal phase, your PMS window, your patterns.",
-            accentColor: Color(hex: 0xA855F7),
-            backgroundStart: Color(hex: 0xFAF5FF),
-            backgroundEnd: Color(hex: 0xEDE9FE)
+        (
+            icon: "square.and.pencil.circle.fill",
+            title: "Log · Record what matters",
+            description: "Add flow, symptoms, mood, pain, energy, temperature, or notes — only what you want.",
+            color: Color(hex: 0xA855F7)
         ),
-        // Closes on usefulness and teases the privacy step that follows, without
-        // duplicating it — the dedicated PrivacyStep is the next screen.
-        FeatureHighlight(
-            icon: "heart.text.clipboard.fill",
-            title: "Ready when\nit matters ✨",
-            description: "Predictions months ahead, symptom patterns you'd never spot alone, and a doctor-ready PDF for appointments — all worked out on your iPhone.",
-            accentColor: Color(hex: 0x6E9B7B),
-            backgroundStart: Color(hex: 0xF0FDF4),
-            backgroundEnd: Color(hex: 0xDCFCE7)
+        (
+            icon: "calendar.badge.checkmark",
+            title: "Review · Learn over time",
+            description: "Use Calendar to look back. After complete cycles, Insights begins surfacing your patterns.",
+            color: Color(hex: 0x6E9B7B)
         )
     ]
 
     var body: some View {
-        VStack(spacing: 0) {
-            TabView(selection: $currentPage) {
-                ForEach(Array(features.enumerated()), id: \.offset) { i, feature in
-                    FeatureSlideView(feature: feature)
-                        .tag(i)
-                }
-            }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .frame(maxHeight: .infinity)
-            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: currentPage)
+        OnboardingScaffold(
+            icon: "wand.and.stars",
+            iconColor: CaelynColor.primaryPlum,
+            title: "A simple daily rhythm",
+            subtitle: "Check today, log what matters, and look back for patterns — all processed on your iPhone."
+        ) {
+            VStack(spacing: CaelynSpacing.sm) {
+                ForEach(Array(features.enumerated()), id: \.offset) { index, feature in
+                    CaelynCard(padding: CaelynSpacing.md) {
+                        HStack(alignment: .top, spacing: CaelynSpacing.md) {
+                            ZStack {
+                                Circle()
+                                    .fill(feature.color.opacity(0.13))
+                                    .frame(width: 48, height: 48)
+                                Image(systemName: feature.icon)
+                                    .font(.system(size: 18, weight: .medium))
+                                    .foregroundStyle(feature.color)
+                            }
+                            .accessibilityHidden(true)
 
-            // Page dots
-            HStack(spacing: 8) {
-                ForEach(0..<features.count, id: \.self) { i in
-                    Capsule()
-                        .fill(currentPage == i
-                              ? CaelynColor.primaryPlum
-                              : CaelynColor.deepPlumText.opacity(0.18))
-                        .frame(width: currentPage == i ? 28 : 8, height: 8)
-                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: currentPage)
-                }
-            }
-            .padding(.bottom, CaelynSpacing.md)
-
-            // Action button
-            CaelynButton(
-                title: currentPage < features.count - 1 ? "Next" : "Set up my cycle →",
-                variant: .primary
-            ) {
-                if currentPage < features.count - 1 {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                        currentPage += 1
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(feature.title)
+                                    .font(CaelynFont.headline)
+                                    .foregroundStyle(CaelynColor.deepPlumText)
+                                Text(feature.description)
+                                    .font(CaelynFont.subheadline)
+                                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.68))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            Spacer(minLength: 0)
+                        }
                     }
-                    Haptics.selection()
-                } else {
-                    vm.next()
+                    .staggeredAppear(delay: 0.28 + Double(index) * 0.08)
                 }
             }
-            .padding(.horizontal, CaelynSpacing.lg)
-            .padding(.bottom, CaelynSpacing.lg)
+        } footer: {
+            CaelynButton(title: "Set up my cycle", variant: .primary) { vm.next() }
         }
-    }
-}
-
-private struct FeatureHighlight {
-    let icon: String
-    let title: String
-    let description: String
-    let accentColor: Color
-    let backgroundStart: Color
-    let backgroundEnd: Color
-}
-
-private struct FeatureSlideView: View {
-    let feature: FeatureHighlight
-    @State private var appear = false
-
-    var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
-
-            // Illustration
-            ZStack {
-                PulsingGlow(color: feature.accentColor.opacity(0.28), size: 220, delay: 0)
-                PulsingGlow(color: feature.accentColor.opacity(0.15), size: 280, delay: 0.5)
-
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [feature.backgroundStart, feature.backgroundEnd],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 170, height: 170)
-                    .shadow(color: feature.accentColor.opacity(0.3), radius: 24, x: 0, y: 8)
-
-                Image(systemName: feature.icon)
-                    .font(.system(size: 72, weight: .light))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [feature.accentColor, CaelynColor.primaryPlum],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .symbolEffect(.pulse, options: .repeating)
-            }
-            .scaleEffect(appear ? 1 : 0.72)
-            .opacity(appear ? 1 : 0)
-
-            Spacer().frame(height: 48)
-
-            VStack(spacing: 14) {
-                Text(feature.title)
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .foregroundStyle(CaelynColor.deepPlumText)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(2)
-                    .opacity(appear ? 1 : 0)
-                    .offset(y: appear ? 0 : 20)
-
-                Text(feature.description)
-                    .font(CaelynFont.body)
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, CaelynSpacing.lg)
-                    .opacity(appear ? 1 : 0)
-                    .offset(y: appear ? 0 : 20)
-            }
-
-            Spacer()
-        }
-        .onAppear {
-            appear = false
-            withAnimation(.spring(response: 0.65, dampingFraction: 0.75).delay(0.1)) {
-                appear = true
-            }
-        }
-        .onDisappear { appear = false }
     }
 }
 
@@ -419,16 +336,22 @@ struct CycleLengthStep: View {
                 bigNumber
                     .staggeredAppear(delay: 0.28)
 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: CaelynSpacing.xs) {
-                        ForEach(options, id: \.self) { value in
-                            numberPill(value)
+                ScrollViewReader { proxy in
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: CaelynSpacing.xs) {
+                            ForEach(options, id: \.self) { value in
+                                numberPill(value)
+                                    .id(value)
+                            }
                         }
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 4)
                     }
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 4)
+                    .scrollClipDisabled()
+                    .onAppear {
+                        proxy.scrollTo(vm.cycleLength, anchor: .center)
+                    }
                 }
-                .scrollClipDisabled()
                 .staggeredAppear(delay: 0.36)
 
                 ToggleCard(
@@ -497,6 +420,7 @@ struct CycleLengthStep: View {
 struct PeriodLengthStep: View {
     @Bindable var vm: OnboardingViewModel
     private let options = Array(1...12)
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: CaelynSpacing.xs), count: 4)
 
     var body: some View {
         OnboardingScaffold(
@@ -527,7 +451,7 @@ struct PeriodLengthStep: View {
                 .animation(.easeOut, value: vm.notSurePeriodLength)
                 .staggeredAppear(delay: 0.28)
 
-                HStack(spacing: CaelynSpacing.xs) {
+                LazyVGrid(columns: columns, spacing: CaelynSpacing.xs) {
                     ForEach(options, id: \.self) { value in
                         let selected = vm.periodLength == value && !vm.notSurePeriodLength
                         Button {
@@ -577,6 +501,7 @@ struct PeriodLengthStep: View {
 
 struct GoalsStep: View {
     let vm: OnboardingViewModel
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     private let allGoals: [(TrackingGoal, String, String)] = [
         (.period,        "drop.fill",      "Period tracking"),
@@ -597,10 +522,12 @@ struct GoalsStep: View {
             subtitle: "Pick everything you'd like to track. You can always change this later."
         ) {
             LazyVGrid(
-                columns: [
-                    GridItem(.flexible(), spacing: CaelynSpacing.sm),
-                    GridItem(.flexible(), spacing: CaelynSpacing.sm)
-                ],
+                columns: dynamicTypeSize.isAccessibilitySize
+                    ? [GridItem(.flexible())]
+                    : [
+                        GridItem(.flexible(), spacing: CaelynSpacing.sm),
+                        GridItem(.flexible(), spacing: CaelynSpacing.sm)
+                    ],
                 spacing: CaelynSpacing.sm
             ) {
                 ForEach(Array(allGoals.enumerated()), id: \.offset) { i, goalData in
@@ -785,6 +712,7 @@ struct DoneStep: View {
     @State private var logoAppear = false
     @State private var textAppear = false
     @State private var confettiAppear = false
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     // Confetti: (symbol, x, y, size, color, delay)
     private let confetti: [(String, CGFloat, CGFloat, CGFloat, Color, Double)] = [
@@ -801,112 +729,117 @@ struct DoneStep: View {
     ]
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 0) {
+                Spacer().frame(height: dynamicTypeSize.isAccessibilitySize ? CaelynSpacing.sm : CaelynSpacing.lg)
 
-            // Celebration illustration
-            ZStack {
-                // Confetti
-                ForEach(Array(confetti.enumerated()), id: \.offset) { _, c in
-                    ConfettiParticle(
-                        symbol: c.0,
-                        color: c.4.opacity(0.85),
-                        size: c.3,
-                        offsetX: c.1,
-                        offsetY: c.2,
-                        delay: c.5
-                    )
-                    .opacity(confettiAppear ? 1 : 0)
-                }
+                celebrationIllustration
 
-                // Main circle
-                ZStack {
-                    PulsingGlow(color: CaelynColor.softRose.opacity(0.5), size: 180, delay: 0)
+                Spacer().frame(height: dynamicTypeSize.isAccessibilitySize ? CaelynSpacing.sm : CaelynSpacing.lg)
 
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(hex: 0xF472B6),
-                                    Color(hex: 0xA855F7),
-                                    Color(hex: 0x6F3D74)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 150, height: 150)
-                        .shadow(color: CaelynColor.primaryPlum.opacity(0.4), radius: 24, x: 0, y: 10)
+                VStack(spacing: 12) {
+                    Text("You're all set! 🎉")
+                        .font(.system(.largeTitle, design: .rounded).weight(.bold))
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
 
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 62, weight: .bold))
-                        .foregroundStyle(.white)
-                }
-                .scaleEffect(logoAppear ? 1.0 : 0.4)
-                .opacity(logoAppear ? 1 : 0)
-            }
-            .frame(height: 310)
-            .onAppear {
-                withAnimation(.spring(response: 0.7, dampingFraction: 0.58)) {
-                    logoAppear = true
-                }
-                confettiAppear = true
-                withAnimation(.easeOut(duration: 0.55).delay(0.35)) {
-                    textAppear = true
-                }
-            }
+                    Text("Start on Home for today's estimate, then use Log whenever you want to record flow, symptoms, mood, or notes.")
+                        .font(CaelynFont.body)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
 
-            Spacer().frame(height: 32)
-
-            VStack(spacing: 12) {
-                Text("You're all set! 🎉")
-                    .font(.system(size: 38, weight: .bold, design: .rounded))
-                    .foregroundStyle(CaelynColor.deepPlumText)
-
-                Text("Caelyn is ready to grow with you. Your first log is waiting — let's do this, gorgeous!")
-                    .font(CaelynFont.body)
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, CaelynSpacing.lg)
-
-                // Day-1 aha: reveal the first prediction BEFORE the funnel exits —
-                // the core value shouldn't be a surprise waiting on the other side.
-                if let predicted = firstPrediction {
-                    CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.lavender.opacity(0.45)) {
-                        HStack(alignment: .top, spacing: CaelynSpacing.sm) {
-                            Image(systemName: "sparkles")
-                                .font(.system(size: 17, weight: .medium))
-                                .foregroundStyle(CaelynColor.primaryPlum)
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text("Your first prediction")
-                                    .font(CaelynFont.caption.weight(.semibold))
+                    if let predicted = firstPrediction {
+                        CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.lavender.opacity(0.45)) {
+                            HStack(alignment: .top, spacing: CaelynSpacing.sm) {
+                                Image(systemName: "sparkles")
+                                    .font(.system(size: 17, weight: .medium))
                                     .foregroundStyle(CaelynColor.primaryPlum)
-                                    .tracking(0.4)
-                                Text("Next period around \(predicted.formatted(.dateTime.month(.wide).day()))")
-                                    .font(CaelynFont.callout.weight(.semibold))
-                                    .foregroundStyle(CaelynColor.deepPlumText)
-                                Text(vm.healthImportedCycles > 0
-                                     ? "Based on the \(vm.healthImportedCycles) cycles imported from Apple Health. Caelyn sharpens this every cycle."
-                                     : "Based on what you shared. Caelyn sharpens this with every cycle you log.")
-                                    .font(CaelynFont.caption)
-                                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
-                                    .fixedSize(horizontal: false, vertical: true)
+                                    .accessibilityHidden(true)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("Your first prediction")
+                                        .font(CaelynFont.caption.weight(.semibold))
+                                        .foregroundStyle(CaelynColor.primaryPlum)
+                                        .tracking(0.4)
+                                    Text("Next period around \(predicted.formatted(.dateTime.month(.wide).day()))")
+                                        .font(CaelynFont.callout.weight(.semibold))
+                                        .foregroundStyle(CaelynColor.deepPlumText)
+                                    Text(vm.healthImportedCycles > 0
+                                         ? "Based on the \(vm.healthImportedCycles) cycles imported from Apple Health. Caelyn sharpens this every cycle."
+                                         : "Based on what you shared. Caelyn sharpens this with every cycle you log.")
+                                        .font(CaelynFont.caption)
+                                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
                             }
                         }
                     }
-                    .padding(.horizontal, CaelynSpacing.lg)
+                }
+                .opacity(textAppear ? 1 : 0)
+                .offset(y: textAppear ? 0 : 20)
+
+                Spacer().frame(height: CaelynSpacing.lg)
+
+                CaelynButton(title: "Open Caelyn", variant: .primary) { onComplete() }
+                    .opacity(textAppear ? 1 : 0)
+            }
+            .padding(.horizontal, CaelynSpacing.lg)
+            .padding(.bottom, CaelynSpacing.lg)
+            .frame(maxWidth: .infinity)
+        }
+        .scrollBounceBehavior(.basedOnSize)
+    }
+
+    private var celebrationIllustration: some View {
+        let compact = dynamicTypeSize.isAccessibilitySize
+        let circleSize: CGFloat = compact ? 76 : 150
+
+        return ZStack {
+            if !compact {
+                ForEach(Array(confetti.enumerated()), id: \.offset) { _, item in
+                    ConfettiParticle(
+                        symbol: item.0,
+                        color: item.4.opacity(0.85),
+                        size: item.3,
+                        offsetX: item.1,
+                        offsetY: item.2,
+                        delay: item.5
+                    )
+                    .opacity(confettiAppear ? 1 : 0)
                 }
             }
-            .opacity(textAppear ? 1 : 0)
-            .offset(y: textAppear ? 0 : 20)
 
-            Spacer()
+            ZStack {
+                PulsingGlow(color: CaelynColor.softRose.opacity(0.5), size: compact ? 100 : 180, delay: 0)
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color(hex: 0xF472B6), Color(hex: 0xA855F7), Color(hex: 0x6F3D74)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: circleSize, height: circleSize)
+                    .shadow(color: CaelynColor.primaryPlum.opacity(0.35), radius: 18, x: 0, y: 8)
 
-            CaelynButton(title: "Open Caelyn 💕", variant: .primary) { onComplete() }
-                .padding(.horizontal, CaelynSpacing.lg)
-                .padding(.bottom, CaelynSpacing.lg)
-                .opacity(textAppear ? 1 : 0)
+                Image(systemName: "checkmark")
+                    .font(.system(size: compact ? 30 : 62, weight: .bold))
+                    .foregroundStyle(.white)
+            }
+            .scaleEffect(logoAppear ? 1.0 : 0.4)
+            .opacity(logoAppear ? 1 : 0)
+        }
+        .frame(height: compact ? 100 : 270)
+        .accessibilityHidden(true)
+        .onAppear {
+            withAnimation(.spring(response: 0.7, dampingFraction: 0.58)) {
+                logoAppear = true
+            }
+            confettiAppear = true
+            withAnimation(.easeOut(duration: 0.55).delay(0.25)) {
+                textAppear = true
+            }
         }
     }
 
@@ -936,7 +869,7 @@ struct HealthStep: View {
             icon: "heart.text.square.fill",
             iconColor: CaelynColor.alertRose,
             title: "Sync with Apple Health?",
-            subtitle: "Import your existing period logs and symptoms — or skip and start fresh. You can always change this in Settings."
+            subtitle: "Import existing period logs and optionally share new flow and symptoms with Apple Health. You can skip this and connect later."
         ) {
             VStack(spacing: CaelynSpacing.sm) {
                 healthRow(icon: "drop.fill",  title: "Menstrual flow",

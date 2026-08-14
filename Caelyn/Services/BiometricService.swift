@@ -63,6 +63,11 @@ enum BiometricService {
     /// This is what gates the lock toggle — using only biometrics-only would lock users out
     /// if they later un-enroll Face ID at the iOS level.
     static var canAuthenticate: Bool {
+        #if DEBUG
+        // UI tests cannot interact with the simulator's protected system passcode
+        // sheet. This launch argument exercises Caelyn's PIN-only fallback instead.
+        if CommandLine.arguments.contains("--ui-test-disable-device-auth") { return false }
+        #endif
         let context = LAContext()
         var error: NSError?
         return context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error)

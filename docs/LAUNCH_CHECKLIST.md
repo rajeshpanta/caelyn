@@ -64,6 +64,8 @@ there is no sync toggle anywhere, and the Trust Center makes no cloud claim.
 ## D. App Store Connect — metadata
 
 - [ ] Privacy Policy URL = `AppURLs.privacyPolicy`; add Support URL = `AppURLs.support`.
+- [ ] Publish the latest `docs/privacy.html` before submission. The live URL is
+      reachable, but the repo version adds the exact HealthKit read/write categories.
 - [ ] **App Privacy "nutrition label"**: declare Health & Fitness data as **not
       linked, not used for tracking**, stored on device only (1.0 has no sync — see
       the banner in `PRIVACY_LABEL.md`). No third-party SDKs — confirm.
@@ -89,14 +91,17 @@ there is no sync toggle anywhere, and the Trust Center makes no cloud claim.
 - [x] ~~Dark-mode contrast pass~~ — done (low-opacity informational text lifted app-wide).
 - [x] ~~Dead Partner Share~~ — `ShareModeView` deleted; rebuild on the CloudKit-sharing
       foundation when that feature is genuinely scheduled.
-- [ ] Dynamic Type: ~129 fixed-size fonts don't scale — audit largest sizes for clipping.
+- [x] Onboarding + Home/Calendar/Log/Insights first-use path passes on iPhone SE
+      at Accessibility XXXL; all onboarding choices and actions remain reachable.
+- [ ] Continue the full-app Dynamic Type pass: remaining data visualizations and
+      compact controls still use fixed-size fonts and need physical-device review.
 
 ## F. Stand-out features shipped in code (verify on device)
 
 - [ ] **Switch Kit**: onboarding Apple Health history import + payoff card; Settings →
       Import data (CSV from Caelyn's own export or another app's).
-- [ ] **Day-1 aha**: first prediction shown on the onboarding Done screen; one-time
-      "predictions are live" card on Home.
+- [ ] **Day-1 aha**: first prediction shown once on the onboarding Done screen;
+      Home opens directly to the cycle overview without a duplicate card or paywall.
 - [ ] **What Caelyn learned about you** (Insights, free at 3+ cycles) + TTC signal points.
 - [ ] **Free tier**: 5 insights (was 2), 6 months of year view (was 3).
 - [ ] **Period-end recap** card; **streak grace** (no reset on a single missed day);
