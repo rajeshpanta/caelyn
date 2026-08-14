@@ -21,8 +21,7 @@ struct PaywallView: View {
                 // Tiers come BEFORE the comparison table so the choice is on the
                 // first screen; the button itself never scrolls (see purchaseBar).
                 ScrollView {
-                    VStack(spacing: CaelynSpacing.lg) {
-                        hero
+                    VStack(spacing: CaelynSpacing.md) {
                         titleBlock
                         if productsAreReady {
                             tierCards
@@ -31,12 +30,14 @@ struct PaywallView: View {
                         } else {
                             unavailableState
                         }
-                        featureSection
+                        benefitStack
+                        freeTierNote
                     }
-                    .padding(CaelynSpacing.lg)
-                    .padding(.top, CaelynSpacing.sm)
+                    .padding(.horizontal, CaelynSpacing.lg)
+                    .padding(.top, CaelynSpacing.xs)
+                    .padding(.bottom, CaelynSpacing.md)
                 }
-                .scrollIndicators(.visible)
+                .scrollBounceBehavior(.basedOnSize)
             }
             .safeAreaInset(edge: .bottom) { purchaseBar }
             .toolbar {
@@ -101,172 +102,162 @@ struct PaywallView: View {
         )
     }
 
-    // MARK: - Hero
-
-    /// Deliberately compact. At its old 200pt the hero pushed the tier cards off
-    /// the first screen, so the plan and its price only appeared after scrolling.
-    private var hero: some View {
-        ZStack {
-            Circle().fill(CaelynColor.lavender).frame(width: 104, height: 104).offset(x: -30, y: -10)
-            Circle().fill(CaelynColor.softRose.opacity(0.85)).frame(width: 92, height: 92).offset(x: 34, y: 10)
-            Circle().fill(CaelynColor.sage.opacity(0.55)).frame(width: 66, height: 66).offset(x: -6, y: 38)
-            Image(systemName: "sparkles")
-                .font(.system(size: 28, weight: .light))
-                .foregroundStyle(CaelynColor.primaryPlum.opacity(0.85))
-                .offset(y: -6)
-        }
-        .frame(height: 128)
-        .accessibilityHidden(true)
-    }
-
     // MARK: - Title
 
+    /// A small sparkle mark instead of the old 128pt circle collage: the plans
+    /// have to be visible without scrolling, and decoration was eating the space
+    /// the decision needed.
     private var titleBlock: some View {
-        VStack(spacing: 6) {
-            Text("Unlock Caelyn Pro")
-                .font(.system(size: 32, weight: .semibold, design: .rounded))
+        VStack(spacing: CaelynSpacing.xs) {
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [CaelynColor.lavender, CaelynColor.blush],
+                            startPoint: .topLeading, endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 44, height: 44)
+                Image(systemName: "sparkles")
+                    .font(.system(size: 19, weight: .light))
+                    .foregroundStyle(CaelynColor.primaryPlum)
+            }
+            .accessibilityHidden(true)
+
+            Text("Caelyn Pro")
+                .font(.system(.title2, design: .rounded).weight(.bold))
                 .foregroundStyle(CaelynColor.deepPlumText)
-                .multilineTextAlignment(.center)
-            Text("Advanced insights, fertility tracking, a Watch companion, and specialist modes — built for your whole health journey.")
-                .font(CaelynFont.body)
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
+            Text("Everything Caelyn learns about you, in full.")
+                .font(CaelynFont.caption)
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, CaelynSpacing.sm)
         }
+        .padding(.top, CaelynSpacing.xs)
     }
 
-    // MARK: - Features
+    // MARK: - Benefits
 
-    private var featureSection: some View {
-        CaelynCard(padding: CaelynSpacing.md) {
-            VStack(spacing: 0) {
-                featureHeaderRow
-                featureDivider
-                featureRow("Period & cycle tracking", inFree: true, inPro: true)
-                featureDivider
-                featureRow("Cycle predictions", inFree: true, inPro: true)
-                featureDivider
-                featureRow("Symptom & mood logging", inFree: true, inPro: true)
-                featureDivider
-                featureRow("Calendar & cycle history", inFree: true, inPro: true)
-                featureDivider
-                featureRow("Reminders & alerts", inFree: true, inPro: true)
-                featureDivider
-                featureRow("CSV data export", inFree: true, inPro: true)
-                featureDivider
-                featureRow("Advanced insights & charts", inFree: false, inPro: true)
-                featureDivider
-                featureRow("PDF doctor report", inFree: false, inPro: true)
-                featureDivider
-                featureRow("TTC fertility tracking", inFree: false, inPro: true)
-                featureDivider
-                featureRow("Condition modes (endo, PCOS…)", inFree: false, inPro: true)
-                featureDivider
-                featureRow("Apple Watch companion", inFree: false, inPro: true)
-            }
-        }
-    }
-
-    private var featureHeaderRow: some View {
-        HStack {
-            Spacer(minLength: 0)
-            Text("Free")
+    /// Four benefits, not an eleven-row comparison grid. Research on subscription
+    /// paywalls is consistent that a short value stack converts better than a
+    /// feature matrix, and the matrix was the single biggest thing standing
+    /// between her and the buy button.
+    private var benefitStack: some View {
+        VStack(alignment: .leading, spacing: CaelynSpacing.xs) {
+            Text("What Pro adds")
                 .font(CaelynFont.caption.weight(.semibold))
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                 .tracking(0.5)
-                .frame(width: 56, alignment: .center)
-            Text("Pro")
-                .font(CaelynFont.caption.weight(.bold))
-                .foregroundStyle(CaelynColor.primaryPlum)
-                .tracking(0.5)
-                .frame(width: 56, alignment: .center)
-        }
-        .padding(.bottom, CaelynSpacing.xs)
-    }
-
-    private var featureDivider: some View {
-        Rectangle()
-            .fill(CaelynColor.deepPlumText.opacity(0.06))
-            .frame(height: 1)
-    }
-
-    private func featureRow(_ title: String, inFree: Bool, inPro: Bool) -> some View {
-        HStack {
-            Text(title)
-                .font(CaelynFont.subheadline)
-                .foregroundStyle(CaelynColor.deepPlumText)
-                .lineLimit(2)
-            Spacer(minLength: 6)
-            featureCheck(included: inFree)
-                .frame(width: 56, alignment: .center)
-            featureCheck(included: inPro, accent: CaelynColor.primaryPlum)
-                .frame(width: 56, alignment: .center)
-        }
-        .padding(.vertical, 10)
-    }
-
-    @ViewBuilder
-    private func featureCheck(included: Bool, accent: Color = CaelynColor.successSage) -> some View {
-        if included {
-            Image(systemName: "checkmark")
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(accent)
-        } else {
-            Text("—")
-                .font(CaelynFont.body)
-                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.25))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            benefitRow("chart.line.uptrend.xyaxis", "Every pattern Caelyn finds",
+                       "Not just the first five.", CaelynColor.lavender)
+            benefitRow("heart.text.square.fill", "Trying to conceive & pregnancy",
+                       "Fertility, pregnancy and postpartum modes.", CaelynColor.blush)
+            benefitRow("stethoscope", "Doctor-ready PDF",
+                       "Your history, ready for an appointment.", CaelynColor.sage.opacity(0.6))
+            benefitRow("applewatch", "Watch & lock screen",
+                       "Your cycle at a glance.", CaelynColor.warmSand)
         }
     }
 
-    // MARK: - Tier cards
+    private func benefitRow(_ icon: String, _ title: String, _ detail: String, _ tint: Color) -> some View {
+        HStack(spacing: CaelynSpacing.sm) {
+            ZStack {
+                Circle().fill(tint).frame(width: 34, height: 34)
+                Image(systemName: icon)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.8))
+            }
+            .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(CaelynFont.subheadline.weight(.semibold))
+                    .foregroundStyle(CaelynColor.deepPlumText)
+                Text(detail)
+                    .font(CaelynFont.caption)
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
 
+    /// Keeps the honest half of the old comparison table in one line: the free
+    /// app is not crippled, and saying so is part of the brand.
+    private var freeTierNote: some View {
+        Text("Tracking, predictions, reminders and export stay free — always.\nYour data stays on this device either way.")
+            .font(CaelynFont.caption)
+            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Plans
+
+    /// Yearly first, then Monthly, then Lifetime. Leading with the annual plan
+    /// and showing its per-month equivalent is the standard anchor: it makes the
+    /// yearly price legible in monthly terms rather than looking like a bigger
+    /// number. Three options is also the ceiling — beyond that, choosing gets
+    /// harder and more people leave without picking anything.
     private var tierCards: some View {
-        VStack(spacing: CaelynSpacing.sm) {
-            HStack(spacing: CaelynSpacing.sm) {
-                PaywallTierCard(
-                    kind: .monthly,
-                    displayPrice: monthlyDisplayPrice,
-                    strikethroughPrice: nil,
-                    perMonthLabel: nil,
-                    badgeText: monthlyTrialText != nil ? "FREE TRIAL" : "FLEXIBLE",
-                    badgeBackground: monthlyTrialText != nil ? CaelynColor.successSage : CaelynColor.deepPlumText.opacity(0.45),
-                    isSelected: selectedTier == .monthly,
-                    isBestValue: false
-                ) {
-                    selectedTier = .monthly
-                }
-
-                PaywallTierCard(
-                    kind: .yearly,
-                    displayPrice: yearlyDisplayPrice,
-                    strikethroughPrice: nil,
-                    perMonthLabel: yearlyPerMonthLabel,
-                    badgeText: yearlyTrialText != nil ? "FREE TRIAL" : yearlySavingsBadgeText,
-                    badgeBackground: CaelynColor.successSage,
-                    isSelected: selectedTier == .yearly,
-                    isBestValue: true
-                ) {
-                    selectedTier = .yearly
-                }
+        VStack(spacing: CaelynSpacing.xs) {
+            PaywallTierCard(
+                kind: .yearly,
+                displayPrice: yearlyDisplayPrice,
+                unitLabel: "per year",
+                subLabel: yearlySubLabel,
+                badgeText: yearlyTrialText != nil ? "FREE TRIAL" : yearlySavingsBadgeText,
+                badgeBackground: CaelynColor.successSage,
+                isSelected: selectedTier == .yearly
+            ) {
+                selectedTier = .yearly
+                Haptics.selection()
             }
 
-            // Lifetime: a one-time "own it forever" tier — leans into local-only
-            // (nothing recurring, nothing in the cloud). Shown only if it loaded (mon-3).
+            PaywallTierCard(
+                kind: .monthly,
+                displayPrice: monthlyDisplayPrice,
+                unitLabel: "per month",
+                subLabel: monthlyTrialText ?? "Cancel anytime",
+                badgeText: nil,
+                badgeBackground: .clear,
+                isSelected: selectedTier == .monthly
+            ) {
+                selectedTier = .monthly
+                Haptics.selection()
+            }
+
+            // Lifetime leans into local-only: nothing recurring, nothing in the
+            // cloud. Shown only if it actually loaded (mon-3).
             if purchase.lifetimeProduct != nil {
                 PaywallTierCard(
                     kind: .lifetime,
                     displayPrice: lifetimeDisplayPrice,
-                    strikethroughPrice: nil,
-                    perMonthLabel: "One time · no subscription, nothing in the cloud",
-                    badgeText: "OWN IT FOREVER",
+                    unitLabel: "once",
+                    subLabel: "One payment, nothing recurring",
+                    badgeText: "FOREVER",
                     badgeBackground: CaelynColor.primaryPlum,
-                    isSelected: selectedTier == .lifetime,
-                    isBestValue: false
+                    isSelected: selectedTier == .lifetime
                 ) {
                     selectedTier = .lifetime
+                    Haptics.selection()
                 }
             }
+        }
+    }
+
+    /// "Just $1.67 a month · 7-day free trial" — the per-month framing first,
+    /// since that's the number she compares against the monthly plan.
+    private var yearlySubLabel: String? {
+        let perMonth = yearlyPerMonthLabel
+        switch (perMonth, yearlyTrialText) {
+        case let (.some(p), .some(trial)): return "\(p) · \(trial)"
+        case let (.some(p), nil):          return p
+        case let (nil, .some(trial)):      return trial
+        default:                           return nil
         }
     }
 
@@ -343,20 +334,11 @@ struct PaywallView: View {
     }
 
     private var trustCopy: some View {
-        VStack(spacing: 4) {
-            HStack(spacing: 6) {
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 11, weight: .semibold))
-                Text("Your core cycle data stays yours.")
-                    .font(CaelynFont.footnote)
-            }
-            Text(disclosureText)
-                .font(CaelynFont.footnote)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
-        .multilineTextAlignment(.center)
-        .padding(.top, CaelynSpacing.xs)
+        Text(disclosureText)
+            .font(CaelynFont.caption)
+            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     // MARK: - Empty / loading states
@@ -443,18 +425,18 @@ struct PaywallView: View {
     /// can never show stale or inaccurate marketing prices.
     private var monthlyDisplayPrice: String {
         guard let product = purchase.monthlyProduct else { return "—" }
-        return "\(product.displayPrice)/mo"
+        return product.displayPrice
     }
 
     private var yearlyDisplayPrice: String {
         guard let product = purchase.yearlyProduct else { return "—" }
-        return "\(product.displayPrice)/yr"
+        return product.displayPrice
     }
 
     private var yearlyPerMonthLabel: String? {
         guard let product = purchase.yearlyProduct else { return nil }
         let perMonth = product.price / 12
-        return "≈ \(formatPrice(perMonth, with: product))/mo"
+        return "Just \(formatPrice(perMonth, with: product)) a month"
     }
 
     private var yearlySavingsBadgeText: String {
@@ -503,13 +485,13 @@ struct PaywallView: View {
     private var disclosureText: String {
         switch selectedTier {
         case .lifetime:
-            return "One-time purchase — no subscription and no auto-renewal. Yours forever on this Apple ID."
+            return "One payment. No subscription, no auto-renewal — yours on this Apple ID."
         case .monthly:
-            let monthlyLead = monthlyTrialText.map { "\($0), then renews at " } ?? "Renews at "
-            return "Auto-renewable subscription. \(monthlyLead)\(monthlyDisplayPrice) unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions."
+            let lead = monthlyTrialText.map { "\($0), then " } ?? ""
+            return "\(lead)\(monthlyDisplayPrice)/month, auto-renewing until you cancel. Cancel anytime in iOS Settings."
         case .yearly:
-            let lead = yearlyTrialText.map { "\($0), then renews at " } ?? "Renews at "
-            return "Auto-renewable subscription. \(lead)\(yearlyDisplayPrice) unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in iOS Settings → Apple ID → Subscriptions."
+            let lead = yearlyTrialText.map { "\($0), then " } ?? ""
+            return "\(lead)\(yearlyDisplayPrice)/year, auto-renewing until you cancel. Cancel anytime in iOS Settings."
         }
     }
 
