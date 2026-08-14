@@ -112,10 +112,12 @@ struct LogView: View {
                 }
             }
             .padding(.horizontal, 2)
-            .padding(.vertical, 2)
+            .padding(.vertical, 4)
         }
-        .scrollClipDisabled()
     }
+
+    /// Grows with the user's text size so the weekday and "Today" still fit.
+    @ScaledMetric(relativeTo: .headline) private var pillWidth: CGFloat = 52
 
     private var recentDates: [Date] {
         let cal = Calendar.current
@@ -157,7 +159,7 @@ struct LogView: View {
                           : Color.clear)
                     .frame(width: 5, height: 5)
             }
-            .frame(width: 52)
+            .frame(width: pillWidth)
             .padding(.vertical, CaelynSpacing.sm)
             .background(
                 isSelected
@@ -187,13 +189,13 @@ struct LogView: View {
                 .foregroundStyle(CaelynColor.deepPlumText)
                 .contentTransition(.identity)
                 .animation(.spring(response: 0.25, dampingFraction: 0.85), value: selectedDate)
-            HStack(spacing: 6) {
-                Text(isToday ? "Today's check-in" : "Past log")
-                Text("·")
-                Text("Cycle day \(cycleDay)")
-            }
-            .font(CaelynFont.subheadline)
-            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+            // One string, not three Texts in an HStack: side by side their
+            // minimum widths add up past the screen at accessibility sizes, which
+            // forced the whole screen wider and clipped it off both edges.
+            Text("\(isToday ? "Today's check-in" : "Past log") · Cycle day \(cycleDay)")
+                .font(CaelynFont.subheadline)
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
+                .fixedSize(horizontal: false, vertical: true)
 
             if isToday && !hasEntryOnSelectedDate && entries.count < 3 {
                 Text("Log even just one thing — every tap teaches Caelyn your pattern.")

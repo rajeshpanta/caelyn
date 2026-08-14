@@ -23,7 +23,9 @@ struct SymptomChip: View {
                     .font(.system(size: 18, weight: .medium))
                 Text(label)
                     .font(CaelynFont.caption.weight(.medium))
-                    .lineLimit(1)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity, minHeight: 76)
             .padding(.horizontal, CaelynSpacing.xs)

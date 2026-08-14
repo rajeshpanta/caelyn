@@ -15,6 +15,7 @@
 		0B85370248819A80B49F144C /* WatchDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED14730ACF6862A0890288B1 /* WatchDataModel.swift */; };
 		0C581E8B0DBDCFD8200EF13F /* HealthKitSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59064BE929C94D1B84DE947C /* HealthKitSync.swift */; };
 		0C7F8B4CF2B29C707FCF9785 /* CycleHistorySection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1422566B4DB4AAE611110E36 /* CycleHistorySection.swift */; };
+		1075D88F73A6362D96FBFA9D /* AdaptiveRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AED61C96E996F082B3B5015 /* AdaptiveRow.swift */; };
 		11FEBA53A510B9DFDBE35CFD /* Shadows.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5100528FE83F0873584CDBC /* Shadows.swift */; };
 		1252C4EA2C01E95C82D7AF42 /* PurchaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AE5BF45B9E75202940D8F7 /* PurchaseService.swift */; };
 		126219ED6C31C5F6A97A5CAB /* ToggleCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3238D5E5DA356783A9A2BA1F /* ToggleCard.swift */; };
@@ -295,6 +296,7 @@
 		884D8350457334717AFDE17B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		893A18A5E786299D456D8D29 /* CycleAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleAnalytics.swift; sourceTree = "<group>"; };
 		8A0CE13176EDA61E7E405D69 /* iCloudSyncView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudSyncView.swift; sourceTree = "<group>"; };
+		8AED61C96E996F082B3B5015 /* AdaptiveRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveRow.swift; sourceTree = "<group>"; };
 		8C1F783DA3E9B4345CA306AC /* PredictionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredictionEngine.swift; sourceTree = "<group>"; };
 		8EA5CF1A402606F76CC6EBB7 /* CaelynWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CaelynWidget.entitlements; sourceTree = "<group>"; };
 		8ECDCA0268B520CF6DE71EE5 /* MoodChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodChip.swift; sourceTree = "<group>"; };
@@ -697,6 +699,7 @@
 			isa = PBXGroup;
 			children = (
 				08F7B66C9C067BF416634B9E /* .gitkeep */,
+				8AED61C96E996F082B3B5015 /* AdaptiveRow.swift */,
 				29AD7A95A766A2973718AE3D /* CaelynButton.swift */,
 				F7110E218D7376F63A078A1C /* CaelynCard.swift */,
 				716AADA33C2AA6BA1134DF22 /* ComponentGallery.swift */,
@@ -941,6 +944,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1075D88F73A6362D96FBFA9D /* AdaptiveRow.swift in Sources */,
 				E0905B45C9B6DBBF071BE5D8 /* AppDelegate.swift in Sources */,
 				45D7233A755B333BD1199215 /* AppLockGate.swift in Sources */,
 				545420A041759717671D6019 /* AppPreviewMask.swift in Sources */,

@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct DailyLogForm: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let date: Date
 
     @Environment(\.modelContext) private var modelContext
@@ -63,7 +64,7 @@ struct DailyLogForm: View {
 
     private var flowSection: some View {
         SectionContainer(title: "Flow") {
-            HStack(spacing: 6) {
+            AdaptiveRow(spacing: 6) {
                 flowPill(nil, label: "None")
                 flowPill(.spotting, label: "Spotting")
                 flowPill(.light, label: "Light")
@@ -97,7 +98,9 @@ struct DailyLogForm: View {
                 Text(label)
                     .font(CaelynFont.caption.weight(isSelected ? .semibold : .regular))
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(isSelected ? 1.0 : 0.65))
-                    .lineLimit(1)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, CaelynSpacing.sm)
@@ -239,6 +242,13 @@ struct DailyLogForm: View {
         return base
     }
 
+    /// One column at accessibility sizes. A quarter-width column can't fit a
+    /// symptom name once text scales, and the grid would push the entire screen
+    /// wider than the display rather than let its content shrink.
+    private var symptomColumnCount: Int {
+        dynamicTypeSize.isAccessibilitySize ? 1 : 4
+    }
+
     private var symptomsSection: some View {
         let customNames = profile?.customSymptoms ?? []
         let builtInSelected = entry?.symptoms ?? []
@@ -247,7 +257,10 @@ struct DailyLogForm: View {
             VStack(alignment: .leading, spacing: CaelynSpacing.md) {
                 // Built-in chips
                 LazyVGrid(
-                    columns: Array(repeating: GridItem(.flexible(), spacing: CaelynSpacing.xs), count: 4),
+                    columns: Array(
+                        repeating: GridItem(.flexible(), spacing: CaelynSpacing.xs),
+                        count: symptomColumnCount
+                    ),
                     spacing: CaelynSpacing.xs
                 ) {
                     ForEach(visibleSymptoms) { symptom in
@@ -334,12 +347,13 @@ struct DailyLogForm: View {
 
     private func severityRow(name: String, key: String) -> some View {
         let currentLevel = entry?.symptomSeverity[key] ?? 2
-        return HStack(spacing: 6) {
+        return AdaptiveRow(spacing: 6) {
             Text(name)
                 .font(CaelynFont.callout)
                 .foregroundStyle(CaelynColor.deepPlumText)
-                .frame(minWidth: 80, alignment: .leading)
-                .lineLimit(1)
+                .frame(minWidth: dynamicTypeSize.isAccessibilitySize ? nil : 80, alignment: .leading)
+                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 4)
             ForEach([1, 2, 3], id: \.self) { level in
                 let labels = ["Mild", "Mod", "Severe"]
@@ -461,7 +475,7 @@ struct DailyLogForm: View {
 
     private var energySection: some View {
         SectionContainer(title: "Energy") {
-            HStack(spacing: CaelynSpacing.xs) {
+            AdaptiveRow(spacing: CaelynSpacing.xs) {
                 ForEach(EnergyLevel.allCases) { level in
                     energyPill(level)
                 }
@@ -484,7 +498,8 @@ struct DailyLogForm: View {
                 Text(level.displayName)
                     .font(CaelynFont.caption.weight(isSelected ? .semibold : .regular))
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(isSelected ? 0.9 : 0.55))
-                    .lineLimit(1)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
                     .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity)
@@ -568,7 +583,7 @@ struct DailyLogForm: View {
                     }
                     Spacer(minLength: 0)
                 }
-                HStack(spacing: CaelynSpacing.xs) {
+                AdaptiveRow(spacing: CaelynSpacing.xs) {
                     ForEach(OvulationTestResult.allCases) { result in
                         ovTestChip(result)
                     }
@@ -754,7 +769,9 @@ struct DailyLogForm: View {
                     Text(showAdvanced ? "Hide extra options" : "More to track · meds, fluid, tests")
                         .font(CaelynFont.body.weight(.medium))
                         .foregroundStyle(CaelynColor.primaryPlum)
-                    Spacer()
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: CaelynSpacing.xs)
                     Image(systemName: showAdvanced ? "chevron.up" : "chevron.down")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(CaelynColor.primaryPlum)
@@ -983,10 +1000,12 @@ private struct SectionContainer<Content: View>: View {
                     .font(CaelynFont.caption.weight(.semibold))
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
                     .tracking(0.6)
+                    .fixedSize(horizontal: false, vertical: true)
                 if let subtitle {
                     Text(subtitle)
                         .font(CaelynFont.caption)
                         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             CaelynCard(padding: CaelynSpacing.md) {
