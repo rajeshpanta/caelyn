@@ -79,6 +79,11 @@ targets:
         # symbols are removed from the binary.
         INFOPLIST_KEY_NSHealthShareUsageDescription: "Caelyn reads menstrual flow history and Apple Watch wrist temperature from Apple Health to improve cycle predictions when you choose to connect."
         INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to."
+        # Export compliance. Caelyn uses only Apple-provided encryption (the
+        # Keychain for the PIN hash, plus OS-level device encryption) and ships no
+        # crypto of its own, which is exempt. Declaring it here answers the
+        # question at build time instead of being prompted on every single upload.
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         SWIFT_EMIT_LOC_STRINGS: YES
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"

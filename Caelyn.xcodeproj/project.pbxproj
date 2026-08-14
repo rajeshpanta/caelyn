@@ -80,6 +80,7 @@
 		83B0DEEB56B767E74A81781D /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE228FE95D6CFB5B6AA94AA /* WidgetDataStore.swift */; };
 		87C388F7E2B1DF57EA5EB394 /* CyclePrediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D5D74DF250AA8A6396C3896 /* CyclePrediction.swift */; };
 		89E77462A3A3AC83DE2F1656 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96EC40E0931D0DEAB6685E5E /* Assets.xcassets */; };
+		8BA147710A9BDEF061AEAD1B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B6E412412EA4D2F92337555C /* PrivacyInfo.xcprivacy */; };
 		8D226211ADD88F0D7513CF4F /* WatchHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0188FEF8DFA34ECEDEE22AAB /* WatchHomeView.swift */; };
 		8DC6C9845609FAA8F8411FAC /* CaelynWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51EC99CA13B2B3BCD725DBE4 /* CaelynWatchApp.swift */; };
 		8F40B2801D830BE5BD40BCED /* Shapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3393953805D85FD844EA1DDC /* Shapes.swift */; };
@@ -91,6 +92,7 @@
 		A07388C20552EFA03BDA067A /* HomeStreakCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2633FDCD19F5767C2E1AAE90 /* HomeStreakCard.swift */; };
 		AA3741F22A064C92E2075BAF /* PregnancyModeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453885131B931155B977A629 /* PregnancyModeCard.swift */; };
 		AB33C36A895225740A42866E /* PatternInsightsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB14E5C47F9DA507113109 /* PatternInsightsSection.swift */; };
+		ABB9565578A0911F35EA34DC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CD38ADF5E6A9A8CFE29E0127 /* PrivacyInfo.xcprivacy */; };
 		AC374C70C11C05D3B5C002D4 /* CaelynApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E24994FC37F88D50DE9B59B /* CaelynApp.swift */; };
 		AC5DA2BA4EAE6B7ED6191DED /* CalendarMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544E8077B17E70A1F5752069 /* CalendarMath.swift */; };
 		AEB01728E684A4E040457D61 /* CycleSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 686ED94B3F2234B776EF9154 /* CycleSettingsView.swift */; };
@@ -310,6 +312,7 @@
 		B18D49C63DA9E976C31F2053 /* ScreenshotSeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotSeeder.swift; sourceTree = "<group>"; };
 		B3E9BDBBD279D29A2A77C926 /* StatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatCard.swift; sourceTree = "<group>"; };
 		B5AE5BF45B9E75202940D8F7 /* PurchaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseService.swift; sourceTree = "<group>"; };
+		B6E412412EA4D2F92337555C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B8FBF952865F40EC744AF966 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		BD48D14EB120165091660899 /* InsightsEmptyState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsEmptyState.swift; sourceTree = "<group>"; };
 		BFF130311725D11BC73F4242 /* SecureWipeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureWipeService.swift; sourceTree = "<group>"; };
@@ -318,6 +321,7 @@
 		C5100528FE83F0873584CDBC /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
 		C7B8D0A8D8A1C1621780130A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
+		CD38ADF5E6A9A8CFE29E0127 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		CD588403958052343C310525 /* WatchBridgeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBridgeService.swift; sourceTree = "<group>"; };
 		CEDF7284C85E89A58176F940 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		D237A741F754AC1F6FD0AC64 /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
@@ -365,6 +369,7 @@
 				B0C166CBDCCBDA1702DCEE16 /* CaelynWatch.entitlements */,
 				51EC99CA13B2B3BCD725DBE4 /* CaelynWatchApp.swift */,
 				5C2D0C0DF903A769EEE2158B /* Info.plist */,
+				CD38ADF5E6A9A8CFE29E0127 /* PrivacyInfo.xcprivacy */,
 				ED14730ACF6862A0890288B1 /* WatchDataModel.swift */,
 				0188FEF8DFA34ECEDEE22AAB /* WatchHomeView.swift */,
 				29695E67A2AF8F0087B074D9 /* WatchQuickLogView.swift */,
@@ -579,6 +584,7 @@
 				AA4BD2A286B2E8E8E9657261 /* CaelynWidgetBundle.swift */,
 				032976BC579EC7C7A9617A56 /* CaelynWidgetProvider.swift */,
 				9955FAEDEE824E578BBD738C /* Info.plist */,
+				B6E412412EA4D2F92337555C /* PrivacyInfo.xcprivacy */,
 				3A35FB178BD6C178286935B2 /* WidgetViews.swift */,
 			);
 			path = CaelynWidget;
@@ -717,6 +723,7 @@
 			buildConfigurationList = A27CE887F8F52366F01A1B01 /* Build configuration list for PBXNativeTarget "CaelynWidget" */;
 			buildPhases = (
 				1C394415793B33A5C884D8FE /* Sources */,
+				2026658185E689BB96266C5A /* Resources */,
 			);
 			buildRules = (
 			);
@@ -864,6 +871,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				89E77462A3A3AC83DE2F1656 /* Assets.xcassets in Resources */,
+				ABB9565578A0911F35EA34DC /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2026658185E689BB96266C5A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8BA147710A9BDEF061AEAD1B /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1188,6 +1204,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads menstrual flow history and Apple Watch wrist temperature from Apple Health to improve cycle predictions when you choose to connect.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to.";
@@ -1265,6 +1282,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads menstrual flow history and Apple Watch wrist temperature from Apple Health to improve cycle predictions when you choose to connect.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to.";
