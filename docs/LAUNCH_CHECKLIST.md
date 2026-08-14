@@ -12,7 +12,7 @@ created and must match exactly, or the paywall shows nothing / review fails.
 - [ ] Create the **auto-renewable subscription group** and two subscriptions:
   - `…pro.monthly` — **$3.99 / month**, **7-day free trial** intro offer.
   - `…pro.yearly` — **$19.99 / year**, **7-day free trial** intro offer.
-- [ ] Create the **non-consumable**: `…pro.lifetime` — **$49.99**.
+- [ ] Create the **non-consumable**: `…pro.lifetime` — **$99.99**.
 - [ ] Turn **Family Sharing ON** for all three products (the local .storekit now has it on — ASC must match).
 - [ ] Confirm every product ID matches `PurchaseService.ProductID` **exactly**.
 - [ ] Fill in localized display name, description, review screenshot per product.

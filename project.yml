@@ -194,6 +194,10 @@ schemes:
         CaelynUITests: [test]
     test:
       config: Debug
+      # Same local StoreKit config as `run` (see the note below). Without it the
+      # paywall can only ever render its "couldn't load subscription options"
+      # state under test, so no UI test can check the tiers or the buy button.
+      storeKitConfiguration: Caelyn.storekit
       targets:
         - CaelynTests
         - CaelynUITests

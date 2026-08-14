@@ -129,7 +129,7 @@
 100. Completion celebration, progress indicator with back nav, UserProfile persistence
 
 ### Monetization
-101. Three tiers (Monthly $3.99 / Yearly $19.99 / Lifetime $49.99) with selector
+101. Three tiers (Monthly $3.99 / Yearly $19.99 / Lifetime $99.99) with selector
 102. 1-week free trial on Monthly and Yearly (eligibility-checked) (Pro)
 103. StoreKit 2 purchase flow, JWS verification, transaction finish, restore purchases
 104. Pending-purchase handling and offline entitlement cache (prevents false downgrade)

@@ -18,26 +18,27 @@ struct PaywallView: View {
         NavigationStack {
             ZStack {
                 backgroundGradient.ignoresSafeArea()
+                // Tiers come BEFORE the comparison table so the choice is on the
+                // first screen; the button itself never scrolls (see purchaseBar).
                 ScrollView {
                     VStack(spacing: CaelynSpacing.lg) {
                         hero
                         titleBlock
-                        featureSection
                         if productsAreReady {
                             tierCards
-                            ctaButton
                         } else if !hasAttemptedLoad || purchase.isLoadingProducts {
                             loadingState
                         } else {
                             unavailableState
                         }
-                        footerLinks
-                        trustCopy
+                        featureSection
                     }
                     .padding(CaelynSpacing.lg)
                     .padding(.top, CaelynSpacing.sm)
                 }
+                .scrollIndicators(.visible)
             }
+            .safeAreaInset(edge: .bottom) { purchaseBar }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { dismiss() } label: {
@@ -102,18 +103,20 @@ struct PaywallView: View {
 
     // MARK: - Hero
 
+    /// Deliberately compact. At its old 200pt the hero pushed the tier cards off
+    /// the first screen, so the plan and its price only appeared after scrolling.
     private var hero: some View {
         ZStack {
-            Circle().fill(CaelynColor.lavender).frame(width: 160, height: 160).offset(x: -44, y: -16)
-            Circle().fill(CaelynColor.softRose.opacity(0.85)).frame(width: 140, height: 140).offset(x: 50, y: 16)
-            Circle().fill(CaelynColor.sage.opacity(0.55)).frame(width: 100, height: 100).offset(x: -8, y: 60)
+            Circle().fill(CaelynColor.lavender).frame(width: 104, height: 104).offset(x: -30, y: -10)
+            Circle().fill(CaelynColor.softRose.opacity(0.85)).frame(width: 92, height: 92).offset(x: 34, y: 10)
+            Circle().fill(CaelynColor.sage.opacity(0.55)).frame(width: 66, height: 66).offset(x: -6, y: 38)
             Image(systemName: "sparkles")
-                .font(.system(size: 36, weight: .light))
+                .font(.system(size: 28, weight: .light))
                 .foregroundStyle(CaelynColor.primaryPlum.opacity(0.85))
-                .offset(y: -8)
+                .offset(y: -6)
         }
-        .frame(height: 200)
-        .padding(.top, CaelynSpacing.sm)
+        .frame(height: 128)
+        .accessibilityHidden(true)
     }
 
     // MARK: - Title
@@ -264,6 +267,31 @@ struct PaywallView: View {
                     selectedTier = .lifetime
                 }
             }
+        }
+    }
+
+    // MARK: - Purchase bar (pinned)
+
+    /// The pay button must never be something she has to go looking for, so it
+    /// lives in a bottom inset rather than at the end of the scroll. The
+    /// auto-renew disclosure rides with it — App Review 3.1.2 expects the terms
+    /// to be visible alongside the purchase, and here they always are.
+    private var purchaseBar: some View {
+        VStack(spacing: CaelynSpacing.xs) {
+            if productsAreReady {
+                ctaButton
+            }
+            trustCopy
+            footerLinks
+        }
+        .padding(.horizontal, CaelynSpacing.lg)
+        .padding(.top, CaelynSpacing.sm)
+        .padding(.bottom, CaelynSpacing.xs)
+        .background(.ultraThinMaterial)
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(CaelynColor.deepPlumText.opacity(0.08))
+                .frame(height: 1)
         }
     }
 

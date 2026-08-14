@@ -680,7 +680,7 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 - [ ] **Paywall sheet appears**.
   - **Expected:**
     - "Loading products..." briefly shows (or products load instantly).
-    - Three product tiles appear: Monthly ($3.99), Yearly ($19.99), Lifetime ($49.99).
+    - Three product tiles appear: Monthly ($3.99), Yearly ($19.99), Lifetime ($99.99).
     - All prices and descriptions load correctly.
 
 - [ ] **Verify product details**:
@@ -722,7 +722,7 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 
 - [ ] **Paywall → Select Lifetime → Tap "Buy Now"** (no trial for one-time).
   - **Expected:**
-    - iOS purchase sheet shows $49.99, one-time charge.
+    - iOS purchase sheet shows $99.99, one-time charge.
     - After purchase, isPro is true; lifetime access granted.
     - No renewal date (lifetime = permanent).
 

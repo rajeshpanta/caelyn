@@ -98,7 +98,7 @@ No marketing promises. No fine print. Just honest building blocks:
 - Zero third-party SDKs, zero analytics, zero ads, zero data selling
 - Apple's Privacy Manifest declares no tracking; App Store confirms NSPrivacyTracking=false
 - No internet permission in Info.plist
-- What leaves your phone: what you export, what you sync to Health, what you back up to your own iCloud, and—only once—app purchase validation through Apple
+- What leaves your phone: what you export yourself, what you choose to share with Apple Health, and purchase validation handled by Apple
 
 **Survives Legal Compulsion**
 - Because Caelyn holds no data and runs no servers, there is nothing to subpoena, sell, or breach
@@ -127,14 +127,14 @@ No marketing promises. No fine print. Just honest building blocks:
 - Unlimited cycle and symptom logging
 - Full predictions and phase tracking
 - Logging streak and patterns
-- First 2 insights + 3 months of year view
+- 5 pattern insights + 6 months of year view
 - Small home widget
 - App Lock, Hide Preview, Private Notifications
 - CSV export
 - Apple Health sync
 
 **Pro ($3.99/month or $19.99/year with 7-day free trial)** adds:
-- All 5 insights + full year-in-review
+- Every pattern insight + the full 12-month year in review
 - Charts (cycle length, period length, symptom frequency, mood, pain, temperature)
 - Medium/Large home widgets + lock-screen widgets
 - TTC fertility dashboard (daily score + signals)
@@ -143,7 +143,7 @@ No marketing promises. No fine print. Just honest building blocks:
 - PDF clinical report
 - Learned luteal length & adaptive PMS timing
 
-**Lifetime ($49.99)** — one purchase, all Pro features forever, no recurring charges
+**Lifetime ($99.99)** — one purchase, all Pro features forever, no recurring charges
 
 *All tiers include the same privacy guarantees. We don't meter privacy; we meter depth of analysis.*
 
@@ -325,7 +325,7 @@ Caelyn's screenshots should demonstrate the "learns your body AND can't tell any
 |-----------|------|-------|-----------|----------------|
 | `smallpanta-icould.com.caelynperiodtracker.pro.monthly` | Auto-renewable subscription | $3.99/month | 7 days | ON |
 | `smallpanta-icould.com.caelynperiodtracker.pro.yearly` | Auto-renewable subscription | $19.99/year | 7 days | ON |
-| `smallpanta-icould.com.caelynperiodtracker.pro.lifetime` | Non-consumable | $49.99 | None | ON |
+| `smallpanta-icould.com.caelynperiodtracker.pro.lifetime` | Non-consumable | $99.99 | None | ON |
 
 ---
 

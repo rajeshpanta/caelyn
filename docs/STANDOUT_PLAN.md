@@ -6,12 +6,12 @@ Natural Cycles/Oura, Apple Health built-in, churned-tracker users) + 4 senior-de
 
 ## The wedge (positioning)
 
-Caelyn is the only cycle tracker that is smarter about YOUR specific body than the cloud giants AND structurally incapable of betraying you. Every competitor forces a trade: intelligence with surveillance (Flo/Clue — cloud accounts, FTC scrutiny, subpoena exposure) or privacy with stupidity (Apple Health/Euki — fixed 14-day math, no explanations, no coaching). Caelyn breaks the trade-off, and the switch moment that sells it is: import your years of history in one tap, and within 60 seconds see what no app has ever told you — YOUR real luteal length vs the 14-day default everyone else assumes, YOUR PMS onset, which symptoms warn you 2-3 days before your period — computed on a device that has no server to leak from, a duress PIN if someone grabs your phone, and a $49.99 own-it-forever price. Tagline-level framing: 'It learns your body. It can't tell anyone.'
+Caelyn is the only cycle tracker that is smarter about YOUR specific body than the cloud giants AND structurally incapable of betraying you. Every competitor forces a trade: intelligence with surveillance (Flo/Clue — cloud accounts, FTC scrutiny, subpoena exposure) or privacy with stupidity (Apple Health/Euki — fixed 14-day math, no explanations, no coaching). Caelyn breaks the trade-off, and the switch moment that sells it is: import your years of history in one tap, and within 60 seconds see what no app has ever told you — YOUR real luteal length vs the 14-day default everyone else assumes, YOUR PMS onset, which symptoms warn you 2-3 days before your period — computed on a device that has no server to leak from, a duress PIN if someone grabs your phone, and a $99.99 own-it-forever price. Tagline-level framing: 'It learns your body. It can't tell anyone.'
 
 ## Where we stand
 
 1. STRENGTH — Only tracker shipping BOTH real intelligence and structural privacy: learned luteal length (9-17d vs everyone's fixed 14), adaptive PMS onset, lag-aware insights, 9-detector pattern engine, on-device AI summaries, wrist-temp ovulation — all with no server, no account, duress PIN + silent wipe, auto-erase, and opt-in sync to the user's OWN iCloud. Flo/Clue are smart but cloud+FTC-damaged; Euki/Drip/Apple Health are private but generic and mute. Nobody else occupies both quadrants.
-2. STRENGTH — Honest monetization is a real asset post-FTC: $19.99/yr vs Flo's $39.99, a $49.99 lifetime tier no major rival offers, free CSV export, no fake-urgency timers, dismissible soft paywall. This is switch-bait for paywall-exhausted Flo/Clue users.
+2. STRENGTH — Honest monetization is a real asset post-FTC: $19.99/yr vs Flo's $39.99, a $99.99 lifetime tier no major rival offers, free CSV export, no fake-urgency timers, dismissible soft paywall. This is switch-bait for paywall-exhausted Flo/Clue users.
 3. STRENGTH — Codebase is genuinely sound (90 tests green, DST-safe engines, honest empty states, 3-tier store fallback) — competitors' churned users cite broken predictions and fabricated data as quit reasons; Caelyn's 'never lie to the user' discipline is already implemented.
 4. WEAKNESS — Zero users, zero reviews, zero brand trust. To a stranger, 'we can't leak your data' is an unverified claim from an unknown closed-source app; there is no in-app threat-model artifact or audit story to make privacy PROVABLE rather than promised.
 5. WEAKNESS — No switching path. There is no Flo/Clue/Stardust CSV importer and the working Apple Health flow import is buried in Settings with no visible payoff. A user with 3 years of Flo history literally cannot switch without starting over — this single gap nullifies the entire switcher strategy.
@@ -93,7 +93,7 @@ Caelyn is the only cycle tracker that is smarter about YOUR specific body than t
 - Wrist-temperature ovulation detection — Caelyn can use Apple Watch (or other wearable) temp sensors for ovulation; Flo has no wearable integration.
 - Irregular cycle mode tuned for real life — Caelyn auto-detects 5 types of irregularity (very short, very long, skipped, double-period, erratic); Flo's irregular mode is more basic.
 - Condition-mode insights for endo/PCOS/perimenopause — Caelyn surfaced observational insights for these conditions; Flo treats all cycles as 'normal' unless you're TTC/pregnant.
-- Transparent pricing — $3.99/mo, $19.99/yr (7-day trial on yearly), $49.99 lifetime; Flo's pricing is opaque and subscription-focused with constant 'limited offer' pressure.
+- Transparent pricing — $3.99/mo, $19.99/yr (7-day trial on yearly), $99.99 lifetime; Flo's pricing is opaque and subscription-focused with constant 'limited offer' pressure.
 - No account required to start using — Jump in, grant app lock permission, done. Flo forces account creation upfront.
 - CSV export (free) — Caelyn lets you export all data freely; Flo locks export behind Pro.
 
@@ -105,7 +105,7 @@ Caelyn is the only cycle tracker that is smarter about YOUR specific body than t
 - Security-conscious users — Anyone who's worried about cycle data on Flo's servers (or aware of the FTC case) would switch for Caelyn's local-only + optional iCloud.
 - Irregular cycle frustration — If Flo's generic predictions fail repeatedly for PCOS/endo/perimenopause, Caelyn's condition modes with surfaced insights feel more tailored.
 - Wearable-first tracking — If you have an Apple Watch or Oura and want to correlate sleep/temp/HRV with your cycle, Caelyn's wearable hooks (especially temp-based ovulation) matter; Flo has none.
-- Lifetime buyer preference — If you'd rather pay once ($49.99 lifetime) than rent forever, Caelyn's option appeals; Flo is subscription-only.
+- Lifetime buyer preference — If you'd rather pay once ($99.99 lifetime) than rent forever, Caelyn's option appeals; Flo is subscription-only.
 
 **Build ideas:**
 - Community-lite social layer (medium) — Add a private, anonymous comment thread on each cycle day so users can share what they're feeling without revealing identity. This captures 20% of Flo's community magic without the surveillance.
@@ -145,7 +145,7 @@ Caelyn is the only cycle tracker that is smarter about YOUR specific body than t
 - Open-source adjacent transparency: Caelyn's privacy claims are *verifiable by inspection*. You can read the code, see there's no network call, confirm it's local. Clue is closed-source SaaS.
 - HealthKit flow two-way sync (bidirectional). Clue's Apple Health integration is read-only (Clue → Health, no backfill).
 - TTC/fertility UI depth: Caelyn has TTC dashboard with daily fertility score, BBT chart, cervical-mucus scoring. Clue has basic fertility mode but less visualization.
-- Lifetime + permanent offline access: Caelyn's $49.99 lifetime means zero ongoing cost, zero cloud dependence, zero subscription renewal anxiety. Clue pushes subscription ($12.99 CAD/mo).
+- Lifetime + permanent offline access: Caelyn's $99.99 lifetime means zero ongoing cost, zero cloud dependence, zero subscription renewal anxiety. Clue pushes subscription ($12.99 CAD/mo).
 - Offline-first: Caelyn works 100% offline. Clue requires internet for most features (sync, insights, research articles).
 - No ads, no third-party SDKs, no analytics. Clue doesn't run ads, but is owned by Sunflower Health (VC), so has financial scaling pressure. Caelyn's in-app only — indie-feels trust.
 
@@ -155,7 +155,7 @@ Caelyn is the only cycle tracker that is smarter about YOUR specific body than t
 - Publish an open-source or auditable privacy report showing zero network calls, zero analytics, zero third-party code. Let Clue users inspect the APT and see the truth. Clue is closed, Caelyn can be transparent.
 - Inclusive onboarding + de-gendered language mode. Clue users in LGBTQ+ communities will switch for genuine inclusion, not just 'we support you' copy.
 - Fix the Share feature (currently broken + would be publicly readable). Clue users care about partner features; broken is worse than missing. Make it real and private, OR remove it.
-- Adopt a 'lifetime + own it forever' positioning explicitly. Clue's endless subscription ($12.99/mo = $156/yr) frustrates users. Caelyn's $49.99 one-time is a huge pivot point if marketed as 'never recurring, never VC, never sold'.
+- Adopt a 'lifetime + own it forever' positioning explicitly. Clue's endless subscription ($12.99/mo = $156/yr) frustrates users. Caelyn's $99.99 one-time is a huge pivot point if marketed as 'never recurring, never VC, never sold'.
 - Wrist-temperature ovulation from HealthKit. Natural Cycles ($$$) owns this. Clue has nothing. Free, local ovulation detection is a feature Clue users would switch for.
 - Restore the app switcher privacy guarantee (mask correctly on .inactive, not .background). Clue users trust local-only *because* they see it happening. Broken lock = trust gone.
 - Perimenopause depth matching or beating Clue's. This is the fastest-growing segment; Clue launched perimenopause mode in 2023. Caelyn is close but needs feature parity + research backing.
@@ -193,7 +193,7 @@ Caelyn is the only cycle tracker that is smarter about YOUR specific body than t
 - Doctor-visit PDF export with correlated insights — Caelyn lets users print/share a summary they own; Stardust's export is raw data dumps. A privacy-conscious user going to their doctor wants to control what information leaves their phone, and Caelyn makes that explicit.
 - Perimenopause depth as a first-class mode, not a stub — Caelyn's DIAGNOSIS already flags perimenopause as the fastest-growing femtech segment; the Phase-4 roadmap treats it seriously. Stardust's onboarding doesn't even mention it.
 - Two-way HealthKit flow sync — Caelyn writes menstrual flow to Apple Health (encrypted in the user's own Health app), and reads it back. Users who track period in Health don't need to double-log; Stardust doesn't offer this.
-- Lifetime 'own-it-forever' tier (Phase 2) — Stardust is subscription-only. For privacy-conscious users who hate recurring billing, Caelyn's lifetime option ($49.99) is a huge trust signal: 'You own your data; you own your purchase.'
+- Lifetime 'own-it-forever' tier (Phase 2) — Stardust is subscription-only. For privacy-conscious users who hate recurring billing, Caelyn's lifetime option ($99.99) is a huge trust signal: 'You own your data; you own your purchase.'
 - Honest empty states + no fabricated data — Caelyn's DIAGNOSIS explicitly flags that the watch showed hardcoded 'Day 14' as a bug; Phase 0 fixes this. Stardust would ship that. Caelyn's philosophy is 'never lie to the user about what we know.'
 - Full transparency on model / prediction engine — Caelyn's code is human-readable; users can inspect `PredictionEngine.swift` and see exactly how cycle length is averaged, how fertile windows are computed. Stardust's code is closed; users must trust the black box.
 - Cold-start intelligence — Caelyn lowers the threshold for insights; Phase 1 raises the free insight cap from 2 to more. Stardust makes users log 6+ cycles before showing patterns. Caelyn respects the user's time.
@@ -522,7 +522,7 @@ Caelyn is the only cycle tracker that is smarter about YOUR specific body than t
 **Caelyn does better:**
 - Structurally honest local-only architecture: **no data to sell, no terms-of-service trap, warrant-proof by design**. Flo/Clue cannot claim this without a complete rebuild. Caelyn's privacy moat is real and verifiable, not marketing.
 - On-device predictions + Foundation Models insights: zero network egress, zero third-party data sharing. Competitors are cloud-first; Caelyn's on-device AI is the only story cloud apps can't match.
-- Lifetime tier ($49.99 one-time) already implemented and ready to ship. Flo/Clue are subscription-only — users who distrust recurring charges (post-FTC Flo action is fresh) have nowhere to go. This is an open lane.
+- Lifetime tier ($99.99 one-time) already implemented and ready to ship. Flo/Clue are subscription-only — users who distrust recurring charges (post-FTC Flo action is fresh) have nowhere to go. This is an open lane.
 - Adaptive learning (luteal length, PMS onset, irregularity thresholds per user) without sending data to servers. Competitors either use population averages or train cloud models; Caelyn's user-specific learning is offline and private.
 - Perimenopause, PCOS, endometriosis condition modes with observational (not regulated) copy. Apple Health gained perimenopause notifications in iOS 17.1; Caelyn's full-feature modes for these life stages go deeper and don't over-claim.
 - APP-LEVEL TRANSPARENCY: Settings show exactly what Caelyn collects (nothing), exactly where it goes (nowhere), and a readable privacy manifest. No other app shows this clearly — most hide it in legalese. Switching Flo users will see the difference immediately.
@@ -545,7 +545,7 @@ Caelyn is the only cycle tracker that is smarter about YOUR specific body than t
 - Make all four reminder types available free (period, ovulation, medication, daily check-in). Currently pill reminders are Pro-only — they're safety-adjacent and App Review flags this. Moving them to free opens a retention funnel and sidesteps review risk. (Effort: Small)
 - Add a 7-day free trial to Monthly tier (currently only Yearly has it). Cold free users who try Premium features will convert better than direct asks. Pair with a privacy-led onboarding paywall shown at the value moment. (Effort: Medium)
 - Gate Pro features by feature depth, not by type. Move free to 'see 5 insights, all basic insight types' → Pro 'see all insights + cross-metric correlations.' Today free gets 2 insights; moving the cap to 5 keeps engagement, shows value. Same for Year view: free last 6 months → Pro all 12. (Effort: Small–Medium)
-- Introduce a 'Lifetime Own-It-Forever' tier at $49.99 one-time (already in code but not shipped). This converts privacy-minded switchers away from recurring-payment competitors and aligns with 'nothing in the cloud' positioning. Emphasize: 'One payment, no subscriptions, no servers.' (Effort: Small — already implemented in code)
+- Introduce a 'Lifetime Own-It-Forever' tier at $99.99 one-time (already in code but not shipped). This converts privacy-minded switchers away from recurring-payment competitors and aligns with 'nothing in the cloud' positioning. Emphasize: 'One payment, no subscriptions, no servers.' (Effort: Small — already implemented in code)
 - Make the PDF doctor report available at $0.99 as an add-on (not Pro-only subscription). Patients who need it for a visit will buy it; the low friction converts faster than asking them to subscribe for three months. (Effort: Medium — requires StoreKit consumable setup)
 - Show learned values (actual luteal length, PMS onset) prominently in free Insights once ≥3 cycles logged. This 'aha moment' converts: users see the app works before paywall. Currently hidden until Pro. (Effort: Small)
 - Bring condition modes (perimenopause, PCOS, endo) to free after 3 cycles logged, gated only on symptom set depth. Currently all Pro. Free users in these cohorts churn without them — they're a life-stage switch, not a premium feature. (Effort: Medium — careful UX to avoid overwhelming)
