@@ -684,7 +684,7 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
     - All prices and descriptions load correctly.
 
 - [ ] **Verify product details**:
-  - [ ] Monthly shows "7-day free trial" label (if eligible).
+  - [ ] Monthly shows "7-day free trial" label (if eligible); Yearly shows a "Save N%" badge and NO trial.
   - [ ] Yearly shows savings badge (e.g., "Save 36%").
   - [ ] Lifetime shows "One-time purchase" or similar.
 

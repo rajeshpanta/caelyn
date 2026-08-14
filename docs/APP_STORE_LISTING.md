@@ -133,7 +133,7 @@ No marketing promises. No fine print. Just honest building blocks:
 - CSV export
 - Apple Health sync
 
-**Pro ($3.99/month or $19.99/year with 7-day free trial)** adds:
+**Pro ($3.99/month with a 7-day free trial, or $19.99/year)** adds:
 - Every pattern insight + the full 12-month year in review
 - Charts (cycle length, period length, symptom frequency, mood, pain, temperature)
 - Medium/Large home widgets + lock-screen widgets
