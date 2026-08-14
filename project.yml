@@ -13,13 +13,16 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "1.0.1"
-    # Builds 3, 4 and 5 are ALREADY uploaded to App Store Connect in the 1.0.1
-    # train, so re-uploading 3 is rejected ("bundle version must be higher than
-    # the previously uploaded version"). Bump this before every upload, and keep
-    # the widget/watch CFBundleVersion below identical — a mismatch between the
-    # app and its embedded bundles trips validation (ITMS-90473).
-    CURRENT_PROJECT_VERSION: 6
+    # Ships as 1.0 — the App Store Connect version record is 1.0, and nothing has
+    # ever been released, so the earlier 1.0.1 uploads are just unused pre-release
+    # builds sitting in Connect.
+    MARKETING_VERSION: "1.0"
+    # Build numbers must rise within a version train. 1.0 is a fresh train (its
+    # builds are separate from the 1.0.1 ones), but this stays strictly above the
+    # highest number used anywhere so no upload can ever collide. Bump it before
+    # every upload, and keep the widget/watch CFBundleVersion below identical — a
+    # mismatch between the app and its embedded bundles trips ITMS-90473.
+    CURRENT_PROJECT_VERSION: 7
     DEVELOPMENT_TEAM: "7T9897GFKH"
 
 targets:
@@ -127,8 +130,8 @@ targets:
       path: CaelynWidget/Info.plist
       properties:
         CFBundleDisplayName: CaelynWidget
-        CFBundleVersion: "6"
-        CFBundleShortVersionString: "1.0.1"
+        CFBundleVersion: "7"
+        CFBundleShortVersionString: "1.0"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
@@ -166,8 +169,8 @@ targets:
       path: CaelynWatch/Info.plist
       properties:
         CFBundleDisplayName: Caelyn
-        CFBundleVersion: "6"
-        CFBundleShortVersionString: "1.0.1"
+        CFBundleVersion: "7"
+        CFBundleShortVersionString: "1.0"
         WKApplication: true
         WKCompanionAppBundleIdentifier: smallpanta-icould.com.caelynperiodtracker
     entitlements:
