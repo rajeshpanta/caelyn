@@ -6,6 +6,13 @@ struct CycleRingView: View {
     let periodLength: Int
     var thickness: CGFloat = 14
     var size: CGFloat = 220
+    /// True when there's no period anchor yet — a brand-new user, or one who
+    /// chose "I'm not sure right now" during onboarding. The ring must not
+    /// invent a cycle in that state: HomeView falls back to `cycleDay = 1` for
+    /// layout, and rendering that as "Day 1 of 28" with filled phase arcs reads
+    /// as a real cycle starting today, contradicting the "Welcome to Caelyn"
+    /// caption right underneath it.
+    var hasCycleData: Bool = true
 
     @State private var hasAppeared = false
     @State private var heartbeat = false
@@ -16,27 +23,31 @@ struct CycleRingView: View {
 
     var body: some View {
         ZStack {
-            Circle()
-                .stroke(CaelynColor.warmSand.opacity(0.5), style: StrokeStyle(lineWidth: thickness))
+            if hasCycleData {
+                Circle()
+                    .stroke(CaelynColor.warmSand.opacity(0.5), style: StrokeStyle(lineWidth: thickness))
 
-            phaseArc(startDay: 0, endDay: periodLength, color: CaelynColor.softRose)
-            phaseArc(startDay: ovulationDay - 1, endDay: ovulationDay + 1, color: CaelynColor.sage)
-            phaseArc(startDay: pmsStart, endDay: cycleLength, color: CaelynColor.lavender)
+                phaseArc(startDay: 0, endDay: periodLength, color: CaelynColor.softRose)
+                phaseArc(startDay: ovulationDay - 1, endDay: ovulationDay + 1, color: CaelynColor.sage)
+                phaseArc(startDay: pmsStart, endDay: cycleLength, color: CaelynColor.lavender)
 
-            currentDayIndicator
+                currentDayIndicator
 
-            VStack(spacing: 2) {
-                Text("Day")
-                    .font(CaelynFont.subheadline)
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
-                Text("\(cycleDay)")
-                    .font(CaelynFont.numberLarge)
-                    .foregroundStyle(CaelynColor.deepPlumText)
-                    .contentTransition(.numericText())
-                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.4), value: cycleDay)
-                Text("of \(cycleLength)")
-                    .font(CaelynFont.footnote)
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                VStack(spacing: 2) {
+                    Text("Day")
+                        .font(CaelynFont.subheadline)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                    Text("\(cycleDay)")
+                        .font(CaelynFont.numberLarge)
+                        .foregroundStyle(CaelynColor.deepPlumText)
+                        .contentTransition(.numericText())
+                        .animation(reduceMotion ? nil : .easeInOut(duration: 0.4), value: cycleDay)
+                    Text("of \(cycleLength)")
+                        .font(CaelynFont.footnote)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.5))
+                }
+            } else {
+                emptyRing
             }
         }
         .frame(width: size, height: size)
@@ -49,7 +60,35 @@ struct CycleRingView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Cycle day \(cycleDay) of \(cycleLength)")
+        .accessibilityLabel(hasCycleData
+            ? "Cycle day \(cycleDay) of \(cycleLength)"
+            : "No cycle logged yet. Log the first day of your period to start tracking.")
+    }
+
+    /// The honest unknown state: a dashed outline with no day number, no filled
+    /// phase arcs and no position marker — nothing that implies a cycle we can't
+    /// actually predict yet.
+    private var emptyRing: some View {
+        ZStack {
+            Circle()
+                .stroke(
+                    CaelynColor.warmSand.opacity(0.55),
+                    style: StrokeStyle(lineWidth: thickness, lineCap: .round, dash: [2, 10])
+                )
+            VStack(spacing: 6) {
+                Image(systemName: "drop")
+                    .font(.system(size: size * 0.13, weight: .light))
+                    .foregroundStyle(CaelynColor.softRose)
+                Text("No cycle yet")
+                    .font(CaelynFont.headline)
+                    .foregroundStyle(CaelynColor.deepPlumText)
+                Text("Log your first period\nand your cycle starts here")
+                    .font(CaelynFont.footnote)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+            }
+            .padding(.horizontal, thickness * 2)
+        }
     }
 
     private func phaseArc(startDay: Int, endDay: Int, color: Color) -> some View {
@@ -114,6 +153,8 @@ struct CycleRingView: View {
 #Preview {
     VStack(spacing: CaelynSpacing.lg) {
         CycleRingView(cycleDay: 4, cycleLength: 29, periodLength: 5)
+        // The "I'm not sure right now" / brand-new-user state.
+        CycleRingView(cycleDay: 1, cycleLength: 28, periodLength: 5, size: 200, hasCycleData: false)
         HStack(spacing: CaelynSpacing.md) {
             CycleRingView(cycleDay: 14, cycleLength: 29, periodLength: 5, thickness: 10, size: 140)
             CycleRingView(cycleDay: 26, cycleLength: 29, periodLength: 5, thickness: 10, size: 140)

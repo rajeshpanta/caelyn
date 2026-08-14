@@ -26,7 +26,8 @@ struct HomeHeroCard: View {
                 cycleDay: cycleDay,
                 cycleLength: cycleLength,
                 periodLength: periodLength,
-                size: 240
+                size: 240,
+                hasCycleData: phase != .unknown
             )
             .frame(maxWidth: .infinity)
             .padding(.vertical, CaelynSpacing.xs)
@@ -76,8 +77,10 @@ struct HomeHeroCard: View {
             }
             .padding(.horizontal, CaelynSpacing.sm)
 
-            phaseLegend
-                .padding(.top, CaelynSpacing.xs)
+            if phase != .unknown {
+                phaseLegend
+                    .padding(.top, CaelynSpacing.xs)
+            }
         }
         .padding(.vertical, CaelynSpacing.lg)
         .padding(.horizontal, CaelynSpacing.lg)
