@@ -465,8 +465,8 @@ final class CaelynTests: XCTestCase {
     }
 
     func testProductIDRawValuesAreNamespaced() {
-        XCTAssertEqual(PurchaseService.ProductID.monthly.rawValue, "smallpanta-icould.com.caelynperiodtracker.pro.monthly")
-        XCTAssertEqual(PurchaseService.ProductID.yearly.rawValue, "smallpanta-icould.com.caelynperiodtracker.pro.yearly")
+        XCTAssertEqual(PurchaseService.ProductID.monthly.rawValue, "smallpanta_icould.com.caelynperiodtracker.pro.monthly")
+        XCTAssertEqual(PurchaseService.ProductID.yearly.rawValue, "smallpanta_icould.com.caelynperiodtracker.pro.yearly")
     }
 
     func testPurchaseOutcomeEquality() {

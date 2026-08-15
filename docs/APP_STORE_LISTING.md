@@ -323,9 +323,9 @@ Caelyn's screenshots should demonstrate the "learns your body AND can't tell any
 
 | Product ID | Type | Price | Free Trial | Family Sharing |
 |-----------|------|-------|-----------|----------------|
-| `smallpanta-icould.com.caelynperiodtracker.pro.monthly` | Auto-renewable subscription | $3.99/month | 7 days | ON |
-| `smallpanta-icould.com.caelynperiodtracker.pro.yearly` | Auto-renewable subscription | $19.99/year | 7 days | ON |
-| `smallpanta-icould.com.caelynperiodtracker.pro.lifetime` | Non-consumable | $99.99 | None | ON |
+| `smallpanta_icould.com.caelynperiodtracker.pro.monthly` | Auto-renewable subscription | $3.99/month | 7 days | ON |
+| `smallpanta_icould.com.caelynperiodtracker.pro.yearly` | Auto-renewable subscription | $19.99/year | 7 days | ON |
+| `smallpanta_icould.com.caelynperiodtracker.pro.lifetime` | Non-consumable | $99.99 | None | ON |
 
 ---
 

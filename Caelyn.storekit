@@ -13,7 +13,7 @@
           "locale": "en_US"
         }
       ],
-      "productID": "smallpanta-icould.com.caelynperiodtracker.pro.lifetime",
+      "productID": "smallpanta_icould.com.caelynperiodtracker.pro.lifetime",
       "referenceName": "Caelyn Pro Lifetime",
       "type": "NonConsumable"
     }
@@ -57,7 +57,7 @@
               "locale": "en_US"
             }
           ],
-          "productID": "smallpanta-icould.com.caelynperiodtracker.pro.monthly",
+          "productID": "smallpanta_icould.com.caelynperiodtracker.pro.monthly",
           "recurringSubscriptionPeriod": "P1M",
           "referenceName": "Caelyn Pro Monthly",
           "subscriptionGroupID": "21525751",
@@ -77,7 +77,7 @@
               "locale": "en_US"
             }
           ],
-          "productID": "smallpanta-icould.com.caelynperiodtracker.pro.yearly",
+          "productID": "smallpanta_icould.com.caelynperiodtracker.pro.yearly",
           "recurringSubscriptionPeriod": "P1Y",
           "referenceName": "Caelyn Pro Yearly",
           "subscriptionGroupID": "21525751",

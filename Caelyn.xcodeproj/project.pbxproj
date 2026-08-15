@@ -134,6 +134,7 @@
 		EE6F1A175709790139DD31CF /* PaywallTierCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E98B3962F3C4B33A33C5001 /* PaywallTierCard.swift */; };
 		EFC09BEAD7BE4DCDEF97ED5C /* PatternEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B69A196D7954169CBDBA685 /* PatternEngine.swift */; };
 		F30D5500E73F1BFBB2EF01FF /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB2A3A73ABB750626A13958B /* InsightsView.swift */; };
+		F33E4593CC5C8724A2DD068A /* Caelyn.storekit in Resources */ = {isa = PBXBuildFile; fileRef = B371714D64A5750C2BDEE63E /* Caelyn.storekit */; };
 		F3C14FB0136889C385D26B01 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 01934B982642BD96A3984DF4 /* Preview Assets.xcassets */; };
 		F3D1457395679EE77357C274 /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FDEAAC04C4AD4BB528B0A16 /* ScreenshotTests.swift */; };
 		F62CF1A517E50F8D1FBD5C69 /* InsightsCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F0CABBB7635B472536C64A /* InsightsCharts.swift */; };
@@ -312,6 +313,7 @@
 		AC71E3A11A7D1A8CD036E7AC /* DesignSystemPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystemPreview.swift; sourceTree = "<group>"; };
 		B0C166CBDCCBDA1702DCEE16 /* CaelynWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CaelynWatch.entitlements; sourceTree = "<group>"; };
 		B18D49C63DA9E976C31F2053 /* ScreenshotSeeder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotSeeder.swift; sourceTree = "<group>"; };
+		B371714D64A5750C2BDEE63E /* Caelyn.storekit */ = {isa = PBXFileReference; path = Caelyn.storekit; sourceTree = "<group>"; };
 		B3E9BDBBD279D29A2A77C926 /* StatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatCard.swift; sourceTree = "<group>"; };
 		B5AE5BF45B9E75202940D8F7 /* PurchaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseService.swift; sourceTree = "<group>"; };
 		B6E412412EA4D2F92337555C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -553,6 +555,7 @@
 		7B0900D7853516E002FA94E9 = {
 			isa = PBXGroup;
 			children = (
+				B371714D64A5750C2BDEE63E /* Caelyn.storekit */,
 				7B0FB055026A3276B28473FA /* Caelyn */,
 				39AB51C6DFF8B4371C985737 /* CaelynTests */,
 				A23CF008B9BBE106533A4FB5 /* CaelynUITests */,
@@ -762,6 +765,7 @@
 			buildConfigurationList = 01EB824E5304A6BD79A124AD /* Build configuration list for PBXNativeTarget "CaelynUITests" */;
 			buildPhases = (
 				656BD2A3CE3CE0BAB58723AF /* Sources */,
+				D859BB5EC56646864119B71B /* Resources */,
 			);
 			buildRules = (
 			);
@@ -893,6 +897,14 @@
 				7DBE433603812776A07CD9F5 /* Assets.xcassets in Resources */,
 				F3C14FB0136889C385D26B01 /* Preview Assets.xcassets in Resources */,
 				133751836219E19B8BB24B0A /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D859BB5EC56646864119B71B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F33E4593CC5C8724A2DD068A /* Caelyn.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1172,7 +1184,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1395,7 +1407,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;

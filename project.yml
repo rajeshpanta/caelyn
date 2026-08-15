@@ -22,7 +22,7 @@ settings:
     # highest number used anywhere so no upload can ever collide. Bump it before
     # every upload, and keep the widget/watch CFBundleVersion below identical — a
     # mismatch between the app and its embedded bundles trips ITMS-90473.
-    CURRENT_PROJECT_VERSION: 7
+    CURRENT_PROJECT_VERSION: 8
     DEVELOPMENT_TEAM: "7T9897GFKH"
 
 targets:
@@ -110,6 +110,14 @@ targets:
     platform: iOS
     sources:
       - path: CaelynUITests
+      # Bundled so ScreenshotTests can spin up an SKTestSession by name.
+      # xcodegen 2.45.4 drops the scheme's `test: storeKitConfiguration:` key
+      # (it only ever writes it into LaunchAction), so a UI test that relies on
+      # the scheme alone sees an empty StoreKit and the paywall renders its
+      # "couldn't load subscription options" state. Loading the config in-process
+      # sidesteps the scheme entirely.
+      - path: Caelyn.storekit
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: smallpanta-icould.com.caelynperiodtracker.uitests
@@ -130,7 +138,7 @@ targets:
       path: CaelynWidget/Info.plist
       properties:
         CFBundleDisplayName: CaelynWidget
-        CFBundleVersion: "7"
+        CFBundleVersion: "8"
         CFBundleShortVersionString: "1.0"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
@@ -169,7 +177,7 @@ targets:
       path: CaelynWatch/Info.plist
       properties:
         CFBundleDisplayName: Caelyn
-        CFBundleVersion: "7"
+        CFBundleVersion: "8"
         CFBundleShortVersionString: "1.0"
         WKApplication: true
         WKCompanionAppBundleIdentifier: smallpanta-icould.com.caelynperiodtracker

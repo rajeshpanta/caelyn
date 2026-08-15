@@ -1,4 +1,5 @@
 import XCTest
+import StoreKitTest
 
 /// App Store screenshot capture for Caelyn.
 ///
@@ -102,6 +103,50 @@ final class ScreenshotTests: XCTestCase {
         } else {
             snapshot("06_Settings_Fallback")
         }
+    }
+
+    // MARK: - 6b: Paywall scrolled to the priced tiers
+
+    /// App Store Connect's IAP review screenshot has to show the actual purchase
+    /// options. `test06_Paywall` stops at the top of the sheet, where the
+    /// free-vs-Pro table fills the screen and no price is visible, so this scrolls
+    /// down to the tier cards before capturing. Prices come from the local
+    /// `Caelyn.storekit` config wired into the scheme's `test` action.
+    func test06b_PaywallPricing() throws {
+        // Load the StoreKit config in-process rather than trusting the scheme —
+        // see the note on CaelynUITests' resources in project.yml.
+        let storeKit = try SKTestSession(configurationFileNamed: "Caelyn")
+        storeKit.disableDialogs = true
+        storeKit.clearTransactions()
+
+        app.terminate()
+        app.launchArguments = ["--screenshot-paywall"]
+        app.launch()
+        XCTAssertTrue(app.buttons["Home"].waitForExistence(timeout: 15))
+        sleep(1)
+        tap(tab: "Settings")
+        sleep(1)
+
+        let upgradeBtn = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS 'Unlock Caelyn Pro'")
+        ).firstMatch
+        XCTAssertTrue(upgradeBtn.waitForExistence(timeout: 5), "Settings should offer the paywall")
+        upgradeBtn.tap()
+        sleep(2)
+
+        // The tier cards sit just below the fold; one swipe brings all three plus
+        // the CTA into frame.
+        app.swipeUp()
+        sleep(1)
+
+        let perYear = app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS 'per year'")
+        ).firstMatch
+        XCTAssertTrue(
+            perYear.waitForExistence(timeout: 5),
+            "Priced tier cards should be on screen — if this fails the products did not load"
+        )
+        snapshot("06b_PaywallPricing")
     }
 
     // MARK: - Helpers

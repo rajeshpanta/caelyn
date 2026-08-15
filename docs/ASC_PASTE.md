@@ -3,8 +3,13 @@
 Everything here fits Apple's character limits and matches the shipping code
 (`Caelyn.storekit`, `PurchaseService.swift`, `project.yml`). Paste verbatim.
 
-Bundle ID: `smallpanta-icould.com.caelynperiodtracker`
-Version: 1.0 · Build: 7
+Bundle ID: `smallpanta-icould.com.caelynperiodtracker` (hyphen — bundle IDs allow it)
+Version: 1.0 · Build: 8
+
+IAP Product IDs use an **underscore**: App Store Connect rejects hyphens in
+product IDs ("Only alphanumeric characters, periods, and underscores are
+allowed"), so they cannot mirror the bundle ID exactly. Build 7 had the
+hyphenated IDs compiled in and is dead — build 8 is the first uploadable one.
 
 ---
 
@@ -155,19 +160,55 @@ Group description: `Caelyn Pro unlocks advanced pattern insights and PDF cycle r
 | | Monthly | Yearly | Lifetime |
 |---|---|---|---|
 | Type | Auto-renewable | Auto-renewable | Non-consumable |
-| Product ID | `smallpanta-icould.com.caelynperiodtracker.pro.monthly` | `smallpanta-icould.com.caelynperiodtracker.pro.yearly` | `smallpanta-icould.com.caelynperiodtracker.pro.lifetime` |
-| Reference name | `Caelyn Pro Monthly` | `Caelyn Pro Yearly` | `Caelyn Pro Lifetime` |
-| Display name | `Caelyn Pro · Monthly` | `Caelyn Pro · Yearly` | `Caelyn Pro · Lifetime` |
+| Product ID | `smallpanta_icould.com.caelynperiodtracker.pro.monthly` | `smallpanta_icould.com.caelynperiodtracker.pro.yearly` | `smallpanta_icould.com.caelynperiodtracker.pro.lifetime` |
+| Reference name (internal) | `Caelyn Pro Monthly` | `Caelyn Pro Yearly` | `Caelyn Pro Lifetime` |
+| Display name (30 max) | `Pro Monthly` | `Pro Yearly` | `Pro Lifetime` |
 | Duration | 1 month | 1 year | — |
-| Price | $3.99 | $19.99 | $99.99 |
+| Price (base, US) | $3.99 | $19.99 | $99.99 |
+| Price (Nepal) | $1.99 | $9.99 | $99.99 (no discount) |
 | Free trial | **1 week** | **NONE** | — |
 | Family Sharing | ON | ON | ON |
 | Rank in group | 1 (lowest) | 2 | — |
 
-Descriptions:
-- Monthly: `Monthly subscription to Caelyn Pro.`
-- Yearly: `Yearly subscription to Caelyn Pro. Best value.`
-- Lifetime: `One-time purchase. Caelyn Pro forever — no subscription, nothing in the cloud.`
+**Nepal pricing.** Subscriptions are discounted ~50% there; Lifetime is not, by
+choice — discounted markets are meant to convert to subscriptions. Yearly must
+stay at $9.99 rather than the auto-converted $19.99, otherwise the savings badge
+drops to SAVE 16%: `PurchaseService.savingsPercent` derives it from live
+storefront prices, so halving Monthly alone would gut the annual anchor in that
+one market. $9.99 against $1.99 reproduces the same 58% everywhere.
+
+Guardrail when adding storefronts: if any storefront ends up with
+`monthly × 12 ≤ yearly`, `savingsPercent` returns 0 and `PaywallView` falls back
+to a **"BEST VALUE"** badge on a plan that actually costs more than paying
+monthly. Apple's per-currency rounding can drift a storefront into that state
+without you touching it — spot-check the Yearly price table.
+
+IAP review screenshot — the same file for all three products, since all three
+sell from one screen:
+`screenshots/iPhone/06_Paywall.png` (the "Unlock Caelyn Pro" comparison table).
+Not a `screenshots/store/*` frame — those are captioned marketing art, and
+`07-get` is the Reminders screen, not the paywall.
+
+IAP review notes (same for all three):
+`Caelyn Pro unlocks advanced pattern insights, charts, the full year in review, TTC fertility dashboard, pregnancy and postpartum modes, condition modes, PDF clinical export, and medium/large/lock-screen widgets. Tap any locked Pro feature or open Settings to reach the paywall shown in the screenshot.`
+
+Descriptions — Connect shows a live *remaining*-character counter on this field
+(40 chars used left 15 remaining, so the cap is around 55). The Lifetime string
+in `Caelyn.storekit` is 77 characters and will not fit. Use these, which are
+also just clearer:
+- Monthly: `Full insights, charts and PDF reports.`
+- Yearly: `Everything in Pro. Best value per month.`
+- Lifetime: `Every Pro feature, forever. One payment.`
+
+Display names are short on purpose. Apple shows the Caelyn icon and the
+`Caelyn Pro` group header directly above them in Settings → Subscriptions, the
+purchase sheet, and receipts, so `Caelyn Pro · Monthly` would repeat both words.
+The paywall is unaffected either way — `PaywallView.swift` renders only
+`product.displayPrice` and hardcodes its own labels.
+
+Never put price, trial length, or "Save 58%" in a Display Name — Apple rejects
+promotional and pricing language there. iOS surfaces the trial automatically
+from the Introductory Offer.
 
 **Only Monthly has a free trial.** `Caelyn.storekit` defines the introductory
 offer on Monthly alone (commit f166e2b). The table in `APP_STORE_LISTING.md`
