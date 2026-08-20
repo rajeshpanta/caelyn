@@ -6,6 +6,49 @@ final class CaelynUITests: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
     }
 
+    /// Decline Apple's Health Access sheet, whatever iOS is calling the button
+    /// this year.
+    ///
+    /// The identifier is NOT stable across releases: this suite looked for
+    /// `UIA.Health.DoNotAllow.Button`, while iOS 18 ships
+    /// `UIA.Health.AuthSheet.CancelButton` labelled "Don't Allow" (with a curly
+    /// apostrophe). The tap therefore never landed, the sheet stayed open for
+    /// the whole timeout, and the test failed claiming onboarding had not
+    /// advanced — when in truth nobody had answered the sheet. A guard that
+    /// fails for its own reasons is worse than no guard, because the next
+    /// person reads the failure as the app being broken.
+    ///
+    /// Returns true if the sheet was found and dismissed.
+    @discardableResult
+    func declineHealthAccessSheet(in app: XCUIApplication, timeout: TimeInterval = 8) -> Bool {
+        let candidates = [
+            app.buttons["UIA.Health.AuthSheet.CancelButton"],
+            app.buttons["UIA.Health.DoNotAllow.Button"],
+        ]
+        var sheetButton: XCUIElement?
+        for candidate in candidates where candidate.waitForExistence(timeout: timeout / TimeInterval(candidates.count)) {
+            sheetButton = candidate
+            break
+        }
+        // Last resort: match the visible label, both apostrophe forms.
+        if sheetButton == nil {
+            for label in ["Don\u{2019}t Allow", "Don't Allow"] {
+                let byLabel = app.buttons[label]
+                if byLabel.waitForExistence(timeout: 2) { sheetButton = byLabel; break }
+            }
+        }
+        guard let button = sheetButton else { return false }
+        button.tap()
+
+        // Apple follows a decline with its own alert ("You can turn on health
+        // data categories later in the Health app."). requestAuthorization does
+        // not return until it is dismissed. Note that Apple says this itself —
+        // which is exactly why Caelyn must not repeat the instruction.
+        let ok = app.buttons["OK"]
+        if ok.waitForExistence(timeout: 5) { ok.tap() }
+        return true
+    }
+
     func testAppLaunches() throws {
         let app = XCUIApplication()
         app.launch()
@@ -75,15 +118,7 @@ final class CaelynUITests: XCTestCase {
             // HealthKit remembers the answer for the lifetime of the install, so on
             // a re-run the sheet is skipped — hence best-effort rather than an
             // assertion. The assertion that matters is that onboarding advances.
-            let denyHealth = app.buttons["UIA.Health.DoNotAllow.Button"]
-            if denyHealth.waitForExistence(timeout: 8) { denyHealth.tap() }
-
-            // Apple follows a decline with its own alert ("You can turn on health
-            // data categories later in the Health app."). requestAuthorization does
-            // not return until it is dismissed. Note that Apple says this itself —
-            // which is exactly why Caelyn must not repeat the instruction.
-            let healthAlertOK = app.buttons["OK"]
-            if healthAlertOK.waitForExistence(timeout: 5) { healthAlertOK.tap() }
+            declineHealthAccessSheet(in: app)
         }
 
         // Declining Health must not block anything — this is the regression guard
@@ -292,12 +327,7 @@ final class CaelynUITests: XCTestCase {
 
         app.buttons["Continue"].tap()
 
-        let deny = app.buttons["UIA.Health.DoNotAllow.Button"]
-        if deny.waitForExistence(timeout: 8) {
-            deny.tap()
-            let ok = app.buttons["OK"]
-            if ok.waitForExistence(timeout: 5) { ok.tap() }
-        }
+        declineHealthAccessSheet(in: app)
         sleep(2)
         capture("Health-Settings-AfterDecline", app: app)
 
