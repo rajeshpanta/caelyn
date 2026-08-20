@@ -205,7 +205,7 @@ struct AppGuideView: View {
             id: 5,
             icon: "gearshape.fill",
             title: "Settings · Stay in control",
-            body: "Adjust reminders and privacy, connect Apple Health, export a copy of your data, or permanently delete everything.",
+            body: "Adjust reminders and privacy, manage Apple Health sync, export a copy of your data, or permanently delete everything.",
             tint: CaelynColor.lavender
         )
     ]

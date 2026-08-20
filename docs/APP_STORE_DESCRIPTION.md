@@ -60,7 +60,7 @@ Unlimited logging, full predictions, the calendar, reminders, five pattern insig
 
 CAELYN PRO
 
-Every pattern Caelyn finds instead of the first five. Charts for cycle length, symptoms, mood, energy and temperature. A full twelve months in review. A PDF for your doctor. Fertility tracking if you are trying to conceive, plus pregnancy and postpartum modes. Modes for PCOS, endometriosis and perimenopause. Your cycle on your Apple Watch and lock screen.
+Every pattern Caelyn finds instead of the first five. Charts for cycle length, period length, symptoms, mood, pain and temperature. A full twelve months in review. A PDF for your doctor. Fertility tracking if you are trying to conceive, plus pregnancy and postpartum modes. Modes for PCOS, endometriosis and perimenopause. Your cycle on your Apple Watch and lock screen.
 
 Pro is 3.99 a month with a seven day free trial, or 19.99 a year. You can also pay once and own it forever. Whichever you pick, the privacy is identical. We charge for depth of analysis, never for keeping your data safe.
 
@@ -69,6 +69,8 @@ A NOTE ON WHAT THIS IS
 Caelyn is a personal cycle tracker, not a medical device. Predictions are estimates based on what you log, and they will sometimes be wrong. It should not be used as contraception. For anything that worries you, please talk to a doctor or nurse.
 
 Made for anyone who wants to understand their body without handing it over.
+Terms of Use:   https://rajeshpanta.github.io/caelyn/terms.html
+Privacy Policy: https://rajeshpanta.github.io/caelyn/privacy.html
 ```
 
 ## Keywords (100 char max, comma separated, no spaces after commas)
@@ -87,21 +89,25 @@ The first release of Caelyn. Everything works offline and stays on your iPhone.
 
 ## IMPORTANT before you paste
 
-The description says "You can also pay once and own it forever." That is only
-true if the Lifetime product ships. It is currently sitting at MISSING_METADATA
-in App Store Connect, so if you submit without finishing it, that sentence is an
-inaccurate claim and inaccurate metadata is a rejection reason on its own.
+**The free trial is real, on Monthly only.** Configured 2026-08-17 and verified
+against the App Store Connect API: subscription 6801665064 (Monthly) carries a
+FREE_TRIAL introductory offer of ONE_WEEK across 175 territories with no end
+date. Yearly 6801681697 has none, by design. Nothing in the binary needed to
+change — `PurchaseService.freeTrialLabel` reads the offer from StoreKit at
+runtime, so the paywall picks it up on its own. If that offer is ever deleted,
+strip the trial claim from the description, the App Review Notes and the three
+hosted pages in the same pass.
 
-If Lifetime is NOT shipping in 1.0, replace this line:
+**The two link lines at the end of the description are load-bearing.** Version
+1.0 was rejected under guideline 3.1.2 for having no functional Terms of Use
+(EULA) link in its metadata. The fix was appending those lines. They are part of
+the description block above — if you re-paste this file, keep them.
 
-    Pro is 3.99 a month with a seven day free trial, or 19.99 a year. You can
-    also pay once and own it forever. Whichever you pick, the privacy is
-    identical.
-
-with this one:
-
-    Pro is 3.99 a month with a seven day free trial, or 19.99 a year. Either
-    way the privacy is identical.
+**Lifetime is fine.** The non-consumable 6801689541 is IN_REVIEW, not
+MISSING_METADATA as an earlier draft of this file warned, so "You can also pay
+once and own it forever" is an accurate claim. `docs/ASC_PASTE.md` is an older,
+superseded draft of this listing and disagrees with this file in several places;
+this file is the source of truth.
 
 ## Every claim was checked against the code
 
@@ -115,4 +121,6 @@ with this one:
                      endometriosis and perimenopause
   watch and widgets  WidgetDataSync pushes snapshots for Pro; medium, large and
                      lock screen widgets check isPro
-  trial              seven days on Monthly only, Yearly has no intro offer
+  trial              seven days (ONE_WEEK) on Monthly only, 175 territories.
+                     Yearly has no introductory offer. Verified against the
+                     ASC API 2026-08-17.

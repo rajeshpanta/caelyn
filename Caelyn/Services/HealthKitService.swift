@@ -92,6 +92,19 @@ enum HealthKitService {
         return hasShareString && hasUpdateString
     }
 
+    /// Read-only authorization, for the onboarding import. That screen only ever
+    /// offers to READ existing history, so asking to write twelve categories there
+    /// (acne, pelvic pain, and the rest) is disproportionate to what it promises.
+    /// Writing is requested later, from Settings, where the user opts into sync.
+    static func requestReadAuthorization() async throws {
+        guard isAvailable else { throw HealthKitError.notAvailable }
+        do {
+            try await store.requestAuthorization(toShare: [], read: allReadableTypes)
+        } catch {
+            throw HealthKitError.authorizationFailed(error.localizedDescription)
+        }
+    }
+
     /// Trigger the iOS permission dialog for Caelyn's HK types.
     /// Apple does not tell us what the user picked; we proceed and gracefully handle write failures.
     static func requestAuthorization() async throws {

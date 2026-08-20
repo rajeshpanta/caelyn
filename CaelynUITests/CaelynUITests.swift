@@ -56,15 +56,46 @@ final class CaelynUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["What matters to you?"].waitForExistence(timeout: 5))
         tapButton("Looks good!", in: app)
 
-        if app.staticTexts["Sync with Apple Health?"].waitForExistence(timeout: 2) {
-            tapButton("Skip for now", in: app)
+        // App Review 5.1.1(iv): a single neutrally-labelled button that opens the
+        // system sheet, no grant-worded control, and no skip. Declining in Apple's
+        // sheet must still advance — that is the regression this guards.
+        if app.staticTexts["Import from Apple Health"].waitForExistence(timeout: 2) {
+            XCTAssertFalse(app.buttons["Skip for now"].exists,
+                           "The Health step must not frame declining as skipping.")
+            XCTAssertFalse(app.buttons["Connect Apple Health"].exists,
+                           "The button leading to the permission sheet must be neutrally labelled.")
+            capture("Onboarding-Apple-Health", app: app)
+            tapButton("Continue", in: app)
+
+            // Continue must open Apple's own Health Access sheet — that is the
+            // whole point of the 5.1.1(iv) fix. The sheet is a remote view inside
+            // the app's element tree, so it is driven directly rather than by an
+            // interruption monitor.
+            // On a genuinely fresh device this opens Apple's Health Access sheet.
+            // HealthKit remembers the answer for the lifetime of the install, so on
+            // a re-run the sheet is skipped — hence best-effort rather than an
+            // assertion. The assertion that matters is that onboarding advances.
+            let denyHealth = app.buttons["UIA.Health.DoNotAllow.Button"]
+            if denyHealth.waitForExistence(timeout: 8) { denyHealth.tap() }
+
+            // Apple follows a decline with its own alert ("You can turn on health
+            // data categories later in the Health app."). requestAuthorization does
+            // not return until it is dismissed. Note that Apple says this itself —
+            // which is exactly why Caelyn must not repeat the instruction.
+            let healthAlertOK = app.buttons["OK"]
+            if healthAlertOK.waitForExistence(timeout: 5) { healthAlertOK.tap() }
         }
 
-        XCTAssertTrue(app.staticTexts["Gentle reminders 🔔"].waitForExistence(timeout: 5))
+        // Declining Health must not block anything — this is the regression guard
+        // for the 5.1.1(iv) rejections.
+        XCTAssertTrue(app.staticTexts["Gentle reminders 🔔"].waitForExistence(timeout: 10),
+                      "Declining Apple Health must still advance onboarding.")
         tapButton("Continue", in: app)
 
         XCTAssertTrue(app.staticTexts["Keep Caelyn private 🔐"].waitForExistence(timeout: 5))
-        tapButton("Skip for now", in: app)
+        XCTAssertFalse(app.buttons["Skip for now"].exists,
+                       "The lock step must not frame declining as skipping.")
+        tapButton("Continue", in: app)
 
         XCTAssertTrue(app.staticTexts["You're all set! 🎉"].waitForExistence(timeout: 5))
         tapButton("Open Caelyn", in: app)
@@ -242,6 +273,40 @@ final class CaelynUITests: XCTestCase {
             "A populated user's deeper insights should remain reachable"
         )
         capture("Simulator-Daily-Journey-Insights", app: app)
+    }
+
+    /// Guards the screen App Review screenshotted for guideline 5.1.1(iv): the
+    /// control that opens the HealthKit sheet must be neutrally labelled, and
+    /// nothing on the screen — before or after the user declines — may direct
+    /// them to go and grant access.
+    func testHealthSettingsNeverDirectsUserToGrantAccess() throws {
+        let app = launchSeeded()
+        tapTab("Settings", in: app)
+        openSetting("Apple Health", in: app, expects: "Apple Health")
+
+        XCTAssertTrue(app.staticTexts["Sync with Apple Health"].waitForExistence(timeout: 4))
+        XCTAssertFalse(app.buttons["Connect Apple Health"].exists,
+                       "The control opening the permission sheet must be neutrally labelled.")
+        XCTAssertTrue(app.buttons["Continue"].exists, "Expected a neutral Continue button.")
+        capture("Health-Settings-Before", app: app)
+
+        app.buttons["Continue"].tap()
+
+        let deny = app.buttons["UIA.Health.DoNotAllow.Button"]
+        if deny.waitForExistence(timeout: 8) {
+            deny.tap()
+            let ok = app.buttons["OK"]
+            if ok.waitForExistence(timeout: 5) { ok.tap() }
+        }
+        sleep(2)
+        capture("Health-Settings-AfterDecline", app: app)
+
+        // The wording that got build 9 rejected, in the state nobody had opened.
+        for banned in ["Apple Health access was denied. Enable it in iOS Settings → Privacy & Security → Health.",
+                       "Enable access in iOS Settings → Health anytime."] {
+            XCTAssertFalse(app.staticTexts[banned].exists,
+                           "Declining must not produce copy directing the user to grant access: \(banned)")
+        }
     }
 
     /// Opens and operates each user-facing Settings destination that can run

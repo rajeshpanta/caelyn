@@ -44,14 +44,14 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 ### A4. HealthKit Integration (Onboarding)
 
 - [ ] **Apple Health opt-in screen** — shown before biometrics setup.
-  - **Expected:** Devices without HealthKit skip this screen. Supported iPhones show "Connect Apple Health" and "Skip for now".
+  - **Expected:** Devices without HealthKit skip this screen. Supported iPhones show a single neutral "Continue" button and NO skip control (App Review 5.1.1(iv)).
 
-- [ ] **Tap "Connect Apple Health"** (supported iPhone only):
+- [ ] **Tap "Continue"** (supported iPhone only) — it must open Apple's own Health Access sheet:
   - [ ] iOS permission prompt appears.
   - [ ] Grant read access to menstrual flow and wrist temperature; grant write access to menstrual flow, symptoms, and pain.
   - **Expected:** The screen confirms Apple Health is connected and, when history exists, reports the number of imported cycles.
 
-- [ ] **Tap "Skip for now"** → advances without importing.
+- [ ] **Decline in Apple's sheet** → onboarding must still advance, and no in-app message may tell you to go enable access.
   - **Expected:** No error; onboarding continues.
 
 ### A5. App Lock Choice
@@ -62,7 +62,7 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 - [ ] **Tap "Enable Face ID"** (or the device's equivalent), then "Continue".
   - **Expected:** The screen changes to show that lock is on. After onboarding completes, the app requests authentication when the lock gate becomes active.
 
-- [ ] **Alternatively, tap "Skip for now"**.
+- [ ] **Grant READ access only** in Apple's sheet → the app must treat this as connected and still run the history import. It must never report a denial.
   - **Expected:** Onboarding continues without a permission prompt. A separate App PIN can be configured later in Settings → Privacy.
 
 ### A6. Onboarding Completion
@@ -345,10 +345,11 @@ A tap-by-tap checklist for testing Caelyn on real devices before App Store submi
 
 ### E1. Health Permissions Request
 
-- [ ] **Settings → Apple Health → "Connect Apple Health"**.
+- [ ] **Settings → Apple Health → "Continue"**.
   - **Expected:** The iOS permission sheet asks to read menstrual flow and wrist temperature, and to write menstrual flow, supported symptoms, and pain.
   - [ ] Grant: The sheet dismisses and the screen shows Connected.
-  - [ ] Deny menstrual-flow write access: the app explains that access was denied and points to iOS Settings; it does not crash.
+  - [ ] Deny access: the screen states plainly that Caelyn uses only what you allowed. It must NOT say access was denied and must NOT instruct you to enable it — that copy is what got build 9 rejected under 5.1.1(iv).
+  - [ ] Grant flow but NOT symptoms: still reported as connected, never as denied.
 
 - [ ] **After connecting, review Caelyn's three sync toggles**: write flow, read flow, and write symptoms.
   - **Expected:** These control which already-authorized operations Caelyn performs. iOS remains the source of truth for category permission.

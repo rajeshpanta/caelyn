@@ -110,9 +110,9 @@ final class OnboardingViewModel {
             isPro: false
         )
         if healthKitConnected {
+            // Onboarding asks for READ only. Writing is granted later, from
+            // Settings, so flagging writes on here would make them fail silently.
             profile.hkReadFlow = true
-            profile.hkWriteFlow = true
-            profile.hkWriteSymptoms = true
         }
         modelContext.insert(profile)
         modelContext.saveOrLog()

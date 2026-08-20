@@ -1184,7 +1184,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 11;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1222,8 +1222,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads menstrual flow history and Apple Watch wrist temperature from Apple Health to improve cycle predictions when you choose to connect.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads your existing period history from Apple Health so your predictions start from real cycles instead of an average — for example, importing the last six periods you logged elsewhere so Caelyn can estimate your next one on day one. It also reads Apple Watch sleeping wrist temperature, if you have it, to confirm afterwards when ovulation likely happened. This data stays on your iPhone.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Caelyn saves what you log back to Apple Health so other apps you use can see it — for example, logging a heavy flow day and cramps in Caelyn makes them appear in the Health app's Cycle Tracking alongside everything else. You choose which of these Caelyn writes, and you can turn it off at any time.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -1300,8 +1300,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads menstrual flow history and Apple Watch wrist temperature from Apple Health to improve cycle predictions when you choose to connect.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Caelyn writes your menstrual flow and symptoms to Apple Health when you choose to.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads your existing period history from Apple Health so your predictions start from real cycles instead of an average — for example, importing the last six periods you logged elsewhere so Caelyn can estimate your next one on day one. It also reads Apple Watch sleeping wrist temperature, if you have it, to confirm afterwards when ovulation likely happened. This data stays on your iPhone.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Caelyn saves what you log back to Apple Health so other apps you use can see it — for example, logging a heavy flow day and cramps in Caelyn makes them appear in the Health app's Cycle Tracking alongside everything else. You choose which of these Caelyn writes, and you can turn it off at any time.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -1407,7 +1407,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 11;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;

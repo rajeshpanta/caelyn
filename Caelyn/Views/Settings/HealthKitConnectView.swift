@@ -85,16 +85,16 @@ private struct HealthKitConnectForm: View {
 
     private var connectSection: some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
-            sectionTitle("What we'll ask for")
-            VStack(spacing: CaelynSpacing.xs) {
-                whatRow("drop.fill", "Menstrual flow", "Import history or write new flow logs")
-                whatRow("sparkles", "Symptoms and pain", "Write the symptoms you log in Caelyn")
-                whatRow("thermometer.medium", "Wrist temperature", "Read Apple Watch sleeping temperature")
-            }
+            // Apple's HealthKit HIG: "Avoid adding custom screens that replicate
+            // the standard permission screen's behavior or content." Apple's sheet
+            // lists every data type with its own toggle — duplicating that list here
+            // is the thing the guideline names.
+            // App Review 5.1.1(iv): Apple rejected this screen for labelling the
+            // button with the grant action. The explanatory copy above is allowed;
+            // the control that opens the system sheet must read neutrally.
             CaelynButton(
-                title: isAuthorizing ? "Connecting…" : (HealthKitService.isAvailable ? "Connect Apple Health" : "Unavailable on this device"),
-                variant: .primary,
-                icon: "heart.text.square"
+                title: HealthKitService.isAvailable ? "Continue" : "Unavailable on this device",
+                variant: .primary
             ) {
                 Task { await connect() }
             }
@@ -104,24 +104,6 @@ private struct HealthKitConnectForm: View {
                     .font(CaelynFont.subheadline)
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                     .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-    }
-
-    private func whatRow(_ icon: String, _ title: String, _ subtitle: String) -> some View {
-        CaelynCard(padding: CaelynSpacing.md) {
-            HStack(spacing: CaelynSpacing.sm) {
-                ZStack {
-                    Circle().fill(CaelynColor.lavender).frame(width: CaelynIconSize.lg, height: CaelynIconSize.lg)
-                    Image(systemName: icon)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(CaelynColor.primaryPlum)
-                }
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title).font(CaelynFont.body).foregroundStyle(CaelynColor.deepPlumText)
-                    Text(subtitle).font(CaelynFont.subheadline).foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
-                }
-                Spacer(minLength: 0)
             }
         }
     }
@@ -257,20 +239,18 @@ private struct HealthKitConnectForm: View {
         defer { isAuthorizing = false }
         do {
             try await HealthKitService.requestAuthorization()
-            // Only mark as connected if the user actually granted write access.
-            // Apple's API always succeeds (it silently records denial), so we
-            // probe the authorization status directly afterwards.
-            let authorized = HealthKitService.canWriteMenstrualFlow()
-            profile.healthKitConnected = authorized
-            if authorized {
-                profile.hkWriteFlow = true
-                profile.hkWriteSymptoms = true
-                modelContext.saveOrLog()
-                statusBanner = .success("Connected. Choose what to sync below.")
-            } else {
-                modelContext.saveOrLog()
-                statusBanner = .error("Apple Health access was denied. Enable it in iOS Settings → Privacy & Security → Health.")
-            }
+            // Apple's sheet is the consent record. HealthKit never reports read
+            // authorization, and the sheet lets people enable writes selectively,
+            // so a write probe cannot distinguish "declined" from "granted read
+            // only". Never infer a denial from it — individual writes no-op
+            // harmlessly — and never tell people to go turn something on.
+            let canWrite = HealthKitService.canWriteMenstrualFlow()
+            profile.healthKitConnected = true
+            profile.hkWriteFlow = canWrite
+            profile.hkWriteSymptoms = canWrite
+            profile.hkReadFlow = true
+            modelContext.saveOrLog()
+            statusBanner = .success("Your choices are saved. Caelyn uses only what you allowed, and you can change that any time in iOS Settings → Privacy & Security → Health.")
         } catch {
             statusBanner = .error("Couldn't connect — \(error.localizedDescription)")
         }

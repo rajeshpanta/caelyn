@@ -674,30 +674,21 @@ struct LockStep: View {
                     }
                 }
 
+                // App Review 5.1.1(iv): the same opt-in toggle plus single neutral
+                // Continue that the reminders step uses. No "Enable X" against a
+                // demoted "Skip for now" — that pairing is what Apple objected to.
                 let biometricName = BiometricService.availableKind() == .none ? "Lock" : BiometricService.availableKind().displayName
-                Text(vm.enableLock ? "\(biometricName) is on 🔒" : "\(biometricName) is off")
-                    .font(CaelynFont.headline)
-                    .foregroundStyle(CaelynColor.deepPlumText)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .contentTransition(.identity)
+                ToggleCard(
+                    title: "Require \(biometricName)",
+                    subtitle: "Only you can open Caelyn. Change this anytime in Settings.",
+                    icon: BiometricService.availableKind() == .none ? "lock.fill" : BiometricService.availableKind().icon,
+                    isOn: $vm.enableLock
+                )
+                .staggeredAppear(delay: 0.30)
             }
         } footer: {
-            VStack(spacing: CaelynSpacing.xs) {
-                let biometricName = BiometricService.availableKind() == .none ? "Lock" : BiometricService.availableKind().displayName
-                CaelynButton(
-                    title: vm.enableLock ? "Continue" : "Enable \(biometricName)",
-                    variant: .primary
-                ) {
-                    if vm.enableLock { vm.next() }
-                    else { vm.enableLock = true }
-                }
-                CaelynButton(
-                    title: vm.enableLock ? "Turn off \(biometricName)" : "Skip for now",
-                    variant: .tertiary
-                ) {
-                    if vm.enableLock { vm.enableLock = false }
-                    else { vm.next() }
-                }
+            CaelynButton(title: "Continue", variant: .primary) {
+                vm.next()
             }
         }
     }
@@ -868,17 +859,15 @@ struct HealthStep: View {
         OnboardingScaffold(
             icon: "heart.text.square.fill",
             iconColor: CaelynColor.alertRose,
-            title: "Sync with Apple Health?",
-            subtitle: "Import existing period logs and optionally share new flow and symptoms with Apple Health. You can skip this and connect later."
+            title: "Import from Apple Health",
+            subtitle: "If you have period history in Apple Health, Caelyn can read it so your predictions start from real cycles. Continue and Apple will ask what you want to share. You can change it at any time in Settings."
         ) {
+            // The data types Caelyn asks for are deliberately NOT listed here.
+            // Apple's HealthKit HIG: "Avoid adding custom screens that replicate the
+            // standard permission screen's behavior or content." Apple's own sheet
+            // enumerates every type with a toggle; the explanation of why belongs in
+            // NSHealthShareUsageDescription, which renders inside that sheet.
             VStack(spacing: CaelynSpacing.sm) {
-                healthRow(icon: "drop.fill",  title: "Menstrual flow",
-                          body: "Reads and writes period data to Health.")
-                    .staggeredAppear(delay: 0.30)
-                healthRow(icon: "sparkles",   title: "Symptoms",
-                          body: "Shares symptoms you log with Apple Health.")
-                    .staggeredAppear(delay: 0.38)
-
                 if connected {
                     CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.successSage.opacity(0.12)) {
                         HStack(alignment: .top, spacing: 8) {
@@ -904,32 +893,17 @@ struct HealthStep: View {
                             }
                         }
                     }
-                } else if denied {
-                    CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.alertRose.opacity(0.10)) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "info.circle")
-                                .foregroundStyle(CaelynColor.alertRose)
-                            Text("Enable access in iOS Settings → Health anytime.")
-                                .font(CaelynFont.caption)
-                                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
                 }
             }
         } footer: {
-            VStack(spacing: CaelynSpacing.xs) {
-                if !connected && !denied {
-                    CaelynButton(
-                        title: isConnecting ? "Connecting…" : "Connect Apple Health",
-                        variant: .primary,
-                        icon: "heart.text.square"
-                    ) {
-                        Task { await connect() }
-                    }
-                    .disabled(isConnecting)
-                }
-                CaelynButton(title: connected ? "Continue" : "Skip for now", variant: connected ? .primary : .tertiary) {
+            // App Review 5.1.1(iv): the control that leads to the system
+            // permission sheet must be neutrally labelled. It says "Continue",
+            // never names the grant, and always advances afterwards — whatever
+            // the user chooses inside Apple's own sheet.
+            CaelynButton(title: "Continue", variant: .primary) {
+                guard !isConnecting else { return }
+                Task {
+                    if !connected && !denied { await connect() }
                     vm.next()
                 }
             }
@@ -944,38 +918,18 @@ struct HealthStep: View {
         }
     }
 
-    private func healthRow(icon: String, title: String, body: String) -> some View {
-        CaelynCard(padding: CaelynSpacing.md) {
-            HStack(spacing: CaelynSpacing.sm) {
-                ZStack {
-                    Circle().fill(CaelynColor.alertRose.opacity(0.12)).frame(width: CaelynIconSize.lg, height: CaelynIconSize.lg)
-                    Image(systemName: icon)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(CaelynColor.alertRose)
-                }
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title).font(CaelynFont.body).foregroundStyle(CaelynColor.deepPlumText)
-                    Text(body).font(CaelynFont.subheadline).foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 0)
-            }
-        }
-    }
-
     private func connect() async {
         isConnecting = true
         defer { isConnecting = false }
         do {
-            try await HealthKitService.requestAuthorization()
-            let granted = HealthKitService.canWriteMenstrualFlow()
-            if granted {
-                vm.healthKitConnected = true
-                connected = true
-                await importHistory()
-            } else {
-                denied = true
-            }
+            try await HealthKitService.requestReadAuthorization()
+            // HealthKit never reports read authorization, so gating on the write
+            // probe throws away a valid read grant and skips the history import
+            // this step exists for. A thrown error is a real failure; a quiet
+            // partial grant is not.
+            vm.healthKitConnected = true
+            connected = true
+            await importHistory()
         } catch {
             denied = true
         }
