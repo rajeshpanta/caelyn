@@ -71,13 +71,5 @@ struct HomeHeader: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    private var greetingEmoji: String {
-        let hour = Calendar.current.component(.hour, from: .now)
-        switch hour {
-        case 5..<12:  return "☀️"
-        case 12..<17: return "🌸"
-        case 17..<22: return "🌙"
-        default:      return "✨"
-        }
-    }
+    private var greetingEmoji: String { HomeCopy.greetingEmoji() }
 }

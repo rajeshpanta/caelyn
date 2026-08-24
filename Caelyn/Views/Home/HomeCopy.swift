@@ -2,13 +2,33 @@ import Foundation
 
 enum HomeCopy {
     static func greeting(for date: Date = .now) -> String {
-        let hour = Calendar.current.component(.hour, from: date)
-        switch hour {
+        switch hour(from: date) {
         case 5..<12:  return "Good morning"
         case 12..<17: return "Hey there"
         case 17..<22: return "Good evening"
         default:      return "Late evening"
         }
+    }
+
+    static func greetingEmoji(for date: Date = .now) -> String {
+        switch hour(from: date) {
+        case 5..<12:  return "\u{2600}\u{FE0F}"
+        case 12..<17: return "\u{1F338}"
+        case 17..<22: return "\u{1F319}"
+        default:      return "\u{2728}"
+        }
+    }
+
+    /// The hour the greeting should speak from.
+    ///
+    /// Store capture pins the status bar to 9:41 (`simctl status_bar override`),
+    /// but the greeting reads the real clock — so a session recorded at 1am
+    /// opened with "Late evening \u{2728}" above a 9:41 status bar, in the one
+    /// asset people judge the app by. Under `--screenshot-mode` the greeting
+    /// agrees with the pinned clock; every real launch still reads the device.
+    private static func hour(from date: Date) -> Int {
+        if CommandLine.arguments.contains("--screenshot-mode") { return 9 }
+        return Calendar.current.component(.hour, from: date)
     }
 
     static func headlinePrediction(daysUntilPeriod: Int) -> String {

@@ -22,6 +22,7 @@
 		133751836219E19B8BB24B0A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 884D8350457334717AFDE17B /* PrivacyInfo.xcprivacy */; };
 		14690102084C6BB10D47DA61 /* MonthGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F67174E0AA8DF3F4111B5DF /* MonthGridView.swift */; };
 		14FC48433AA3511A592FBFE6 /* Spacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D237A741F754AC1F6FD0AC64 /* Spacing.swift */; };
+		16FE16578D028ADFBD697853 /* PreviewTourTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5572EE8D45251ECD6306F44 /* PreviewTourTests.swift */; };
 		17A3409231A1A3244C342F0E /* NotificationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 483D4ABE3B0FBDCFACE74186 /* NotificationRouter.swift */; };
 		1B58EF2925278DA567C2F08F /* YearViewSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B841A4EB3CB7F77C77BD3E /* YearViewSection.swift */; };
 		1C566289B10118DEA3ABDCFA /* HealthKitConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1525588F818995E2E60CF533 /* HealthKitConnectView.swift */; };
@@ -343,6 +344,7 @@
 		F19182C4F23C467AC50DDED0 /* SettingsRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRows.swift; sourceTree = "<group>"; };
 		F217396A66FD507CDBD109BA /* HomeComingUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeComingUp.swift; sourceTree = "<group>"; };
 		F482876413250EE67CC8E266 /* PrivacyChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyChip.swift; sourceTree = "<group>"; };
+		F5572EE8D45251ECD6306F44 /* PreviewTourTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewTourTests.swift; sourceTree = "<group>"; };
 		F703D1FBCAA2E9C6A61BF8E4 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		F7110E218D7376F63A078A1C /* CaelynCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynCard.swift; sourceTree = "<group>"; };
 		F727008BDD9FE097F46B549E /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -665,6 +667,7 @@
 			children = (
 				820D9BF9B360C1A5531E053E /* CaelynUITests.swift */,
 				1627592A44213DFBF0ADE392 /* CaelynUITestsLaunchTests.swift */,
+				F5572EE8D45251ECD6306F44 /* PreviewTourTests.swift */,
 				5FDEAAC04C4AD4BB528B0A16 /* ScreenshotTests.swift */,
 			);
 			path = CaelynUITests;
@@ -936,6 +939,7 @@
 			files = (
 				6CA673EF60F6E08D1F1D4BB0 /* CaelynUITests.swift in Sources */,
 				692E4812E610E9093A97A8F0 /* CaelynUITestsLaunchTests.swift in Sources */,
+				16FE16578D028ADFBD697853 /* PreviewTourTests.swift in Sources */,
 				F3D1457395679EE77357C274 /* ScreenshotTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
