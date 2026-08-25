@@ -81,23 +81,25 @@ enum GenericTableSource: ImportSource {
         // what catches real-world spellings like "Period Intensity" or
         // "Basal temperature (C)". A column already claimed by another field is
         // never taken twice.
-        var columnFor: [String: Int] = [:]
+        var columnFor: [String: Int] = ["date": dateIndex]
         var taken: Set<Int> = [dateIndex]
+
+        func claim(_ field: String, where matches: (String) -> Bool) {
+            guard columnFor[field] == nil,
+                  let index = headers.indices.first(where: { !taken.contains($0) && matches(headers[$0]) })
+            else { return }
+            columnFor[field] = index
+            taken.insert(index)
+        }
+
+        // Exact header names first, across every field, so a file that spells a
+        // column exactly right never loses it to another field's loose match.
         for (field, names) in aliases where field != "date" {
-            guard let index = headers.firstIndex(where: { names.contains($0) && !taken.contains(headers.firstIndex(of: $0) ?? -1) })
-                    ?? headers.indices.first(where: { !taken.contains($0) && names.contains(headers[$0]) })
-            else { continue }
-            columnFor[field] = index
-            taken.insert(index)
+            claim(field) { names.contains($0) }
         }
-        for (field, names) in aliases where field != "date" && columnFor[field] == nil {
-            guard let index = headers.indices.first(where: { position in
-                !taken.contains(position) && names.contains(where: { headers[position].contains($0) })
-            }) else { continue }
-            columnFor[field] = index
-            taken.insert(index)
+        for (field, names) in aliases where field != "date" {
+            claim(field) { header in names.contains { header.contains($0) } }
         }
-        columnFor["date"] = dateIndex
 
         var result = ParsedImport()
 

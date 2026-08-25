@@ -22,13 +22,17 @@ struct ImportPayload {
 
     /// UTF-8 first, then the encodings a spreadsheet export realistically uses.
     /// Nil means the file is not text at all — a PDF, an image, a zip.
-    private(set) lazy var text: String? = {
+    private(set) lazy var text: String? = decodedText()
+
+    /// Non-lazy so the other lazy properties can use it without needing a mutable
+    /// copy of `self` to touch `text` mid-initialisation.
+    private func decodedText() -> String? {
         if let utf8 = String(data: data, encoding: .utf8) { return stripBOM(utf8) }
         for encoding: String.Encoding in [.utf16, .isoLatin1, .windowsCP1252] {
             if let decoded = String(data: data, encoding: encoding) { return stripBOM(decoded) }
         }
         return nil
-    }()
+    }
 
     private func stripBOM(_ string: String) -> String {
         string.hasPrefix("\u{FEFF}") ? String(string.dropFirst()) : string
@@ -43,15 +47,15 @@ struct ImportPayload {
 
     /// Rows including the header, RFC 4180 parsed. Nil when the file isn't text.
     private(set) lazy var csvRows: [[String]]? = {
-        guard var copy = Optional(self), let text = copy.text, !looksLikeJSON else { return nil }
+        guard !looksLikeJSON, let text = decodedText() else { return nil }
         let rows = CSVReader.parse(text)
         return rows.isEmpty ? nil : rows
     }()
 
     /// Header row, trimmed and lowercased — the shape most detectors match on.
     private(set) lazy var csvHeaders: [String] = {
-        var copy = self
-        guard let rows = copy.csvRows, let header = rows.first else { return [] }
+        guard !looksLikeJSON, let text = decodedText(),
+              let header = CSVReader.parse(text).first else { return [] }
         return header.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
     }()
 
