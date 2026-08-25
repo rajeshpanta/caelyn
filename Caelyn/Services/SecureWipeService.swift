@@ -35,6 +35,11 @@ enum SecureWipeService {
         // 5. Remove app-lock secrets and failed-attempt state from the Keychain.
         PINService.clearAll()
 
+        // 5b. Drop the Apple Health provenance ledger and sync anchors. They hold
+        //     no readings, but they do record which days carried which kinds of
+        //     data — that is residue, and a wipe must not leave residue.
+        HealthSyncService.forgetSyncState()
+
         // 6. Reset preference flags so the next onboarding is genuinely fresh.
         let defaults = UserDefaults.standard
         for key in [

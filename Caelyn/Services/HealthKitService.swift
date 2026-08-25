@@ -21,6 +21,9 @@ enum HealthKitError: Error, LocalizedError {
 struct ImportResult {
     let entriesCreated: Int
     let entriesUpdated: Int
+    /// Values Apple Health also had, where Caelyn kept what she had logged
+    /// herself. Reported so an import can be honest about what it left alone.
+    var keptYourValue: Int = 0
     var total: Int { entriesCreated + entriesUpdated }
 }
 
@@ -31,6 +34,11 @@ enum HealthKitService {
     // designed to be shared across those callbacks, so this reference must not
     // inherit the service's MainActor isolation.
     nonisolated private static let store = HKHealthStore()
+
+    /// The same store, for the read pipeline in `Services/Health/`. Exposed rather
+    /// than duplicated: `HKHealthStore` is designed to be shared, and two stores
+    /// would mean two independent authorization caches.
+    nonisolated static var sharedStore: HKHealthStore { store }
 
     // MARK: - Type catalog
 
@@ -69,14 +77,11 @@ enum HealthKitService {
         return set
     }
 
+    /// Everything Caelyn asks to read. Defined by `HealthDataCatalog`, which is
+    /// also what the merge engine maps from — so a type can never be requested
+    /// without somewhere for its values to land.
     static var allReadableTypes: Set<HKObjectType> {
-        var set: Set<HKObjectType> = [menstrualFlowType]
-        // Apple Watch sleeping wrist temperature, for retrospective ovulation
-        // confirmation (int-3). Read-only.
-        if let wrist = HKObjectType.quantityType(forIdentifier: .appleSleepingWristTemperature) {
-            set.insert(wrist)
-        }
-        return set
+        HealthDataCatalog.allReadTypes
     }
 
     // MARK: - Availability + Auth
@@ -355,33 +360,43 @@ enum HealthKitService {
 
     // MARK: - Import: Health → Caelyn
 
-    /// Read flow samples from Health and create or update Caelyn CycleEntries.
+    /// Import her period history from Apple Health.
+    ///
+    /// Delegates to the merge engine rather than writing directly, which is what
+    /// makes it safe: a day she has already logged herself is never overwritten by
+    /// whatever another app put in Health for the same day. Caelyn's own past
+    /// samples are accepted here on purpose — after a reinstall they are the only
+    /// surviving copy of her history.
     @discardableResult
-    static func importFlowFromHealth(into context: ModelContext) async throws -> ImportResult {
+    static func importFlowFromHealth(
+        into context: ModelContext,
+        ledger: HealthSyncLedger = .shared,
+        calendar: Calendar = .current,
+        today: Date = .now
+    ) async throws -> ImportResult {
         guard isAvailable else { throw HealthKitError.notAvailable }
         let samples = try await fetchAllMenstrualFlowSamples()
-        let cal = Calendar.current
-        let existing = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
-        var created = 0
-        var updated = 0
+        let observations = samples.compactMap { HealthDataCatalog.observation(from: $0, calendar: calendar) }
 
-        for sample in samples {
-            let day = cal.startOfDay(for: sample.startDate)
-            guard let caelynFlow = caelynFlow(fromSample: sample) else { continue }
-            if let entry = existing.first(where: { cal.isDate($0.date, inSameDayAs: day) }) {
-                if entry.flow != caelynFlow {
-                    entry.flow = caelynFlow
-                    entry.updatedAt = .now
-                    updated += 1
-                }
-            } else {
-                let entry = CycleEntry(date: day, flow: caelynFlow)
-                context.insert(entry)
-                created += 1
-            }
-        }
-        context.saveOrLog()
-        return ImportResult(entriesCreated: created, entriesUpdated: updated)
+        let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
+        var byDay: [Date: CycleEntry] = [:]
+        for entry in entries { byDay[calendar.startOfDay(for: entry.date)] = entry }
+
+        let decisions = HealthImportReconciler.plan(
+            observations: observations,
+            currentValue: { day, field in byDay[calendar.startOfDay(for: day)]?.value(for: field) },
+            ledger: ledger,
+            ownBundleID: Bundle.main.bundleIdentifier ?? "",
+            acceptOwnSource: true,
+            calendar: calendar,
+            today: today
+        )
+        let summary = HealthImportReconciler.commit(decisions, into: context, ledger: ledger, calendar: calendar)
+        return ImportResult(
+            entriesCreated: summary.filled,
+            entriesUpdated: summary.updated,
+            keptYourValue: summary.keptUserValue
+        )
     }
 
     private static func fetchAllMenstrualFlowSamples() async throws -> [HKCategorySample] {
@@ -405,7 +420,9 @@ enum HealthKitService {
 
     // MARK: - Mapping helpers (internal — exposed for tests)
 
-    private static let metadataFlowLevelKey = "CaelynFlowLevel"
+    /// Same constant the read side matches on. Defined once, in the catalog, so
+    /// the two halves of the round trip cannot drift apart.
+    private static let metadataFlowLevelKey = HealthDataCatalog.flowLevelMetadataKey
 
     static func makeFlowSample(date: Date, flow: FlowLevel, isCycleStart: Bool) -> HKCategorySample {
         let value = mapFlowToHK(flow)

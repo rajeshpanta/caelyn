@@ -42,6 +42,10 @@ struct CaelynApp: App {
             if newPhase == .active && !Self.isScreenshotMode && !Self.isOnboardingUITest {
                 Task { await NotificationService.syncFromLiveStore() }
                 Task { await PurchaseService.shared.loadProducts() }
+                // Pick up anything other apps wrote to Apple Health while Caelyn
+                // was closed. No-op unless she has connected and left a read
+                // toggle on.
+                Task { await HealthSyncService.syncOnForeground() }
             }
         }
     }

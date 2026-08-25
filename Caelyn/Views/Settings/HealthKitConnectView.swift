@@ -132,6 +132,18 @@ private struct HealthKitConnectForm: View {
                     icon: "sparkles",
                     isOn: bind(\.hkWriteSymptoms)
                 )
+                ToggleCard(
+                    title: "Read symptoms from Health",
+                    subtitle: "Bring in symptoms and pain logged in other apps.",
+                    icon: "sparkles.rectangle.stack",
+                    isOn: bind(\.hkReadSymptoms)
+                )
+                ToggleCard(
+                    title: "Read fertility signals",
+                    subtitle: "Temperature, cervical mucus, ovulation and pregnancy tests.",
+                    icon: "thermometer.medium",
+                    isOn: bind(\.hkReadFertility)
+                )
             }
         }
     }
@@ -151,13 +163,13 @@ private struct HealthKitConnectForm: View {
             .disabled(isBackfilling || !(profile.hkWriteFlow || profile.hkWriteSymptoms))
 
             CaelynButton(
-                title: isImporting ? "Importing…" : "Import flow logs from Health",
+                title: isImporting ? "Importing…" : "Bring my history from Health",
                 variant: .secondary,
                 icon: "arrow.down.heart"
             ) {
                 Task { await runImport() }
             }
-            .disabled(isImporting || !profile.hkReadFlow)
+            .disabled(isImporting || !anyReadEnabled)
         }
     }
 
@@ -249,6 +261,8 @@ private struct HealthKitConnectForm: View {
             profile.hkWriteFlow = canWrite
             profile.hkWriteSymptoms = canWrite
             profile.hkReadFlow = true
+            profile.hkReadSymptoms = true
+            profile.hkReadFertility = true
             modelContext.saveOrLog()
             statusBanner = .success("Your choices are saved. Caelyn uses only what you allowed, and you can change that any time in iOS Settings → Privacy & Security → Health.")
         } catch {
@@ -262,6 +276,10 @@ private struct HealthKitConnectForm: View {
         profile.hkWriteFlow = false
         profile.hkReadSymptoms = false
         profile.hkWriteSymptoms = false
+        profile.hkReadFertility = false
+        // Forget which values came from Health, so a later reconnect treats
+        // everything in her log as hers and can only add to it.
+        HealthSyncService.forgetSyncState()
         modelContext.saveOrLog()
         statusBanner = .success("Disconnected.")
     }
@@ -284,19 +302,15 @@ private struct HealthKitConnectForm: View {
         }
     }
 
+    private var anyReadEnabled: Bool {
+        profile.hkReadFlow || profile.hkReadSymptoms || profile.hkReadFertility
+    }
+
     private func runImport() async {
         isImporting = true
         defer { isImporting = false }
-        do {
-            let result = try await HealthKitService.importFlowFromHealth(into: modelContext)
-            if result.total == 0 {
-                statusBanner = .success("No new flow data found in Apple Health.")
-            } else {
-                statusBanner = .success("Imported \(result.entriesCreated) new and updated \(result.entriesUpdated) days.")
-            }
-        } catch {
-            statusBanner = .error("Couldn't import — \(error.localizedDescription)")
-        }
+        let summary = await HealthSyncService.run(mode: .fullImport, profile: profile, context: modelContext)
+        statusBanner = .success(HealthSyncCopy.importResult(summary))
     }
 }
 

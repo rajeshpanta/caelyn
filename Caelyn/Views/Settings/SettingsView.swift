@@ -450,6 +450,10 @@ struct SettingsView: View {
         profile.hkWriteFlow = false
         profile.hkReadSymptoms = false
         profile.hkWriteSymptoms = false
+        profile.hkReadFertility = false
+        // Forget which values came from Health. After this every value in her log
+        // counts as hers, so reconnecting can only ever add — never overwrite.
+        HealthSyncService.forgetSyncState()
         // Nothing on the lock screen, nothing in the app switcher.
         profile.hidePreview = true
         profile.privateNotifications = true

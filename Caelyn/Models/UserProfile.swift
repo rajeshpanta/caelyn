@@ -16,6 +16,11 @@ final class UserProfile {
     var hkWriteFlow: Bool = false
     var hkReadSymptoms: Bool = false
     var hkWriteSymptoms: Bool = false
+    /// Fertility signals from Health — temperature, cervical mucus, ovulation and
+    /// pregnancy tests. Separate from symptoms because it is a meaningfully more
+    /// intimate set, and she should be able to take the rest without it.
+    /// Additive with a default, so existing stores migrate without a schema plan.
+    var hkReadFertility: Bool = false
 
     var firstDayOfWeek: Int = 1
     var theme: AppTheme = AppTheme.system

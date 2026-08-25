@@ -26,6 +26,7 @@
 		17A3409231A1A3244C342F0E /* NotificationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 483D4ABE3B0FBDCFACE74186 /* NotificationRouter.swift */; };
 		1B58EF2925278DA567C2F08F /* YearViewSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B841A4EB3CB7F77C77BD3E /* YearViewSection.swift */; };
 		1C566289B10118DEA3ABDCFA /* HealthKitConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1525588F818995E2E60CF533 /* HealthKitConnectView.swift */; };
+		1E769E48CA3099B6F0CE9005 /* HealthDataCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF5F92C5D1341E931256492A /* HealthDataCatalog.swift */; };
 		1F55F3C99335A109FF917A65 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEDF7284C85E89A58176F940 /* MainTabView.swift */; };
 		218A1D7F2C2FDC91289482A8 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 368EA8FCC339D47BDE93020F /* PaywallView.swift */; };
 		21AD8993561F27D1B5784D68 /* CaelynWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4BD2A286B2E8E8E9657261 /* CaelynWidgetBundle.swift */; };
@@ -57,6 +58,7 @@
 		60CE2C6B72B2C3BC33887DC2 /* DataStatusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F8759E4F031305F132899D /* DataStatusCard.swift */; };
 		61B1000513AE1D2AC81ED400 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53C42DDF815AFDFE00A7D214 /* LogView.swift */; };
 		62140E22137E9BFD253F7C3D /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A9CD6A95C7EC0C76441783 /* Enums.swift */; };
+		65FF320AE108576A504D61DF /* HealthObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF3BB0D47FEAAB36D769FA1 /* HealthObservation.swift */; };
 		661515C66A81E3DF7ABA7CE9 /* OnboardingSteps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D48D4147BDA4F0E3B4942CB /* OnboardingSteps.swift */; };
 		670A3218F030EAAF4D349B2D /* MoodChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECDCA0268B520CF6DE71EE5 /* MoodChip.swift */; };
 		68B19BD4A1651FC72243F58E /* DayDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4BC2802ED9E13B920ABEFD /* DayDetailSheet.swift */; };
@@ -67,9 +69,11 @@
 		6D3293F70DFD8C6B2B7280B7 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CF157977EC9D07CEDE4334 /* CalendarView.swift */; };
 		6EE73517CCFF174B7DF6F843 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CB27B600CFE9B63241AD672 /* HomeView.swift */; };
 		6F7F7FCCFD8D2218EE459484 /* CaelynWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 50974342C78D7073C7C2389C /* CaelynWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		703AFA6142CEAFC1A84FB24A /* HealthImportReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D35938DEA399A0DF8CBF34C /* HealthImportReconciler.swift */; };
 		703C12C08350CF3009961F11 /* FirstVisitIntroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18CAE0DBAEA415502AF29E09 /* FirstVisitIntroCard.swift */; };
 		7346A991F2E84C669EEC8729 /* CycleAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893A18A5E786299D456D8D29 /* CycleAnalytics.swift */; };
 		74BDA36CDF822EC344FDF372 /* PINViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D583843EB06C575EF3737512 /* PINViews.swift */; };
+		7510FC53C2D5CB5FA5C11DE9 /* HealthSyncCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = F57BC36B537D478D140C49CF /* HealthSyncCopy.swift */; };
 		752A55857B59D33AE4CA8258 /* CaelynWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032976BC579EC7C7A9617A56 /* CaelynWidgetProvider.swift */; };
 		76A85E09A594126D2B6DFAA8 /* CaelynWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7964B2E44B79AC36776C09E4 /* CaelynWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		776A3C2C7F8086C9E1FB0D1D /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */; };
@@ -87,11 +91,13 @@
 		8DC6C9845609FAA8F8411FAC /* CaelynWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51EC99CA13B2B3BCD725DBE4 /* CaelynWatchApp.swift */; };
 		8F40B2801D830BE5BD40BCED /* Shapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3393953805D85FD844EA1DDC /* Shapes.swift */; };
 		8F9FBACA1AB4B3CF19B97FFA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1324749F9ED0476DABEC79C3 /* SettingsView.swift */; };
+		90239874E4D8B802A556F4D2 /* HealthSyncAnchorStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4B6F0C2FFCCFE3AA741B36 /* HealthSyncAnchorStore.swift */; };
 		903D408B317900DB6B1E13B4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF78CFC55351ED7D33634AA0 /* RootView.swift */; };
 		94EF936F835F61CD2B65D964 /* HomePatternInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220787509170B408F4B03C6B /* HomePatternInsight.swift */; };
 		9793F7ACFFB971F837581A8D /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFE9A76ACD4C8CB6B8CE0C9 /* OnboardingStep.swift */; };
 		97A3A12A9A56E0E068EBADD4 /* TypicalRanges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1727D86385E84CE318EA3C08 /* TypicalRanges.swift */; };
 		A07388C20552EFA03BDA067A /* HomeStreakCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2633FDCD19F5767C2E1AAE90 /* HomeStreakCard.swift */; };
+		A0D53E1481E2EEA060626F69 /* HealthKitReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E3D7518B46566CE8231592C /* HealthKitReader.swift */; };
 		AA3741F22A064C92E2075BAF /* PregnancyModeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453885131B931155B977A629 /* PregnancyModeCard.swift */; };
 		AB33C36A895225740A42866E /* PatternInsightsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB14E5C47F9DA507113109 /* PatternInsightsSection.swift */; };
 		ABB9565578A0911F35EA34DC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CD38ADF5E6A9A8CFE29E0127 /* PrivacyInfo.xcprivacy */; };
@@ -111,6 +117,7 @@
 		BCF83A1FFD503E7BADB1D6E8 /* WatchQuickLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29695E67A2AF8F0087B074D9 /* WatchQuickLogView.swift */; };
 		BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354545D943378E53A1B935B7 /* CaelynTests.swift */; };
 		BFF497451E33CBC53ACCE00B /* OnboardingScaffold.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA214E11FC745FFBCD83EC1 /* OnboardingScaffold.swift */; };
+		CD63188C47D91DE234D29B77 /* HealthSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30AAE3B912A0684B01C599F7 /* HealthSyncTests.swift */; };
 		CEFF825CB5AD92FDFA5B5816 /* DailyLogForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DCA3984C3998D72FA315625 /* DailyLogForm.swift */; };
 		D1475D3E5B70DAD2D5B3495E /* CycleEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C61F24B11915E63DD4E264C /* CycleEntry.swift */; };
 		D2D1626B36290421AEC9C1E5 /* OnboardingAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870D1AB3C46C174650091279 /* OnboardingAnimations.swift */; };
@@ -127,9 +134,11 @@
 		E25279A0EFD42D53F2D1CAEF /* BiometricService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6D8A6D5E649BC3272BA4A4 /* BiometricService.swift */; };
 		E2791BFAB11145A765840272 /* GoalCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E04439EFC176289240A6888 /* GoalCard.swift */; };
 		E3BD504097E951ABAFA21554 /* HomeHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDCFC2DE6E44F2E39E83EB23 /* HomeHeroCard.swift */; };
+		E3D7BAC65BC3A314A731758F /* HealthSyncLedger.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE941E27A13FA63DE11CECF6 /* HealthSyncLedger.swift */; };
 		E6736B444097A936BE0D10B9 /* WristTempOvulationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DEA117F0CC7A4A969A4459 /* WristTempOvulationEngine.swift */; };
 		E693D6A0AD58B675641DDC53 /* WatchBridgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD588403958052343C310525 /* WatchBridgeService.swift */; };
 		E770FCFA78B811972499CE97 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F727008BDD9FE097F46B549E /* NotificationService.swift */; };
+		EABD571DAC0941B3E5A2FAAF /* HealthSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F6BBC00F6BE7EB68B372D6 /* HealthSyncService.swift */; };
 		EAFC9E788FEAD10FAEEC1901 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133DA567417FA320181DEB05 /* Persistence.swift */; };
 		EBD8A8A5883E9AD187D8C2E2 /* InsightsStatsGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BBAE1207378ECD1DA48A5DE /* InsightsStatsGrid.swift */; };
 		EE6F1A175709790139DD31CF /* PaywallTierCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E98B3962F3C4B33A33C5001 /* PaywallTierCard.swift */; };
@@ -234,6 +243,7 @@
 		29AD7A95A766A2973718AE3D /* CaelynButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynButton.swift; sourceTree = "<group>"; };
 		29C32A52D52FD6E8FB154FCE /* MonthSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthSummaryCard.swift; sourceTree = "<group>"; };
 		2A45E9FE5A677D4562C59DE7 /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
+		30AAE3B912A0684B01C599F7 /* HealthSyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSyncTests.swift; sourceTree = "<group>"; };
 		3238D5E5DA356783A9A2BA1F /* ToggleCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleCard.swift; sourceTree = "<group>"; };
 		3393953805D85FD844EA1DDC /* Shapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shapes.swift; sourceTree = "<group>"; };
 		33A60D37340B385B8608B8CB /* TTCDashboardCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTCDashboardCard.swift; sourceTree = "<group>"; };
@@ -255,6 +265,7 @@
 		483D4ABE3B0FBDCFACE74186 /* NotificationRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationRouter.swift; sourceTree = "<group>"; };
 		4AFE9A76ACD4C8CB6B8CE0C9 /* OnboardingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStep.swift; sourceTree = "<group>"; };
 		4B35E72936365A18992EE8CC /* ProUpsellCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProUpsellCard.swift; sourceTree = "<group>"; };
+		4D35938DEA399A0DF8CBF34C /* HealthImportReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthImportReconciler.swift; sourceTree = "<group>"; };
 		4E98B3962F3C4B33A33C5001 /* PaywallTierCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallTierCard.swift; sourceTree = "<group>"; };
 		50974342C78D7073C7C2389C /* CaelynWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CaelynWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51EC99CA13B2B3BCD725DBE4 /* CaelynWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynWatchApp.swift; sourceTree = "<group>"; };
@@ -271,6 +282,7 @@
 		5B8CB13185D631BA4005CD6C /* HomeHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeHeader.swift; sourceTree = "<group>"; };
 		5C2D0C0DF903A769EEE2158B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5C4FFE6F4155280EEFBD7322 /* CaelynTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CaelynTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5E3D7518B46566CE8231592C /* HealthKitReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitReader.swift; sourceTree = "<group>"; };
 		5F4166D3870A6F4C282B5832 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		5FDEAAC04C4AD4BB528B0A16 /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		6011FB7860B910ED48584777 /* WidgetDataSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataSync.swift; sourceTree = "<group>"; };
@@ -308,6 +320,8 @@
 		97F0CABBB7635B472536C64A /* InsightsCharts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsCharts.swift; sourceTree = "<group>"; };
 		9955FAEDEE824E578BBD738C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9BBA80B3841E6E03E0EFB1EC /* OnboardingProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingProgress.swift; sourceTree = "<group>"; };
+		9BF3BB0D47FEAAB36D769FA1 /* HealthObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthObservation.swift; sourceTree = "<group>"; };
+		9E4B6F0C2FFCCFE3AA741B36 /* HealthSyncAnchorStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSyncAnchorStore.swift; sourceTree = "<group>"; };
 		A00731802B5C8B96D6AC55E9 /* InsightCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightCard.swift; sourceTree = "<group>"; };
 		A804FDBB1CB616D607B89290 /* Caelyn.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Caelyn.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA4BD2A286B2E8E8E9657261 /* CaelynWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynWidgetBundle.swift; sourceTree = "<group>"; };
@@ -318,8 +332,10 @@
 		B3E9BDBBD279D29A2A77C926 /* StatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatCard.swift; sourceTree = "<group>"; };
 		B5AE5BF45B9E75202940D8F7 /* PurchaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseService.swift; sourceTree = "<group>"; };
 		B6E412412EA4D2F92337555C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		B8F6BBC00F6BE7EB68B372D6 /* HealthSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSyncService.swift; sourceTree = "<group>"; };
 		B8FBF952865F40EC744AF966 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		BD48D14EB120165091660899 /* InsightsEmptyState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsEmptyState.swift; sourceTree = "<group>"; };
+		BE941E27A13FA63DE11CECF6 /* HealthSyncLedger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSyncLedger.swift; sourceTree = "<group>"; };
 		BFF130311725D11BC73F4242 /* SecureWipeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureWipeService.swift; sourceTree = "<group>"; };
 		C1D72FA6409165615CFC45E1 /* HomeMoodCheckIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeMoodCheckIn.swift; sourceTree = "<group>"; };
 		C3B841A4EB3CB7F77C77BD3E /* YearViewSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearViewSection.swift; sourceTree = "<group>"; };
@@ -329,6 +345,7 @@
 		CD38ADF5E6A9A8CFE29E0127 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		CD588403958052343C310525 /* WatchBridgeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBridgeService.swift; sourceTree = "<group>"; };
 		CEDF7284C85E89A58176F940 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		CF5F92C5D1341E931256492A /* HealthDataCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDataCatalog.swift; sourceTree = "<group>"; };
 		D237A741F754AC1F6FD0AC64 /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
 		D583843EB06C575EF3737512 /* PINViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINViews.swift; sourceTree = "<group>"; };
 		D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
@@ -345,6 +362,7 @@
 		F217396A66FD507CDBD109BA /* HomeComingUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeComingUp.swift; sourceTree = "<group>"; };
 		F482876413250EE67CC8E266 /* PrivacyChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyChip.swift; sourceTree = "<group>"; };
 		F5572EE8D45251ECD6306F44 /* PreviewTourTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewTourTests.swift; sourceTree = "<group>"; };
+		F57BC36B537D478D140C49CF /* HealthSyncCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSyncCopy.swift; sourceTree = "<group>"; };
 		F703D1FBCAA2E9C6A61BF8E4 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		F7110E218D7376F63A078A1C /* CaelynCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynCard.swift; sourceTree = "<group>"; };
 		F727008BDD9FE097F46B549E /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -443,6 +461,7 @@
 				FAE228FE95D6CFB5B6AA94AA /* WidgetDataStore.swift */,
 				6011FB7860B910ED48584777 /* WidgetDataSync.swift */,
 				17DEA117F0CC7A4A969A4459 /* WristTempOvulationEngine.swift */,
+				F239195599CE4A118D0F01F6 /* Health */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -479,6 +498,7 @@
 			isa = PBXGroup;
 			children = (
 				354545D943378E53A1B935B7 /* CaelynTests.swift */,
+				30AAE3B912A0684B01C599F7 /* HealthSyncTests.swift */,
 			);
 			path = CaelynTests;
 			sourceTree = "<group>";
@@ -724,6 +744,21 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		F239195599CE4A118D0F01F6 /* Health */ = {
+			isa = PBXGroup;
+			children = (
+				CF5F92C5D1341E931256492A /* HealthDataCatalog.swift */,
+				4D35938DEA399A0DF8CBF34C /* HealthImportReconciler.swift */,
+				5E3D7518B46566CE8231592C /* HealthKitReader.swift */,
+				9BF3BB0D47FEAAB36D769FA1 /* HealthObservation.swift */,
+				9E4B6F0C2FFCCFE3AA741B36 /* HealthSyncAnchorStore.swift */,
+				F57BC36B537D478D140C49CF /* HealthSyncCopy.swift */,
+				BE941E27A13FA63DE11CECF6 /* HealthSyncLedger.swift */,
+				B8F6BBC00F6BE7EB68B372D6 /* HealthSyncService.swift */,
+			);
+			path = Health;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -930,6 +965,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
+				CD63188C47D91DE234D29B77 /* HealthSyncTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -995,9 +1031,17 @@
 				703C12C08350CF3009961F11 /* FirstVisitIntroCard.swift in Sources */,
 				E2791BFAB11145A765840272 /* GoalCard.swift in Sources */,
 				433BD4EC552A95D00B4B7F07 /* Haptics.swift in Sources */,
+				1E769E48CA3099B6F0CE9005 /* HealthDataCatalog.swift in Sources */,
+				703AFA6142CEAFC1A84FB24A /* HealthImportReconciler.swift in Sources */,
 				1C566289B10118DEA3ABDCFA /* HealthKitConnectView.swift in Sources */,
+				A0D53E1481E2EEA060626F69 /* HealthKitReader.swift in Sources */,
 				B54C125DD9E05A5CB548105D /* HealthKitService.swift in Sources */,
 				0C581E8B0DBDCFD8200EF13F /* HealthKitSync.swift in Sources */,
+				65FF320AE108576A504D61DF /* HealthObservation.swift in Sources */,
+				90239874E4D8B802A556F4D2 /* HealthSyncAnchorStore.swift in Sources */,
+				7510FC53C2D5CB5FA5C11DE9 /* HealthSyncCopy.swift in Sources */,
+				E3D7BAC65BC3A314A731758F /* HealthSyncLedger.swift in Sources */,
+				EABD571DAC0941B3E5A2FAAF /* HealthSyncService.swift in Sources */,
 				2B4851D91A1CD6DBB6C5296E /* HomeComingUp.swift in Sources */,
 				B2DAD96CCD4FE630BC6C8944 /* HomeCopy.swift in Sources */,
 				07E5A710DF8ECD1462E692D1 /* HomeHeader.swift in Sources */,
@@ -1226,7 +1270,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads your existing period history from Apple Health so your predictions start from real cycles instead of an average — for example, importing the last six periods you logged elsewhere so Caelyn can estimate your next one on day one. It also reads Apple Watch sleeping wrist temperature, if you have it, to confirm afterwards when ovulation likely happened. This data stays on your iPhone.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads the cycle data you already have in Apple Health so you do not have to start over. Period and spotting days build your real cycle history, so Caelyn can predict your next period from day one instead of guessing an average. Symptom and pain entries fill in your log so patterns like 'bloating starts three days early' are found from everything you have tracked, not just what you retype. Basal body temperature, cervical mucus and ovulation and pregnancy test results feed the ovulation and fertility estimates Caelyn already shows you, and Apple Watch sleeping wrist temperature helps confirm afterwards when ovulation likely happened. Anything you logged in Caelyn yourself is never overwritten. You pick which of these Caelyn reads, and all of it stays on your iPhone.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Caelyn saves what you log back to Apple Health so other apps you use can see it — for example, logging a heavy flow day and cramps in Caelyn makes them appear in the Health app's Cycle Tracking alongside everything else. You choose which of these Caelyn writes, and you can turn it off at any time.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1304,7 +1348,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Caelyn;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Caelyn uses Face ID to keep your cycle data private.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads your existing period history from Apple Health so your predictions start from real cycles instead of an average — for example, importing the last six periods you logged elsewhere so Caelyn can estimate your next one on day one. It also reads Apple Watch sleeping wrist temperature, if you have it, to confirm afterwards when ovulation likely happened. This data stays on your iPhone.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caelyn reads the cycle data you already have in Apple Health so you do not have to start over. Period and spotting days build your real cycle history, so Caelyn can predict your next period from day one instead of guessing an average. Symptom and pain entries fill in your log so patterns like 'bloating starts three days early' are found from everything you have tracked, not just what you retype. Basal body temperature, cervical mucus and ovulation and pregnancy test results feed the ovulation and fertility estimates Caelyn already shows you, and Apple Watch sleeping wrist temperature helps confirm afterwards when ovulation likely happened. Anything you logged in Caelyn yourself is never overwritten. You pick which of these Caelyn reads, and all of it stays on your iPhone.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Caelyn saves what you log back to Apple Health so other apps you use can see it — for example, logging a heavy flow day and cramps in Caelyn makes them appear in the Health app's Cycle Tracking alongside everything else. You choose which of these Caelyn writes, and you can turn it off at any time.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

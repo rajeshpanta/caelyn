@@ -940,9 +940,9 @@ struct HealthStep: View {
     /// cycles instead of starting from zero. Failure is silent — the plain
     /// "connected" state still shows and the app works exactly as before.
     private func importHistory() async {
-        guard let result = try? await HealthKitService.importFlowFromHealth(into: modelContext) else { return }
-        vm.healthImportedEntries = result.total
-        guard result.total > 0 else { return }
+        let summary = await HealthSyncService.runInitialImport(context: modelContext)
+        vm.healthImportedEntries = summary.daysAffected
+        guard summary.daysAffected > 0 else { return }
         let entries = (try? modelContext.fetch(FetchDescriptor<CycleEntry>())) ?? []
         let cycles = PredictionEngine.cycles(from: entries)
         vm.healthImportedCycles = cycles.count
