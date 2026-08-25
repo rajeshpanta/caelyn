@@ -7,7 +7,7 @@ import SwiftData
 ///
 /// `preview` and `apply` are separate calls over the same plan, so the app can
 /// show her exactly what an import would do and let her decide. Nothing here
-/// resolves a conflict on her behalf; `HealthImportReconciler` owns that policy
+/// resolves a conflict on her behalf; `ImportReconciler` owns that policy
 /// and this type just moves data through it.
 @MainActor
 enum HealthSyncService {
@@ -23,8 +23,8 @@ enum HealthSyncService {
     }
 
     struct Plan {
-        var decisions: [HealthImportReconciler.Decision] = []
-        var summary = HealthImportReconciler.Summary()
+        var decisions: [ImportReconciler.Decision] = []
+        var summary = ImportReconciler.Summary()
         var unreadableTypes: [String] = []
         var readResult = HealthKitReader.ReadResult()
         var types: [HKSampleType] = []
@@ -54,7 +54,7 @@ enum HealthSyncService {
         mode: Mode,
         profile: UserProfile,
         context: ModelContext,
-        ledger: HealthSyncLedger = .shared,
+        ledger: ImportLedger = .shared,
         calendar: Calendar = .current,
         today: Date = .now
     ) async -> Plan {
@@ -67,7 +67,7 @@ enum HealthSyncService {
             : await HealthKitReader.readChanges(types: types, calendar: calendar)
 
         let lookup = valueLookup(context: context, calendar: calendar)
-        let decisions = HealthImportReconciler.plan(
+        let decisions = ImportReconciler.plan(
             observations: read.observations,
             deletedRecordIDs: read.deletedRecordIDs,
             currentValue: lookup,
@@ -80,7 +80,7 @@ enum HealthSyncService {
 
         var plan = Plan()
         plan.decisions = decisions
-        plan.summary = HealthImportReconciler.summarize(decisions)
+        plan.summary = ImportReconciler.summarize(decisions)
         plan.unreadableTypes = read.unreadableTypes
         plan.readResult = read
         plan.types = types
@@ -96,12 +96,14 @@ enum HealthSyncService {
     static func apply(
         _ plan: Plan,
         context: ModelContext,
-        ledger: HealthSyncLedger = .shared,
+        ledger: ImportLedger = .shared,
         calendar: Calendar = .current
-    ) -> HealthImportReconciler.Summary {
-        let summary = HealthImportReconciler.commit(plan.decisions, into: context, ledger: ledger, calendar: calendar)
-        HealthKitReader.commitAnchors(plan.readResult, types: plan.types)
-        return summary
+    ) -> ImportReconciler.Summary {
+        let result = ImportReconciler.commit(plan.decisions, into: context, ledger: ledger, calendar: calendar)
+        // Anchors move only when the merge actually landed. A rolled-back save
+        // must be re-read next time, not skipped past.
+        if result.succeeded { HealthKitReader.commitAnchors(plan.readResult, types: plan.types) }
+        return result.summary
     }
 
     /// Preview and commit in one step, for the paths that are not user-confirmed
@@ -111,10 +113,10 @@ enum HealthSyncService {
         mode: Mode,
         profile: UserProfile,
         context: ModelContext,
-        ledger: HealthSyncLedger = .shared,
+        ledger: ImportLedger = .shared,
         calendar: Calendar = .current,
         today: Date = .now
-    ) async -> HealthImportReconciler.Summary {
+    ) async -> ImportReconciler.Summary {
         let plan = await preview(mode: mode, profile: profile, context: context,
                                  ledger: ledger, calendar: calendar, today: today)
         return apply(plan, context: context, ledger: ledger, calendar: calendar)
@@ -129,14 +131,14 @@ enum HealthSyncService {
     @discardableResult
     static func runInitialImport(
         context: ModelContext,
-        ledger: HealthSyncLedger = .shared,
+        ledger: ImportLedger = .shared,
         calendar: Calendar = .current,
         today: Date = .now
-    ) async -> HealthImportReconciler.Summary {
+    ) async -> ImportReconciler.Summary {
         guard HealthKitService.isAvailable else { return .init() }
         let types = HealthDataCatalog.syncedSampleTypes
         let read = await HealthKitReader.readAll(types: types, calendar: calendar)
-        let decisions = HealthImportReconciler.plan(
+        let decisions = ImportReconciler.plan(
             observations: read.observations,
             currentValue: valueLookup(context: context, calendar: calendar),
             ledger: ledger,
@@ -145,9 +147,9 @@ enum HealthSyncService {
             calendar: calendar,
             today: today
         )
-        let summary = HealthImportReconciler.commit(decisions, into: context, ledger: ledger, calendar: calendar)
-        HealthKitReader.commitAnchors(read, types: types)
-        return summary
+        let result = ImportReconciler.commit(decisions, into: context, ledger: ledger, calendar: calendar)
+        if result.succeeded { HealthKitReader.commitAnchors(read, types: types) }
+        return result.summary
     }
 
     // MARK: - Foreground catch-up
@@ -185,7 +187,7 @@ enum HealthSyncService {
     /// Forget every anchor and every provenance claim. Called on disconnect: after
     /// it, nothing in her log is considered Caelyn-owned any more, so a later
     /// reconnect can only ever add to what she has — never overwrite it.
-    static func forgetSyncState(ledger: HealthSyncLedger = .shared) {
+    static func forgetSyncState(ledger: ImportLedger = .shared) {
         HealthSyncAnchorStore.removeAll()
         ledger.removeAll()
         lastForegroundSync = nil
@@ -198,7 +200,7 @@ enum HealthSyncService {
     private static func valueLookup(
         context: ModelContext,
         calendar: Calendar
-    ) -> (Date, HealthObservation.Field) -> HealthObservation.Value? {
+    ) -> (Date, ImportObservation.Field) -> ImportObservation.Value? {
         let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
         var byDay: [Date: CycleEntry] = [:]
         for entry in entries { byDay[calendar.startOfDay(for: entry.date)] = entry }

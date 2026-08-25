@@ -128,12 +128,12 @@ enum HealthDataCatalog {
     /// Returns nil for anything Caelyn has no honest home for — an indeterminate
     /// test result, a "symptom not present" marker, an unspecified flow — rather
     /// than guessing a value.
-    static func observation(from sample: HKSample, calendar: Calendar = .current) -> HealthObservation? {
+    static func observation(from sample: HKSample, calendar: Calendar = .current) -> ImportObservation? {
         let day = calendar.startOfDay(for: sample.startDate)
         let source = sample.sourceRevision.source
 
-        func make(_ field: HealthObservation.Field, _ value: HealthObservation.Value) -> HealthObservation {
-            HealthObservation(
+        func make(_ field: ImportObservation.Field, _ value: ImportObservation.Value) -> ImportObservation {
+            ImportObservation(
                 day: day,
                 field: field,
                 value: value,

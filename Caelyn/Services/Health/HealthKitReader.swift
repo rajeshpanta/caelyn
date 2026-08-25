@@ -3,7 +3,7 @@ import HealthKit
 import OSLog
 
 /// Pulls records out of Apple Health and hands them to the merge engine as
-/// `HealthObservation`s. It reads and reports; it never decides and never writes.
+/// `ImportObservation`s. It reads and reports; it never decides and never writes.
 ///
 /// Two modes, and the difference matters:
 ///
@@ -19,7 +19,7 @@ enum HealthKitReader {
     private static let log = Logger(subsystem: "smallpanta-icould.com.caelynperiodtracker", category: "healthread")
 
     struct ReadResult {
-        var observations: [HealthObservation] = []
+        var observations: [ImportObservation] = []
         var deletedRecordIDs: [UUID] = []
         /// Anchors to persist once the merge is committed, keyed by type identifier.
         var anchors: [String: HKQueryAnchor] = [:]

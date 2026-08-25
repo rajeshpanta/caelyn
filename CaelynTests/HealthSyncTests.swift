@@ -5,7 +5,7 @@ import HealthKit
 
 /// Tests for the Apple Health merge engine.
 ///
-/// Everything here exercises `HealthImportReconciler` and `HealthSyncLedger`
+/// Everything here exercises `ImportReconciler` and `ImportLedger`
 /// directly rather than going through `HKHealthStore`, because the rules that
 /// matter — never overwrite what she typed, never duplicate, never loop — are
 /// decided before HealthKit is involved. What that leaves unverified is called out
@@ -16,7 +16,7 @@ final class HealthSyncTests: XCTestCase {
 
     private var container: ModelContainer!
     private var context: ModelContext!
-    private var ledger: HealthSyncLedger!
+    private var ledger: ImportLedger!
 
     private let calendar = Calendar(identifier: .gregorian)
     private let ownBundle = "smallpanta-icould.com.caelynperiodtracker"
@@ -28,7 +28,7 @@ final class HealthSyncTests: XCTestCase {
         context = container.mainContext
         // nil file URL keeps the ledger in memory, so tests never touch the
         // real one on disk.
-        ledger = HealthSyncLedger(fileURL: nil)
+        ledger = ImportLedger(fileURL: nil)
     }
 
     override func tearDownWithError() throws {
@@ -45,14 +45,14 @@ final class HealthSyncTests: XCTestCase {
 
     private func observation(
         day: Date,
-        field: HealthObservation.Field,
-        value: HealthObservation.Value,
+        field: ImportObservation.Field,
+        value: ImportObservation.Value,
         recordID: UUID = UUID(),
         bundle: String? = nil,
         source: String = "Clue",
         recordedAt: Date? = nil
-    ) -> HealthObservation {
-        HealthObservation(
+    ) -> ImportObservation {
+        ImportObservation(
             day: day,
             field: field,
             value: value,
@@ -64,14 +64,14 @@ final class HealthSyncTests: XCTestCase {
     }
 
     private func plan(
-        _ observations: [HealthObservation],
+        _ observations: [ImportObservation],
         deleted: [UUID] = [],
         acceptOwnSource: Bool = false
-    ) -> [HealthImportReconciler.Decision] {
+    ) -> [ImportReconciler.Decision] {
         let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
         var byDay: [Date: CycleEntry] = [:]
         for entry in entries { byDay[calendar.startOfDay(for: entry.date)] = entry }
-        return HealthImportReconciler.plan(
+        return ImportReconciler.plan(
             observations: observations,
             deletedRecordIDs: deleted,
             currentValue: { d, f in byDay[self.calendar.startOfDay(for: d)]?.value(for: f) },
@@ -85,12 +85,12 @@ final class HealthSyncTests: XCTestCase {
 
     @discardableResult
     private func merge(
-        _ observations: [HealthObservation],
+        _ observations: [ImportObservation],
         deleted: [UUID] = [],
         acceptOwnSource: Bool = false
-    ) -> HealthImportReconciler.Summary {
+    ) -> ImportReconciler.Summary {
         let decisions = plan(observations, deleted: deleted, acceptOwnSource: acceptOwnSource)
-        return HealthImportReconciler.commit(decisions, into: context, ledger: ledger, calendar: calendar)
+        return ImportReconciler.commit(decisions, into: context, ledger: ledger, calendar: calendar).summary
     }
 
     private func entry(on date: Date) -> CycleEntry? {
@@ -99,8 +99,8 @@ final class HealthSyncTests: XCTestCase {
             .first { calendar.isDate($0.date, inSameDayAs: target) }
     }
 
-    private func action(_ decisions: [HealthImportReconciler.Decision],
-                        for field: HealthObservation.Field) -> HealthImportReconciler.Action? {
+    private func action(_ decisions: [ImportReconciler.Decision],
+                        for field: ImportObservation.Field) -> ImportReconciler.Action? {
         decisions.first { $0.field == field }?.action
     }
 
@@ -210,7 +210,7 @@ final class HealthSyncTests: XCTestCase {
                                 source: "New", recordedAt: target.addingTimeInterval(3600))
 
         let decisions = plan([older, newer])
-        HealthImportReconciler.commit(decisions, into: context, ledger: ledger, calendar: calendar)
+        ImportReconciler.commit(decisions, into: context, ledger: ledger, calendar: calendar)
 
         XCTAssertEqual(entry(on: target)?.flow, .heavy)
         XCTAssertTrue(decisions.contains { $0.action == .rejected(.supersededInBatch) })
@@ -407,7 +407,7 @@ final class HealthSyncTests: XCTestCase {
         mine.flow = .heavy
         context.saveOrLog()
 
-        let summary = HealthImportReconciler.commit(decisions, into: context, ledger: ledger, calendar: calendar)
+        let summary = ImportReconciler.commit(decisions, into: context, ledger: ledger, calendar: calendar).summary
 
         XCTAssertEqual(entry(on: target)?.flow, .heavy, "a value logged mid-confirmation still wins")
         XCTAssertEqual(summary.filled, 0)
@@ -417,7 +417,7 @@ final class HealthSyncTests: XCTestCase {
     // MARK: - Large history
 
     func testLargeHistoricalImport() {
-        var batch: [HealthObservation] = []
+        var batch: [ImportObservation] = []
         for offset in 1...(365 * 3) where offset % 28 < 5 {
             batch.append(observation(day: day(-offset), field: .flow, value: .flow(.medium)))
         }
@@ -439,11 +439,11 @@ final class HealthSyncTests: XCTestCase {
         let base = eastern.startOfDay(for: Date(timeIntervalSince1970: 1_770_000_000))
         let lateNight = base.addingTimeInterval(23 * 3600 + 45 * 60)
 
-        let observation = HealthObservation(
+        let observation = ImportObservation(
             day: lateNight, field: .flow, value: .flow(.light),
             recordID: UUID(), sourceBundleID: foreignBundle, sourceName: "Clue", recordedAt: lateNight
         )
-        let decisions = HealthImportReconciler.plan(
+        let decisions = ImportReconciler.plan(
             observations: [observation],
             currentValue: { _, _ in nil },
             ledger: ledger,
@@ -464,12 +464,12 @@ final class HealthSyncTests: XCTestCase {
 
         let localNoon = DateComponents(calendar: tokyo, year: 2026, month: 3, day: 14, hour: 12).date!
         XCTAssertEqual(
-            HealthSyncLedger.dayKey(tokyo.startOfDay(for: localNoon), calendar: tokyo),
+            ImportLedger.dayKey(tokyo.startOfDay(for: localNoon), calendar: tokyo),
             "2026-03-14"
         )
         let laNoon = DateComponents(calendar: la, year: 2026, month: 3, day: 14, hour: 12).date!
         XCTAssertEqual(
-            HealthSyncLedger.dayKey(la.startOfDay(for: laNoon), calendar: la),
+            ImportLedger.dayKey(la.startOfDay(for: laNoon), calendar: la),
             "2026-03-14",
             "the same calendar day must key identically wherever she is"
         )
@@ -481,7 +481,7 @@ final class HealthSyncTests: XCTestCase {
         la.timeZone = TimeZone(identifier: "America/Los_Angeles")!
         let dstDay = la.startOfDay(for: DateComponents(calendar: la, year: 2026, month: 3, day: 8, hour: 12).date!)
 
-        let record = HealthObservation(
+        let record = ImportObservation(
             day: dstDay, field: .flow, value: .flow(.heavy),
             recordID: UUID(), sourceBundleID: foreignBundle, sourceName: "Clue", recordedAt: dstDay
         )
@@ -523,12 +523,12 @@ final class HealthSyncTests: XCTestCase {
             .appending(path: "ledger-\(UUID().uuidString).json")
         defer { try? FileManager.default.removeItem(at: url) }
 
-        let writer = HealthSyncLedger(fileURL: url)
+        let writer = ImportLedger(fileURL: url)
         let record = observation(day: day(-23), field: .flow, value: .flow(.heavy))
         writer.record(record, calendar: calendar)
         writer.save()
 
-        let reader = HealthSyncLedger(fileURL: url)
+        let reader = ImportLedger(fileURL: url)
         let claim = reader.claim(day: day(-23), field: .flow, calendar: calendar)
         XCTAssertEqual(claim?.importedValue, "heavy")
         XCTAssertEqual(claim?.sourceName, "Clue")
@@ -541,7 +541,7 @@ final class HealthSyncTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: url) }
         try Data("{ not json".utf8).write(to: url)
 
-        let recovered = HealthSyncLedger(fileURL: url)
+        let recovered = ImportLedger(fileURL: url)
         XCTAssertEqual(recovered.claimCount, 0, "a corrupt ledger starts empty rather than throwing")
     }
 
@@ -560,19 +560,19 @@ final class HealthSyncTests: XCTestCase {
     // MARK: - Field mapping
 
     func testEveryFieldSurvivesALedgerKeyRoundTrip() {
-        let fields: [HealthObservation.Field] = [
+        let fields: [ImportObservation.Field] = [
             .flow, .basalTemperature, .cervicalMucus, .ovulationTest,
             .pregnancyTest, .sexualActivity, .symptom(.cramps), .painType(.pelvicPain)
         ]
         for field in fields {
-            XCTAssertEqual(HealthObservation.Field(ledgerKey: field.ledgerKey), field,
+            XCTAssertEqual(ImportObservation.Field(ledgerKey: field.ledgerKey), field,
                            "\(field.ledgerKey) must survive a round trip or its provenance is orphaned")
         }
     }
 
     func testUnknownLedgerKeyIsRejectedRatherThanGuessed() {
-        XCTAssertNil(HealthObservation.Field(ledgerKey: "symptom:notARealSymptom"))
-        XCTAssertNil(HealthObservation.Field(ledgerKey: "somethingElse"))
+        XCTAssertNil(ImportObservation.Field(ledgerKey: "symptom:notARealSymptom"))
+        XCTAssertNil(ImportObservation.Field(ledgerKey: "somethingElse"))
     }
 
     // MARK: - HealthKit value mapping
@@ -632,7 +632,7 @@ final class HealthSyncTests: XCTestCase {
 
     func testImportingIntermenstrualBleedingDoesNotCreateACycle() {
         // Three months of real periods, plus mid-cycle spotting from another app.
-        var batch: [HealthObservation] = []
+        var batch: [ImportObservation] = []
         for cycle in 1...3 {
             for dayOfPeriod in 0..<4 {
                 batch.append(observation(day: day(-(cycle * 28) + dayOfPeriod), field: .flow, value: .flow(.medium)))
@@ -685,11 +685,11 @@ final class HealthSyncTests: XCTestCase {
     // MARK: - Copy
 
     func testImportCopyNamesThingsSheRecognises() {
-        var summary = HealthImportReconciler.Summary()
+        var summary = ImportReconciler.Summary()
         summary.filled = 3
         summary.daysAffected = 2
         summary.byField = ["flow": 2, "symptom": 1]
-        let text = HealthSyncCopy.importResult(summary)
+        let text = ImportCopy.importResult(summary)
 
         XCTAssertTrue(text.contains("2 period days"))
         XCTAssertTrue(text.contains("1 symptom"))
@@ -699,16 +699,16 @@ final class HealthSyncTests: XCTestCase {
     }
 
     func testCopySaysWhatWasLeftAlone() {
-        var summary = HealthImportReconciler.Summary()
+        var summary = ImportReconciler.Summary()
         summary.filled = 1
         summary.daysAffected = 1
         summary.byField = ["flow": 1]
         summary.keptUserValue = 4
-        XCTAssertTrue(HealthSyncCopy.importResult(summary).contains("Caelyn kept yours"))
+        XCTAssertTrue(ImportCopy.importResult(summary).contains("Caelyn kept yours"))
     }
 
     func testEmptyImportCopyIsNotAlarming() {
-        let text = HealthSyncCopy.importResult(HealthImportReconciler.Summary())
+        let text = ImportCopy.importResult(ImportReconciler.Summary())
         XCTAssertEqual(text, "Nothing new to bring over.")
     }
 }

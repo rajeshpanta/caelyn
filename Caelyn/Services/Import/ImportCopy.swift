@@ -1,12 +1,13 @@
 import Foundation
 
-/// Turns a merge summary into something worth reading.
+/// Turns a merge summary into something worth reading, for Apple Health syncs and
+/// file imports alike.
 ///
 /// The rule for everything in here: no HealthKit vocabulary, no field names, no
 /// counts of "records". She thinks in periods, symptoms and temperatures, so that
 /// is what the numbers are labelled with — and the line that matters most is the
 /// one saying what Caelyn *didn't* touch.
-enum HealthSyncCopy {
+enum ImportCopy {
 
     /// Human labels for the merge engine's field groupings, singular and plural.
     private static let labels: [String: (one: String, many: String)] = [
@@ -27,7 +28,7 @@ enum HealthSyncCopy {
     ]
 
     /// "54 period days", "214 symptoms", … for the confirmation screen.
-    static func breakdown(_ summary: HealthImportReconciler.Summary) -> [String] {
+    static func breakdown(_ summary: ImportReconciler.Summary) -> [String] {
         order.compactMap { key in
             guard let count = summary.byField[key], count > 0, let label = labels[key] else { return nil }
             return "\(count) \(count == 1 ? label.one : label.many)"
@@ -35,7 +36,7 @@ enum HealthSyncCopy {
     }
 
     /// One-line result for the banner after an import runs.
-    static func importResult(_ summary: HealthImportReconciler.Summary) -> String {
+    static func importResult(_ summary: ImportReconciler.Summary) -> String {
         guard !summary.isEmpty else {
             return summary.keptUserValue > 0
                 ? "Everything Apple Health has is already in Caelyn — your own entries were left exactly as you wrote them."
@@ -57,7 +58,7 @@ enum HealthSyncCopy {
     }
 
     /// Shown before committing, so she decides with the numbers in front of her.
-    static func previewHeadline(_ summary: HealthImportReconciler.Summary) -> String {
+    static func previewHeadline(_ summary: ImportReconciler.Summary) -> String {
         summary.isEmpty
             ? "Nothing new to bring over"
             : "Found \(days(summary.daysAffected)) of history"
@@ -65,7 +66,7 @@ enum HealthSyncCopy {
 
     /// The one line worth spelling out on the confirmation screen: an import can
     /// only ever add to what she wrote.
-    static func previewReassurance(_ summary: HealthImportReconciler.Summary) -> String {
+    static func previewReassurance(_ summary: ImportReconciler.Summary) -> String {
         summary.keptUserValue > 0
             ? "Anything you logged yourself stays exactly as it is — including \(places(summary.keptUserValue)) where Apple Health says something different."
             : "Anything you logged yourself stays exactly as it is."
@@ -81,7 +82,7 @@ enum HealthSyncCopy {
         "\(count) place\(count == 1 ? "" : "s")"
     }
 
-    private static func list(_ parts: [String]) -> String {
+    static func list(_ parts: [String]) -> String {
         switch parts.count {
         case 0:  return ""
         case 1:  return parts[0]

@@ -310,7 +310,7 @@ private struct HealthKitConnectForm: View {
         isImporting = true
         defer { isImporting = false }
         let summary = await HealthSyncService.run(mode: .fullImport, profile: profile, context: modelContext)
-        statusBanner = .success(HealthSyncCopy.importResult(summary))
+        statusBanner = .success(ImportCopy.importResult(summary))
     }
 }
 

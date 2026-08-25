@@ -3,11 +3,11 @@ import Foundation
 /// One value, for one calendar day, for one Caelyn field, traced back to the
 /// exact record it came from.
 ///
-/// This is the *only* currency the merge engine speaks. Apple Health samples and
-/// rows from another app's export file both normalize into `HealthObservation`,
-/// so there is a single reconciliation policy to reason about and to test —
-/// rather than one merge path per source that each drift on their own.
-struct HealthObservation: Equatable {
+/// This is the *only* currency the merge engine speaks. An Apple Health sample, a
+/// row of a Clue export and a line of a spreadsheet all normalize into an
+/// `ImportObservation`, so there is a single reconciliation policy to reason about
+/// and to test — rather than one merge path per source, each drifting on its own.
+struct ImportObservation: Equatable {
 
     /// Which Caelyn field an observation lands in.
     ///
@@ -24,6 +24,15 @@ struct HealthObservation: Equatable {
         case sexualActivity
         case symptom(Symptom)
         case painType(PainType)
+        /// The 0-10 slider. Only ever filled by a source that genuinely carries a
+        /// comparable scale — never derived from a severity word.
+        case painScore
+        case mood
+        case energy
+        case medication
+        case note
+        /// One of her own named symptoms, matched by name.
+        case customSymptom(String)
 
         /// Stable string key for the on-disk ledger. Must never change for an
         /// existing case or previously-recorded provenance is orphaned (which
@@ -38,6 +47,12 @@ struct HealthObservation: Equatable {
             case .sexualActivity:   return "sex"
             case .symptom(let s):   return "symptom:\(s.rawValue)"
             case .painType(let p):  return "pain:\(p.rawValue)"
+            case .painScore:        return "painscore"
+            case .mood:             return "mood"
+            case .energy:           return "energy"
+            case .medication:       return "medication"
+            case .note:             return "note"
+            case .customSymptom(let name): return "custom:\(name)"
             }
         }
     }
@@ -52,6 +67,10 @@ struct HealthObservation: Equatable {
         case boolean(Bool)
         case symptomSeverity(Int)         // 1 mild / 2 moderate / 3 severe
         case present                      // marker types that carry no value
+        case painScore(Int)               // 0-10
+        case mood(Mood)
+        case energy(EnergyLevel)
+        case text(String)
 
         /// Canonical string form, stored in the ledger so a later sync can tell
         /// "unchanged since import" from "the user edited this afterwards".
@@ -64,6 +83,10 @@ struct HealthObservation: Equatable {
             case .boolean(let b):         return b ? "1" : "0"
             case .symptomSeverity(let s): return String(s)
             case .present:                return "1"
+            case .painScore(let p):       return String(p)
+            case .mood(let m):            return m.rawValue
+            case .energy(let e):          return e.rawValue
+            case .text(let t):            return t
             }
         }
     }
@@ -74,8 +97,9 @@ struct HealthObservation: Equatable {
     let value: Value
 
     /// Identity of the originating record. For HealthKit this is the sample UUID;
-    /// for a file import it is a hash of the source row (see `ImportSource`), so
-    /// re-importing the same file twice is recognised rather than duplicated.
+    /// for a file it is derived deterministically from source, day and field (see
+    /// `ImportRecordID`), so the same row seen twice is recognised as the same
+    /// record rather than imported again.
     let recordID: UUID
 
     /// Bundle identifier of the app that wrote the record. Caelyn's own bundle ID

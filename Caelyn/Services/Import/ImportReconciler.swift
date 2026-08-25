@@ -1,8 +1,10 @@
 import Foundation
 import SwiftData
 
-/// The single merge engine. Every imported value — from Apple Health today, from
-/// another app's export file in Phase 2 — passes through here.
+/// The single merge engine. Every imported value passes through here, whether it
+/// came from Apple Health or from a file another app exported. One policy, one
+/// place, one set of tests — a second conflict engine is how two import paths end
+/// up disagreeing about whose data wins.
 ///
 /// It is split into `plan` and `commit` on purpose. `plan` is pure: it takes the
 /// observations, a way to read what Caelyn currently holds, and the provenance
@@ -22,7 +24,7 @@ import SwiftData
 /// 5. Anything that fails validation is rejected with a reason, never silently
 ///    dropped and never written.
 @MainActor
-enum HealthImportReconciler {
+enum ImportReconciler {
 
     // MARK: - Decisions
 
@@ -45,6 +47,9 @@ enum HealthImportReconciler {
         case implausibleDate
         case temperatureOutOfRange
         case severityOutOfRange
+        case painScoreOutOfRange
+        case emptyText
+        case textTooLong
         /// Superseded by another observation for the same day and field in the
         /// same batch (the more recently recorded one wins).
         case supersededInBatch
@@ -52,11 +57,11 @@ enum HealthImportReconciler {
 
     struct Decision: Equatable {
         let day: Date
-        let field: HealthObservation.Field
+        let field: ImportObservation.Field
         let action: Action
         /// Absent only for `.clear`, which originates from a deletion rather than
         /// from an incoming value.
-        let observation: HealthObservation?
+        let observation: ImportObservation?
     }
 
     // MARK: - Summary
@@ -117,10 +122,10 @@ enum HealthImportReconciler {
     ///   - acceptOwnSource: true only for a full restore (e.g. after a reinstall,
     ///     when Caelyn's own past writes are the history worth recovering).
     static func plan(
-        observations: [HealthObservation],
+        observations: [ImportObservation],
         deletedRecordIDs: [UUID] = [],
-        currentValue: (Date, HealthObservation.Field) -> HealthObservation.Value?,
-        ledger: HealthSyncLedger,
+        currentValue: (Date, ImportObservation.Field) -> ImportObservation.Value?,
+        ledger: ImportLedger,
         ownBundleID: String,
         acceptOwnSource: Bool,
         calendar: Calendar = .current,
@@ -137,8 +142,8 @@ enum HealthImportReconciler {
         // 2. Collapse the batch to one observation per day+field. Two apps writing
         //    the same field on the same day is normal; the more recently recorded
         //    one wins, and the loser is reported rather than silently discarded.
-        var best: [Key: HealthObservation] = [:]
-        var superseded: [HealthObservation] = []
+        var best: [Key: ImportObservation] = [:]
+        var superseded: [ImportObservation] = []
         for observation in incoming {
             let day = calendar.startOfDay(for: observation.day)
             let key = Key(day: day, field: observation.field)
@@ -219,7 +224,7 @@ enum HealthImportReconciler {
         //    Caelyn still owns and that still holds exactly what was imported.
         for recordID in deletedRecordIDs {
             for claim in ledger.claims(forRecord: recordID) {
-                guard let field = HealthObservation.Field(ledgerKey: claim.fieldKey),
+                guard let field = ImportObservation.Field(ledgerKey: claim.fieldKey),
                       let day = dayFromKey(claim.dayKey, calendar: calendar)
                 else { continue }
                 guard let stored = currentValue(day, field), stored.ledgerValue == claim.importedValue else {
@@ -235,11 +240,11 @@ enum HealthImportReconciler {
 
     private struct Key: Hashable {
         let day: Date
-        let field: HealthObservation.Field
+        let field: ImportObservation.Field
     }
 
     private static func validate(
-        _ observation: HealthObservation,
+        _ observation: ImportObservation,
         day: Date,
         todayStart: Date,
         floor: Date
@@ -253,6 +258,13 @@ enum HealthImportReconciler {
             guard celsius >= 30, celsius <= 45, celsius.isFinite else { return .temperatureOutOfRange }
         case .symptomSeverity(let level):
             guard (1...3).contains(level) else { return .severityOutOfRange }
+        case .painScore(let score):
+            guard (0...10).contains(score) else { return .painScoreOutOfRange }
+        case .text(let text):
+            guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return .emptyText }
+            // A note that dwarfs any real diary entry is a parse slip — most often
+            // an entire unquoted file collapsed into one cell.
+            guard text.count <= 10_000 else { return .textTooLong }
         default:
             break
         }
@@ -269,19 +281,40 @@ enum HealthImportReconciler {
 
     // MARK: - Commit
 
+    /// Outcome of a commit — including whether it actually landed.
+    struct CommitResult {
+        var summary: Summary
+        var succeeded: Bool
+        /// Set when the save failed and everything was rolled back.
+        var failure: String?
+
+        static func rolledBack(_ message: String) -> CommitResult {
+            CommitResult(summary: Summary(), succeeded: false, failure: message)
+        }
+    }
+
     /// Apply an already-reviewed plan. Only `.fill`, `.update` and `.clear` touch
     /// the store; everything else was a report.
     ///
     /// Entries are created through `CycleStore.entry(for:)` so imports obey the
     /// same one-row-per-day invariant as every other write path.
+    ///
+    /// All or nothing. Every change is staged, then saved once; if that save
+    /// fails the context is rolled back and the ledger re-read from disk, so the
+    /// store and the record of what came from where can never disagree. Provenance
+    /// is written only after the data it describes is safely on disk.
     @discardableResult
     static func commit(
         _ decisions: [Decision],
         into context: ModelContext,
-        ledger: HealthSyncLedger,
+        ledger: ImportLedger,
+        batchID: UUID? = nil,
         calendar: Calendar = .current
-    ) -> Summary {
+    ) -> CommitResult {
         var touched = false
+        /// Provenance to record, held back until the save succeeds.
+        var pendingClaims: [ImportObservation] = []
+        var pendingReleases: [(Date, ImportObservation.Field)] = []
         /// Decisions that were valid when planned but no longer are, because she
         /// logged something on that day in the meantime. Counted as values kept.
         var stale = 0
@@ -300,7 +333,7 @@ enum HealthImportReconciler {
                     let claim = ledger.claim(day: decision.day, field: decision.field, calendar: calendar)
                     guard let claim, claim.importedValue == live.ledgerValue else {
                         // Filled by hand since the plan was made — it is hers.
-                        ledger.release(day: decision.day, field: decision.field, calendar: calendar)
+                        pendingReleases.append((decision.day, decision.field))
                         stale += 1
                         continue
                     }
@@ -308,14 +341,14 @@ enum HealthImportReconciler {
 
                 entry.apply(observation.value, to: decision.field)
                 entry.updatedAt = .now
-                ledger.record(observation, calendar: calendar)
+                pendingClaims.append(observation)
                 touched = true
 
             case .clear:
                 let entry = CycleStore.entry(for: decision.day, in: context, calendar: calendar)
                 entry.clear(decision.field)
                 entry.updatedAt = .now
-                ledger.release(day: decision.day, field: decision.field, calendar: calendar)
+                pendingReleases.append((decision.day, decision.field))
                 // A day emptied by a deletion should not linger as a blank row.
                 if !entry.hasContent { context.delete(entry) }
                 touched = true
@@ -323,14 +356,27 @@ enum HealthImportReconciler {
             case .keepUserValue:
                 // Her value stands, and the field is hers — drop any stale claim so
                 // no future sync mistakes it for Caelyn-owned data.
-                ledger.release(day: decision.day, field: decision.field, calendar: calendar)
+                pendingReleases.append((decision.day, decision.field))
 
             case .duplicate, .rejected:
                 continue
             }
         }
 
-        if touched { context.saveOrLog() }
+        if touched {
+            do {
+                try context.save()
+            } catch {
+                // Put the store back exactly as it was and forget the provenance
+                // that would have described writes which never happened.
+                context.rollback()
+                ledger.discardUnsavedChanges()
+                return .rolledBack(error.localizedDescription)
+            }
+        }
+
+        for observation in pendingClaims { ledger.record(observation, batchID: batchID, calendar: calendar) }
+        for (day, field) in pendingReleases { ledger.release(day: day, field: field, calendar: calendar) }
         ledger.save()
 
         var summary = summarize(decisions)
@@ -340,13 +386,13 @@ enum HealthImportReconciler {
             summary.keptUserValue += stale
             summary.filled = max(0, summary.filled - stale)
         }
-        return summary
+        return CommitResult(summary: summary, succeeded: true, failure: nil)
     }
 }
 
 // MARK: - Field access
 
-extension HealthObservation.Field {
+extension ImportObservation.Field {
     /// Coarse grouping used for the "what we found" breakdown.
     var summaryKey: String {
         switch self {
@@ -358,6 +404,12 @@ extension HealthObservation.Field {
         case .sexualActivity:   return "sexualActivity"
         case .symptom:          return "symptom"
         case .painType:         return "pain"
+        case .painScore:        return "pain"
+        case .mood:             return "mood"
+        case .energy:           return "energy"
+        case .medication:       return "medication"
+        case .note:             return "note"
+        case .customSymptom:    return "symptom"
         }
     }
 
@@ -370,12 +422,19 @@ extension HealthObservation.Field {
         case "mucus":    self = .cervicalMucus
         case "lh":       self = .ovulationTest
         case "pregtest": self = .pregnancyTest
-        case "sex":      self = .sexualActivity
+        case "sex":        self = .sexualActivity
+        case "painscore":  self = .painScore
+        case "mood":       self = .mood
+        case "energy":     self = .energy
+        case "medication": self = .medication
+        case "note":       self = .note
         default:
             if let raw = ledgerKey.dropPrefix("symptom:"), let symptom = Symptom(rawValue: raw) {
                 self = .symptom(symptom)
             } else if let raw = ledgerKey.dropPrefix("pain:"), let pain = PainType(rawValue: raw) {
                 self = .painType(pain)
+            } else if let raw = ledgerKey.dropPrefix("custom:"), !raw.isEmpty {
+                self = .customSymptom(raw)
             } else {
                 return nil
             }
@@ -392,7 +451,7 @@ private extension String {
 extension CycleEntry {
     /// Current value of a field, in the merge engine's vocabulary. `nil` means
     /// "nothing logged here", which is the only state an import may fill freely.
-    func value(for field: HealthObservation.Field) -> HealthObservation.Value? {
+    func value(for field: ImportObservation.Field) -> ImportObservation.Value? {
         switch field {
         case .flow:             return flow.map { .flow($0) }
         case .basalTemperature: return basalTemperature.map { .temperature($0) }
@@ -405,10 +464,17 @@ extension CycleEntry {
             return .symptomSeverity(symptomSeverity[symptom.rawValue] ?? 2)
         case .painType(let pain):
             return painTypes.contains(pain) ? .present : nil
+        case .painScore:  return pain.map { .painScore($0) }
+        case .mood:       return mood.map { .mood($0) }
+        case .energy:     return energyLevel.map { .energy($0) }
+        case .medication: return medication.flatMap { $0.isEmpty ? nil : .text($0) }
+        case .note:       return note.flatMap { $0.isEmpty ? nil : .text($0) }
+        case .customSymptom(let name):
+            return loggedCustomSymptoms.contains(name) ? .present : nil
         }
     }
 
-    func apply(_ value: HealthObservation.Value, to field: HealthObservation.Field) {
+    func apply(_ value: ImportObservation.Value, to field: ImportObservation.Field) {
         switch (field, value) {
         case (.flow, .flow(let f)):                     flow = f
         case (.basalTemperature, .temperature(let t)):  basalTemperature = t
@@ -423,12 +489,19 @@ extension CycleEntry {
             if !symptoms.contains(symptom) { symptoms.append(symptom) }
         case (.painType(let pain), _):
             if !painTypes.contains(pain) { painTypes.append(pain) }
+        case (.painScore, .painScore(let score)):   pain = score
+        case (.mood, .mood(let m)):                 mood = m
+        case (.energy, .energy(let e)):             energyLevel = e
+        case (.medication, .text(let t)):           medication = t
+        case (.note, .text(let t)):                 note = t
+        case (.customSymptom(let name), _):
+            if !loggedCustomSymptoms.contains(name) { loggedCustomSymptoms.append(name) }
         default:
-            break   // mismatched pairing — the catalog builds these, so unreachable
+            break   // mismatched pairing — sources build these, so unreachable
         }
     }
 
-    func clear(_ field: HealthObservation.Field) {
+    func clear(_ field: ImportObservation.Field) {
         switch field {
         case .flow:             flow = nil
         case .basalTemperature: basalTemperature = nil
@@ -441,6 +514,13 @@ extension CycleEntry {
             symptomSeverity[symptom.rawValue] = nil
         case .painType(let pain):
             painTypes.removeAll { $0 == pain }
+        case .painScore:  pain = nil
+        case .mood:       mood = nil
+        case .energy:     energyLevel = nil
+        case .medication: medication = nil
+        case .note:       note = nil
+        case .customSymptom(let name):
+            loggedCustomSymptoms.removeAll { $0 == name }
         }
     }
 }

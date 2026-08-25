@@ -370,7 +370,7 @@ enum HealthKitService {
     @discardableResult
     static func importFlowFromHealth(
         into context: ModelContext,
-        ledger: HealthSyncLedger = .shared,
+        ledger: ImportLedger = .shared,
         calendar: Calendar = .current,
         today: Date = .now
     ) async throws -> ImportResult {
@@ -382,7 +382,7 @@ enum HealthKitService {
         var byDay: [Date: CycleEntry] = [:]
         for entry in entries { byDay[calendar.startOfDay(for: entry.date)] = entry }
 
-        let decisions = HealthImportReconciler.plan(
+        let decisions = ImportReconciler.plan(
             observations: observations,
             currentValue: { day, field in byDay[calendar.startOfDay(for: day)]?.value(for: field) },
             ledger: ledger,
@@ -391,7 +391,7 @@ enum HealthKitService {
             calendar: calendar,
             today: today
         )
-        let summary = HealthImportReconciler.commit(decisions, into: context, ledger: ledger, calendar: calendar)
+        let summary = ImportReconciler.commit(decisions, into: context, ledger: ledger, calendar: calendar).summary
         return ImportResult(
             entriesCreated: summary.filled,
             entriesUpdated: summary.updated,
