@@ -12,7 +12,7 @@ enum ImportPlanner {
 
     // MARK: - Detection
 
-    struct Identification {
+    struct Identification: Sendable {
         let source: ImportSourceID
         let confidence: ImportDetection
         /// Sources that also recognised the file. More than one certain match is
@@ -20,23 +20,34 @@ enum ImportPlanner {
         let alsoMatched: [ImportSourceID]
     }
 
-    private static func detector(for id: ImportSourceID) -> (inout ImportPayload) -> ImportDetection {
+    /// A file that has been read and understood, but not yet compared against
+    /// anything she has logged. Carries no database state, so it can be produced
+    /// off the main thread and handed back.
+    struct ReadFile: Sendable {
+        let identification: Identification
+        let parsed: ParsedImport
+    }
+
+    nonisolated private static func detector(for id: ImportSourceID) -> (inout ImportPayload) -> ImportDetection {
         switch id {
         case .caelyn:      return CaelynExportSource.detect
         case .clue:        return ClueSource.detect
         case .flo:         return FloSource.detect
         case .genericCSV:  return GenericTableSource.detect
         case .genericJSON: return GenericJSONSource.detect
+        // Never a file, so nothing can be detected as it.
+        case .appleHealth: return { _ in .no }
         }
     }
 
-    private static func parser(for id: ImportSourceID) -> (inout ImportPayload, Calendar) throws -> ParsedImport {
+    nonisolated private static func parser(for id: ImportSourceID) -> (inout ImportPayload, Calendar) throws -> ParsedImport {
         switch id {
         case .caelyn:      return CaelynExportSource.parse
         case .clue:        return ClueSource.parse
         case .flo:         return FloSource.parse
         case .genericCSV:  return GenericTableSource.parse
         case .genericJSON: return GenericJSONSource.parse
+        case .appleHealth: return { _, _ in throw ImportSourceError.unsupported }
         }
     }
 
@@ -47,7 +58,7 @@ enum ImportPlanner {
     /// certainty, neither is trusted — Caelyn falls back to reading the file as a
     /// plain table or document, which maps less but cannot mis-map. Guessing wrong
     /// here would write years of history into the wrong fields, quietly.
-    static func identify(_ payload: inout ImportPayload) throws -> Identification {
+    nonisolated static func identify(_ payload: inout ImportPayload) throws -> Identification {
         guard !payload.isEmpty else { throw ImportSourceError.empty }
 
         var certain: [ImportSourceID] = []
@@ -74,6 +85,88 @@ enum ImportPlanner {
             return Identification(source: fallback, confidence: .generic, alsoMatched: [])
         }
         throw ImportSourceError.unsupported
+    }
+
+    /// Identify and parse a file. No database, no main thread — reading a
+    /// five-year export is real work, and doing it on the main thread would freeze
+    /// the screen she is looking at.
+    nonisolated static func read(
+        filename: String,
+        data: Data,
+        calendar: Calendar = .current
+    ) throws -> ReadFile {
+        var payload = ImportPayload(filename: filename, data: data)
+        let identification = try identify(&payload)
+        let parsed = try parser(for: identification.source)(&payload, calendar)
+        return ReadFile(identification: identification, parsed: parsed)
+    }
+
+    /// Read a file off the main thread, then work out what it would change.
+    ///
+    /// The split matters: parsing is CPU-bound and belongs on a background thread,
+    /// while comparing against her existing entries needs the store and therefore
+    /// the main actor. Doing both in one place would either block the UI or touch
+    /// SwiftData from the wrong thread.
+    static func plan(
+        filename: String,
+        data: Data,
+        context: ModelContext,
+        ledger: ImportLedger = .shared,
+        calendar: Calendar = .current,
+        today: Date = .now
+    ) async throws -> ImportPreview {
+        let file = try await Task.detached(priority: .userInitiated) {
+            try read(filename: filename, data: data, calendar: calendar)
+        }.value
+        return plan(file, context: context, ledger: ledger, calendar: calendar, today: today)
+    }
+
+    /// Compare an already-read file against what she has logged.
+    static func plan(
+        _ file: ReadFile,
+        context: ModelContext,
+        ledger: ImportLedger = .shared,
+        calendar: Calendar = .current,
+        today: Date = .now
+    ) -> ImportPreview {
+        let identification = file.identification
+        let parsed = file.parsed
+
+        guard !parsed.observations.isEmpty else {
+            return ImportPreview(
+                source: identification.source,
+                confidence: identification.confidence,
+                ambiguousWith: identification.alsoMatched,
+                summary: ImportReconciler.Summary(),
+                parsed: parsed,
+                decisions: [],
+                batchID: UUID()
+            )
+        }
+
+        let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
+        var byDay: [Date: CycleEntry] = [:]
+        for entry in entries { byDay[calendar.startOfDay(for: entry.date)] = entry }
+
+        let decisions = ImportReconciler.plan(
+            observations: parsed.observations,
+            currentValue: { day, field in byDay[calendar.startOfDay(for: day)]?.value(for: field) },
+            ledger: ledger,
+            ownBundleID: Bundle.main.bundleIdentifier ?? "",
+            acceptOwnSource: true,
+            calendar: calendar,
+            today: today
+        )
+
+        return ImportPreview(
+            source: identification.source,
+            confidence: identification.confidence,
+            ambiguousWith: identification.alsoMatched,
+            summary: ImportReconciler.summarize(decisions),
+            parsed: parsed,
+            decisions: decisions,
+            batchID: UUID()
+        )
     }
 
     // MARK: - Plan

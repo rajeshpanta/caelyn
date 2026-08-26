@@ -28,7 +28,7 @@ enum ImportReconciler {
 
     // MARK: - Decisions
 
-    enum Action: Equatable {
+    enum Action: Equatable, Sendable {
         /// Field was empty — the imported value fills it.
         case fill
         /// Caelyn still owns this field and its source changed the value.
@@ -42,7 +42,7 @@ enum ImportReconciler {
         case rejected(Rejection)
     }
 
-    enum Rejection: String, Equatable {
+    enum Rejection: String, Equatable, Sendable {
         case futureDate
         case implausibleDate
         case temperatureOutOfRange
@@ -55,7 +55,7 @@ enum ImportReconciler {
         case supersededInBatch
     }
 
-    struct Decision: Equatable {
+    struct Decision: Equatable, Sendable {
         let day: Date
         let field: ImportObservation.Field
         let action: Action
@@ -67,7 +67,7 @@ enum ImportReconciler {
     // MARK: - Summary
 
     /// What a plan would do, in the shape the confirmation screen needs.
-    struct Summary: Equatable {
+    struct Summary: Equatable, Sendable {
         var filled = 0
         var updated = 0
         var keptUserValue = 0

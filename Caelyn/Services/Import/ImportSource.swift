@@ -7,12 +7,16 @@ import Foundation
 /// verified and parsed. Claiming support Caelyn does not have would be worse than
 /// offering none: she would follow the instructions, hand over years of history,
 /// and get silence.
-enum ImportSourceID: String, CaseIterable, Identifiable {
+enum ImportSourceID: String, CaseIterable, Identifiable, Sendable {
     case caelyn
     case clue
     case flo
     case genericCSV
     case genericJSON
+    /// Not a file format — the history already on her iPhone. It shares this type
+    /// so both routes produce the same preview and the same undo, and it is kept
+    /// out of `detectionOrder` because no file can ever be it.
+    case appleHealth
 
     var id: String { rawValue }
 
@@ -24,6 +28,7 @@ enum ImportSourceID: String, CaseIterable, Identifiable {
         case .flo:         return "Flo"
         case .genericCSV:  return "Spreadsheet"
         case .genericJSON: return "Another app"
+        case .appleHealth: return "Apple Health"
         }
     }
 
@@ -41,7 +46,7 @@ enum ImportSourceID: String, CaseIterable, Identifiable {
 /// misidentified file is silent, plausible-looking corruption — so a source
 /// either recognises a file by structure it could not have by coincidence, or it
 /// declines and lets the generic reader do the honest, conservative thing.
-enum ImportDetection: Equatable {
+enum ImportDetection: Equatable, Sendable {
     /// Structural evidence that is not reachable by accident.
     case certain
     /// Readable, but only as a generic table or document.
@@ -70,7 +75,7 @@ protocol ImportSource {
 }
 
 /// What a source found, before any merge decisions are made.
-struct ParsedImport {
+struct ParsedImport: Sendable {
     var observations: [ImportObservation] = []
 
     /// Columns or keys Caelyn saw and chose not to map. Surfaced so she can tell

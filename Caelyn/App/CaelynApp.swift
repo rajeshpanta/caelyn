@@ -13,12 +13,26 @@ struct CaelynApp: App {
     private static let isPaywallMode    = CommandLine.arguments.contains("--screenshot-paywall")
     private static let isOnboardingUITest = CommandLine.arguments.contains("--ui-test-onboarding")
 
+    /// A file handed to Caelyn from Files, Mail or another app's share sheet.
+    /// Held here rather than deeper in the view tree so it survives the app lock
+    /// and is presented once the app is actually usable.
+    @State private var incomingFile: IncomingImportFile?
+
     var body: some Scene {
         WindowGroup {
             AppLockGate {
                 ThemedContentView()
                     .appPreviewMask()
                     .syncWidgetData()
+                    .sheet(item: $incomingFile) { file in
+                        BringHistoryView(incomingFile: file)
+                    }
+            }
+            .onOpenURL { url in
+                // Read the bytes now, while the security scope is open, and hold
+                // those instead of the URL — by the time the sheet presents, the
+                // original location may no longer be reachable.
+                if let file = IncomingImportFile(openedAt: url) { incomingFile = file }
             }
             .task {
                 if Self.isOnboardingUITest {

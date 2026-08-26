@@ -23,6 +23,39 @@ struct ImportPreview {
 
     var hasChanges: Bool { summary.changeCount > 0 }
 
+    /// Whether this is the Apple Health route rather than a file.
+    var isAppleHealth: Bool { source == .appleHealth }
+
+    /// Oldest and newest day this import would touch, if any.
+    var dateRange: ClosedRange<Date>? {
+        let days = decisions.compactMap { decision -> Date? in
+            switch decision.action {
+            case .fill, .update, .clear: return decision.day
+            default: return nil
+            }
+        }
+        guard let first = days.min(), let last = days.max() else { return nil }
+        return first...last
+    }
+
+    /// "4 years of history", "8 months of history" — measured from the actual
+    /// span of the data, never rounded up into a claim the file cannot support.
+    /// Nil when the span is too short to describe honestly.
+    func spanDescription(calendar: Calendar = .current) -> String? {
+        guard let range = dateRange else { return nil }
+        let days = calendar.dateComponents([.day], from: range.lowerBound, to: range.upperBound).day ?? 0
+        switch days {
+        case ..<45:
+            return nil
+        case 45..<365:
+            let months = max(2, Int((Double(days) / 30.44).rounded(.down)))
+            return "\(months) months of history"
+        default:
+            let years = Int((Double(days) / 365.25).rounded(.down))
+            return years <= 1 ? "a year of history" : "\(years) years of history"
+        }
+    }
+
     /// True when Caelyn recognised the app, rather than reading the file as a
     /// plain table.
     var recognisedTheApp: Bool { confidence == .certain && ambiguousWith.isEmpty }
@@ -41,6 +74,9 @@ struct ImportPreview {
 
     /// Where Caelyn thinks it came from, in her words.
     var sourceLine: String {
+        if isAppleHealth {
+            return "From the cycle and fertility history already stored on your iPhone."
+        }
         switch (recognisedTheApp, source) {
         case (true, .caelyn):  return "This is a Caelyn backup."
         case (true, let app):  return "This looks like a \(app.displayName) export."
@@ -59,6 +95,28 @@ struct ImportPreview {
         summary.keptUserValue > 0
             ? "Nothing you logged in Caelyn will change. \(summary.keptUserValue) value\(summary.keptUserValue == 1 ? "" : "s") in this file differ\(summary.keptUserValue == 1 ? "s" : "") from what you wrote — Caelyn is keeping yours."
             : "Nothing you already logged in Caelyn will change."
+    }
+
+    /// Build a preview from an Apple Health read, so both routes reach the same
+    /// confirmation screen and the same undo. The Health path was already split
+    /// into plan-then-apply, so nothing about it had to change to get here.
+    static func fromHealth(_ plan: HealthSyncService.Plan) -> ImportPreview {
+        var parsed = ParsedImport()
+        parsed.observations = plan.readResult.observations
+        if !plan.unreadableTypes.isEmpty {
+            parsed.assumptions.append(
+                "Some of what you asked Caelyn to read wasn't available, so it brought across everything else."
+            )
+        }
+        return ImportPreview(
+            source: .appleHealth,
+            confidence: .certain,
+            ambiguousWith: [],
+            summary: plan.summary,
+            parsed: parsed,
+            decisions: plan.decisions,
+            batchID: UUID()
+        )
     }
 
     /// Assumptions the format forced, plus anything Caelyn had to skip. Shown

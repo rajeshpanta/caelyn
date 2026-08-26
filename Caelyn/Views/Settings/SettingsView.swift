@@ -1,6 +1,5 @@
 import SwiftUI
 import SwiftData
-import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @Query private var profiles: [UserProfile]
@@ -11,9 +10,8 @@ struct SettingsView: View {
     @State private var showingCycleSettings = false
     @State private var showingPrivacyTrust = false
     @State private var showingPINManage = false
-    @State private var showingImporter = false
-    @State private var showingImportResult = false
-    @State private var importMessage = ""
+    @State private var showingBringHistory = false
+    @State private var showingImportHistory = false
     @State private var showingParanoidConfirm = false
     @State private var showingCloudSync = false
     @State private var showingFirstDayPicker = false
@@ -87,6 +85,9 @@ struct SettingsView: View {
             }
             .navigationDestination(isPresented: $showingReminders) {
                 RemindersView()
+            }
+            .navigationDestination(isPresented: $showingImportHistory) {
+                ImportHistoryView()
             }
             .navigationDestination(isPresented: $showingHealthKit) {
                 HealthKitConnectView()
@@ -409,11 +410,17 @@ struct SettingsView: View {
             SettingsRow(
                 icon: "square.and.arrow.down",
                 iconColor: CaelynColor.primaryPlum,
-                title: "Import data",
-                // The row keeps its name until the Phase 3 "Bring your history"
-                // screen replaces it; only what it can read has changed.
-                detail: "From Caelyn, Clue, Flo or a spreadsheet",
-                action: { showingImporter = true }
+                title: "Bring your history",
+                detail: "From another app",
+                action: { showingBringHistory = true }
+            )
+            SettingsDivider()
+            SettingsRow(
+                icon: "clock.arrow.circlepath",
+                iconColor: CaelynColor.primaryPlum,
+                title: "Imports",
+                detail: nil,
+                action: { showingImportHistory = true }
             )
             SettingsDivider()
             SettingsRow(
@@ -425,20 +432,8 @@ struct SettingsView: View {
                 isDestructive: true
             )
         }
-        .fileImporter(
-            isPresented: $showingImporter,
-            // JSON as well as CSV, because the two biggest trackers both export
-            // JSON. `.data` is the catch-all for files whose type the sending app
-            // never declared — common for something emailed out of a support desk.
-            allowedContentTypes: [.commaSeparatedText, .plainText, .json, .data],
-            allowsMultipleSelection: false
-        ) { result in
-            handleImport(result)
-        }
-        .alert("Import", isPresented: $showingImportResult) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(importMessage)
+        .sheet(isPresented: $showingBringHistory) {
+            BringHistoryView()
         }
     }
 
@@ -470,47 +465,6 @@ struct SettingsView: View {
         modelContext.saveOrLog()
         Task { await NotificationService.cancelAll() }
         Haptics.success()
-    }
-
-    /// Switch Kit: read the picked file — Caelyn's own export, a Clue or Flo
-    /// export, or any spreadsheet with dates in it — and merge it in. Caelyn works
-    /// out which it is from the file's structure. Never overwrites hand-logged data.
-    ///
-    /// This commits straight away, which is what this row has always done. The
-    /// confirm-before-importing flow is built (`ImportPlanner.plan` returns a full
-    /// `ImportPreview`) and is what the Phase 3 screen will present.
-    private func handleImport(_ result: Result<[URL], Error>) {
-        switch result {
-        case .failure:
-            importMessage = "Couldn't open that file."
-            showingImportResult = true
-        case .success(let urls):
-            guard let url = urls.first else { return }
-            let secured = url.startAccessingSecurityScopedResource()
-            defer { if secured { url.stopAccessingSecurityScopedResource() } }
-            guard let data = try? Data(contentsOf: url) else {
-                importMessage = ImportService.ImportError.unreadable.localizedDescription
-                showingImportResult = true
-                return
-            }
-            do {
-                let outcome = try ImportService.importFile(
-                    named: url.lastPathComponent, data: data, into: modelContext
-                )
-                var parts = ["Brought over \(outcome.total) day\(outcome.total == 1 ? "" : "s") of history"]
-                if outcome.entriesCreated > 0 { parts.append("\(outcome.entriesCreated) new") }
-                if outcome.entriesUpdated > 0 { parts.append("\(outcome.entriesUpdated) merged") }
-                var message = parts.joined(separator: " — ") + ". Your predictions now use this history."
-                if outcome.keptYourValue > 0 {
-                    message += " \(outcome.keptYourValue) value\(outcome.keptYourValue == 1 ? "" : "s") differed from what you had logged; Caelyn kept yours."
-                }
-                importMessage = message
-                Haptics.success()
-            } catch {
-                importMessage = error.localizedDescription
-            }
-            showingImportResult = true
-        }
     }
 
     // MARK: - App section

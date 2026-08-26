@@ -97,9 +97,11 @@ enum HealthSyncService {
         _ plan: Plan,
         context: ModelContext,
         ledger: ImportLedger = .shared,
+        batchID: UUID? = nil,
         calendar: Calendar = .current
     ) -> ImportReconciler.Summary {
-        let result = ImportReconciler.commit(plan.decisions, into: context, ledger: ledger, calendar: calendar)
+        let result = ImportReconciler.commit(plan.decisions, into: context, ledger: ledger,
+                                             batchID: batchID, calendar: calendar)
         // Anchors move only when the merge actually landed. A rolled-back save
         // must be re-read next time, not skipped past.
         if result.succeeded { HealthKitReader.commitAnchors(plan.readResult, types: plan.types) }

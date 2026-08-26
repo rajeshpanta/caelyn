@@ -7,7 +7,7 @@ import Foundation
 /// row of a Clue export and a line of a spreadsheet all normalize into an
 /// `ImportObservation`, so there is a single reconciliation policy to reason about
 /// and to test — rather than one merge path per source, each drifting on its own.
-struct ImportObservation: Equatable {
+struct ImportObservation: Equatable, Sendable {
 
     /// Which Caelyn field an observation lands in.
     ///
@@ -15,7 +15,7 @@ struct ImportObservation: Equatable {
     /// resolution have to be per-field, because a single day routinely mixes
     /// hand-logged values with imported ones (she logs her flow in Caelyn, her
     /// ring writes the temperature).
-    enum Field: Hashable {
+    enum Field: Hashable, Sendable {
         case flow
         case basalTemperature
         case cervicalMucus
@@ -59,7 +59,7 @@ struct ImportObservation: Equatable {
 
     /// The value itself, in Caelyn's own vocabulary — mapping from HealthKit
     /// enums or a foreign app's spellings has already happened by this point.
-    enum Value: Equatable {
+    enum Value: Equatable, Sendable {
         case flow(FlowLevel)
         case temperature(Double)          // °C
         case mucus(CervicalMucus)

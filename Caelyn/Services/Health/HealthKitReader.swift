@@ -40,7 +40,10 @@ enum HealthKitReader {
                 let samples = try await fetchSamples(type: type, predicate: nil)
                 result.observations += samples.compactMap { HealthDataCatalog.observation(from: $0, calendar: calendar) }
             } catch {
-                log.info("Couldn't read \(type.identifier, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                // The type name is redacted: which health categories she has data
+                // in, or has denied, is itself information about her. The error
+                // text is what makes the log useful for debugging.
+                log.info("Couldn't read \(type.identifier, privacy: .private): \(error.localizedDescription, privacy: .public)")
                 result.unreadableTypes.append(type.identifier)
             }
         }
@@ -60,7 +63,7 @@ enum HealthKitReader {
                 result.deletedRecordIDs += batch.deleted
                 if let anchor = batch.newAnchor { result.anchors[type.identifier] = anchor }
             } catch {
-                log.info("Couldn't sync \(type.identifier, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                log.info("Couldn't sync \(type.identifier, privacy: .private): \(error.localizedDescription, privacy: .public)")
                 result.unreadableTypes.append(type.identifier)
             }
         }

@@ -52,6 +52,21 @@ targets:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
         com.apple.developer.usernotifications.time-sensitive: true
+    # Registering these is what puts Caelyn in the share sheet and the "Open in"
+    # list for an export she has just downloaded. A Share Extension would be the
+    # heavier alternative — a second process with its own memory limit that would
+    # still have to hand the file to the app to show the confirmation screen.
+    # Document types get the same result through one lifecycle callback.
+    info:
+      path: Caelyn/Info.plist
+      properties:
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: "Cycle history export"
+            LSHandlerRank: Alternate
+            CFBundleTypeRole: Viewer
+            LSItemContentTypes:
+              - public.comma-separated-values-text
+              - public.json
     dependencies:
       - target: CaelynWidget
         embed: true
@@ -87,6 +102,9 @@ targets:
         # crypto of its own, which is exempt. Declaring it here answers the
         # question at build time instead of being prompted on every single upload.
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        # Opening a file in place rather than copying it in. Caelyn only ever
+        # reads, so the sandbox does not need a private copy.
+        INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace: YES
         SWIFT_EMIT_LOC_STRINGS: YES
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"
