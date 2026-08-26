@@ -22,7 +22,7 @@ settings:
     # highest number used anywhere so no upload can ever collide. Bump it before
     # every upload, and keep the widget/watch CFBundleVersion below identical — a
     # mismatch between the app and its embedded bundles trips ITMS-90473.
-    CURRENT_PROJECT_VERSION: 11
+    CURRENT_PROJECT_VERSION: 12
     DEVELOPMENT_TEAM: "7T9897GFKH"
 
 targets:
@@ -156,7 +156,7 @@ targets:
       path: CaelynWidget/Info.plist
       properties:
         CFBundleDisplayName: CaelynWidget
-        CFBundleVersion: "11"
+        CFBundleVersion: "12"
         CFBundleShortVersionString: "1.0"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
@@ -195,7 +195,7 @@ targets:
       path: CaelynWatch/Info.plist
       properties:
         CFBundleDisplayName: Caelyn
-        CFBundleVersion: "11"
+        CFBundleVersion: "12"
         CFBundleShortVersionString: "1.0"
         WKApplication: true
         WKCompanionAppBundleIdentifier: smallpanta-icould.com.caelynperiodtracker
