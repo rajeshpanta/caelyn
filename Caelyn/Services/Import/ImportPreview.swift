@@ -23,6 +23,8 @@ struct ImportPreview {
     /// Set when an Apple Health read was narrowed to one app, so the screen can
     /// name that app rather than saying "Apple Health" for everything.
     var healthSourceLabel: String?
+    /// That app's own name, for sentences that read better without "via Apple Health".
+    var healthAppName: String?
 
     var hasChanges: Bool { summary.changeCount > 0 }
 
@@ -71,7 +73,7 @@ struct ImportPreview {
             // "this file" is wrong for an Apple Health read — there is no file —
             // and it is the first line she sees when a route finds nothing, which
             // is exactly when the wording has to make sense.
-            let subject = isAppleHealth ? (healthSourceLabel == nil ? "Apple Health" : "Period Tracker") : "this file"
+            let subject = isAppleHealth ? (healthAppName ?? "Apple Health") : "this file"
             return summary.keptUserValue > 0
                 ? "Everything in \(subject) is already in Caelyn"
                 : "Nothing new to bring over"
@@ -82,8 +84,8 @@ struct ImportPreview {
     /// Where Caelyn thinks it came from, in her words.
     var sourceLine: String {
         if isAppleHealth {
-            if healthSourceLabel != nil {
-                return "From what Period Tracker has put into Apple Health on this iPhone."
+            if let app = healthAppName {
+                return "From what \(app) has put into Apple Health on this iPhone."
             }
             return "From the cycle and fertility history already stored on your iPhone."
         }
@@ -110,7 +112,8 @@ struct ImportPreview {
     /// Build a preview from an Apple Health read, so both routes reach the same
     /// confirmation screen and the same undo. The Health path was already split
     /// into plan-then-apply, so nothing about it had to change to get here.
-    static func fromHealth(_ plan: HealthSyncService.Plan, sourceLabel: String? = nil) -> ImportPreview {
+    static func fromHealth(_ plan: HealthSyncService.Plan,
+                           sourceFilter: HealthSyncService.SourceFilter? = nil) -> ImportPreview {
         var parsed = ParsedImport()
         parsed.observations = plan.readResult.observations
         if !plan.unreadableTypes.isEmpty {
@@ -126,7 +129,8 @@ struct ImportPreview {
             parsed: parsed,
             decisions: plan.decisions,
             batchID: UUID(),
-            healthSourceLabel: sourceLabel
+            healthSourceLabel: sourceFilter?.label,
+            healthAppName: sourceFilter?.appName
         )
     }
 

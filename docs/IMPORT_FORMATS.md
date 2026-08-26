@@ -190,22 +190,41 @@ Imports from this route are recorded as **"Period Tracker via Apple Health"** ra
 than plain Apple Health, so her list of imports says which app each batch came from
 and undo stays per-app.
 
-## Natural Cycles — not implemented
+## Natural Cycles — Apple Health bridge, no file adapter
 
-**How she gets it:** the account page offers a download; it arrives as a zip of
-CSVs, of which `Daily Entries.csv` holds the per-day data.
+**The app:** *Natural Cycles: Fertility App*, **NaturalCycles Nordic AB**,
+`com.naturalcycles.cordova`, **v5.8.4**, App Store ID **765535549**. Verified via
+the iTunes lookup API, 2026-08-26.
 
-**Why there is no adapter:** the filename is documented, the **column names are
-not**. Writing a parser against guessed headers is precisely the failure mode this
-document exists to prevent — a temperature column read as the wrong field is
-invisible corruption. `Daily Entries.csv` goes through the generic table reader,
-which matches `date`, `temperature`/`bbt` and flow-ish columns by name and reports
-whatever it could not place.
+**A real export exists and is still not parsed.** Natural Cycles does provide a
+data download — a compressed folder of CSVs, one of which holds daily entries with
+temperatures and period entries. Unlike GP Apps or Simple Design, the artifact is
+unambiguous. What is missing is any description of its **columns**: their help
+centre sits behind a Cloudflare challenge, no independent parser exists on GitHub,
+and no third party documents the schema. Reading a temperature column by position
+and guessing its meaning is exactly the failure mode this file exists to prevent.
 
-**To finish it:** obtain one real export, record the exact headers here, then add
-the adapter. The interface is ready; nothing else is blocking it.
+**The Health route is documented by the vendor.** Natural Cycles' own support
+material describes Settings → Integrations → Apple Health, where a user chooses to
+export and/or import cycle data.
 
----
+**One real limitation, and it matters more here than anywhere else.** Natural
+Cycles documents that **temperatures cannot be exported to Apple Health** — a
+platform restriction on writing Apple's temperature fields — *except* for users of
+their own connected thermometer. Temperature is the entire premise of Natural
+Cycles, so the picker note says this before she starts rather than letting her
+discover an empty chart afterwards.
+
+**Recoverable via the bridge:** period days and cycle history, plus any other type
+Natural Cycles writes among the sixteen Caelyn reads.
+**Not recoverable:** temperatures for most users, and anything Apple Health has no
+type Caelyn reads for.
+
+**Wiring:** `ImportSourceGuide.naturalCycles`, filtered to
+`com.naturalcycles.cordova`, provenance **"Natural Cycles via Apple Health"**.
+
+**To upgrade to a direct adapter,** one real export folder settles it — the daily
+entries CSV with its header row is all the evidence needed.
 
 ## Ovia — not implemented
 

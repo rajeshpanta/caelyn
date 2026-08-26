@@ -142,7 +142,7 @@ final class BringHistoryModel {
         )
         healthPlan = plan
         healthSourceFilter = sourceFilter
-        preview = ImportPreview.fromHealth(plan, sourceLabel: sourceFilter?.label)
+        preview = ImportPreview.fromHealth(plan, sourceFilter: sourceFilter)
         phase = .confirming
     }
 
