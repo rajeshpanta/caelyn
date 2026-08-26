@@ -16,7 +16,7 @@ settings:
     # Ships as 1.0 — the App Store Connect version record is 1.0, and nothing has
     # ever been released, so the earlier 1.0.1 uploads are just unused pre-release
     # builds sitting in Connect.
-    MARKETING_VERSION: "1.0"
+    MARKETING_VERSION: "1.1"
     # Build numbers must rise within a version train. 1.0 is a fresh train (its
     # builds are separate from the 1.0.1 ones), but this stays strictly above the
     # highest number used anywhere so no upload can ever collide. Bump it before
@@ -157,7 +157,7 @@ targets:
       properties:
         CFBundleDisplayName: CaelynWidget
         CFBundleVersion: "12"
-        CFBundleShortVersionString: "1.0"
+        CFBundleShortVersionString: "1.1"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
@@ -196,7 +196,7 @@ targets:
       properties:
         CFBundleDisplayName: Caelyn
         CFBundleVersion: "12"
-        CFBundleShortVersionString: "1.0"
+        CFBundleShortVersionString: "1.1"
         WKApplication: true
         WKCompanionAppBundleIdentifier: smallpanta-icould.com.caelynperiodtracker
     entitlements:
