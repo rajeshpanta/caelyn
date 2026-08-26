@@ -160,6 +160,12 @@ struct ImportSourceGuide {
         actionLabel: "Choose the file"
     )
 
+    /// Narrows an Apple Health route to one app's records. Nil means the whole
+    /// of Health, which is what the Apple Health row itself promises.
+    var healthSourceFilter: HealthSyncService.SourceFilter? {
+        key == "period-tracker" ? .periodTrackerGPApps : nil
+    }
+
     /// True when the instructions end at the file browser.
     var needsAFile: Bool { route == .fileAfterInstructions }
 

@@ -68,7 +68,7 @@ struct BringHistoryView: View {
                     if guide.needsAFile {
                         showingFilePicker = true
                     } else {
-                        Task { await startAppleHealth() }
+                        Task { await startAppleHealth(limitTo: guide.healthSourceFilter) }
                     }
                 }
             }
@@ -136,7 +136,7 @@ struct BringHistoryView: View {
             if guide.hasInstructions {
                 guideSource = guide
             } else {
-                Task { await startAppleHealth() }
+                Task { await startAppleHealth(limitTo: guide.healthSourceFilter) }
             }
         } label: {
             HStack(spacing: CaelynSpacing.sm) {
@@ -354,12 +354,12 @@ struct BringHistoryView: View {
         }
     }
 
-    private func startAppleHealth() async {
+    private func startAppleHealth(limitTo filter: HealthSyncService.SourceFilter? = nil) async {
         guard let profile else {
             model.dismissError()
             return
         }
-        await model.readAppleHealth(profile: profile, context: modelContext)
+        await model.readAppleHealth(profile: profile, context: modelContext, limitTo: filter)
     }
 }
 

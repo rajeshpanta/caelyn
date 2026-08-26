@@ -172,6 +172,24 @@ while carrying `source: .appleHealth` and `route: .appleHealthAfterInstructions`
 Instructions come first because the sync switch lives inside GP Apps' app. No new
 HealthKit permission was added.
 
+**Source filtering.** Apple Health is a shared pool — Flo, Clue, Caelyn itself and
+the Health app all write into it — so a route promising *Period Tracker* history has
+to mean that and nothing else. `HealthSyncService.SourceFilter.periodTrackerGPApps`
+narrows the read to `com.gpapps.ptrackerlite` and `com.gpapps.ptracker`, matching on
+`ImportObservation.sourceBundleID`, which HealthKit stamps from
+`sourceRevision.source` and no caller can forge. The plain **Apple Health** row
+passes no filter and still imports everything she has approved.
+
+Two consequences worth remembering. A filtered route **never advances the sync
+anchors** — it examined one app's slice, and moving the shared anchor would tell the
+next full sync that everything else had already been seen. And it **ignores
+deletions**, because a deleted record is identified by id alone and a record from
+another app is not this route's to clear.
+
+Imports from this route are recorded as **"Period Tracker via Apple Health"** rather
+than plain Apple Health, so her list of imports says which app each batch came from
+and undo stays per-app.
+
 ## Natural Cycles — not implemented
 
 **How she gets it:** the account page offers a download; it arrives as a zip of
