@@ -138,7 +138,7 @@ enum HealthDataCatalog {
                 field: field,
                 value: value,
                 recordID: sample.uuid,
-                sourceBundleID: source.bundleIdentifier ?? "",
+                sourceBundleID: source.bundleIdentifier,
                 sourceName: source.name,
                 recordedAt: sample.startDate
             )
@@ -210,10 +210,16 @@ enum HealthDataCatalog {
 
     static func flowLevel(fromRawValue value: Int) -> FlowLevel? {
         switch value {
+        // A period day recorded without a heaviness. Kept rather than dropped:
+        // discarding it loses a bleeding day, and bleeding days are what every
+        // cycle length and prediction is built from.
+        case 1:  return .unspecified
         case 2:  return .light
         case 3:  return .medium
         case 4:  return .heavy
-        default: return nil   // unspecified / none / unknown — not a flow reading
+        // 5 is "no bleeding today". That is the absence of a period day, not one
+        // with an unknown amount, and it must never create an entry.
+        default: return nil
         }
     }
 

@@ -581,8 +581,10 @@ final class HealthSyncTests: XCTestCase {
         XCTAssertEqual(HealthDataCatalog.flowLevel(fromRawValue: 2), .light)
         XCTAssertEqual(HealthDataCatalog.flowLevel(fromRawValue: 3), .medium)
         XCTAssertEqual(HealthDataCatalog.flowLevel(fromRawValue: 4), .heavy)
-        // Unspecified and "none" are not flow readings and must not become one.
-        XCTAssertNil(HealthDataCatalog.flowLevel(fromRawValue: 1))
+        // Raw 1 is a bleeding day recorded without a heaviness. This assertion
+        // used to expect nil, which is exactly the bug that lost those days.
+        XCTAssertEqual(HealthDataCatalog.flowLevel(fromRawValue: 1), .unspecified)
+        // Raw 5 is "no bleeding today" — an absence, and still not a day.
         XCTAssertNil(HealthDataCatalog.flowLevel(fromRawValue: 5))
     }
 
@@ -621,6 +623,119 @@ final class HealthSyncTests: XCTestCase {
             XCTAssertEqual(HealthDataCatalog.flowLevel(from: sample), level,
                            "\(level.rawValue) did not survive the round trip")
         }
+    }
+
+    // MARK: - Bleeding with no recorded intensity (H-6)
+
+    /// HealthKit refuses a menstrual-flow sample without the cycle-start key, so
+    /// building one here mirrors what the store actually holds.
+    private func flowSample(rawValue: Int, on date: Date, cycleStart: Bool = false) -> HKCategorySample {
+        HKCategorySample(
+            type: HKCategoryType(.menstrualFlow),
+            value: rawValue,
+            start: date, end: date,
+            metadata: [HKMetadataKeyMenstrualCycleStart: cycleStart]
+        )
+    }
+
+    /// The controlled pair that found the bug: Apple Health raw 1 (intensity not
+    /// recorded) next to raw 4 (heavy). Caelyn used to build no observation at all
+    /// for raw 1, so the day vanished — no error, and a preview that quietly said
+    /// one period day instead of two.
+    func testUnspecifiedAndHeavyBothSurviveAnAppleHealthImport() {
+        let dayA = day(-20)   // unspecified
+        let dayB = day(-19)   // heavy
+
+        let observations = [
+            HealthDataCatalog.observation(from: flowSample(rawValue: 1, on: dayA, cycleStart: true), calendar: calendar),
+            HealthDataCatalog.observation(from: flowSample(rawValue: 4, on: dayB), calendar: calendar)
+        ]
+        XCTAssertEqual(observations.compactMap { $0 }.count, 2, "both days must become observations")
+
+        let summary = merge(observations.compactMap { $0 }, acceptOwnSource: true)
+
+        XCTAssertEqual(summary.byField["flow"], 2, "the preview must say two period days, not one")
+        XCTAssertEqual(summary.daysAffected, 2)
+        XCTAssertEqual(entry(on: dayA)?.flow, .unspecified, "the day is kept, without inventing an intensity")
+        XCTAssertEqual(entry(on: dayB)?.flow, .heavy)
+    }
+
+    func testUnspecifiedCountsAsABleedingDayInCycleReconstruction() {
+        // Two periods a month apart; the first day of each has no recorded
+        // intensity, exactly as an Apple Health import can deliver it.
+        var observations: [ImportObservation] = []
+        for cycle in 1...3 {
+            for offset in 0..<4 {
+                let date = day(-(cycle * 28) + offset)
+                let raw = offset == 0 ? 1 : 3
+                if let observation = HealthDataCatalog.observation(
+                    from: flowSample(rawValue: raw, on: date, cycleStart: offset == 0), calendar: calendar
+                ) { observations.append(observation) }
+            }
+        }
+        merge(observations, acceptOwnSource: true)
+
+        let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
+        let cycles = PredictionEngine.cycles(from: entries, today: today)
+        XCTAssertEqual(cycles.count, 2)
+        XCTAssertTrue(cycles.allSatisfy { $0.length == 28 },
+                      "a day with no recorded intensity is still the day the period started")
+        XCTAssertTrue(cycles.allSatisfy { $0.periodLength == 4 })
+    }
+
+    func testNoBleedingIsStillIgnored() {
+        // Raw 5 means "no bleeding today" — an absence, not a day with an unknown
+        // amount. It must never create an entry.
+        XCTAssertNil(HealthDataCatalog.flowLevel(fromRawValue: 5))
+        let observation = HealthDataCatalog.observation(from: flowSample(rawValue: 5, on: day(-3)), calendar: calendar)
+        XCTAssertNil(observation)
+    }
+
+    func testEveryAppleHealthFlowValueMapsAsApplesDocumentationDescribesIt() {
+        XCTAssertEqual(HealthDataCatalog.flowLevel(fromRawValue: 1), .unspecified)
+        XCTAssertEqual(HealthDataCatalog.flowLevel(fromRawValue: 2), .light)
+        XCTAssertEqual(HealthDataCatalog.flowLevel(fromRawValue: 3), .medium)
+        XCTAssertEqual(HealthDataCatalog.flowLevel(fromRawValue: 4), .heavy)
+        XCTAssertNil(HealthDataCatalog.flowLevel(fromRawValue: 5))
+        XCTAssertNil(HealthDataCatalog.flowLevel(fromRawValue: 99))
+    }
+
+    func testUnspecifiedIsWrittenBackToHealthAsUnspecified() {
+        XCTAssertEqual(HealthKitService.mapFlowToHK(.unspecified).rawValue, 1,
+                       "writing it back as any intensity would invent one")
+        XCTAssertEqual(HealthKitService.caelynFlow(fromHKRawValue: 1), .unspecified)
+    }
+
+    func testUnspecifiedDayCanStillBeOverwrittenByHerOwnChoice() {
+        let target = day(-21)
+        guard let observation = HealthDataCatalog.observation(
+            from: flowSample(rawValue: 1, on: target, cycleStart: true), calendar: calendar
+        ) else { return XCTFail("expected an observation") }
+        merge([observation], acceptOwnSource: true)
+        XCTAssertEqual(entry(on: target)?.flow, .unspecified)
+
+        entry(on: target)?.flow = .heavy      // she fills it in
+        context.saveOrLog()
+
+        // The same sample coming round again must not undo her choice.
+        let summary = merge([observation], acceptOwnSource: true)
+        XCTAssertEqual(entry(on: target)?.flow, .heavy)
+        XCTAssertEqual(summary.keptUserValue, 1)
+    }
+
+    func testRepeatedImportOfAnUnspecifiedDayDoesNotDuplicate() {
+        let target = day(-22)
+        guard let observation = HealthDataCatalog.observation(
+            from: flowSample(rawValue: 1, on: target, cycleStart: true), calendar: calendar
+        ) else { return XCTFail("expected an observation") }
+
+        let first = merge([observation], acceptOwnSource: true)
+        let second = merge([observation], acceptOwnSource: true)
+
+        XCTAssertEqual(first.filled, 1)
+        XCTAssertEqual(second.filled, 0)
+        XCTAssertEqual(second.duplicates, 1)
+        XCTAssertEqual(((try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []).count, 1)
     }
 
     func testIntermenstrualBleedingIsASymptomNotFlow() {

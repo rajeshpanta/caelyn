@@ -110,6 +110,59 @@ final class ImportSourceTests: XCTestCase {
         XCTAssertEqual(restored.note, "rough day, with \"quotes\" and, commas")
     }
 
+    func testUnspecifiedFlowRoundTripsThroughCaelynsOwnExport() throws {
+        // A day imported from Apple Health without a recorded heaviness must
+        // survive an export and re-import as the same thing — not silently
+        // become a level she never chose, and not vanish.
+        let day = calendar.date(byAdding: .day, value: -9, to: today)!
+        let entry = CycleEntry(date: day, flow: .unspecified)
+        context.insert(entry)
+        try context.save()
+
+        let csv = ExportService.generateCSV(entries: [entry], includeNotes: false)
+        XCTAssertTrue(csv.contains("unspecified"), "the export has to carry the value")
+        try context.delete(model: CycleEntry.self)
+        try context.save()
+
+        try importing(csv)
+        XCTAssertEqual(entries().first?.flow, .unspecified)
+    }
+
+    func testUnspecifiedSpellingsAreUnderstoodFromAnotherAppsFile() {
+        XCTAssertEqual(ImportValues.flow("unspecified"), .unspecified)
+        XCTAssertEqual(ImportValues.flow("Unknown"), .unspecified)
+        XCTAssertEqual(ImportValues.flow("not recorded"), .unspecified)
+        // And the levels she can actually pick are untouched.
+        XCTAssertEqual(ImportValues.flow("heavy"), .heavy)
+        XCTAssertEqual(ImportValues.flow("light"), .light)
+        XCTAssertNil(ImportValues.flow("fluorescent"))
+    }
+
+    func testAnUnspecifiedDayCanBeUndoneLikeAnyOther() throws {
+        let day = calendar.date(byAdding: .day, value: -8, to: today)!
+        let key = ImportLedger.dayKey(day, calendar: calendar)
+        let plan = try importing("date,flow\n\(key),unspecified")
+        XCTAssertEqual(entry(key)?.flow, .unspecified)
+
+        let outcome = ImportPlanner.undo(batchID: plan.batchID, context: context,
+                                         ledger: ledger, calendar: calendar)
+        XCTAssertTrue(outcome.succeeded)
+        XCTAssertNil(entry(key), "the day is removed just like any other imported day")
+    }
+
+    func testUnspecifiedNeverOverwritesAnIntensitySheChose() throws {
+        let day = calendar.date(byAdding: .day, value: -7, to: today)!
+        let key = ImportLedger.dayKey(day, calendar: calendar)
+        let mine = CycleEntry(date: day, flow: .heavy)
+        context.insert(mine)
+        try context.save()
+
+        let plan = try importing("date,flow\n\(key),unspecified")
+
+        XCTAssertEqual(entry(key)?.flow, .heavy, "a vaguer value must never replace a specific one she chose")
+        XCTAssertEqual(plan.summary.keptUserValue, 1)
+    }
+
     func testCaelynExportIsRecognisedAsCaelynNotAsASpreadsheet() throws {
         let csv = """
         date,flow,pain,pain_types,symptoms,mood,energy_level,medication,basal_temperature,cervical_mucus,sexual_activity,ovulation_test,pregnancy_test,custom_symptoms,note

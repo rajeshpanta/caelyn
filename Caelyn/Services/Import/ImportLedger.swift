@@ -55,7 +55,15 @@ final class ImportLedger {
         let daysAffected: Int
     }
 
-    static let shared = ImportLedger(fileURL: ImportLedger.defaultFileURL())
+    /// The app's ledger.
+    ///
+    /// `nonisolated` because this reference is used as a default argument
+    /// throughout the import pipeline, and default arguments are evaluated outside
+    /// the main actor. Handing out the reference is safe — the type is Sendable,
+    /// and every piece of mutable state on it is main-actor isolated, so nothing
+    /// can be read or written without hopping onto the main actor first. Without
+    /// this the references are a warning today and an error under Swift 6.
+    nonisolated static let shared = ImportLedger(fileURL: ImportLedger.defaultFileURL())
 
     private let fileURL: URL?
     private var claims: [String: Claim] = [:]
@@ -68,7 +76,7 @@ final class ImportLedger {
 
     /// `fileURL: nil` gives a purely in-memory ledger — used by tests and by the
     /// (unreachable) case where Application Support can't be resolved.
-    init(fileURL: URL?) {
+    nonisolated init(fileURL: URL?) {
         self.fileURL = fileURL
     }
 
@@ -249,7 +257,7 @@ final class ImportLedger {
         loadIfNeeded()
     }
 
-    private static func defaultFileURL() -> URL? {
+    nonisolated private static func defaultFileURL() -> URL? {
         guard let dir = try? FileManager.default.url(
             for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true
         ) else { return nil }

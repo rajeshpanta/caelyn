@@ -2,13 +2,25 @@ import Foundation
 
 enum FlowLevel: String, Codable, CaseIterable, Identifiable {
     case spotting, light, medium, heavy
+    /// A bleeding day whose heaviness was never recorded.
+    ///
+    /// Apple Health has always had this state — `HKCategoryValueVaginalBleeding`
+    /// raw value 1 — and Caelyn used to throw those samples away, silently losing
+    /// period days that predictions depend on. It exists so an imported day can
+    /// say "she bled" without inventing how much. Nothing in the app ever *sets*
+    /// it from a tap; it only arrives from a source that recorded the day but not
+    /// the amount, and she can overwrite it by choosing any intensity.
+    ///
+    /// Added last so the four levels she can actually pick keep their order.
+    case unspecified
     var id: String { rawValue }
     var displayName: String {
         switch self {
-        case .spotting: return "Spotting"
-        case .light:    return "Light"
-        case .medium:   return "Medium"
-        case .heavy:    return "Heavy"
+        case .spotting:    return "Spotting"
+        case .light:       return "Light"
+        case .medium:      return "Medium"
+        case .heavy:       return "Heavy"
+        case .unspecified: return "Not recorded"
         }
     }
 }

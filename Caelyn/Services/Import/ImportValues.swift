@@ -157,6 +157,8 @@ enum ImportValues {
             return .medium
         case "heavy", "high", "3":
             return .heavy
+        case "unspecified", "unknown", "notrecorded", "unrecorded":
+            return .unspecified
         case "veryheavy", "very_heavy", "extraheavy", "4", "5":
             return .heavy
         default:

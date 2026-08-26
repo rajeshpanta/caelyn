@@ -441,10 +441,13 @@ enum HealthKitService {
 
     static func mapFlowToHK(_ flow: FlowLevel) -> HKCategoryValueMenstrualFlow {
         switch flow {
-        case .spotting: return .light
-        case .light:    return .light
-        case .medium:   return .medium
-        case .heavy:    return .heavy
+        case .spotting:    return .light
+        case .light:       return .light
+        case .medium:      return .medium
+        case .heavy:       return .heavy
+        // Written back as Apple's own "intensity not recorded" rather than
+        // guessing one, so a day that came in unspecified leaves unspecified.
+        case .unspecified: return .unspecified
         }
     }
 
@@ -463,7 +466,8 @@ enum HealthKitService {
         case .light:        return .light
         case .medium:       return .medium
         case .heavy:        return .heavy
-        case .unspecified:  return nil
+        case .unspecified:  return .unspecified
+        // Apple's `.none` means "no bleeding today" — an absence, not a day.
         case .none:         return nil
         @unknown default:   return nil
         }

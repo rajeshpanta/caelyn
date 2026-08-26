@@ -99,6 +99,9 @@ struct DayCell: View {
         var parts = [dayNumber]
         if state.isToday { parts.append("today") }
         switch state.marker {
+        // "logged period not recorded" would be nonsense out loud, so a day with
+        // no recorded intensity is announced as simply a logged period.
+        case .loggedPeriod(.unspecified): parts.append("logged period")
         case .loggedPeriod(let flow): parts.append("logged period \(flow.displayName.lowercased())")
         case .activePeriodWindow:     parts.append("expected period day — tap to log")
         case .predictedPeriod:        parts.append("predicted period")
