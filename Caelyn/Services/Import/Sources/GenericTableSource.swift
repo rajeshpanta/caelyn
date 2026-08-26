@@ -81,15 +81,19 @@ enum GenericTableSource: ImportSource {
         // what catches real-world spellings like "Period Intensity" or
         // "Basal temperature (C)". A column already claimed by another field is
         // never taken twice.
-        var columnFor: [String: Int] = ["date": dateIndex]
+        // Every column that names a field, left to right — not just the first.
+        //
+        // A sheet may carry "Flow" for some rows and "Period" for others, or a
+        // tidy column beside a messy one. Both are read and each row uses whichever
+        // it actually fills in; keeping only one would quietly discard the rest.
+        var columnsFor: [String: [Int]] = ["date": [dateIndex]]
         var taken: Set<Int> = [dateIndex]
 
         func claim(_ field: String, where matches: (String) -> Bool) {
-            guard columnFor[field] == nil,
-                  let index = headers.indices.first(where: { !taken.contains($0) && matches(headers[$0]) })
-            else { return }
-            columnFor[field] = index
-            taken.insert(index)
+            for index in headers.indices where !taken.contains(index) && matches(headers[index]) {
+                columnsFor[field, default: []].append(index)
+                taken.insert(index)
+            }
         }
 
         // Exact header names first, across every field, so a file that spells a
@@ -106,7 +110,7 @@ enum GenericTableSource: ImportSource {
         // Columns Caelyn has no concept for. A second column naming something it
         // already read is a duplicate, not an unknown, so it is left out of this
         // list rather than reported as having nowhere to go.
-        let claimedColumns = Set(columnFor.values)
+        let claimedColumns = Set(columnsFor.values.flatMap { $0 })
         let knownNames = Set(aliases.flatMap(\.names))
         for (index, header) in headers.enumerated()
         where !claimedColumns.contains(index) && !header.isEmpty && !knownNames.contains(header) {
@@ -118,9 +122,12 @@ enum GenericTableSource: ImportSource {
         for row in body {
             result.rowsRead += 1
             func cell(_ field: String) -> String? {
-                guard let index = columnFor[field], row.indices.contains(index) else { return nil }
-                let value = row[index].trimmingCharacters(in: .whitespacesAndNewlines)
-                return value.isEmpty ? nil : value
+                // Leftmost column of this field that the row actually fills in.
+                for index in columnsFor[field] ?? [] where row.indices.contains(index) {
+                    let value = row[index].trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !value.isEmpty { return value }
+                }
+                return nil
             }
             guard let rawDate = cell("date"),
                   let day = ImportValues.day(from: rawDate, using: dateFormat, calendar: calendar) else {

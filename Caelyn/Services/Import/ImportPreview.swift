@@ -131,7 +131,9 @@ struct ImportPreview {
         }
         if parsed.rowsSkipped > 0 {
             let reasons = parsed.skipReasons
-                .sorted { $0.value > $1.value }
+                // Count first, then name, so equally-common reasons don't reorder
+                // themselves between one reading of the same file and the next.
+                .sorted { ($0.value, $1.key) > ($1.value, $0.key) }
                 .prefix(3)
                 .map { "\($0.value) \($0.key)" }
             if !reasons.isEmpty {

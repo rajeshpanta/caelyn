@@ -65,16 +65,22 @@ enum GenericJSONSource: ImportSource {
         // "period" on others — would otherwise resolve differently from one run to
         // the next depending on how the keys happened to hash. The same file has to
         // import the same way every time.
-        var keyFor: [String: String] = [:]
+        // Every key that names a field, in alias order — not just the first.
+        //
+        // A file is entitled to be inconsistent: some days written as
+        // `"period": true`, others as `"flow": "heavy"`. Both mean bleeding, so
+        // both are read, and each row uses whichever it actually carries. Keeping
+        // only the canonical name would deterministically discard the days written
+        // the other way, which is the same silent loss as dropping them outright.
+        var keysFor: [String: [String]] = [:]
         var claimed: Set<String> = [dateKey]
         let allKeys = Set(rows.prefix(50).flatMap { $0.keys }).sorted()
         for (field, names) in GenericTableSource.aliases where field != "date" {
             for name in names {
                 guard let match = allKeys.first(where: { $0.lowercased() == name && !claimed.contains($0) })
                 else { continue }
-                keyFor[field] = match
+                keysFor[field, default: []].append(match)
                 claimed.insert(match)
-                break
             }
         }
 
@@ -95,7 +101,9 @@ enum GenericJSONSource: ImportSource {
                 continue
             }
             func value(_ field: String) -> String? {
-                guard let key = keyFor[field], let raw = row[key] else { return nil }
+                // First key this row actually carries a usable value under.
+                guard let key = (keysFor[field] ?? []).first(where: { row[$0] != nil }),
+                      let raw = row[key] else { return nil }
                 let text: String
                 // Booleans must be recognised before numbers. JSONSerialization
                 // hands back `true` as an NSNumber whose stringValue is "1", and
@@ -114,8 +122,9 @@ enum GenericJSONSource: ImportSource {
                 return trimmed.isEmpty ? nil : trimmed
             }
             func list(_ field: String) -> [String] {
-                guard let key = keyFor[field] else { return [] }
-                if let array = row[key] as? [String] { return array }
+                for key in keysFor[field] ?? [] {
+                    if let array = row[key] as? [String] { return array }
+                }
                 return ImportValues.splitList(value(field) ?? "")
             }
 

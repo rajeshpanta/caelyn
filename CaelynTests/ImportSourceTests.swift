@@ -262,6 +262,34 @@ final class ImportSourceTests: XCTestCase {
                         "a column Caelyn genuinely has no concept for is still reported")
     }
 
+    func testAFileThatNamesOneThingTwoWaysKeepsBothSetsOfDays() throws {
+        // Real exports are inconsistent: some days written one way, some another.
+        // Reading only the canonical name would deterministically throw the rest
+        // away — deterministic, and still four lost period days.
+        let json = """
+        [{"date":"2026-01-05","period":true},
+         {"date":"2026-01-06","period":true},
+         {"date":"2026-01-07","flow":"heavy"}]
+        """
+        try importing(json, name: "mixed.json")
+        XCTAssertEqual(entry("2026-01-05")?.flow, .unspecified)
+        XCTAssertEqual(entry("2026-01-06")?.flow, .unspecified)
+        XCTAssertEqual(entry("2026-01-07")?.flow, .heavy)
+        XCTAssertEqual(entries().count, 3, "every bleeding day survives, however the file spelled it")
+    }
+
+    func testASheetWithTwoColumnsForOneThingUsesWhicheverTheRowFilledIn() throws {
+        try importing("""
+        date,flow,period
+        2026-01-05,heavy,
+        2026-01-06,,yes
+        2026-01-07,light,
+        """)
+        XCTAssertEqual(entry("2026-01-05")?.flow, .heavy)
+        XCTAssertEqual(entry("2026-01-06")?.flow, .unspecified)
+        XCTAssertEqual(entry("2026-01-07")?.flow, .light)
+    }
+
     func testCaelynExportIsRecognisedAsCaelynNotAsASpreadsheet() throws {
         let csv = """
         date,flow,pain,pain_types,symptoms,mood,energy_level,medication,basal_temperature,cervical_mucus,sexual_activity,ovulation_test,pregnancy_test,custom_symptoms,note
