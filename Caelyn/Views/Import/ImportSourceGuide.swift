@@ -20,6 +20,18 @@ struct ImportSourceGuide {
         case appleHealthAfterInstructions
     }
 
+    /// Stable identity for this row.
+    ///
+    /// Derived from the title, never from `source` — two rows can legitimately
+    /// share a source (Apple Health handles both its own row and Period Tracker's),
+    /// and keying identity on the source would collapse them into one as far as
+    /// SwiftUI and VoiceOver are concerned.
+    var key: String {
+        title.lowercased()
+            .replacingOccurrences(of: " ", with: "-")
+            .filter { $0.isLetter || $0.isNumber || $0 == "-" }
+    }
+
     /// Shown on the picker row. Stored rather than derived, because a row can
     /// name the app she is leaving while routing through Apple Health.
     let title: String

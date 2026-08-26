@@ -441,6 +441,22 @@ final class BringHistoryFlowTests: XCTestCase {
         }
     }
 
+    func testEveryPickerRowHasItsOwnIdentity() {
+        // Apple Health backs two rows — its own and Period Tracker's. Keying
+        // identity on the source would merge them in SwiftUI and give both the
+        // same accessibility identifier, so VoiceOver and the UI tests would see
+        // one control where there are two.
+        let keys = ImportSourceGuide.pickable.map(\.key)
+        XCTAssertEqual(Set(keys).count, keys.count, "two rows share an identity: \(keys)")
+        XCTAssertNotEqual(ImportSourceGuide.periodTracker.key, ImportSourceGuide.appleHealth.key)
+        XCTAssertEqual(ImportSourceGuide.periodTracker.key, "period-tracker")
+        XCTAssertEqual(ImportSourceGuide.appleHealth.key, "apple-health")
+        for key in keys {
+            XCTAssertFalse(key.isEmpty)
+            XCTAssertFalse(key.contains(" "), "\(key) would be awkward as an identifier")
+        }
+    }
+
     func testPeriodTrackerNamesGPAppsSoSheDoesNotPickTheLookalike() {
         // Two widely-used trackers are both called "Period Tracker" and both have
         // a flower. Caelyn supports GP Apps' — the big pink flower — and the row

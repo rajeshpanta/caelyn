@@ -122,7 +122,7 @@ struct BringHistoryView: View {
                 .tracking(0.6)
             CaelynCard(padding: 0) {
                 VStack(spacing: 0) {
-                    ForEach(Array(ImportSourceGuide.pickable.enumerated()), id: \.element.source) { index, guide in
+                    ForEach(Array(ImportSourceGuide.pickable.enumerated()), id: \.element.key) { index, guide in
                         sourceRow(guide)
                         if index < ImportSourceGuide.pickable.count - 1 { SettingsDivider() }
                     }
@@ -169,7 +169,7 @@ struct BringHistoryView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityIdentifier("UIA.Import.Source.\(guide.source.rawValue)")
+        .accessibilityIdentifier("UIA.Import.Source.\(guide.key)")
         .accessibilityLabel("\(guide.title). \(guide.subtitle)")
         .accessibilityAddTraits(.isButton)
     }
@@ -447,9 +447,9 @@ private struct ImportGuideView: View {
 }
 
 extension ImportSourceGuide: Identifiable, Hashable {
-    var id: String { source.rawValue }
-    static func == (lhs: ImportSourceGuide, rhs: ImportSourceGuide) -> Bool { lhs.source == rhs.source }
-    func hash(into hasher: inout Hasher) { hasher.combine(source) }
+    var id: String { key }
+    static func == (lhs: ImportSourceGuide, rhs: ImportSourceGuide) -> Bool { lhs.key == rhs.key }
+    func hash(into hasher: inout Hasher) { hasher.combine(key) }
 }
 
 #Preview {
