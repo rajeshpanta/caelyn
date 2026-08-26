@@ -59,15 +59,33 @@ enum GenericJSONSource: ImportSource {
         var builder = ObservationBuilder(source: id, calendar: calendar)
 
         // Resolve Caelyn's fields to whatever this file calls them.
+        //
+        // Sorted, and walked in alias order rather than key order, because a file
+        // that carries two names for the same thing — "flow" on some days and
+        // "period" on others — would otherwise resolve differently from one run to
+        // the next depending on how the keys happened to hash. The same file has to
+        // import the same way every time.
         var keyFor: [String: String] = [:]
-        let allKeys = Set(rows.prefix(50).flatMap { $0.keys })
+        var claimed: Set<String> = [dateKey]
+        let allKeys = Set(rows.prefix(50).flatMap { $0.keys }).sorted()
         for (field, names) in GenericTableSource.aliases where field != "date" {
-            if let match = allKeys.first(where: { names.contains($0.lowercased()) }) {
+            for name in names {
+                guard let match = allKeys.first(where: { $0.lowercased() == name && !claimed.contains($0) })
+                else { continue }
                 keyFor[field] = match
+                claimed.insert(match)
+                break
             }
         }
-        let claimed = Set(keyFor.values).union([dateKey])
-        for key in allKeys where !claimed.contains(key) { result.noteUnmapped(key) }
+
+        // Only keys Caelyn has no concept for are reported. A second key naming
+        // something it already read is a duplicate, not an unknown, and saying
+        // "Caelyn doesn't have a place for flow" when flow is exactly what it just
+        // imported would be plainly wrong.
+        let knownNames = Set(GenericTableSource.aliases.flatMap(\.names))
+        for key in allKeys where !claimed.contains(key) && !knownNames.contains(key.lowercased()) {
+            result.noteUnmapped(key)
+        }
 
         for row in rows {
             result.rowsRead += 1

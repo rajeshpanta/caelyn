@@ -229,6 +229,39 @@ final class ImportSourceTests: XCTestCase {
                         "and she is told the amount wasn't understood")
     }
 
+    func testAFileNamingTheSameThingTwiceImportsIdenticallyEveryTime() throws {
+        // Two keys for one concept. Which one wins must not depend on how the
+        // keys happened to hash, or the same file imports differently run to run.
+        let json = """
+        [{"date":"2026-01-05","flow":"heavy"},
+         {"date":"2026-01-06","period":true},
+         {"date":"2026-01-07","flow":"light"}]
+        """
+        var seen: Set<String> = []
+        for _ in 0..<5 {
+            let container = try ModelContainer(for: CycleEntry.self, UserProfile.self,
+                                               configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+            var p = payload(json, name: "other.json")
+            let plan = try ImportPlanner.plan(payload: &p, context: container.mainContext,
+                                              ledger: ImportLedger(fileURL: nil),
+                                              calendar: calendar, today: today)
+            seen.insert("\(plan.summary.daysAffected)|\(plan.summary.changeCount)|\(plan.parsed.unmappedFields.keys.sorted())")
+        }
+        XCTAssertEqual(seen.count, 1, "the same file must produce the same plan every time")
+    }
+
+    func testADuplicateColumnIsNotReportedAsSomethingCaelynCannotUse() throws {
+        // "flow" and "period" both mean the same thing. Caelyn reads one of them;
+        // telling her it has "no place for" the other would be plainly untrue.
+        let plan = try preview("""
+        date,flow,period,horoscope
+        2026-01-05,heavy,yes,capricorn
+        """)
+        XCTAssertNil(plan.parsed.unmappedFields["period"])
+        XCTAssertNotNil(plan.parsed.unmappedFields["horoscope"],
+                        "a column Caelyn genuinely has no concept for is still reported")
+    }
+
     func testCaelynExportIsRecognisedAsCaelynNotAsASpreadsheet() throws {
         let csv = """
         date,flow,pain,pain_types,symptoms,mood,energy_level,medication,basal_temperature,cervical_mucus,sexual_activity,ovulation_test,pregnancy_test,custom_symptoms,note

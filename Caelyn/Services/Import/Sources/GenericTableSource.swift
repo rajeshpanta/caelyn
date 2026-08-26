@@ -103,10 +103,13 @@ enum GenericTableSource: ImportSource {
 
         var result = ParsedImport()
 
-        // Columns Caelyn recognised no name for. Reported, never guessed at.
-        let claimed = Set(columnFor.values)
+        // Columns Caelyn has no concept for. A second column naming something it
+        // already read is a duplicate, not an unknown, so it is left out of this
+        // list rather than reported as having nowhere to go.
+        let claimedColumns = Set(columnFor.values)
+        let knownNames = Set(aliases.flatMap(\.names))
         for (index, header) in headers.enumerated()
-        where !claimed.contains(index) && !header.isEmpty {
+        where !claimedColumns.contains(index) && !header.isEmpty && !knownNames.contains(header) {
             result.noteUnmapped(header)
         }
 
