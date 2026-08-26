@@ -438,7 +438,7 @@ final class PeriodTrackerGPAppsTests: XCTestCase {
 
         var plan = HealthSyncService.Plan()
         plan.summary = summary
-        let preview = ImportPreview.fromHealth(plan, sourceLabel: HealthSyncService.SourceFilter.periodTrackerGPApps.label)
+        let preview = ImportPreview.fromHealth(plan, sourceFilter: .periodTrackerGPApps)
         XCTAssertFalse(preview.hasChanges)
         XCTAssertEqual(preview.headline, "Nothing new to bring over")
     }
@@ -453,7 +453,7 @@ final class PeriodTrackerGPAppsTests: XCTestCase {
     func testTheEmptyStateNeverTellsHerToGoEnableSomething() {
         var plan = HealthSyncService.Plan()
         plan.unreadableTypes = ["HKCategoryTypeIdentifierCervicalMucusQuality"]
-        let preview = ImportPreview.fromHealth(plan, sourceLabel: HealthSyncService.SourceFilter.periodTrackerGPApps.label)
+        let preview = ImportPreview.fromHealth(plan, sourceFilter: .periodTrackerGPApps)
         let text = ([preview.headline, preview.sourceLine, preview.safetyLine] + preview.caveats)
             .joined(separator: " ")
         for banned in ["enable", "Settings", "denied", "permission", "HKCategory", "grant"] {
@@ -467,7 +467,7 @@ final class PeriodTrackerGPAppsTests: XCTestCase {
         plan.summary.filled = 4
         plan.summary.daysAffected = 4
         plan.summary.byField = ["flow": 4]
-        let preview = ImportPreview.fromHealth(plan, sourceLabel: HealthSyncService.SourceFilter.periodTrackerGPApps.label)
+        let preview = ImportPreview.fromHealth(plan, sourceFilter: .periodTrackerGPApps)
         XCTAssertTrue(preview.sourceLine.contains("Period Tracker"))
         XCTAssertTrue(preview.breakdown.contains("4 period days"))
     }

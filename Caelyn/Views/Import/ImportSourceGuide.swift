@@ -20,6 +20,10 @@ struct ImportSourceGuide {
         case appleHealthAfterInstructions
     }
 
+    /// Narrows an Apple Health route to one app's records. Nil means the whole
+    /// of Health, which is what the Apple Health row itself promises.
+    let healthSourceFilter: HealthSyncService.SourceFilter?
+
     /// Stable identity for this row.
     ///
     /// Derived from the title, never from `source` — two rows can legitimately
@@ -47,12 +51,13 @@ struct ImportSourceGuide {
     /// The button at the end of the instructions.
     let actionLabel: String
 
-    static let all: [ImportSourceGuide] = [appleHealth, clue, flo, periodTracker, caelyn, another]
+    static let all: [ImportSourceGuide] = [appleHealth, clue, flo, periodTracker, naturalCycles, caelyn, another]
 
     /// The order on the picker: what most people are switching from, first.
-    static let pickable: [ImportSourceGuide] = [appleHealth, clue, flo, periodTracker, another, caelyn]
+    static let pickable: [ImportSourceGuide] = [appleHealth, clue, flo, periodTracker, naturalCycles, another, caelyn]
 
     static let appleHealth = ImportSourceGuide(
+        healthSourceFilter: nil,
         title: "Apple Health",
         source: .appleHealth,
         route: .appleHealth,
@@ -80,6 +85,7 @@ struct ImportSourceGuide {
     /// already reads sixteen types out of Health, so that is the route until one
     /// real backup file can be examined.
     static let periodTracker = ImportSourceGuide(
+        healthSourceFilter: .periodTrackerGPApps,
         title: "Period Tracker",
         source: .appleHealth,
         route: .appleHealthAfterInstructions,
@@ -96,7 +102,41 @@ struct ImportSourceGuide {
         actionLabel: "Continue to Apple Health"
     )
 
+    /// **Natural Cycles** — App Store 765535549, NaturalCycles Nordic AB,
+    /// `com.naturalcycles.cordova`, v5.8.4.
+    ///
+    /// Natural Cycles does produce a real data download — a compressed folder of
+    /// CSVs including one of daily entries. Caelyn does not parse it, because its
+    /// columns are documented nowhere and no independent parser exists to check a
+    /// reading against. The route is Apple Health, which Natural Cycles supports
+    /// deliberately: Settings → Integrations lets her export cycle data to Health.
+    ///
+    /// **The temperature caveat is real and theirs.** Natural Cycles documents that
+    /// temperatures cannot be exported to Apple Health except for users of their own
+    /// connected thermometer — a platform restriction on writing into Apple's
+    /// temperature fields. Since temperature is the whole point of Natural Cycles,
+    /// saying so before she starts is the difference between an honest route and a
+    /// disappointing one.
+    static let naturalCycles = ImportSourceGuide(
+        healthSourceFilter: .naturalCycles,
+        title: "Natural Cycles",
+        source: .appleHealth,
+        route: .appleHealthAfterInstructions,
+        subtitle: "Your cycle history, through Apple Health",
+        icon: "thermometer.variable.and.figure",
+        steps: [
+            "Open Natural Cycles and go to Settings.",
+            "Tap Integrations, then Apple Health.",
+            "Turn on exporting to Apple Health, and allow it when iOS asks.",
+            "Give it a minute to hand your cycle data over.",
+            "Come back here and Caelyn will show you what it found."
+        ],
+        note: "Natural Cycles can't pass your temperatures to Apple Health — that's a limit on their side, and it applies to everyone except users of their own thermometer. So your period days and cycle history come across, but your temperature chart usually won't. Caelyn will show you exactly what it found before anything is added.",
+        actionLabel: "Continue to Apple Health"
+    )
+
     static let clue = ImportSourceGuide(
+        healthSourceFilter: nil,
         title: "Clue",
         source: .clue,
         route: .fileAfterInstructions,
@@ -115,6 +155,7 @@ struct ImportSourceGuide {
     )
 
     static let flo = ImportSourceGuide(
+        healthSourceFilter: nil,
         title: "Flo",
         source: .flo,
         route: .fileAfterInstructions,
@@ -132,6 +173,7 @@ struct ImportSourceGuide {
     )
 
     static let caelyn = ImportSourceGuide(
+        healthSourceFilter: nil,
         title: "Caelyn backup",
         source: .caelyn,
         route: .fileAfterInstructions,
@@ -146,6 +188,7 @@ struct ImportSourceGuide {
     )
 
     static let another = ImportSourceGuide(
+        healthSourceFilter: nil,
         title: "Another app",
         source: .genericCSV,
         route: .fileAfterInstructions,
@@ -159,12 +202,6 @@ struct ImportSourceGuide {
         note: "Caelyn works out what the file is on its own, and brings across everything it recognises. It'll tell you what it couldn't.",
         actionLabel: "Choose the file"
     )
-
-    /// Narrows an Apple Health route to one app's records. Nil means the whole
-    /// of Health, which is what the Apple Health row itself promises.
-    var healthSourceFilter: HealthSyncService.SourceFilter? {
-        key == "period-tracker" ? .periodTrackerGPApps : nil
-    }
 
     /// True when the instructions end at the file browser.
     var needsAFile: Bool { route == .fileAfterInstructions }

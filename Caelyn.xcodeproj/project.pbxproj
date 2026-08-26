@@ -43,6 +43,7 @@
 		30B208D9835B5E16A959BE2A /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE228FE95D6CFB5B6AA94AA /* WidgetDataStore.swift */; };
 		30CB3F72A2205298FDF17583 /* PredictionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C1F783DA3E9B4345CA306AC /* PredictionEngine.swift */; };
 		30D0ECE98187C5E88F4B4FEF /* InsightCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00731802B5C8B96D6AC55E9 /* InsightCard.swift */; };
+		37D0C70431A345E55B922E0E /* NaturalCyclesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D2EA34ED769F42B4DC793B /* NaturalCyclesTests.swift */; };
 		3DB284FE2C8F763A6E0F9199 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */; };
 		3E39E536C02C7FD122CFCFF3 /* FloSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC427F6183476AF3FB089CA /* FloSource.swift */; };
 		3ED93C314D3398057BF14BBC /* HomeMoodCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D72FA6409165615CFC45E1 /* HomeMoodCheckIn.swift */; };
@@ -379,6 +380,7 @@
 		C1D72FA6409165615CFC45E1 /* HomeMoodCheckIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeMoodCheckIn.swift; sourceTree = "<group>"; };
 		C319BE4C759A3F6DAA894EEF /* GenericJSONSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericJSONSource.swift; sourceTree = "<group>"; };
 		C3B841A4EB3CB7F77C77BD3E /* YearViewSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearViewSection.swift; sourceTree = "<group>"; };
+		C3D2EA34ED769F42B4DC793B /* NaturalCyclesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaturalCyclesTests.swift; sourceTree = "<group>"; };
 		C5100528FE83F0873584CDBC /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
 		C7B8D0A8D8A1C1621780130A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
@@ -545,6 +547,7 @@
 				354545D943378E53A1B935B7 /* CaelynTests.swift */,
 				30AAE3B912A0684B01C599F7 /* HealthSyncTests.swift */,
 				ADEDBAF6EEDC8F44BF3AE915 /* ImportSourceTests.swift */,
+				C3D2EA34ED769F42B4DC793B /* NaturalCyclesTests.swift */,
 				88FCBE3844BBD8ECD171A663 /* PeriodTrackerGPAppsTests.swift */,
 			);
 			path = CaelynTests;
@@ -1057,6 +1060,7 @@
 				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
 				CD63188C47D91DE234D29B77 /* HealthSyncTests.swift in Sources */,
 				47E69C78CF1388CE0E9D2BE7 /* ImportSourceTests.swift in Sources */,
+				37D0C70431A345E55B922E0E /* NaturalCyclesTests.swift in Sources */,
 				44D7B8C7A55B262F9BDBD07A /* PeriodTrackerGPAppsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

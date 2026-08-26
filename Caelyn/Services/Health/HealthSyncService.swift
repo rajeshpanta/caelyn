@@ -64,8 +64,11 @@ enum HealthSyncService {
     struct SourceFilter: Equatable {
         /// Bundle identifiers whose records this route accepts.
         let bundleIDs: Set<String>
+        /// The app as she knows it, used in everything she reads.
+        let appName: String
+
         /// What the resulting import is called in her list of imports.
-        let label: String
+        var label: String { "\(appName) via Apple Health" }
 
         /// Period Tracker by GP Apps — App Store 330376830, GP International LLC.
         /// Both identifiers are listed because the App Store build is
@@ -74,7 +77,14 @@ enum HealthSyncService {
         /// nothing for half its users.
         static let periodTrackerGPApps = SourceFilter(
             bundleIDs: ["com.gpapps.ptrackerlite", "com.gpapps.ptracker"],
-            label: "Period Tracker via Apple Health"
+            appName: "Period Tracker"
+        )
+
+        /// Natural Cycles — App Store 765535549, NaturalCycles Nordic AB.
+        /// The app is a Cordova build, hence the identifier.
+        static let naturalCycles = SourceFilter(
+            bundleIDs: ["com.naturalcycles.cordova"],
+            appName: "Natural Cycles"
         )
     }
 

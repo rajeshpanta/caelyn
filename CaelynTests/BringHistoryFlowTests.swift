@@ -398,11 +398,19 @@ final class BringHistoryFlowTests: XCTestCase {
     func testPickerOnlyOffersSourcesCaelynCanActuallyRead() {
         let offered = ImportSourceGuide.pickable.map(\.source)
         XCTAssertEqual(Set(offered), Set([.appleHealth, .clue, .flo, .genericCSV, .caelyn]))
-        // Natural Cycles and Ovia are unverified and must not be advertised.
+
+        // Ovia has no verified route of any kind and must not be advertised.
+        // Natural Cycles is named on purpose: it has a working Apple Health route.
+        // What it must never have is a *file* route, because its export columns
+        // are unverified — the rule is about promising a parser, not about naming
+        // an app.
         for guide in ImportSourceGuide.pickable {
             let text = ([guide.title, guide.subtitle, guide.note ?? ""] + guide.steps).joined(separator: " ")
-            XCTAssertFalse(text.contains("Natural Cycles"))
-            XCTAssertFalse(text.contains("Ovia"))
+            XCTAssertFalse(text.contains("Ovia"), "\(guide.title) advertises an unsupported app")
+            if guide.needsAFile {
+                XCTAssertFalse(text.contains("Natural Cycles"),
+                               "\(guide.title) offers a file route for a format Caelyn cannot read")
+            }
         }
     }
 
