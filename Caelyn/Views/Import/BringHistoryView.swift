@@ -63,7 +63,13 @@ struct BringHistoryView: View {
             .navigationDestination(item: $guideSource) { guide in
                 ImportGuideView(guide: guide) {
                     guideSource = nil
-                    showingFilePicker = true
+                    // Where the instructions lead: a file she has to pick, or
+                    // Apple Health once she has switched the other app's sync on.
+                    if guide.needsAFile {
+                        showingFilePicker = true
+                    } else {
+                        Task { await startAppleHealth() }
+                    }
                 }
             }
         }
@@ -127,7 +133,7 @@ struct BringHistoryView: View {
 
     private func sourceRow(_ guide: ImportSourceGuide) -> some View {
         Button {
-            if guide.needsAFile {
+            if guide.hasInstructions {
                 guideSource = guide
             } else {
                 Task { await startAppleHealth() }
@@ -369,7 +375,7 @@ struct IncomingImportFile: Identifiable, Equatable {
 /// Instructions for getting a file out of one particular app.
 private struct ImportGuideView: View {
     let guide: ImportSourceGuide
-    let onChooseFile: () -> Void
+    let onContinue: () -> Void
 
     var body: some View {
         ScrollView {
@@ -423,8 +429,12 @@ private struct ImportGuideView: View {
                     }
                 }
 
-                CaelynButton(title: "Choose the file", variant: .primary, icon: "folder") {
-                    onChooseFile()
+                CaelynButton(
+                    title: guide.actionLabel,
+                    variant: .primary,
+                    icon: guide.needsAFile ? "folder" : "heart.text.square"
+                ) {
+                    onContinue()
                 }
                 .accessibilityIdentifier("UIA.Import.ChooseFile")
             }
