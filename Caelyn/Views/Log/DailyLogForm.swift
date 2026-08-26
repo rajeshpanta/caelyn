@@ -128,6 +128,10 @@ struct DailyLogForm: View {
         case .light:    return CaelynColor.softRose
         case .medium:   return CaelynColor.alertRose.opacity(0.85)
         case .heavy:    return CaelynColor.alertRose
+        // Never reached from the pills, which are spelled out rather than built
+        // from every case — but the switch has to cover it. A day imported
+        // without an intensity simply shows no pill selected until she picks one.
+        case .unspecified: return CaelynColor.softRose
         }
     }
 

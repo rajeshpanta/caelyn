@@ -339,6 +339,39 @@ final class CaelynUITests: XCTestCase {
         }
     }
 
+    /// The guided import flow, as far as it can be driven without a real file:
+    /// the source picker, one app's instructions, and the route to the file
+    /// browser. Every control it checks is one a VoiceOver user has to be able
+    /// to reach by name.
+    func testBringHistoryFlowIsReachableAndLabelled() throws {
+        let app = launchSeeded()
+        tapTab("Settings", in: app)
+
+        let entry = settingButton("Bring your history", in: app)
+        reveal(entry, in: app)
+        entry.tap()
+
+        XCTAssertTrue(app.staticTexts["You don't have to start over"].waitForExistence(timeout: 4))
+        for source in ["appleHealth", "clue", "flo", "genericCSV", "caelyn"] {
+            XCTAssertTrue(app.buttons["UIA.Import.Source.\(source)"].exists,
+                          "Missing source row: \(source)")
+        }
+
+        // Clue leads to instructions, not straight into a file browser — the
+        // export has to be requested from Clue first, and she needs telling.
+        app.buttons["UIA.Import.Source.clue"].tap()
+        let chooseFile = app.buttons["UIA.Import.ChooseFile"]
+        XCTAssertTrue(chooseFile.waitForExistence(timeout: 4), "Clue should explain how to get the file")
+        XCTAssertTrue(app.staticTexts["Request data"].exists || app.descendants(matching: .any)
+            .containing(NSPredicate(format: "label CONTAINS[c] 'Request data'")).count > 0,
+                      "the instructions should name the button she has to find in Clue")
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["UIA.Import.Source.clue"].waitForExistence(timeout: 4),
+                      "Back should return to the source picker")
+        app.buttons["UIA.Import.Close"].tap()
+    }
+
     /// Opens and operates each user-facing Settings destination that can run
     /// without a physical sensor or an external account.
     func testSettingsAndDataToolsJourney() throws {
@@ -394,15 +427,20 @@ final class CaelynUITests: XCTestCase {
         closeExport.tap()
         XCTAssertTrue(closeExport.waitForNonExistence(timeout: 4))
 
-        let importer = settingButton("Import data", in: app)
+        // The row now opens the guided "Bring your history" flow rather than
+        // dropping straight into the system file browser.
+        let importer = settingButton("Bring your history", in: app)
         reveal(importer, in: app)
         importer.tap()
-        XCTAssertTrue(
-            app.navigationBars["Recents"].waitForExistence(timeout: 4)
-                || app.navigationBars["Browse"].waitForExistence(timeout: 2)
-                || app.buttons["Cancel"].waitForExistence(timeout: 2),
-            "Import should open the system file picker"
-        )
+        XCTAssertTrue(app.staticTexts["You don't have to start over"].waitForExistence(timeout: 4),
+                      "Bring your history should open the source picker")
+        XCTAssertTrue(app.buttons["UIA.Import.Source.appleHealth"].exists)
+        XCTAssertTrue(app.buttons["UIA.Import.Source.clue"].exists)
+        XCTAssertTrue(app.buttons["UIA.Import.Source.flo"].exists)
+        // Nothing unverified may be advertised as a supported app.
+        XCTAssertFalse(app.staticTexts["Natural Cycles"].exists)
+        XCTAssertFalse(app.staticTexts["Ovia"].exists)
+        app.buttons["UIA.Import.Close"].tap()
         let cancelImport = app.buttons["Cancel"]
         if cancelImport.waitForExistence(timeout: 2) { cancelImport.tap() }
 

@@ -1,6 +1,5 @@
 import SwiftUI
 import SwiftData
-import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @Query private var profiles: [UserProfile]
@@ -11,9 +10,8 @@ struct SettingsView: View {
     @State private var showingCycleSettings = false
     @State private var showingPrivacyTrust = false
     @State private var showingPINManage = false
-    @State private var showingImporter = false
-    @State private var showingImportResult = false
-    @State private var importMessage = ""
+    @State private var showingBringHistory = false
+    @State private var showingImportHistory = false
     @State private var showingParanoidConfirm = false
     @State private var showingCloudSync = false
     @State private var showingFirstDayPicker = false
@@ -87,6 +85,9 @@ struct SettingsView: View {
             }
             .navigationDestination(isPresented: $showingReminders) {
                 RemindersView()
+            }
+            .navigationDestination(isPresented: $showingImportHistory) {
+                ImportHistoryView()
             }
             .navigationDestination(isPresented: $showingHealthKit) {
                 HealthKitConnectView()
@@ -409,9 +410,17 @@ struct SettingsView: View {
             SettingsRow(
                 icon: "square.and.arrow.down",
                 iconColor: CaelynColor.primaryPlum,
-                title: "Import data",
-                detail: "CSV from Caelyn or another app",
-                action: { showingImporter = true }
+                title: "Bring your history",
+                detail: "From another app",
+                action: { showingBringHistory = true }
+            )
+            SettingsDivider()
+            SettingsRow(
+                icon: "clock.arrow.circlepath",
+                iconColor: CaelynColor.primaryPlum,
+                title: "Imports",
+                detail: nil,
+                action: { showingImportHistory = true }
             )
             SettingsDivider()
             SettingsRow(
@@ -423,17 +432,8 @@ struct SettingsView: View {
                 isDestructive: true
             )
         }
-        .fileImporter(
-            isPresented: $showingImporter,
-            allowedContentTypes: [.commaSeparatedText, .plainText],
-            allowsMultipleSelection: false
-        ) { result in
-            handleImport(result)
-        }
-        .alert("Import", isPresented: $showingImportResult) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(importMessage)
+        .sheet(isPresented: $showingBringHistory) {
+            BringHistoryView()
         }
     }
 
@@ -450,6 +450,10 @@ struct SettingsView: View {
         profile.hkWriteFlow = false
         profile.hkReadSymptoms = false
         profile.hkWriteSymptoms = false
+        profile.hkReadFertility = false
+        // Forget which values came from Health. After this every value in her log
+        // counts as hers, so reconnecting can only ever add — never overwrite.
+        HealthSyncService.forgetSyncState()
         // Nothing on the lock screen, nothing in the app switcher.
         profile.hidePreview = true
         profile.privateNotifications = true
@@ -461,36 +465,6 @@ struct SettingsView: View {
         modelContext.saveOrLog()
         Task { await NotificationService.cancelAll() }
         Haptics.success()
-    }
-
-    /// Switch Kit: read the picked CSV (Caelyn's own export or another app's) and
-    /// merge it into the store. Never overwrites hand-logged data.
-    private func handleImport(_ result: Result<[URL], Error>) {
-        switch result {
-        case .failure:
-            importMessage = "Couldn't open that file."
-            showingImportResult = true
-        case .success(let urls):
-            guard let url = urls.first else { return }
-            let secured = url.startAccessingSecurityScopedResource()
-            defer { if secured { url.stopAccessingSecurityScopedResource() } }
-            guard let text = try? String(contentsOf: url, encoding: .utf8) else {
-                importMessage = ImportService.ImportError.unreadable.localizedDescription
-                showingImportResult = true
-                return
-            }
-            do {
-                let outcome = try ImportService.importCSV(text: text, into: modelContext)
-                var parts = ["Imported \(outcome.total) day\(outcome.total == 1 ? "" : "s") of data"]
-                if outcome.entriesCreated > 0 { parts.append("\(outcome.entriesCreated) new") }
-                if outcome.entriesUpdated > 0 { parts.append("\(outcome.entriesUpdated) merged") }
-                importMessage = parts.joined(separator: " — ") + ". Your predictions now use this history."
-                Haptics.success()
-            } catch {
-                importMessage = error.localizedDescription
-            }
-            showingImportResult = true
-        }
     }
 
     // MARK: - App section

@@ -22,7 +22,7 @@ settings:
     # highest number used anywhere so no upload can ever collide. Bump it before
     # every upload, and keep the widget/watch CFBundleVersion below identical — a
     # mismatch between the app and its embedded bundles trips ITMS-90473.
-    CURRENT_PROJECT_VERSION: 11
+    CURRENT_PROJECT_VERSION: 12
     DEVELOPMENT_TEAM: "7T9897GFKH"
 
 targets:
@@ -52,6 +52,21 @@ targets:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
         com.apple.developer.usernotifications.time-sensitive: true
+    # Registering these is what puts Caelyn in the share sheet and the "Open in"
+    # list for an export she has just downloaded. A Share Extension would be the
+    # heavier alternative — a second process with its own memory limit that would
+    # still have to hand the file to the app to show the confirmation screen.
+    # Document types get the same result through one lifecycle callback.
+    info:
+      path: Caelyn/Info.plist
+      properties:
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: "Cycle history export"
+            LSHandlerRank: Alternate
+            CFBundleTypeRole: Viewer
+            LSItemContentTypes:
+              - public.comma-separated-values-text
+              - public.json
     dependencies:
       - target: CaelynWidget
         embed: true
@@ -80,13 +95,16 @@ targets:
         # Services/. Apple's static analyzer rejects uploads (ITMS-90683)
         # without these strings. Re-comment these only if all HealthKit
         # symbols are removed from the binary.
-        INFOPLIST_KEY_NSHealthShareUsageDescription: "Caelyn reads your existing period history from Apple Health so your predictions start from real cycles instead of an average — for example, importing the last six periods you logged elsewhere so Caelyn can estimate your next one on day one. It also reads Apple Watch sleeping wrist temperature, if you have it, to confirm afterwards when ovulation likely happened. This data stays on your iPhone."
+        INFOPLIST_KEY_NSHealthShareUsageDescription: "Caelyn reads the cycle data you already have in Apple Health so you do not have to start over. Period and spotting days build your real cycle history, so Caelyn can predict your next period from day one instead of guessing an average. Symptom and pain entries fill in your log so patterns like 'bloating starts three days early' are found from everything you have tracked, not just what you retype. Basal body temperature, cervical mucus and ovulation and pregnancy test results feed the ovulation and fertility estimates Caelyn already shows you, and Apple Watch sleeping wrist temperature helps confirm afterwards when ovulation likely happened. Anything you logged in Caelyn yourself is never overwritten. You pick which of these Caelyn reads, and all of it stays on your iPhone."
         INFOPLIST_KEY_NSHealthUpdateUsageDescription: "Caelyn saves what you log back to Apple Health so other apps you use can see it — for example, logging a heavy flow day and cramps in Caelyn makes them appear in the Health app's Cycle Tracking alongside everything else. You choose which of these Caelyn writes, and you can turn it off at any time."
         # Export compliance. Caelyn uses only Apple-provided encryption (the
         # Keychain for the PIN hash, plus OS-level device encryption) and ships no
         # crypto of its own, which is exempt. Declaring it here answers the
         # question at build time instead of being prompted on every single upload.
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        # Opening a file in place rather than copying it in. Caelyn only ever
+        # reads, so the sandbox does not need a private copy.
+        INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace: YES
         SWIFT_EMIT_LOC_STRINGS: YES
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"
@@ -138,7 +156,7 @@ targets:
       path: CaelynWidget/Info.plist
       properties:
         CFBundleDisplayName: CaelynWidget
-        CFBundleVersion: "11"
+        CFBundleVersion: "12"
         CFBundleShortVersionString: "1.0"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
@@ -177,7 +195,7 @@ targets:
       path: CaelynWatch/Info.plist
       properties:
         CFBundleDisplayName: Caelyn
-        CFBundleVersion: "11"
+        CFBundleVersion: "12"
         CFBundleShortVersionString: "1.0"
         WKApplication: true
         WKCompanionAppBundleIdentifier: smallpanta-icould.com.caelynperiodtracker

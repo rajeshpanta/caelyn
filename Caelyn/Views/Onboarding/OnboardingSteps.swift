@@ -854,6 +854,7 @@ struct HealthStep: View {
     @State private var isConnecting = false
     @State private var connected = false
     @State private var denied = false
+    @State private var showingBringHistory = false
 
     var body: some View {
         OnboardingScaffold(
@@ -900,13 +901,31 @@ struct HealthStep: View {
             // permission sheet must be neutrally labelled. It says "Continue",
             // never names the grant, and always advances afterwards — whatever
             // the user chooses inside Apple's own sheet.
-            CaelynButton(title: "Continue", variant: .primary) {
-                guard !isConnecting else { return }
-                Task {
-                    if !connected && !denied { await connect() }
-                    vm.next()
+            VStack(spacing: CaelynSpacing.xs) {
+                CaelynButton(title: "Continue", variant: .primary) {
+                    guard !isConnecting else { return }
+                    Task {
+                        if !connected && !denied { await connect() }
+                        vm.next()
+                    }
                 }
+                // Not everyone's history is in Apple Health — most switchers'
+                // sits in Flo or Clue. Offered here as a quiet second option so
+                // onboarding gains a choice, not a step.
+                Button("My history is in another app") {
+                    showingBringHistory = true
+                }
+                .font(CaelynFont.subheadline.weight(.medium))
+                .foregroundStyle(CaelynColor.primaryPlum)
+                .padding(.vertical, CaelynSpacing.xs)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
+                .accessibilityIdentifier("UIA.Onboarding.BringHistory")
+                .accessibilityHint("Bring your history from another period app")
             }
+        }
+        .sheet(isPresented: $showingBringHistory) {
+            BringHistoryView()
         }
         .onAppear {
             // Auto-skip if HealthKit isn't available (e.g. iPad). Respect the nav
@@ -940,9 +959,9 @@ struct HealthStep: View {
     /// cycles instead of starting from zero. Failure is silent — the plain
     /// "connected" state still shows and the app works exactly as before.
     private func importHistory() async {
-        guard let result = try? await HealthKitService.importFlowFromHealth(into: modelContext) else { return }
-        vm.healthImportedEntries = result.total
-        guard result.total > 0 else { return }
+        let summary = await HealthSyncService.runInitialImport(context: modelContext)
+        vm.healthImportedEntries = summary.daysAffected
+        guard summary.daysAffected > 0 else { return }
         let entries = (try? modelContext.fetch(FetchDescriptor<CycleEntry>())) ?? []
         let cycles = PredictionEngine.cycles(from: entries)
         vm.healthImportedCycles = cycles.count

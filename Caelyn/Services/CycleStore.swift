@@ -46,6 +46,11 @@ enum CycleStore {
             return existing
         }
         let created = CycleEntry(date: day)
+        // `CycleEntry.init` normalises with `Calendar.current`, which is the wrong
+        // day whenever a different calendar was passed in — an import running in
+        // her travel timezone, or a test pinning one. `day` is already the
+        // start-of-day in that calendar, so it is the authority here.
+        created.date = day
         context.insert(created)
         return created
     }
