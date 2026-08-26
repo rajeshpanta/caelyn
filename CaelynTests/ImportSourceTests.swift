@@ -163,6 +163,72 @@ final class ImportSourceTests: XCTestCase {
         XCTAssertEqual(plan.summary.keptUserValue, 1)
     }
 
+    // MARK: - Never inventing an intensity
+
+    func testBooleanPeriodColumnBecomesADayWithNoIntensity() throws {
+        try importing("""
+        date,period
+        2026-01-05,yes
+        2026-01-06,true
+        2026-01-07,no
+        """)
+        XCTAssertEqual(entry("2026-01-05")?.flow, .unspecified)
+        XCTAssertEqual(entry("2026-01-06")?.flow, .unspecified)
+        XCTAssertNil(entry("2026-01-07"), "'no' is not a bleeding day and must create nothing")
+    }
+
+    func testExplicitLevelsStillMapToThemselves() throws {
+        try importing("""
+        date,flow
+        2026-01-05,light
+        2026-01-06,medium
+        2026-01-07,heavy
+        2026-01-08,spotting
+        """)
+        XCTAssertEqual(entry("2026-01-05")?.flow, .light)
+        XCTAssertEqual(entry("2026-01-06")?.flow, .medium)
+        XCTAssertEqual(entry("2026-01-07")?.flow, .heavy)
+        XCTAssertEqual(entry("2026-01-08")?.flow, .spotting)
+    }
+
+    func testBooleanPeriodDaysStillReconstructIntoCycles() throws {
+        var rows = ["date,period"]
+        for cycle in 0..<3 {
+            for offset in 0..<4 {
+                let day = calendar.date(byAdding: .day, value: cycle * 30 + offset,
+                                        to: calendar.date(from: DateComponents(year: 2026, month: 1, day: 1))!)!
+                rows.append("\(ImportLedger.dayKey(day, calendar: calendar)),yes")
+            }
+        }
+        try importing(rows.joined(separator: "\n"))
+        let cycles = PredictionEngine.cycles(from: entries(), today: today)
+        XCTAssertEqual(cycles.count, 2)
+        XCTAssertTrue(cycles.allSatisfy { $0.length == 30 },
+                      "a day with no recorded intensity is still a period day")
+    }
+
+    func testGenericJSONBooleanPeriodAlsoAvoidsInventingALevel() throws {
+        let json = """
+        [{"date":"2026-01-05","period":true},{"date":"2026-01-06","period":"heavy"}]
+        """
+        try importing(json, name: "other.json")
+        XCTAssertEqual(entry("2026-01-05")?.flow, .unspecified)
+        XCTAssertEqual(entry("2026-01-06")?.flow, .heavy)
+    }
+
+    func testClueKeepsAPeriodDayItCannotNameTheIntensityOf() throws {
+        let json = clueJSON("""
+        {"date":"2026-01-05T00:00:00.000Z","type":"period","value":{"option":"some_new_level"}},
+        {"date":"2026-01-06T00:00:00.000Z","type":"period","value":{"option":"heavy"}}
+        """)
+        let plan = try importing(json, name: "measurements.json")
+        XCTAssertEqual(entry("2026-01-05")?.flow, .unspecified,
+                       "the bleeding day is kept even when the word for it is unknown")
+        XCTAssertEqual(entry("2026-01-06")?.flow, .heavy)
+        XCTAssertNotNil(plan.parsed.unmappedFields["period: some_new_level"],
+                        "and she is told the amount wasn't understood")
+    }
+
     func testCaelynExportIsRecognisedAsCaelynNotAsASpreadsheet() throws {
         let csv = """
         date,flow,pain,pain_types,symptoms,mood,energy_level,medication,basal_temperature,cervical_mucus,sexual_activity,ovulation_test,pregnancy_test,custom_symptoms,note
@@ -571,6 +637,11 @@ final class ImportSourceTests: XCTestCase {
         XCTAssertEqual(ImportValues.flow("very_heavy"), .heavy)
         XCTAssertNil(ImportValues.flow("fluorescent"))
         XCTAssertTrue(ImportValues.isExplicitlyNoFlow("none"))
+        // A column that only says whether she bled proves the day, not a level.
+        for boolean in ["yes", "true", "y", "period"] {
+            XCTAssertEqual(ImportValues.flow(boolean), .unspecified,
+                           "'\(boolean)' says a period happened, not how heavy it was")
+        }
     }
 
     func testSpottingBecomesASymptomAndNeverAPeriodDay() throws {
@@ -731,9 +802,12 @@ final class ImportSourceTests: XCTestCase {
         """
         let plan = try importing(json, name: "flo.json")
         XCTAssertEqual(entries().count, 10)
-        XCTAssertTrue(entries().allSatisfy { $0.flow == .medium })
-        XCTAssertTrue(plan.parsed.assumptions.contains { $0.contains("not how heavy") },
+        XCTAssertTrue(entries().allSatisfy { $0.flow == .unspecified },
+                      "Flo proves the day, not the amount — Caelyn must not name a level")
+        XCTAssertTrue(plan.parsed.assumptions.contains { $0.contains("didn't include how heavy") },
                       "the assumption must be stated before she confirms")
+        XCTAssertFalse(plan.parsed.assumptions.joined().lowercased().contains("medium"),
+                       "the caveat must not mention a level Flo never gave")
 
         let cycles = PredictionEngine.cycles(from: entries(), today: today)
         XCTAssertEqual(cycles.count, 1)

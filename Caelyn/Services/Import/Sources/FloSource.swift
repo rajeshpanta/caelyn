@@ -15,10 +15,9 @@ import Foundation
 ///
 /// The verified structure carries **period date ranges and nothing else** — no
 /// per-day intensity, no symptoms, no temperatures. Caelyn therefore imports the
-/// bleeding days, which is what actually drives predictions, and says plainly that
-/// it is doing so. It records those days as medium, because `FlowLevel` has no
-/// "unspecified" and a period day with no intensity still has to be a period day
-/// — and it tells her that in the preview rather than letting her discover it.
+/// bleeding days, which is what actually drives predictions, and records them with
+/// no intensity at all rather than a level Flo never stated. The preview says so
+/// before she confirms, and she can fill any day in herself.
 ///
 /// Any other section of a Flo export is counted and reported as unmapped rather
 /// than parsed on a guess. If Flo's export turns out to carry symptom history in a
@@ -89,14 +88,14 @@ enum FloSource: ImportSource {
 
             for offset in 0..<span {
                 guard let day = calendar.date(byAdding: .day, value: offset, to: start) else { continue }
-                builder.add(day: day, field: .flow, value: .flow(.medium))
+                builder.add(day: day, field: .flow, value: .flow(.unspecified))
             }
         }
 
         result.observations = builder.observations
         if !builder.observations.isEmpty {
             result.assumptions.append(
-                "Flo's export records the dates of your periods but not how heavy each day was, so Caelyn brings the days across as medium. You can change any of them."
+                "Flo recorded these as period days but didn't include how heavy the bleeding was. Caelyn kept the dates without guessing — you can fill in how heavy any day was whenever you like."
             )
         }
         return result

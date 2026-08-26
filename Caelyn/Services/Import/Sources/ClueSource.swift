@@ -98,16 +98,19 @@ enum ClueSource: ImportSource {
 
             switch type {
             case "period":
-                guard let level = options.compactMap({ flow[$0] }).first else {
-                    // A period entry Clue spelled in a way Caelyn doesn't know is
-                    // still a bleeding day; recording the day matters more than the
-                    // intensity, and medium is Caelyn's neutral level.
+                if let level = options.compactMap({ flow[$0] }).first {
+                    builder.add(day: day, field: .flow, value: .flow(level))
+                } else {
+                    // Clue said there was a period but named the amount in a way
+                    // Caelyn doesn't know — or didn't name one at all. The day is
+                    // kept without an intensity rather than dropped: losing a
+                    // bleeding day costs a cycle boundary, and guessing a level
+                    // would be inventing data.
+                    builder.add(day: day, field: .flow, value: .flow(.unspecified))
                     if !options.isEmpty {
                         result.noteUnmapped("period: \(options.joined(separator: ", "))")
                     }
-                    continue
                 }
-                builder.add(day: day, field: .flow, value: .flow(level))
 
             case "spotting":
                 builder.add(day: day, field: .symptom(.irregularBleed), value: .symptomSeverity(1))

@@ -79,11 +79,18 @@ enum GenericJSONSource: ImportSource {
             func value(_ field: String) -> String? {
                 guard let key = keyFor[field], let raw = row[key] else { return nil }
                 let text: String
-                switch raw {
-                case let string as String:  text = string
-                case let number as NSNumber: text = number.stringValue
-                case let flag as Bool:      text = flag ? "true" : "false"
-                default:                    return nil
+                // Booleans must be recognised before numbers. JSONSerialization
+                // hands back `true` as an NSNumber whose stringValue is "1", and
+                // "1" reads as a light flow — so a plain "period: true" would
+                // have arrived as an intensity the file never stated.
+                if let flag = raw as? Bool, CFGetTypeID(raw as CFTypeRef) == CFBooleanGetTypeID() {
+                    text = flag ? "true" : "false"
+                } else if let string = raw as? String {
+                    text = string
+                } else if let number = raw as? NSNumber {
+                    text = number.stringValue
+                } else {
+                    return nil
                 }
                 let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
                 return trimmed.isEmpty ? nil : trimmed

@@ -279,9 +279,11 @@ final class BringHistoryFlowTests: XCTestCase {
         let preview = try? XCTUnwrap(model.preview)
         XCTAssertEqual(preview?.source, .flo)
         XCTAssertTrue(
-            preview?.caveats.contains(where: { $0.contains("not how heavy") }) == true,
+            preview?.caveats.contains(where: { $0.contains("didn't include how heavy") }) == true,
             "the assumption Flo forces must be on the confirmation screen, not discovered later"
         )
+        XCTAssertFalse(preview?.caveats.joined().lowercased().contains("medium") == true,
+                       "and it must not name a level Flo never recorded")
         XCTAssertEqual(entries().count, 0, "and still nothing is written")
     }
 

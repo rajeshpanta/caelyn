@@ -147,17 +147,25 @@ enum ImportValues {
     /// Numeric scales are read as 1-based intensity, which is what every export
     /// checked uses. `0` is treated as "nothing logged", not as spotting, because
     /// a zero in a flow column almost always means an empty day.
+    ///
+    /// Values that only assert *that* she bled — `yes`, `true`, `period` — come
+    /// back as `.unspecified` rather than a level, because the file did not
+    /// record one.
     static func flow(_ raw: String) -> FlowLevel? {
         switch normalize(raw) {
         case "spotting", "spot", "verylight", "very_light", "trace":
             return .spotting
         case "light", "low", "1":
             return .light
-        case "medium", "moderate", "mid", "normal", "2", "true", "yes", "y", "period":
+        case "medium", "moderate", "mid", "normal", "2":
             return .medium
         case "heavy", "high", "3":
             return .heavy
-        case "unspecified", "unknown", "notrecorded", "unrecorded":
+        // A column that only says whether she bled — "period: yes" — proves the
+        // day, not the amount. Recording it as medium would be putting a number
+        // on something the file never measured.
+        case "true", "yes", "y", "period", "unspecified", "unknown",
+             "notrecorded", "unrecorded", "bleeding":
             return .unspecified
         case "veryheavy", "very_heavy", "extraheavy", "4", "5":
             return .heavy
