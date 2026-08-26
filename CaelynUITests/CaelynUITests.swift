@@ -352,7 +352,7 @@ final class CaelynUITests: XCTestCase {
         entry.tap()
 
         XCTAssertTrue(app.staticTexts["You don't have to start over"].waitForExistence(timeout: 4))
-        for source in ["appleHealth", "clue", "flo", "genericCSV", "caelyn"] {
+        for source in ["apple-health", "clue", "flo", "period-tracker", "another-app", "caelyn-backup"] {
             XCTAssertTrue(app.buttons["UIA.Import.Source.\(source)"].exists,
                           "Missing source row: \(source)")
         }
@@ -434,9 +434,10 @@ final class CaelynUITests: XCTestCase {
         importer.tap()
         XCTAssertTrue(app.staticTexts["You don't have to start over"].waitForExistence(timeout: 4),
                       "Bring your history should open the source picker")
-        XCTAssertTrue(app.buttons["UIA.Import.Source.appleHealth"].exists)
+        XCTAssertTrue(app.buttons["UIA.Import.Source.apple-health"].exists)
         XCTAssertTrue(app.buttons["UIA.Import.Source.clue"].exists)
         XCTAssertTrue(app.buttons["UIA.Import.Source.flo"].exists)
+        XCTAssertTrue(app.buttons["UIA.Import.Source.period-tracker"].exists)
         // Nothing unverified may be advertised as a supported app.
         XCTAssertFalse(app.staticTexts["Natural Cycles"].exists)
         XCTAssertFalse(app.staticTexts["Ovia"].exists)

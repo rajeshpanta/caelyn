@@ -123,6 +123,73 @@ registered first.
 
 ---
 
+## Period Tracker by GP Apps — Apple Health bridge, no file adapter
+
+**The app:** the big magenta flower with a yellow centre. *Period Tracker by GP
+Apps*, **GP International LLC**, `com.gpapps.ptrackerlite`, **v12.1.1** (10 Jul
+2026), App Store ID **330376830**. Verified via the iTunes lookup API, 2026-08-26.
+
+**Not the lookalike.** ABISHKKING / Simple Design ship "Period Tracker Period
+Calendar" (`com.abishkking.periodcalendar` on iOS, `com.popularapp.periodcalendar`
+on Play) — a pink *diary* with a small white flower. Different company, different
+app, different data. The picker subtitle names GP Apps so nobody follows the wrong
+instructions, and a test enforces it.
+
+**What GP Apps actually offers** — from its own listing and support pages:
+
+| Path | Status |
+|---|---|
+| HealthKit | **Yes** — "Now supports HealthKit". This is the route. |
+| Online backup account | Yes, cross-platform (iOS / Android / Windows) — but server-side; the user never receives a file |
+| **Emailed backup file** | **Yes** — and this is the interesting one |
+| Email export of period dates and notes | Yes — "for doctor's visits", i.e. human-readable |
+
+**The emailed backup is real, and its format is undocumented.** GP Apps' FAQ tells
+users to *"open your most recently emailed backup… then click on the attachment"*,
+and elsewhere refers to *"your backup file"* and to emailing it to support. So
+unlike most trackers, a genuine portable artifact exists and reaches the user.
+
+But nothing describes what is inside it. No published schema, no open-source
+parser, no reverse-engineered example — GitHub code search for the bundle id
+returns only app-inventory lists. Building a parser from that would mean guessing
+at the structure of years of reproductive history, which is the one thing this
+codebase does not do.
+
+**This is the closest any unsupported source has come to a real adapter.** One real
+backup file would settle it: examine the attachment, confirm the structure, and
+build a first-class adapter to the same standard as Clue and Flo. Until then the
+route is Apple Health, which is stated on the current listing and which Caelyn
+already reads sixteen types out of.
+
+**Recoverable via the bridge:** whatever GP Apps writes into Health, out of
+menstrual flow, spotting, basal body temperature, cervical mucus, ovulation tests,
+pregnancy tests, sexual activity, and the symptom and pain categories.
+**Not recoverable:** written notes, moods, weight — Apple Health has no type Caelyn
+reads for them.
+
+**Wiring:** `ImportSourceGuide.periodTracker` keeps the app's own name on the row
+while carrying `source: .appleHealth` and `route: .appleHealthAfterInstructions`.
+Instructions come first because the sync switch lives inside GP Apps' app. No new
+HealthKit permission was added.
+
+**Source filtering.** Apple Health is a shared pool — Flo, Clue, Caelyn itself and
+the Health app all write into it — so a route promising *Period Tracker* history has
+to mean that and nothing else. `HealthSyncService.SourceFilter.periodTrackerGPApps`
+narrows the read to `com.gpapps.ptrackerlite` and `com.gpapps.ptracker`, matching on
+`ImportObservation.sourceBundleID`, which HealthKit stamps from
+`sourceRevision.source` and no caller can forge. The plain **Apple Health** row
+passes no filter and still imports everything she has approved.
+
+Two consequences worth remembering. A filtered route **never advances the sync
+anchors** — it examined one app's slice, and moving the shared anchor would tell the
+next full sync that everything else had already been seen. And it **ignores
+deletions**, because a deleted record is identified by id alone and a record from
+another app is not this route's to clear.
+
+Imports from this route are recorded as **"Period Tracker via Apple Health"** rather
+than plain Apple Health, so her list of imports says which app each batch came from
+and undo stays per-app.
+
 ## Natural Cycles — not implemented
 
 **How she gets it:** the account page offers a download; it arrives as a zip of

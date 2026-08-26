@@ -28,6 +28,8 @@ enum HealthSyncService {
         var unreadableTypes: [String] = []
         var readResult = HealthKitReader.ReadResult()
         var types: [HKSampleType] = []
+        /// Set when this plan was narrowed to one app's records.
+        var sourceFilter: SourceFilter?
 
         var hasChanges: Bool { !summary.isEmpty }
     }
@@ -50,11 +52,38 @@ enum HealthSyncService {
 
     /// Read Apple Health and work out what would change — without changing
     /// anything. Safe to call repeatedly.
+    /// Restrict a read to one app's records.
+    ///
+    /// Apple Health is a shared pool: Flo, Clue, Caelyn itself and the Health app
+    /// all write into it. A route that says "bring my Period Tracker history" has
+    /// to mean that and nothing else, or it silently rakes in every other app's
+    /// data under another app's name.
+    ///
+    /// The filter runs on `ImportObservation.sourceBundleID`, which HealthKit
+    /// stamps from `sourceRevision.source` and no caller can forge.
+    struct SourceFilter: Equatable {
+        /// Bundle identifiers whose records this route accepts.
+        let bundleIDs: Set<String>
+        /// What the resulting import is called in her list of imports.
+        let label: String
+
+        /// Period Tracker by GP Apps — App Store 330376830, GP International LLC.
+        /// Both identifiers are listed because the App Store build is
+        /// `ptrackerlite` while the paid tier has historically shipped separately;
+        /// accepting either costs nothing and missing one would silently import
+        /// nothing for half its users.
+        static let periodTrackerGPApps = SourceFilter(
+            bundleIDs: ["com.gpapps.ptrackerlite", "com.gpapps.ptracker"],
+            label: "Period Tracker via Apple Health"
+        )
+    }
+
     static func preview(
         mode: Mode,
         profile: UserProfile,
         context: ModelContext,
         ledger: ImportLedger = .shared,
+        limitTo sourceFilter: SourceFilter? = nil,
         calendar: Calendar = .current,
         today: Date = .now
     ) async -> Plan {
@@ -62,9 +91,16 @@ enum HealthSyncService {
         let types = enabledTypes(for: profile)
         guard !types.isEmpty else { return Plan() }
 
-        let read = mode == .fullImport
+        var read = mode == .fullImport
             ? await HealthKitReader.readAll(types: types, calendar: calendar)
             : await HealthKitReader.readChanges(types: types, calendar: calendar)
+
+        if let sourceFilter {
+            read.observations = read.observations.filter { sourceFilter.bundleIDs.contains($0.sourceBundleID) }
+            // Deletions are identified by record id alone, and a record from
+            // another app is not this route's to clear.
+            read.deletedRecordIDs = []
+        }
 
         let lookup = valueLookup(context: context, calendar: calendar)
         let decisions = ImportReconciler.plan(
@@ -84,7 +120,15 @@ enum HealthSyncService {
         plan.unreadableTypes = read.unreadableTypes
         plan.readResult = read
         plan.types = types
+        plan.sourceFilter = sourceFilter
         return plan
+    }
+
+    /// Apply a filter to observations that have already been read. Same rule as
+    /// `preview`, exposed so the behaviour can be exercised without a Health store.
+    static func filtered(_ observations: [ImportObservation], by filter: SourceFilter?) -> [ImportObservation] {
+        guard let filter else { return observations }
+        return observations.filter { filter.bundleIDs.contains($0.sourceBundleID) }
     }
 
     // MARK: - Apply
@@ -102,9 +146,12 @@ enum HealthSyncService {
     ) -> ImportReconciler.Summary {
         let result = ImportReconciler.commit(plan.decisions, into: context, ledger: ledger,
                                              batchID: batchID, calendar: calendar)
-        // Anchors move only when the merge actually landed. A rolled-back save
-        // must be re-read next time, not skipped past.
-        if result.succeeded { HealthKitReader.commitAnchors(plan.readResult, types: plan.types) }
+        // Anchors move only when the merge actually landed, and never for a
+        // filtered route: it examined one app's slice, so advancing the shared
+        // anchor would tell the next full sync that everything else had been seen.
+        if result.succeeded, plan.sourceFilter == nil {
+            HealthKitReader.commitAnchors(plan.readResult, types: plan.types)
+        }
         return result.summary
     }
 

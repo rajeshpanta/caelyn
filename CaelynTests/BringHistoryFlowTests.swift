@@ -413,6 +413,90 @@ final class BringHistoryFlowTests: XCTestCase {
         XCTAssertTrue(ImportSourceGuide.appleHealth.steps.isEmpty, "Apple Health needs no file")
     }
 
+    // MARK: - Period Tracker by GP Apps
+
+    func testPeriodTrackerRoutesThroughAppleHealthAndNeverAsksForAFile() {
+        let guide = ImportSourceGuide.periodTracker
+        XCTAssertEqual(guide.route, .appleHealthAfterInstructions)
+        XCTAssertEqual(guide.source, .appleHealth,
+                       "there is no Period Tracker file format, so it must be handled as Apple Health")
+        XCTAssertFalse(guide.needsAFile, "sending her to a file browser would be a dead end")
+        XCTAssertTrue(guide.hasInstructions, "the sync has to be switched on inside Period Tracker first")
+        XCTAssertFalse(guide.steps.isEmpty)
+    }
+
+    func testPeriodTrackerKeepsItsOwnNameOnThePicker() {
+        // The row says the app she is leaving, even though it routes through Health.
+        XCTAssertEqual(ImportSourceGuide.periodTracker.title, "Period Tracker")
+        XCTAssertEqual(ImportSourceGuide.appleHealth.title, "Apple Health")
+        let titles = ImportSourceGuide.pickable.map(\.title)
+        XCTAssertEqual(Set(titles).count, titles.count, "two rows must not share a name")
+    }
+
+    func testPeriodTrackerIsHonestAboutWhatCannotComeAcross() {
+        let note = ImportSourceGuide.periodTracker.note ?? ""
+        for lost in ["notes", "moods", "weight"] {
+            XCTAssertTrue(note.lowercased().contains(lost),
+                          "the note must say '\(lost)' cannot travel")
+        }
+    }
+
+    func testEveryPickerRowHasItsOwnIdentity() {
+        // Apple Health backs two rows — its own and Period Tracker's. Keying
+        // identity on the source would merge them in SwiftUI and give both the
+        // same accessibility identifier, so VoiceOver and the UI tests would see
+        // one control where there are two.
+        let keys = ImportSourceGuide.pickable.map(\.key)
+        XCTAssertEqual(Set(keys).count, keys.count, "two rows share an identity: \(keys)")
+        XCTAssertNotEqual(ImportSourceGuide.periodTracker.key, ImportSourceGuide.appleHealth.key)
+        XCTAssertEqual(ImportSourceGuide.periodTracker.key, "period-tracker")
+        XCTAssertEqual(ImportSourceGuide.appleHealth.key, "apple-health")
+        for key in keys {
+            XCTAssertFalse(key.isEmpty)
+            XCTAssertFalse(key.contains(" "), "\(key) would be awkward as an identifier")
+        }
+    }
+
+    func testPeriodTrackerNamesGPAppsSoSheDoesNotPickTheLookalike() {
+        // Two widely-used trackers are both called "Period Tracker" and both have
+        // a flower. Caelyn supports GP Apps' — the big pink flower — and the row
+        // has to say so, or she follows these steps in the wrong app.
+        let guide = ImportSourceGuide.periodTracker
+        XCTAssertTrue(guide.subtitle.contains("GP Apps"),
+                      "the picker row itself must name the developer")
+        let text = (guide.subtitle + " " + (guide.note ?? "")).lowercased()
+        XCTAssertTrue(text.contains("flower"), "the icon is how she tells them apart")
+        XCTAssertTrue(text.contains("diary"), "and the lookalike should be named as such")
+    }
+
+    func testNoPickerRowPromisesAFormatCaelynCannotRead() {
+        // A row routing to a file must name a source with a real parser behind it.
+        let parseable: Set<ImportSourceID> = [.caelyn, .clue, .flo, .genericCSV, .genericJSON]
+        for guide in ImportSourceGuide.pickable where guide.needsAFile {
+            XCTAssertTrue(parseable.contains(guide.source),
+                          "\(guide.title) sends her to a file browser with no parser behind it")
+        }
+    }
+
+    func testAddingPeriodTrackerDidNotDisturbTheOtherSources() {
+        // Every pre-existing row keeps its route, its name and its action.
+        let expected: [(String, ImportSourceGuide.Route, Bool)] = [
+            ("Apple Health",  .appleHealth,             false),
+            ("Clue",          .fileAfterInstructions,   true),
+            ("Flo",           .fileAfterInstructions,   true),
+            ("Another app",   .fileAfterInstructions,   true),
+            ("Caelyn backup", .fileAfterInstructions,   true)
+        ]
+        for (title, route, needsFile) in expected {
+            guard let guide = ImportSourceGuide.pickable.first(where: { $0.title == title }) else {
+                return XCTFail("\(title) disappeared from the picker")
+            }
+            XCTAssertEqual(guide.route, route, "\(title) changed route")
+            XCTAssertEqual(guide.needsAFile, needsFile, "\(title) changed how it is reached")
+            XCTAssertFalse(guide.actionLabel.isEmpty)
+        }
+    }
+
     func testGuideCopyStaysOutOfTechnicalLanguage() {
         for guide in ImportSourceGuide.all {
             let text = ([guide.title, guide.subtitle, guide.note ?? ""] + guide.steps)
