@@ -49,6 +49,7 @@
 		403194B34DD4A2B53FADA0D2 /* QuickActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A923C9143914C0A18515A7F /* QuickActionButton.swift */; };
 		406EBA2FD8145B5B845DF2D0 /* ObservationBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24A0AB981C951A6DA8F812A3 /* ObservationBuilder.swift */; };
 		433BD4EC552A95D00B4B7F07 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3516961D449934550DCF93 /* Haptics.swift */; };
+		44D7B8C7A55B262F9BDBD07A /* PeriodTrackerGPAppsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FCBE3844BBD8ECD171A663 /* PeriodTrackerGPAppsTests.swift */; };
 		45D7233A755B333BD1199215 /* AppLockGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ABB74AEF2C2F9EAD97CDA2C /* AppLockGate.swift */; };
 		46D5AFC8BE254313ADAE3509 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE1504121970ACCEA336450 /* PreviewData.swift */; };
 		472D89657740D27533BD03B3 /* TTCFertilityEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147DB92677049A03D13E8143 /* TTCFertilityEngine.swift */; };
@@ -338,6 +339,7 @@
 		86B123204237A9ED21254F61 /* ImportSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportSource.swift; sourceTree = "<group>"; };
 		870D1AB3C46C174650091279 /* OnboardingAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingAnimations.swift; sourceTree = "<group>"; };
 		884D8350457334717AFDE17B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		88FCBE3844BBD8ECD171A663 /* PeriodTrackerGPAppsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodTrackerGPAppsTests.swift; sourceTree = "<group>"; };
 		893A18A5E786299D456D8D29 /* CycleAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleAnalytics.swift; sourceTree = "<group>"; };
 		8A0CE13176EDA61E7E405D69 /* iCloudSyncView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudSyncView.swift; sourceTree = "<group>"; };
 		8AED61C96E996F082B3B5015 /* AdaptiveRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveRow.swift; sourceTree = "<group>"; };
@@ -543,6 +545,7 @@
 				354545D943378E53A1B935B7 /* CaelynTests.swift */,
 				30AAE3B912A0684B01C599F7 /* HealthSyncTests.swift */,
 				ADEDBAF6EEDC8F44BF3AE915 /* ImportSourceTests.swift */,
+				88FCBE3844BBD8ECD171A663 /* PeriodTrackerGPAppsTests.swift */,
 			);
 			path = CaelynTests;
 			sourceTree = "<group>";
@@ -1054,6 +1057,7 @@
 				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
 				CD63188C47D91DE234D29B77 /* HealthSyncTests.swift in Sources */,
 				47E69C78CF1388CE0E9D2BE7 /* ImportSourceTests.swift in Sources */,
+				44D7B8C7A55B262F9BDBD07A /* PeriodTrackerGPAppsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
