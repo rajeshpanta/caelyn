@@ -123,54 +123,54 @@ registered first.
 
 ---
 
-## Period Tracker / Period Calendar — Apple Health bridge, no file adapter
+## Period Tracker by GP Apps — Apple Health bridge, no file adapter
 
-**The app:** the pink diary with the white flower. iOS "Period Tracker Period
-Calendar", **ABISHKKING LIMITED**, `com.abishkking.periodcalendar`, v3.8.4
-(verified via the iTunes lookup API, 2026-08-26). Google Play
-`com.popularapp.periodcalendar`, listed under Simple Design Ltd. / ABISHKKING —
-the same product across the two stores.
+**The app:** the big magenta flower with a yellow centre. *Period Tracker by GP
+Apps*, **GP International LLC**, `com.gpapps.ptrackerlite`, **v12.1.1** (10 Jul
+2026), App Store ID **330376830**. Verified via the iTunes lookup API, 2026-08-26.
 
-**Why there is no adapter:** it has no machine-readable export. Its own current
-App Store listing offers three data paths and only three:
+**Not the lookalike.** ABISHKKING / Simple Design ship "Period Tracker Period
+Calendar" (`com.abishkking.periodcalendar` on iOS, `com.popularapp.periodcalendar`
+on Play) — a pink *diary* with a small white flower. Different company, different
+app, different data. The picker subtitle names GP Apps so nobody follows the wrong
+instructions, and a test enforces it.
 
-| Path | Usable? |
+**What GP Apps actually offers** — from its own listing and support pages:
+
+| Path | Status |
 |---|---|
-| "Export a health report with charts for self-archive or doctors" | **No** — a PDF for printing |
-| "Backup and restore data between devices" | **No** — moves data phone to phone; the user never receives a portable file |
-| **"Sync data with Apple Health"** | **Yes** — this is the route |
+| HealthKit | **Yes** — "Now supports HealthKit". This is the route. |
+| Online backup account | Yes, cross-platform (iOS / Android / Windows) — but server-side; the user never receives a file |
+| **Emailed backup file** | **Yes** — and this is the interesting one |
+| Email export of period dates and notes | Yes — "for doctor's visits", i.e. human-readable |
 
-**One partial format sighting, deliberately not used.** `lenakmeth/MenstruatioNN`
-(GitHub, last commit June 2022) contains `read_period_file()`, documented as "meant
-for the app Period Tracker of Simple Design Ltd." It parses a tab-separated `.txt`
-log of `%d %b, %Y` + `Period Starts` / `Period Ends`. That is real evidence, but it
-fails the bar Clue and Flo cleared, on four counts:
+**The emailed backup is real, and its format is undocumented.** GP Apps' FAQ tells
+users to *"open your most recently emailed backup… then click on the attachment"*,
+and elsewhere refers to *"your backup file"* and to emailing it to support. So
+unlike most trackers, a genuine portable artifact exists and reaches the user.
 
-1. **One source, not two.** Nothing corroborates it.
-2. **Four years stale.** The app is now v3.8.4; that code targeted a 2022 Android build.
-3. **Wrong platform.** Android, and this ships on iOS.
-4. **Thinner than the alternative anyway.** It carries period start and end dates and
-   nothing else — no intensity, no symptoms, no temperature — while the Health
-   bridge carries all of those.
+But nothing describes what is inside it. No published schema, no open-source
+parser, no reverse-engineered example — GitHub code search for the bundle id
+returns only app-inventory lists. Building a parser from that would mean guessing
+at the structure of years of reproductive history, which is the one thing this
+codebase does not do.
 
-Writing a parser against it would risk silently mis-reading reproductive history to
-recover *less* than the route we already have.
+**This is the closest any unsupported source has come to a real adapter.** One real
+backup file would settle it: examine the attachment, confirm the structure, and
+build a first-class adapter to the same standard as Clue and Flo. Until then the
+route is Apple Health, which is stated on the current listing and which Caelyn
+already reads sixteen types out of.
 
-**What the bridge recovers** — whatever Period Tracker writes into Health, out of the
-sixteen types Caelyn reads: menstrual flow, spotting, basal body temperature, cervical
-mucus, ovulation tests, pregnancy tests, sexual activity, and the symptom and pain
-categories. **What it cannot:** notes, moods, energy, weight and hydration — Apple
-Health has no type Caelyn reads for them.
+**Recoverable via the bridge:** whatever GP Apps writes into Health, out of
+menstrual flow, spotting, basal body temperature, cervical mucus, ovulation tests,
+pregnancy tests, sexual activity, and the symptom and pain categories.
+**Not recoverable:** written notes, moods, weight — Apple Health has no type Caelyn
+reads for them.
 
-**How it is wired:** `ImportSourceGuide.periodTracker` is a picker row that keeps the
-app's own name but carries `source: .appleHealth` and
-`route: .appleHealthAfterInstructions`. The instructions exist because the sync switch
-lives inside Period Tracker — sending her to Apple Health cold would find nothing and
-read as broken. No new HealthKit permission was added; Caelyn already requests
-everything this route needs.
-
-**To upgrade it to a real adapter,** one real export file settles it. Until then the
-row is honest: it promises a Health bridge, not a file import.
+**Wiring:** `ImportSourceGuide.periodTracker` keeps the app's own name on the row
+while carrying `source: .appleHealth` and `route: .appleHealthAfterInstructions`.
+Instructions come first because the sync switch lives inside GP Apps' app. No new
+HealthKit permission was added.
 
 ## Natural Cycles — not implemented
 

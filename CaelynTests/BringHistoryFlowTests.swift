@@ -413,7 +413,7 @@ final class BringHistoryFlowTests: XCTestCase {
         XCTAssertTrue(ImportSourceGuide.appleHealth.steps.isEmpty, "Apple Health needs no file")
     }
 
-    // MARK: - Period Tracker (Simple Design / ABISHKKING)
+    // MARK: - Period Tracker by GP Apps
 
     func testPeriodTrackerRoutesThroughAppleHealthAndNeverAsksForAFile() {
         let guide = ImportSourceGuide.periodTracker
@@ -435,11 +435,22 @@ final class BringHistoryFlowTests: XCTestCase {
 
     func testPeriodTrackerIsHonestAboutWhatCannotComeAcross() {
         let note = ImportSourceGuide.periodTracker.note ?? ""
-        XCTAssertTrue(note.contains("no export file"), "she should know why it goes via Health")
         for lost in ["notes", "moods", "weight"] {
             XCTAssertTrue(note.lowercased().contains(lost),
                           "the note must say '\(lost)' cannot travel")
         }
+    }
+
+    func testPeriodTrackerNamesGPAppsSoSheDoesNotPickTheLookalike() {
+        // Two widely-used trackers are both called "Period Tracker" and both have
+        // a flower. Caelyn supports GP Apps' — the big pink flower — and the row
+        // has to say so, or she follows these steps in the wrong app.
+        let guide = ImportSourceGuide.periodTracker
+        XCTAssertTrue(guide.subtitle.contains("GP Apps"),
+                      "the picker row itself must name the developer")
+        let text = (guide.subtitle + " " + (guide.note ?? "")).lowercased()
+        XCTAssertTrue(text.contains("flower"), "the icon is how she tells them apart")
+        XCTAssertTrue(text.contains("diary"), "and the lookalike should be named as such")
     }
 
     func testNoPickerRowPromisesAFormatCaelynCannotRead() {

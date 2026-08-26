@@ -51,31 +51,36 @@ struct ImportSourceGuide {
         actionLabel: "Continue"
     )
 
-    /// Period Tracker / Period Calendar — the pink diary with the white flower,
-    /// by ABISHKKING on the App Store and Simple Design on Google Play.
+    /// **Period Tracker by GP Apps** — the big magenta flower with a yellow centre.
+    /// GP International LLC, `com.gpapps.ptrackerlite`, v12.1.1.
     ///
-    /// **There is no file to import.** Its only export is a PDF report for a
-    /// doctor, and its backup moves data between devices rather than producing
-    /// something a person can hand to another app. What it does have — stated on
-    /// its own App Store listing for the current version — is Apple Health sync,
-    /// and Caelyn already reads sixteen types out of Health. So the route is
-    /// through Health, and the instructions exist because the switch lives inside
-    /// Period Tracker: send her to Apple Health without flipping it first and
-    /// Caelyn would correctly report finding nothing, which reads as broken.
+    /// Not to be confused with ABISHKKING / Simple Design's "Period Tracker Period
+    /// Calendar", whose icon is a pink diary with a small white flower on it. The
+    /// two are easy to mix up and the subtitle exists to stop her picking wrong.
+    ///
+    /// **Why Apple Health rather than a file.** GP Apps genuinely does produce an
+    /// emailed backup file — their support pages tell people to tap the attachment
+    /// to restore, and refer to "your backup file" — so unlike most trackers there
+    /// really is a portable artifact. But its format is documented nowhere: no
+    /// published schema, no open-source parser, no reverse-engineered example.
+    /// Guessing at it would risk silently mis-reading years of reproductive
+    /// history. Their App Store listing states HealthKit support, and Caelyn
+    /// already reads sixteen types out of Health, so that is the route until one
+    /// real backup file can be examined.
     static let periodTracker = ImportSourceGuide(
         title: "Period Tracker",
         source: .appleHealth,
         route: .appleHealthAfterInstructions,
-        subtitle: "The pink one with the flower — comes across through Apple Health",
+        subtitle: "By GP Apps — the big pink flower — through Apple Health",
         icon: "camera.macro",
         steps: [
             "Open Period Tracker and go to its Settings.",
-            "Look for Apple Health — it may sit under Data, Sync, or More.",
-            "Turn the sync on, and allow it to write your cycle data when iOS asks.",
+            "Find the Health or Apple Health option — it may sit under Data or General.",
+            "Turn it on, and allow it to write your cycle data when iOS asks.",
             "Give it a minute to hand everything over.",
             "Come back here and Caelyn will show you what it found."
         ],
-        note: "Period Tracker has no export file, so Apple Health is the way across. Your periods, temperatures, cervical mucus, ovulation and pregnancy tests and symptoms can all travel this way — notes, moods and weight can't, because Apple Health has nowhere to put them. Caelyn will show you exactly what it found before anything is added.",
+        note: "This is the app by GP Apps with the big pink flower, not the pink diary one. Apple Health is the way across: your periods, temperatures, cervical mucus, ovulation and pregnancy tests and symptoms can travel this way. Your written notes, moods and weight can't — Apple Health has nowhere to put them. Caelyn will show you exactly what it found before anything is added.",
         actionLabel: "Continue to Apple Health"
     )
 
