@@ -283,10 +283,24 @@ final class NaturalCyclesTests: XCTestCase {
     }
 
     func testEveryFilteredRowKeepsItsOwnFilterAndIdentity() {
+        // Deliberately not a census of which apps are supported — that list grows.
+        // What must hold however long it gets: Natural Cycles is in it, the plain
+        // Apple Health row is never narrowed, and no two filtered rows claim the
+        // same app, which would make one of them import the other's records.
         let filtered = ImportSourceGuide.pickable.filter { $0.healthSourceFilter != nil }
-        XCTAssertEqual(Set(filtered.map(\.title)), ["Period Tracker", "Natural Cycles"])
+        XCTAssertTrue(filtered.contains { $0.healthSourceFilter == .naturalCycles })
         XCTAssertNil(ImportSourceGuide.appleHealth.healthSourceFilter,
                      "the plain Apple Health row must never be narrowed")
+
+        var claimed: Set<String> = []
+        for guide in filtered {
+            let ids = guide.healthSourceFilter?.bundleIDs ?? []
+            XCTAssertFalse(ids.isEmpty, "\(guide.title) is filtered to nothing")
+            XCTAssertTrue(ids.isDisjoint(with: claimed),
+                          "\(guide.title) claims a bundle id another row already owns")
+            claimed.formUnion(ids)
+        }
+
         let keys = ImportSourceGuide.pickable.map(\.key)
         XCTAssertEqual(Set(keys).count, keys.count)
     }

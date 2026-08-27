@@ -226,6 +226,46 @@ type Caelyn reads for.
 **To upgrade to a direct adapter,** one real export folder settles it — the daily
 entries CSV with its header row is all the evidence needed.
 
+## Glow — Apple Health bridge, no file adapter
+
+**The app:** *Glow Ovulation & Period App*, **Glow, Inc.**, `com.upwlabs.emma`,
+**v12.0.3**, App Store ID **638021335**. Verified via the iTunes lookup API,
+2026-08-26. **Not** *Glow Eve Period Tracker* (`com.glowing.lexie`, ID 1002275138)
+— same company, same version number, different app and a different HealthKit
+source. The filter covers only the main app; folding Eve in would import its
+records under Glow's name.
+
+**The CSV export exists and is documented in one sentence.** Glow's current support
+site, in full: *"Can I download my data? Please reach out to support@glowing.com and
+our team can send you a CSV file of your data."* (published 2025-11-28). Human-
+fulfilled, no self-serve, and nothing describes the file — no name, no delimiter,
+no headers, no schema. GitHub has no Glow parser. **LOW confidence — no adapter.**
+
+**The Health route is the best-documented of any bridge here.** Glow's support site,
+verbatim: *"go to your More page > click 'Connect with health apps' > turn on Health
+app. Go to your Settings in App click the red 'All Categories on' link and click the
+'Allow' button on the upper left. You should be able to see a plethora of
+Reproductive Health options as well as Sleep, Weight and Exercise."*
+
+That gives the exact menu wording, and it names reproductive health categories
+rather than a vague "supports HealthKit". It also documents **the step people miss**:
+turning the Health app on inside Glow is not sufficient, because iOS keeps every
+category switched off until *All Categories on* is tapped. A migration that skipped
+that would find nothing and look broken.
+
+**Stated honestly:** what is verified is that Glow's Health connection *covers*
+reproductive health categories and that its listing says *"Sync data between Glow
+and Apple Health app."* Which types it **writes**, as opposed to requests, is not
+documented and is only observable on a device.
+
+**Recoverable via the bridge:** whatever Glow writes among the sixteen types Caelyn
+reads — Glow tracks flow, symptoms, basal body temperature, cervical mucus and
+sexual activity, all of which Health can carry.
+**Not recoverable:** notes, moods, weight, and Glow's community content.
+
+**Wiring:** `ImportSourceGuide.glow`, filtered to `com.upwlabs.emma`, provenance
+**"Glow via Apple Health"**.
+
 ## Ovia — researched in depth, deliberately **not** offered
 
 **The app:** *Ovia Cycle & Pregnancy Tracker*, **Ovuline, Inc.**, `com.ovuline`,
