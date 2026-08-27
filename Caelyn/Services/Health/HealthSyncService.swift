@@ -87,6 +87,16 @@ enum HealthSyncService {
             appName: "Natural Cycles"
         )
 
+        /// Eve by Glow — App Store 1002275138, Glow, Inc. A separate product from
+        /// Glow with its own bundle identifier, and therefore its own HealthKit
+        /// source. Kept apart from `.glow` deliberately: someone importing "Eve"
+        /// must not receive Glow's records, or either app's history would appear
+        /// under the other's name.
+        static let glowEve = SourceFilter(
+            bundleIDs: ["com.glowing.lexie"],
+            appName: "Eve"
+        )
+
         /// Glow Ovulation & Period App — App Store 638021335, Glow, Inc.
         ///
         /// Only the main app. Glow also ships Eve (`com.glowing.lexie`), a separate
