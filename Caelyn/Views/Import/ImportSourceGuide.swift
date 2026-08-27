@@ -51,10 +51,10 @@ struct ImportSourceGuide {
     /// The button at the end of the instructions.
     let actionLabel: String
 
-    static let all: [ImportSourceGuide] = [appleHealth, clue, flo, periodTracker, naturalCycles, caelyn, another]
+    static let all: [ImportSourceGuide] = [appleHealth, clue, flo, periodTracker, naturalCycles, glow, caelyn, another]
 
     /// The order on the picker: what most people are switching from, first.
-    static let pickable: [ImportSourceGuide] = [appleHealth, clue, flo, periodTracker, naturalCycles, another, caelyn]
+    static let pickable: [ImportSourceGuide] = [appleHealth, clue, flo, periodTracker, naturalCycles, glow, another, caelyn]
 
     static let appleHealth = ImportSourceGuide(
         healthSourceFilter: nil,
@@ -132,6 +132,35 @@ struct ImportSourceGuide {
             "Come back here and Caelyn will show you what it found."
         ],
         note: "Natural Cycles can't pass your temperatures to Apple Health — that's a limit on their side, and it applies to everyone except users of their own thermometer. So your period days and cycle history come across, but your temperature chart usually won't. Caelyn will show you exactly what it found before anything is added.",
+        actionLabel: "Continue to Apple Health"
+    )
+
+    /// **Glow Ovulation & Period App** — App Store 638021335, Glow, Inc.,
+    /// `com.upwlabs.emma`, v12.0.3. Not Glow Eve, which is a separate app.
+    ///
+    /// Glow does offer a CSV of your data, but only by emailing their support team
+    /// and waiting for a person to send it — and nothing anywhere describes what is
+    /// in it. So Caelyn does not parse it, and the route is Apple Health.
+    ///
+    /// The steps below are Glow's own, quoted almost verbatim from their support
+    /// site, including the part people miss: turning the Health app on inside Glow
+    /// is not enough on its own, because iOS still has every category switched off
+    /// until "All Categories on" is tapped.
+    static let glow = ImportSourceGuide(
+        healthSourceFilter: .glow,
+        title: "Glow",
+        source: .appleHealth,
+        route: .appleHealthAfterInstructions,
+        subtitle: "Your cycle history, through Apple Health",
+        icon: "sparkles",
+        steps: [
+            "Open Glow and go to the More tab.",
+            "Tap Connect with health apps, then turn on Health app.",
+            "Glow will send you to iOS Settings — tap All Categories on, then Allow.",
+            "Give it a minute to hand your history over.",
+            "Come back here and Caelyn will show you what it found."
+        ],
+        note: "That third step is the one people miss: switching Glow on isn't enough by itself, because iOS keeps every category off until you tap All Categories on. Glow can also email you a spreadsheet of your data if you write to their support team, but Caelyn can't read that file yet. Whatever comes across, you'll see it here before anything is added.",
         actionLabel: "Continue to Apple Health"
     )
 

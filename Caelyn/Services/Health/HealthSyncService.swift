@@ -86,6 +86,17 @@ enum HealthSyncService {
             bundleIDs: ["com.naturalcycles.cordova"],
             appName: "Natural Cycles"
         )
+
+        /// Glow Ovulation & Period App — App Store 638021335, Glow, Inc.
+        ///
+        /// Only the main app. Glow also ships Eve (`com.glowing.lexie`), a separate
+        /// product with its own HealthKit source; folding it in here would import
+        /// Eve's records under Glow's name, which is the mislabelling this whole
+        /// mechanism exists to prevent.
+        static let glow = SourceFilter(
+            bundleIDs: ["com.upwlabs.emma"],
+            appName: "Glow"
+        )
     }
 
     static func preview(
