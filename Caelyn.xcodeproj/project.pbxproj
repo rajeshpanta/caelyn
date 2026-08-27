@@ -26,6 +26,7 @@
 		16961B74255ADA38E6649B14 /* ImportPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 666910ABE0DF220B35EA4822 /* ImportPlanner.swift */; };
 		16FE16578D028ADFBD697853 /* PreviewTourTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5572EE8D45251ECD6306F44 /* PreviewTourTests.swift */; };
 		17A3409231A1A3244C342F0E /* NotificationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 483D4ABE3B0FBDCFACE74186 /* NotificationRouter.swift */; };
+		17F0B4AE0C74C741F778F608 /* GlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D85C561541868291999A9AF2 /* GlowTests.swift */; };
 		1B58EF2925278DA567C2F08F /* YearViewSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B841A4EB3CB7F77C77BD3E /* YearViewSection.swift */; };
 		1C566289B10118DEA3ABDCFA /* HealthKitConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1525588F818995E2E60CF533 /* HealthKitConnectView.swift */; };
 		1E769E48CA3099B6F0CE9005 /* HealthDataCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF5F92C5D1341E931256492A /* HealthDataCatalog.swift */; };
@@ -43,12 +44,14 @@
 		30B208D9835B5E16A959BE2A /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE228FE95D6CFB5B6AA94AA /* WidgetDataStore.swift */; };
 		30CB3F72A2205298FDF17583 /* PredictionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C1F783DA3E9B4345CA306AC /* PredictionEngine.swift */; };
 		30D0ECE98187C5E88F4B4FEF /* InsightCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00731802B5C8B96D6AC55E9 /* InsightCard.swift */; };
+		37D0C70431A345E55B922E0E /* NaturalCyclesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D2EA34ED769F42B4DC793B /* NaturalCyclesTests.swift */; };
 		3DB284FE2C8F763A6E0F9199 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */; };
 		3E39E536C02C7FD122CFCFF3 /* FloSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC427F6183476AF3FB089CA /* FloSource.swift */; };
 		3ED93C314D3398057BF14BBC /* HomeMoodCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D72FA6409165615CFC45E1 /* HomeMoodCheckIn.swift */; };
 		403194B34DD4A2B53FADA0D2 /* QuickActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A923C9143914C0A18515A7F /* QuickActionButton.swift */; };
 		406EBA2FD8145B5B845DF2D0 /* ObservationBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24A0AB981C951A6DA8F812A3 /* ObservationBuilder.swift */; };
 		433BD4EC552A95D00B4B7F07 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3516961D449934550DCF93 /* Haptics.swift */; };
+		44D7B8C7A55B262F9BDBD07A /* PeriodTrackerGPAppsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88FCBE3844BBD8ECD171A663 /* PeriodTrackerGPAppsTests.swift */; };
 		45D7233A755B333BD1199215 /* AppLockGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ABB74AEF2C2F9EAD97CDA2C /* AppLockGate.swift */; };
 		46D5AFC8BE254313ADAE3509 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE1504121970ACCEA336450 /* PreviewData.swift */; };
 		472D89657740D27533BD03B3 /* TTCFertilityEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147DB92677049A03D13E8143 /* TTCFertilityEngine.swift */; };
@@ -59,6 +62,7 @@
 		4DBA8B571DFD7F281EB98470 /* CycleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6930A28AF00A718C7E1DEEF7 /* CycleStore.swift */; };
 		520271C53F2450027D395924 /* BringHistoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98076A5C234E5356106253B9 /* BringHistoryModel.swift */; };
 		545420A041759717671D6019 /* AppPreviewMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = E88754596ACA60C51D4EC8D3 /* AppPreviewMask.swift */; };
+		55116106737A41E89CC2EEAC /* GlowEveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C455151FA14FB93DB163574F /* GlowEveTests.swift */; };
 		57C4D01E401B503A86FA4018 /* PINService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDE263BD03594FD4C68D7A0 /* PINService.swift */; };
 		58B3689F2054DF67F23594B9 /* CaelynButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29AD7A95A766A2973718AE3D /* CaelynButton.swift */; };
 		5B981B698B655F0DF9F07190 /* WidgetDataSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6011FB7860B910ED48584777 /* WidgetDataSync.swift */; };
@@ -338,6 +342,7 @@
 		86B123204237A9ED21254F61 /* ImportSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportSource.swift; sourceTree = "<group>"; };
 		870D1AB3C46C174650091279 /* OnboardingAnimations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingAnimations.swift; sourceTree = "<group>"; };
 		884D8350457334717AFDE17B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		88FCBE3844BBD8ECD171A663 /* PeriodTrackerGPAppsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodTrackerGPAppsTests.swift; sourceTree = "<group>"; };
 		893A18A5E786299D456D8D29 /* CycleAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleAnalytics.swift; sourceTree = "<group>"; };
 		8A0CE13176EDA61E7E405D69 /* iCloudSyncView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudSyncView.swift; sourceTree = "<group>"; };
 		8AED61C96E996F082B3B5015 /* AdaptiveRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveRow.swift; sourceTree = "<group>"; };
@@ -377,6 +382,8 @@
 		C1D72FA6409165615CFC45E1 /* HomeMoodCheckIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeMoodCheckIn.swift; sourceTree = "<group>"; };
 		C319BE4C759A3F6DAA894EEF /* GenericJSONSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericJSONSource.swift; sourceTree = "<group>"; };
 		C3B841A4EB3CB7F77C77BD3E /* YearViewSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearViewSection.swift; sourceTree = "<group>"; };
+		C3D2EA34ED769F42B4DC793B /* NaturalCyclesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaturalCyclesTests.swift; sourceTree = "<group>"; };
+		C455151FA14FB93DB163574F /* GlowEveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlowEveTests.swift; sourceTree = "<group>"; };
 		C5100528FE83F0873584CDBC /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
 		C7B8D0A8D8A1C1621780130A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
@@ -388,6 +395,7 @@
 		D49C09151DD868DA7228ECDC /* ImportPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportPreview.swift; sourceTree = "<group>"; };
 		D583843EB06C575EF3737512 /* PINViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINViews.swift; sourceTree = "<group>"; };
 		D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
+		D85C561541868291999A9AF2 /* GlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlowTests.swift; sourceTree = "<group>"; };
 		E2702E1D3675E82E5037E3F5 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		E2BF3402959D855BEA0096A3 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		E35A9DECDE3CDA366CAFB7DA /* BringHistoryFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BringHistoryFlowTests.swift; sourceTree = "<group>"; };
@@ -541,8 +549,12 @@
 			children = (
 				E35A9DECDE3CDA366CAFB7DA /* BringHistoryFlowTests.swift */,
 				354545D943378E53A1B935B7 /* CaelynTests.swift */,
+				C455151FA14FB93DB163574F /* GlowEveTests.swift */,
+				D85C561541868291999A9AF2 /* GlowTests.swift */,
 				30AAE3B912A0684B01C599F7 /* HealthSyncTests.swift */,
 				ADEDBAF6EEDC8F44BF3AE915 /* ImportSourceTests.swift */,
+				C3D2EA34ED769F42B4DC793B /* NaturalCyclesTests.swift */,
+				88FCBE3844BBD8ECD171A663 /* PeriodTrackerGPAppsTests.swift */,
 			);
 			path = CaelynTests;
 			sourceTree = "<group>";
@@ -1052,8 +1064,12 @@
 			files = (
 				DC7A6B723589A24DF3B6F3CD /* BringHistoryFlowTests.swift in Sources */,
 				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
+				55116106737A41E89CC2EEAC /* GlowEveTests.swift in Sources */,
+				17F0B4AE0C74C741F778F608 /* GlowTests.swift in Sources */,
 				CD63188C47D91DE234D29B77 /* HealthSyncTests.swift in Sources */,
 				47E69C78CF1388CE0E9D2BE7 /* ImportSourceTests.swift in Sources */,
+				37D0C70431A345E55B922E0E /* NaturalCyclesTests.swift in Sources */,
+				44D7B8C7A55B262F9BDBD07A /* PeriodTrackerGPAppsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1338,7 +1354,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1352,7 +1368,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1565,7 +1581,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1585,7 +1601,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

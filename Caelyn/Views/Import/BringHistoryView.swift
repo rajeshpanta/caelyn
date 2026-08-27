@@ -63,7 +63,13 @@ struct BringHistoryView: View {
             .navigationDestination(item: $guideSource) { guide in
                 ImportGuideView(guide: guide) {
                     guideSource = nil
-                    showingFilePicker = true
+                    // Where the instructions lead: a file she has to pick, or
+                    // Apple Health once she has switched the other app's sync on.
+                    if guide.needsAFile {
+                        showingFilePicker = true
+                    } else {
+                        Task { await startAppleHealth(limitTo: guide.healthSourceFilter) }
+                    }
                 }
             }
         }
@@ -116,7 +122,7 @@ struct BringHistoryView: View {
                 .tracking(0.6)
             CaelynCard(padding: 0) {
                 VStack(spacing: 0) {
-                    ForEach(Array(ImportSourceGuide.pickable.enumerated()), id: \.element.source) { index, guide in
+                    ForEach(Array(ImportSourceGuide.pickable.enumerated()), id: \.element.key) { index, guide in
                         sourceRow(guide)
                         if index < ImportSourceGuide.pickable.count - 1 { SettingsDivider() }
                     }
@@ -127,10 +133,10 @@ struct BringHistoryView: View {
 
     private func sourceRow(_ guide: ImportSourceGuide) -> some View {
         Button {
-            if guide.needsAFile {
+            if guide.hasInstructions {
                 guideSource = guide
             } else {
-                Task { await startAppleHealth() }
+                Task { await startAppleHealth(limitTo: guide.healthSourceFilter) }
             }
         } label: {
             HStack(spacing: CaelynSpacing.sm) {
@@ -163,7 +169,7 @@ struct BringHistoryView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityIdentifier("UIA.Import.Source.\(guide.source.rawValue)")
+        .accessibilityIdentifier("UIA.Import.Source.\(guide.key)")
         .accessibilityLabel("\(guide.title). \(guide.subtitle)")
         .accessibilityAddTraits(.isButton)
     }
@@ -348,12 +354,12 @@ struct BringHistoryView: View {
         }
     }
 
-    private func startAppleHealth() async {
+    private func startAppleHealth(limitTo filter: HealthSyncService.SourceFilter? = nil) async {
         guard let profile else {
             model.dismissError()
             return
         }
-        await model.readAppleHealth(profile: profile, context: modelContext)
+        await model.readAppleHealth(profile: profile, context: modelContext, limitTo: filter)
     }
 }
 
@@ -369,7 +375,7 @@ struct IncomingImportFile: Identifiable, Equatable {
 /// Instructions for getting a file out of one particular app.
 private struct ImportGuideView: View {
     let guide: ImportSourceGuide
-    let onChooseFile: () -> Void
+    let onContinue: () -> Void
 
     var body: some View {
         ScrollView {
@@ -423,8 +429,12 @@ private struct ImportGuideView: View {
                     }
                 }
 
-                CaelynButton(title: "Choose the file", variant: .primary, icon: "folder") {
-                    onChooseFile()
+                CaelynButton(
+                    title: guide.actionLabel,
+                    variant: .primary,
+                    icon: guide.needsAFile ? "folder" : "heart.text.square"
+                ) {
+                    onContinue()
                 }
                 .accessibilityIdentifier("UIA.Import.ChooseFile")
             }
@@ -437,9 +447,9 @@ private struct ImportGuideView: View {
 }
 
 extension ImportSourceGuide: Identifiable, Hashable {
-    var id: String { source.rawValue }
-    static func == (lhs: ImportSourceGuide, rhs: ImportSourceGuide) -> Bool { lhs.source == rhs.source }
-    func hash(into hasher: inout Hasher) { hasher.combine(source) }
+    var id: String { key }
+    static func == (lhs: ImportSourceGuide, rhs: ImportSourceGuide) -> Bool { lhs.key == rhs.key }
+    func hash(into hasher: inout Hasher) { hasher.combine(key) }
 }
 
 #Preview {

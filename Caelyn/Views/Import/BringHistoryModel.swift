@@ -90,6 +90,7 @@ final class BringHistoryModel {
                 ledger: ledger, calendar: calendar, today: today
             )
             healthPlan = nil
+            healthSourceFilter = nil
             preview = plan
             phase = .confirming
         } catch let error as ImportSourceError {
@@ -102,7 +103,17 @@ final class BringHistoryModel {
     // MARK: - Apple Health
 
     /// Work out what Apple Health would add, without adding it.
-    func readAppleHealth(profile: UserProfile, context: ModelContext, today: Date = .now) async {
+    /// Set when the route narrowed to one app, so the finished import is named
+    /// after that app rather than appearing as a generic Apple Health import in
+    /// her list of imports.
+    private var healthSourceFilter: HealthSyncService.SourceFilter?
+
+    func readAppleHealth(
+        profile: UserProfile,
+        context: ModelContext,
+        limitTo sourceFilter: HealthSyncService.SourceFilter? = nil,
+        today: Date = .now
+    ) async {
         guard !isBusy else { return }
         phase = .reading
         guard HealthKitService.isAvailable else {
@@ -127,10 +138,11 @@ final class BringHistoryModel {
 
         let plan = await HealthSyncService.preview(
             mode: .fullImport, profile: profile, context: context,
-            ledger: ledger, calendar: calendar, today: today
+            ledger: ledger, limitTo: sourceFilter, calendar: calendar, today: today
         )
         healthPlan = plan
-        preview = ImportPreview.fromHealth(plan)
+        healthSourceFilter = sourceFilter
+        preview = ImportPreview.fromHealth(plan, sourceFilter: sourceFilter)
         phase = .confirming
     }
 
@@ -150,7 +162,7 @@ final class BringHistoryModel {
                 ledger.addBatch(ImportLedger.Batch(
                     id: preview.batchID,
                     sourceID: ImportSourceID.appleHealth.rawValue,
-                    sourceName: ImportSourceID.appleHealth.displayName,
+                    sourceName: healthSourceFilter?.label ?? ImportSourceID.appleHealth.displayName,
                     importedAt: Date(),
                     valuesWritten: summary.changeCount,
                     daysAffected: summary.daysAffected
@@ -170,7 +182,7 @@ final class BringHistoryModel {
 
         phase = .done(ImportOutcome(
             batchID: preview.batchID,
-            sourceName: preview.source.displayName,
+            sourceName: healthSourceFilter?.label ?? preview.source.displayName,
             summary: result.summary,
             spanDescription: preview.spanDescription(calendar: calendar)
         ))
@@ -181,6 +193,7 @@ final class BringHistoryModel {
     func cancel() {
         preview = nil
         healthPlan = nil
+        healthSourceFilter = nil
         phase = .choosingSource
     }
 

@@ -352,7 +352,7 @@ final class CaelynUITests: XCTestCase {
         entry.tap()
 
         XCTAssertTrue(app.staticTexts["You don't have to start over"].waitForExistence(timeout: 4))
-        for source in ["appleHealth", "clue", "flo", "genericCSV", "caelyn"] {
+        for source in ["apple-health", "clue", "flo", "period-tracker", "another-app", "caelyn-backup"] {
             XCTAssertTrue(app.buttons["UIA.Import.Source.\(source)"].exists,
                           "Missing source row: \(source)")
         }
@@ -434,12 +434,16 @@ final class CaelynUITests: XCTestCase {
         importer.tap()
         XCTAssertTrue(app.staticTexts["You don't have to start over"].waitForExistence(timeout: 4),
                       "Bring your history should open the source picker")
-        XCTAssertTrue(app.buttons["UIA.Import.Source.appleHealth"].exists)
+        XCTAssertTrue(app.buttons["UIA.Import.Source.apple-health"].exists)
         XCTAssertTrue(app.buttons["UIA.Import.Source.clue"].exists)
         XCTAssertTrue(app.buttons["UIA.Import.Source.flo"].exists)
-        // Nothing unverified may be advertised as a supported app.
-        XCTAssertFalse(app.staticTexts["Natural Cycles"].exists)
+        XCTAssertTrue(app.buttons["UIA.Import.Source.period-tracker"].exists)
+        // Nothing unverified may be advertised as a supported app. Natural Cycles
+        // is deliberately not on this list any more: 1.2 gave it a real, verified
+        // Apple Health route, so its name appearing here is correct. Ovia and
+        // Stardust have no verified route of any kind and must never appear.
         XCTAssertFalse(app.staticTexts["Ovia"].exists)
+        XCTAssertFalse(app.staticTexts["Stardust"].exists)
         app.buttons["UIA.Import.Close"].tap()
         let cancelImport = app.buttons["Cancel"]
         if cancelImport.waitForExistence(timeout: 2) { cancelImport.tap() }
