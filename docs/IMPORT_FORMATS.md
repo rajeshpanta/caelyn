@@ -20,6 +20,7 @@ accurately beats claiming ten.
 | Flo | Yes — two independent open-source parsers, for `operationalData.cycles` only | High for cycles, nothing else verified | `FloSource` |
 | Natural Cycles | **No** — file name known, column names not | — | Generic table reader |
 | Ovia | **No** | — | Generic table reader |
+| Stardust | **No export exists**; Health integration verified as *inbound only* | — | None — no row offered |
 | Anything else | n/a | — | Generic table / JSON reader |
 
 "Two independent parsers" means two separately-written community projects that
@@ -358,6 +359,113 @@ build a Flo/Clue-quality adapter — and the direct export is where Ovia's histo
 actually lives, so that is the route worth having. Failing that, a single screenshot
 of Health → Cycle Tracking → Data Sources & Access on a phone with Ovia installed
 would settle the Health question either way.
+
+## Stardust — researched in depth, deliberately **not** offered
+
+**The app:** *Stardust Period Tracker* (listed in some storefronts as *Stardust:
+Period & Pregnancy*), **Stardust App LLC**, `com.stardust.stardustapp`, **v3.9.3**,
+App Store ID **1495829322**, minimum iOS 15.2. The Android build is a separate
+bundle, `com.stardust.app`.
+
+Stardust fails **both** routes, and unlike Ovia it fails the Apple Health route on
+direction rather than on coverage. Every quotation below is Stardust's own.
+
+### There is no export
+
+Stardust's FAQ answers thirteen questions. Not one of them is about getting data
+out. The Google Play data-safety panel offers deletion only — *"You can request
+that data be deleted"* — with no portability entry, and the privacy policy's Data
+Subject Requests section matches: *"You have the right to delete your information
+via your app settings. You can also request access to or correction of your
+personal information… by contacting us."* A right to *request access* by email is
+not a machine-readable export, and nothing describes a file, a format, or a
+delivery. GitHub code search for the bundle identifier returns app-inventory
+datasets and no parser.
+
+So there is no artifact to write an adapter against. That alone would leave Health
+as the only route, as it does for four other sources here.
+
+### Apple Health — Stardust reads, and that is the whole problem
+
+The question that decides this row is not *whether* Stardust integrates with Apple
+Health. It does. The question is which way the cycle history moves. Three
+independent Stardust-authored sources answer it the same way.
+
+Their FAQ, instructing the user, verbatim: *"follow the instructions to modify
+permissions to **share your Apple Health data with Stardust**."*
+
+Their privacy policy, verbatim: *"if you connect Apple HealthKit or Google Health
+with the Services, we may **import** certain information **under your direction**
+such as step count/activity data, temperature, sleep data, and **menstruation
+data**."*
+
+Their App Store description never mentions Apple Health at all. What it describes
+is consumption: *"Connect wearables like Apple Watch and Oura Ring to track your
+Basal Body Temperature"*, and *"Get enhanced cycle tracking insights using your
+sleep and activity data."* The FAQ says the same of temperature — sync a wearable
+and *"your temperatures will upload automatically"*, meaning up into Stardust.
+
+Every one of those is Health → Stardust. Stardust is a **consumer** of Apple Health
+menstruation data, which is precisely the direction that is useless to Caelyn.
+
+### The one sentence pointing the other way, and why it is not enough
+
+Stardust's supplementary Health Data Privacy Policy (last updated 21 October 2025)
+says: *"Third-party mobile health applications and services. At your direction, we
+may share health data with other companies such as Apple HealthKit."*
+
+That is the only writing-shaped evidence in existence, and it is disclosure
+boilerplate: *may* share, *such as*, no data types named, no user-facing setting
+described, no instructions anywhere, and no mention in the App Store listing. It
+establishes permission to write, not written data — the exact distinction this
+document exists to hold. Building a migration row on it would mean shipping a
+promise sourced from a legal disclaimer's hedge.
+
+The FAQ is the strongest negative evidence. Its Apple Health answer is the natural
+place to tell a user how to send her history *to* Health, and it explains only how
+to grant Stardust read access.
+
+### The tell: Stardust's own migration path is screenshots
+
+Asked *"Can I transfer data from another app to Stardust?"*, the FAQ answers:
+*"Yes! And we've made it super simple. During onboarding, you can upload
+screenshots of your past or current period data. We'll securely transfer the info
+into Stardust, then permanently delete the screenshots from our servers."*
+
+A company that could carry cycle history through HealthKit would not build
+server-side OCR of screenshots to import it. Stardust built the OCR, which says
+plainly what it thinks HealthKit can and cannot carry.
+
+It fits their architecture. Their data page describes health data encrypted and
+stored **on their servers**, tied to a random account ID through an external
+authentication provider, deliberately separated from real-world identity. That is a
+server-of-record design, not one that mirrors a cycle history into HealthKit on the
+phone.
+
+### Why no row, rather than a row that under-delivers
+
+An Apple Health route filtered to `com.stardust.stardustapp` would, on this
+evidence, return **nothing at all** — Stardust writes no source records for Caelyn
+to find. A row named Stardust that completes and reports "0 days" is worse than no
+row: it reads as *your history is gone*, when the truth is that it was never
+transferable this way. That is the failure this pipeline exists to prevent, and it
+is the same reasoning that keeps Ovia out, one step further along — Ovia would have
+returned a misleading few temperatures, Stardust would return an empty set.
+
+Stardust is also a genuinely popular app with a privacy-first reputation, which
+makes the temptation to list it stronger and the cost of listing it wrongly higher.
+Adding it would raise the supported-app count and deliver nothing, so it stays out.
+
+### What would change this
+
+**One screenshot of Health → Cycle Tracking → Data Sources & Access on a phone with
+Stardust installed and connected.** If Stardust appears there as a source, this
+section is wrong and the row is a half-hour's work using the existing
+`SourceFilter` machinery. If it does not appear, this section is confirmed. The
+same single check settles Ovia.
+
+Failing that, a real export — if Stardust ever ships one — would be the better
+route, since that is where Stardust's history actually lives.
 
 ## The generic readers
 
