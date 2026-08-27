@@ -226,11 +226,64 @@ type Caelyn reads for.
 **To upgrade to a direct adapter,** one real export folder settles it — the daily
 entries CSV with its header row is all the evidence needed.
 
-## Ovia — not implemented
+## Ovia — researched in depth, deliberately **not** offered
 
-No export format verified. Generic table reader, same as above.
+**The app:** *Ovia Cycle & Pregnancy Tracker*, **Ovuline, Inc.**, `com.ovuline`,
+**v8.9.0**, App Store ID **570244389**. The name confirms the formerly separate
+Ovia Pregnancy app is now folded into the main app; *Ovia Parenting & Baby Tracker*
+(`com.ovuline.Parenting`) remains separate.
 
----
+Ovia is the **best-documented export of any source examined** and is still not
+implemented. Both available routes fail, for different reasons, and the second
+failure is the interesting one.
+
+### The direct export — real, well documented, columns unknown
+
+Ovia's help centre, verbatim: *"Go to the 'More' menu in the bottom bar → Settings
+→ Export my data. This will send a .zip file to the email associated with your
+account that includes several .csv files of your logged data."* The export arrives
+**within 48 hours** and **expires after 7 days**. It contains everything ever
+entered or viewed — symptoms, cycle, ovulation — plus uploaded photos and videos.
+
+There is also a trap worth recording: Ovia organises tracking into **goals** (cycle,
+pregnancy, postpartum, peri/menopause), and its guide states that viewing or
+exporting data from a *previous* goal requires switching back to that goal first.
+A user now in Pregnancy who exports without switching gets an export missing her
+cycle history — and nothing warns her.
+
+What is missing is the same thing missing everywhere: **the column headers.** No
+schema is published, and GitHub code search for Ovia or Ovuline export parsing
+returns nothing. So no adapter.
+
+### The Apple Health route — available, and actively misleading
+
+This is why Ovia gets no row at all, unlike Period Tracker and Natural Cycles.
+
+Ovia's current App Store description says *"Share data from Ovia to the Apple Health
+app"*, so it does write. But **no source anywhere says it writes menstrual flow.**
+Ovia's own guide describes the integration in the *pull* direction — *"Ovia is able
+to pull sleep, steps, and weight metrics"* — and the only independent analysis of
+what it pushes lists blood pressure, weight, steps and body temperature, noting that
+of fertility metrics it sends **only basal body temperature**.
+
+Caelyn reads sixteen types. Against that list, an Ovia-filtered Health import would
+most likely surface **a few temperatures and no period days at all**.
+
+That is not a corruption risk — the merge rules hold regardless — but it is worse
+than offering nothing. A row saying "Ovia" that returns a preview reading *"3
+temperature readings"* invites the conclusion that her history has moved when none
+of it has. Silently omitting the data that matters, while appearing to succeed, is
+the failure this whole pipeline is built to prevent.
+
+So Ovia is left out until there is evidence for a route that carries period days.
+
+### What would change this
+
+**One real export.** The zip's CSV filenames and one header row would be enough to
+build a Flo/Clue-quality adapter — and the direct export is where Ovia's history
+actually lives, so that is the route worth having. Failing that, a single screenshot
+of Health → Cycle Tracking → Data Sources & Access on a phone with Ovia installed
+would settle the Health question either way.
 
 ## The generic readers
 
