@@ -62,6 +62,7 @@
 		4DBA8B571DFD7F281EB98470 /* CycleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6930A28AF00A718C7E1DEEF7 /* CycleStore.swift */; };
 		520271C53F2450027D395924 /* BringHistoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98076A5C234E5356106253B9 /* BringHistoryModel.swift */; };
 		545420A041759717671D6019 /* AppPreviewMask.swift in Sources */ = {isa = PBXBuildFile; fileRef = E88754596ACA60C51D4EC8D3 /* AppPreviewMask.swift */; };
+		55116106737A41E89CC2EEAC /* GlowEveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C455151FA14FB93DB163574F /* GlowEveTests.swift */; };
 		57C4D01E401B503A86FA4018 /* PINService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDE263BD03594FD4C68D7A0 /* PINService.swift */; };
 		58B3689F2054DF67F23594B9 /* CaelynButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29AD7A95A766A2973718AE3D /* CaelynButton.swift */; };
 		5B981B698B655F0DF9F07190 /* WidgetDataSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6011FB7860B910ED48584777 /* WidgetDataSync.swift */; };
@@ -382,6 +383,7 @@
 		C319BE4C759A3F6DAA894EEF /* GenericJSONSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericJSONSource.swift; sourceTree = "<group>"; };
 		C3B841A4EB3CB7F77C77BD3E /* YearViewSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YearViewSection.swift; sourceTree = "<group>"; };
 		C3D2EA34ED769F42B4DC793B /* NaturalCyclesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaturalCyclesTests.swift; sourceTree = "<group>"; };
+		C455151FA14FB93DB163574F /* GlowEveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlowEveTests.swift; sourceTree = "<group>"; };
 		C5100528FE83F0873584CDBC /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
 		C7B8D0A8D8A1C1621780130A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
@@ -547,6 +549,7 @@
 			children = (
 				E35A9DECDE3CDA366CAFB7DA /* BringHistoryFlowTests.swift */,
 				354545D943378E53A1B935B7 /* CaelynTests.swift */,
+				C455151FA14FB93DB163574F /* GlowEveTests.swift */,
 				D85C561541868291999A9AF2 /* GlowTests.swift */,
 				30AAE3B912A0684B01C599F7 /* HealthSyncTests.swift */,
 				ADEDBAF6EEDC8F44BF3AE915 /* ImportSourceTests.swift */,
@@ -1061,6 +1064,7 @@
 			files = (
 				DC7A6B723589A24DF3B6F3CD /* BringHistoryFlowTests.swift in Sources */,
 				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
+				55116106737A41E89CC2EEAC /* GlowEveTests.swift in Sources */,
 				17F0B4AE0C74C741F778F608 /* GlowTests.swift in Sources */,
 				CD63188C47D91DE234D29B77 /* HealthSyncTests.swift in Sources */,
 				47E69C78CF1388CE0E9D2BE7 /* ImportSourceTests.swift in Sources */,
