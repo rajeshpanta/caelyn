@@ -51,10 +51,10 @@ struct ImportSourceGuide {
     /// The button at the end of the instructions.
     let actionLabel: String
 
-    static let all: [ImportSourceGuide] = [appleHealth, clue, flo, periodTracker, naturalCycles, glow, caelyn, another]
+    static let all: [ImportSourceGuide] = [appleHealth, clue, flo, periodTracker, naturalCycles, glow, glowEve, caelyn, another]
 
     /// The order on the picker: what most people are switching from, first.
-    static let pickable: [ImportSourceGuide] = [appleHealth, clue, flo, periodTracker, naturalCycles, glow, another, caelyn]
+    static let pickable: [ImportSourceGuide] = [appleHealth, clue, flo, periodTracker, naturalCycles, glow, glowEve, another, caelyn]
 
     static let appleHealth = ImportSourceGuide(
         healthSourceFilter: nil,
@@ -161,6 +161,36 @@ struct ImportSourceGuide {
             "Come back here and Caelyn will show you what it found."
         ],
         note: "That third step is the one people miss: switching Glow on isn't enough by itself, because iOS keeps every category off until you tap All Categories on. Glow can also email you a spreadsheet of your data if you write to their support team, but Caelyn can't read that file yet. Whatever comes across, you'll see it here before anything is added.",
+        actionLabel: "Continue to Apple Health"
+    )
+
+    /// **Eve by Glow** — App Store 1002275138, Glow, Inc., `com.glowing.lexie`,
+    /// v12.0.3. A separate app from Glow, with its own HealthKit source.
+    ///
+    /// Eve is the one case where the vendor names the reproductive types itself.
+    /// Its App Store listing: *"Compatible with the Health App for tracking Sleep,
+    /// Steps, Walking+Running, Height, Weight, Date of Birth, Water, and of course,
+    /// menstrual health (Menstruation, Sexual Activity, Spotting)."*
+    ///
+    /// All three of those are types Caelyn reads. Equally important is what the
+    /// list leaves out: Eve tracks moods, symptoms and BBT and charts them, but
+    /// none of those appear in its Health compatibility, so they will not travel.
+    /// The note says so rather than letting her find out afterwards.
+    static let glowEve = ImportSourceGuide(
+        healthSourceFilter: .glowEve,
+        title: "Eve",
+        source: .appleHealth,
+        route: .appleHealthAfterInstructions,
+        subtitle: "Eve by Glow — periods and intimacy, through Apple Health",
+        icon: "moon.stars.fill",
+        steps: [
+            "Open Eve and go to the More tab.",
+            "Tap Connect with health apps, then turn on Health app.",
+            "When iOS asks, allow all the categories — it keeps them off otherwise.",
+            "Give it a minute to hand your history over.",
+            "Come back here and Caelyn will show you what it found."
+        ],
+        note: "Eve shares three things with Apple Health: your periods, spotting, and when you've had sex. Those come across. The moods, symptoms and temperatures you've logged in Eve don't — Eve doesn't pass those to Health at all. Caelyn will show you exactly what it found before anything is added.",
         actionLabel: "Continue to Apple Health"
     )
 

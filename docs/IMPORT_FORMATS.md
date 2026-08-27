@@ -266,6 +266,40 @@ sexual activity, all of which Health can carry.
 **Wiring:** `ImportSourceGuide.glow`, filtered to `com.upwlabs.emma`, provenance
 **"Glow via Apple Health"**.
 
+## Eve by Glow — Apple Health bridge, and the only one where the types are documented
+
+**The app:** *Glow Eve Period Tracker*, **Glow, Inc.**, `com.glowing.lexie`,
+**v12.0.3** (released 2026-05-04), App Store ID **1002275138**. Verified via the
+iTunes lookup API, 2026-08-26. A separate product from Glow with its own bundle
+identifier and therefore its own HealthKit source.
+
+**Eve is the only source whose vendor names the reproductive types.** Its App Store
+listing, verbatim: *"Compatible with the Health App for tracking Sleep, Steps,
+Walking+Running, Height, Weight, Date of Birth, Water, and of course, menstrual
+health **(Menstruation, Sexual Activity, Spotting)**."*
+
+Those map onto three types Caelyn already reads — `menstrualFlow`,
+`sexualActivity`, `intermenstrualBleeding`. Every other bridge in this file rests
+on a vaguer claim; this one rests on a list.
+
+**What the list leaves out matters as much.** Eve tracks moods, symptoms and basal
+body temperature and charts them — none appear in its Health compatibility, so none
+will travel. The picker note says so plainly rather than letting her discover an
+empty symptom history afterwards.
+
+**Direct export: LOW confidence, no adapter.** Glow Premium's export covers Eve
+alongside the other Glow apps, obtained the same way — by emailing
+support@glowing.com. As with Glow, nothing describes the file, and there is no
+parser anywhere.
+
+**Recoverable:** period days, spotting, sexual activity.
+**Not recoverable:** moods, symptoms, temperatures, notes, community content.
+
+**Wiring:** `ImportSourceGuide.glowEve`, filtered to `com.glowing.lexie`, provenance
+**"Eve via Apple Health"**. Kept strictly disjoint from `.glow` — two tests assert
+neither route can pick up the other's records, since the apps share a company, a
+version number and a support site but not a data store.
+
 ## Ovia — researched in depth, deliberately **not** offered
 
 **The app:** *Ovia Cycle & Pregnancy Tracker*, **Ovuline, Inc.**, `com.ovuline`,
