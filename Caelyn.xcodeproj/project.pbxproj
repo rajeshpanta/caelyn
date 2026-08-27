@@ -26,6 +26,7 @@
 		16961B74255ADA38E6649B14 /* ImportPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 666910ABE0DF220B35EA4822 /* ImportPlanner.swift */; };
 		16FE16578D028ADFBD697853 /* PreviewTourTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5572EE8D45251ECD6306F44 /* PreviewTourTests.swift */; };
 		17A3409231A1A3244C342F0E /* NotificationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 483D4ABE3B0FBDCFACE74186 /* NotificationRouter.swift */; };
+		17F0B4AE0C74C741F778F608 /* GlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D85C561541868291999A9AF2 /* GlowTests.swift */; };
 		1B58EF2925278DA567C2F08F /* YearViewSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B841A4EB3CB7F77C77BD3E /* YearViewSection.swift */; };
 		1C566289B10118DEA3ABDCFA /* HealthKitConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1525588F818995E2E60CF533 /* HealthKitConnectView.swift */; };
 		1E769E48CA3099B6F0CE9005 /* HealthDataCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF5F92C5D1341E931256492A /* HealthDataCatalog.swift */; };
@@ -392,6 +393,7 @@
 		D49C09151DD868DA7228ECDC /* ImportPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportPreview.swift; sourceTree = "<group>"; };
 		D583843EB06C575EF3737512 /* PINViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINViews.swift; sourceTree = "<group>"; };
 		D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
+		D85C561541868291999A9AF2 /* GlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlowTests.swift; sourceTree = "<group>"; };
 		E2702E1D3675E82E5037E3F5 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		E2BF3402959D855BEA0096A3 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		E35A9DECDE3CDA366CAFB7DA /* BringHistoryFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BringHistoryFlowTests.swift; sourceTree = "<group>"; };
@@ -545,6 +547,7 @@
 			children = (
 				E35A9DECDE3CDA366CAFB7DA /* BringHistoryFlowTests.swift */,
 				354545D943378E53A1B935B7 /* CaelynTests.swift */,
+				D85C561541868291999A9AF2 /* GlowTests.swift */,
 				30AAE3B912A0684B01C599F7 /* HealthSyncTests.swift */,
 				ADEDBAF6EEDC8F44BF3AE915 /* ImportSourceTests.swift */,
 				C3D2EA34ED769F42B4DC793B /* NaturalCyclesTests.swift */,
@@ -1058,6 +1061,7 @@
 			files = (
 				DC7A6B723589A24DF3B6F3CD /* BringHistoryFlowTests.swift in Sources */,
 				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
+				17F0B4AE0C74C741F778F608 /* GlowTests.swift in Sources */,
 				CD63188C47D91DE234D29B77 /* HealthSyncTests.swift in Sources */,
 				47E69C78CF1388CE0E9D2BE7 /* ImportSourceTests.swift in Sources */,
 				37D0C70431A345E55B922E0E /* NaturalCyclesTests.swift in Sources */,
