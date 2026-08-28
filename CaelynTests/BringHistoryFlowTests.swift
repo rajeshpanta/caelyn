@@ -18,7 +18,7 @@ final class BringHistoryFlowTests: XCTestCase {
     private let calendar = Calendar(identifier: .gregorian)
 
     override func setUpWithError() throws {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         container = try ModelContainer(for: CycleEntry.self, UserProfile.self, configurations: config)
         context = container.mainContext
         ledger = ImportLedger(fileURL: nil)

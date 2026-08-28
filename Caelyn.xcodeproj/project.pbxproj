@@ -169,6 +169,7 @@
 		EABD571DAC0941B3E5A2FAAF /* HealthSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F6BBC00F6BE7EB68B372D6 /* HealthSyncService.swift */; };
 		EAFC9E788FEAD10FAEEC1901 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133DA567417FA320181DEB05 /* Persistence.swift */; };
 		EBD8A8A5883E9AD187D8C2E2 /* InsightsStatsGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BBAE1207378ECD1DA48A5DE /* InsightsStatsGrid.swift */; };
+		EDC27385EA3B0A3DB336459F /* AccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4E6AEE82C3214565A6A2AE /* AccountTests.swift */; };
 		EE6F1A175709790139DD31CF /* PaywallTierCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E98B3962F3C4B33A33C5001 /* PaywallTierCard.swift */; };
 		EFC09BEAD7BE4DCDEF97ED5C /* PatternEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B69A196D7954169CBDBA685 /* PatternEngine.swift */; };
 		F1E1253B90FE2FDE0F59C59A /* AppleSignInService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C886EAA52EF63FB58A7B0CE /* AppleSignInService.swift */; };
@@ -408,6 +409,7 @@
 		D583843EB06C575EF3737512 /* PINViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINViews.swift; sourceTree = "<group>"; };
 		D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
 		D85C561541868291999A9AF2 /* GlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlowTests.swift; sourceTree = "<group>"; };
+		DC4E6AEE82C3214565A6A2AE /* AccountTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTests.swift; sourceTree = "<group>"; };
 		E2702E1D3675E82E5037E3F5 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		E2BF3402959D855BEA0096A3 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		E35A9DECDE3CDA366CAFB7DA /* BringHistoryFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BringHistoryFlowTests.swift; sourceTree = "<group>"; };
@@ -560,6 +562,7 @@
 		39AB51C6DFF8B4371C985737 /* CaelynTests */ = {
 			isa = PBXGroup;
 			children = (
+				DC4E6AEE82C3214565A6A2AE /* AccountTests.swift */,
 				E35A9DECDE3CDA366CAFB7DA /* BringHistoryFlowTests.swift */,
 				354545D943378E53A1B935B7 /* CaelynTests.swift */,
 				58917566D3D58FBFF324EE38 /* CloudSyncSafetyTests.swift */,
@@ -1088,6 +1091,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EDC27385EA3B0A3DB336459F /* AccountTests.swift in Sources */,
 				DC7A6B723589A24DF3B6F3CD /* BringHistoryFlowTests.swift in Sources */,
 				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
 				D2D5AB8D5834553A9CF7F06F /* CloudSyncSafetyTests.swift in Sources */,

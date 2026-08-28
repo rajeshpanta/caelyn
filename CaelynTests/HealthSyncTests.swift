@@ -23,7 +23,7 @@ final class HealthSyncTests: XCTestCase {
     private let foreignBundle = "com.clue.app"
 
     override func setUpWithError() throws {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         container = try ModelContainer(for: CycleEntry.self, UserProfile.self, configurations: config)
         context = container.mainContext
         // nil file URL keeps the ledger in memory, so tests never touch the

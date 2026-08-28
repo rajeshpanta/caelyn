@@ -28,7 +28,7 @@ final class NaturalCyclesTests: XCTestCase {
 
     override func setUpWithError() throws {
         container = try ModelContainer(for: CycleEntry.self, UserProfile.self,
-                                       configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+                                       configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none))
         context = container.mainContext
         ledger = ImportLedger(fileURL: nil)
     }
