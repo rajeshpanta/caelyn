@@ -93,6 +93,10 @@ enum Persistence {
                 // rather than replaced by an empty cloud store, and there is a test
                 // pinning the two URLs together.
                 isSyncActive = true
+                // From here a private cloud copy is presumed to exist, and stays
+                // presumed until she deletes it — switching sync off later does not
+                // make the copy go away, and must not hide the button that would.
+                CloudDataDeletion.noteCloudCopyMayExist()
                 log.info("SwiftData: opened the iCloud-mirrored store.")
                 return container
             }

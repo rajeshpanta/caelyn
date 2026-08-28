@@ -277,7 +277,7 @@ struct AccountView: View {
     /// someone who has never signed in can still have a cloud copy to remove.
     @ViewBuilder
     private var cloudCopyCard: some View {
-        if syncOn || CloudDataDeletion.cloudCopyWasDeleted || CloudDataDeletion.deletionIsPending {
+        if showCloudCopyCard {
             SettingsSectionCard(title: "Your iCloud copy") {
                 VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
                     if CloudDataDeletion.deletionIsPending {
@@ -289,6 +289,18 @@ struct AccountView: View {
                             .padding(.top, CaelynSpacing.md)
                     } else if CloudDataDeletion.cloudCopyWasDeleted && !syncOn {
                         Text("You deleted your iCloud copy. Caelyn won't make a new one unless you turn sync back on.")
+                            .font(CaelynFont.subheadline)
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.horizontal, CaelynSpacing.md)
+                            .padding(.top, CaelynSpacing.md)
+                    } else if !syncOn && CloudDataDeletion.cloudCopyMayExist {
+                        // Sync off is not the same as no copy. Someone who synced
+                        // for a month and then switched it off still has a month of
+                        // history in iCloud, and needs to be told so — and given the
+                        // button — rather than left assuming it went away with the
+                        // toggle.
+                        Text("Sync is off, but the copy Caelyn already made is still in your iCloud. Turning sync off stops new changes going up; it doesn't remove what's already there.")
                             .font(CaelynFont.subheadline)
                             .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
                             .fixedSize(horizontal: false, vertical: true)
@@ -329,9 +341,30 @@ struct AccountView: View {
                 Button("Delete iCloud copy", role: .destructive) { deleteCloudCopy() }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This permanently removes your history from iCloud and cannot be undone. Your history on this iPhone is not deleted and Caelyn will keep working exactly as it does now. Sync will be turned off so no new copy is made.")
+                Text(deleteCloudMessage)
             }
         }
+    }
+
+    /// Whether to offer cloud deletion at all.
+    ///
+    /// Deliberately not keyed on the sync toggle. It is shown whenever Caelyn has
+    /// reason to believe a copy exists — currently syncing, a copy made earlier and
+    /// sync since switched off, an unfinished deletion, or a completed one worth
+    /// confirming. A user who has never successfully synced sees nothing, because
+    /// for her there is genuinely nothing to delete.
+    private var showCloudCopyCard: Bool {
+        syncOn
+            || CloudDataDeletion.cloudCopyMayExist
+            || CloudDataDeletion.cloudCopyWasDeleted
+            || CloudDataDeletion.deletionIsPending
+    }
+
+    private var deleteCloudMessage: String {
+        let base = "This permanently removes your history from iCloud and cannot be undone. Your history on this iPhone is not deleted and Caelyn will keep working exactly as it does now."
+        return syncOn
+            ? base + " Sync will be turned off so no new copy is made."
+            : base + " Sync stays off, so no new copy will be made."
     }
 
     private func deleteCloudCopy() {

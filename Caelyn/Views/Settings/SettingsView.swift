@@ -753,7 +753,10 @@ struct SettingsView: View {
     /// a deletion that never confirmed. If any of those hold, the scope question is
     /// real and she has to answer it.
     private var mayHaveCloudCopy: Bool {
-        Persistence.isSyncEnabled || Persistence.isSyncActive || CloudDataDeletion.deletionIsPending
+        Persistence.isSyncEnabled
+            || Persistence.isSyncActive
+            || CloudDataDeletion.cloudCopyMayExist
+            || CloudDataDeletion.deletionIsPending
     }
 
     private func deleteAllData(scope: SecureWipeService.Scope) {

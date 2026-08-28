@@ -35,7 +35,8 @@ final class DeletionModelTests: XCTestCase {
 
     private func clearFlags() {
         let defaults = UserDefaults.standard
-        for key in [CloudDataDeletion.pendingKey, CloudDataDeletion.deletedAtKey, Persistence.syncEnabledKey] {
+        for key in [CloudDataDeletion.pendingKey, CloudDataDeletion.deletedAtKey,
+                    CloudDataDeletion.mayExistKey, Persistence.syncEnabledKey] {
             defaults.removeObject(forKey: key)
         }
     }
@@ -302,5 +303,141 @@ final class DeletionModelTests: XCTestCase {
     func testAnAddressStillCannotBecomeAName() {
         XCTAssertNil(PersonalName.usable("x7f3k2@privaterelay.appleid.com"))
         XCTAssertNil(PersonalName.usable("maya@example.com"))
+    }
+}
+
+/// Reaching the cloud-deletion action.
+///
+/// The defect these exist to prevent: Caelyn keyed the "Delete my iCloud copy"
+/// action on the sync toggle, so switching sync off hid the only way to remove a
+/// copy that was already in iCloud. Sync being off says nothing about whether a
+/// copy exists — it only says nothing new is going up.
+@MainActor
+final class CloudDeletionReachabilityTests: XCTestCase {
+
+    private var container: ModelContainer!
+    private var context: ModelContext!
+
+    override func setUpWithError() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        container = try ModelContainer(for: CycleEntry.self, UserProfile.self, configurations: config)
+        context = container.mainContext
+        clearFlags()
+    }
+
+    override func tearDownWithError() throws {
+        clearFlags()
+        container = nil; context = nil
+    }
+
+    private func clearFlags() {
+        let d = UserDefaults.standard
+        for key in [CloudDataDeletion.pendingKey, CloudDataDeletion.deletedAtKey,
+                    CloudDataDeletion.mayExistKey, Persistence.syncEnabledKey] {
+            d.removeObject(forKey: key)
+        }
+    }
+
+    /// Mirrors `AccountView.showCloudCopyCard`, which is the production rule.
+    private func actionIsReachable(syncOn: Bool) -> Bool {
+        syncOn
+            || CloudDataDeletion.cloudCopyMayExist
+            || CloudDataDeletion.cloudCopyWasDeleted
+            || CloudDataDeletion.deletionIsPending
+    }
+
+    // 1. Sync on and a copy exists → visible.
+    func testWithSyncOnTheDeleteActionIsAvailable() {
+        UserDefaults.standard.set(true, forKey: Persistence.syncEnabledKey)
+        CloudDataDeletion.noteCloudCopyMayExist()
+        XCTAssertTrue(actionIsReachable(syncOn: true))
+    }
+
+    // 2. **The defect.** Sync off, but a copy was made earlier → still visible.
+    func testWithSyncOffButAPriorCopyTheDeleteActionIsStillAvailable() {
+        CloudDataDeletion.noteCloudCopyMayExist()
+        UserDefaults.standard.set(false, forKey: Persistence.syncEnabledKey)
+
+        XCTAssertTrue(CloudDataDeletion.cloudCopyMayExist)
+        XCTAssertTrue(actionIsReachable(syncOn: false),
+                      "Turning sync off must not hide the only way to delete a copy already in iCloud.")
+    }
+
+    // 3. After a confirmed deletion the state moves on.
+    func testAConfirmedDeletionClearsTheMayExistMarker() async {
+        CloudDataDeletion.noteCloudCopyMayExist()
+        XCTAssertTrue(CloudDataDeletion.cloudCopyMayExist)
+
+        let outcome = await CloudDataDeletion.deleteCloudCopy()
+
+        if outcome.didDelete {
+            XCTAssertFalse(CloudDataDeletion.cloudCopyMayExist,
+                           "Once the copy is gone Caelyn should stop saying one may exist.")
+            XCTAssertTrue(CloudDataDeletion.cloudCopyWasDeleted)
+            // Still reachable, so she can see it was done rather than the card
+            // vanishing without explanation.
+            XCTAssertTrue(actionIsReachable(syncOn: false))
+        } else {
+            // Simulator has no iCloud account: nothing may be claimed.
+            XCTAssertTrue(CloudDataDeletion.cloudCopyMayExist,
+                          "A failed deletion must not clear the marker.")
+        }
+    }
+
+    /// An interrupted deletion keeps the action reachable so it can be retried.
+    func testAnUnfinishedDeletionKeepsTheActionReachable() {
+        UserDefaults.standard.set(true, forKey: CloudDataDeletion.pendingKey)
+        XCTAssertTrue(actionIsReachable(syncOn: false))
+    }
+
+    // 4. A user who never synced is offered nothing — there is nothing to delete.
+    func testAUserWhoNeverSyncedIsNotOfferedACloudDeletion() {
+        XCTAssertFalse(CloudDataDeletion.cloudCopyMayExist)
+        XCTAssertFalse(CloudDataDeletion.cloudCopyWasDeleted)
+        XCTAssertFalse(CloudDataDeletion.deletionIsPending)
+        XCTAssertFalse(actionIsReachable(syncOn: false),
+                       "Offering to delete a copy that cannot exist is its own small lie.")
+    }
+
+    /// Merely flipping the preference is not enough — the marker is only set when
+    /// the mirrored store actually opened, because nothing uploads until it does.
+    func testTheMarkerTracksTheStoreOpeningNotThePreference() {
+        UserDefaults.standard.set(true, forKey: Persistence.syncEnabledKey)
+        XCTAssertFalse(CloudDataDeletion.cloudCopyMayExist,
+                       "Asking for sync is not the same as having synced.")
+
+        CloudDataDeletion.noteCloudCopyMayExist()   // what Persistence does on a real open
+        XCTAssertTrue(CloudDataDeletion.cloudCopyMayExist)
+    }
+
+    // 5. Deleting the cloud copy never touches local history.
+    func testDeletingTheCloudCopyLeavesLocalHistoryAlone() async {
+        let calendar = Calendar(identifier: .gregorian)
+        let start = calendar.date(from: DateComponents(year: 2026, month: 4, day: 1))!
+        for offset in 0..<25 {
+            let entry = CycleEntry(date: calendar.date(byAdding: .day, value: offset, to: start)!)
+            entry.flow = .medium
+            context.insert(entry)
+        }
+        context.saveOrLog()
+        CloudDataDeletion.noteCloudCopyMayExist()
+
+        _ = await CloudDataDeletion.deleteCloudCopy()
+
+        let remaining = (try? context.fetch(FetchDescriptor<CycleEntry>()))?.count ?? 0
+        XCTAssertEqual(remaining, 25, "Delete my iCloud copy must never reach the device's own history.")
+    }
+
+    /// The delete-all scope question uses the same signal, so a user with sync off
+    /// and a prior copy is still asked which storage she means.
+    func testDeleteAllStillAsksAboutScopeWhenSyncIsOffButACopyExists() {
+        CloudDataDeletion.noteCloudCopyMayExist()
+        UserDefaults.standard.set(false, forKey: Persistence.syncEnabledKey)
+
+        let mayHaveCloudCopy = Persistence.isSyncEnabled
+            || Persistence.isSyncActive
+            || CloudDataDeletion.cloudCopyMayExist
+            || CloudDataDeletion.deletionIsPending
+        XCTAssertTrue(mayHaveCloudCopy)
     }
 }

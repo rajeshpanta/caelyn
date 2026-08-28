@@ -38,8 +38,32 @@ enum CloudDataDeletion {
     /// still attached to.
     static let deletedAtKey = "caelyn.cloudCopyDeletedAt"
 
+    /// Set the first time the mirrored store actually opens, and cleared only by a
+    /// confirmed deletion.
+    ///
+    /// **Sync being off is not proof that no cloud copy exists.** Someone who
+    /// synced for a month and then switched sync off still has a month of history
+    /// sitting in iCloud, and hiding the delete action from her — which is what
+    /// Caelyn did until this flag existed — leaves her no way to remove it short of
+    /// turning sync back on. This records "a copy may be out there" independently
+    /// of whether Caelyn is currently syncing.
+    ///
+    /// Written only when `isSyncActive` becomes true, never merely when she flips
+    /// the preference: if the container never opened, nothing was ever uploaded and
+    /// offering to delete a copy that cannot exist would be its own small lie.
+    static let mayExistKey = "caelyn.cloudCopyMayExist"
+
     static var deletionIsPending: Bool { UserDefaults.standard.bool(forKey: pendingKey) }
     static var cloudCopyWasDeleted: Bool { UserDefaults.standard.object(forKey: deletedAtKey) != nil }
+
+    /// True when Caelyn has reason to believe a private cloud copy exists.
+    static var cloudCopyMayExist: Bool { UserDefaults.standard.bool(forKey: mayExistKey) }
+
+    /// Record that the mirrored store opened, so a copy is presumed to exist from
+    /// here until she deletes it. Idempotent.
+    static func noteCloudCopyMayExist() {
+        UserDefaults.standard.set(true, forKey: mayExistKey)
+    }
 
     enum Outcome: Equatable {
         /// The zone is gone, confirmed by the server.
@@ -79,6 +103,7 @@ enum CloudDataDeletion {
 
             defaults.set(Date(), forKey: deletedAtKey)
             defaults.removeObject(forKey: pendingKey)
+            defaults.removeObject(forKey: mayExistKey)
             log.info("Cloud delete: private iCloud copy removed.")
             return .deleted
         } catch let error as CKError where error.code == .zoneNotFound || error.code == .userDeletedZone {
@@ -86,6 +111,7 @@ enum CloudDataDeletion {
             // asked for is the outcome she has.
             defaults.set(Date(), forKey: deletedAtKey)
             defaults.removeObject(forKey: pendingKey)
+            defaults.removeObject(forKey: mayExistKey)
             log.info("Cloud delete: there was no iCloud copy to remove.")
             return .nothingToDelete
         } catch {
