@@ -32,6 +32,7 @@ struct AccountView: View {
     @State private var cloudDeletionResult: String?
     @State private var isDeletingCloud = false
     @State private var purchase = PurchaseService.shared
+    @State private var namePrompt: String?
 
     var body: some View {
         ScrollView {
@@ -55,6 +56,18 @@ struct AccountView: View {
             availability = await CloudAccount.availability()
             isSignedIn = AccountIdentityStore.isSignedIn
             nameDraft = profile?.preferredName ?? ""
+        }
+        .sheet(item: Binding(
+            get: { namePrompt.map(NamePrompt.init(prefill:)) },
+            set: { if $0 == nil { namePrompt = nil } }
+        )) { prompt in
+            PreferredNameStep(prefill: prompt.prefill) { confirmed in
+                AccountSession.setPreferredName(confirmed, on: profile)
+                modelContext.saveOrLog()
+                nameDraft = profile?.preferredName ?? ""
+                namePrompt = nil
+            }
+            .interactiveDismissDisabled()
         }
     }
 
@@ -182,6 +195,11 @@ struct AccountView: View {
                 isSignedIn = true
                 nameDraft = profile?.preferredName ?? ""
                 Haptics.success()
+                // Asked once. A returning user who has already answered — here or
+                // on another device that synced — signs straight in.
+                if AccountSession.needsNameConfirmation(profile) {
+                    namePrompt = AccountSession.namePrefill(for: profile)
+                }
             }
         }
     }

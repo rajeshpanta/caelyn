@@ -19,10 +19,10 @@ enum AccountSession {
 
     /// Record a successful authorization.
     ///
-    /// The name is written **once and only if she has not already chosen one**.
-    /// Apple returns the name on the first authorization and never again, so it is
-    /// persisted immediately; but a `preferredName` she typed herself always wins,
-    /// and re-authorizing must not quietly reset it back to what Apple said.
+    /// Apple returns a name on the first authorization and never again, so the
+    /// suggestion is captured immediately or lost forever — but it is only ever a
+    /// suggestion. What Caelyn actually calls her is set by her, in
+    /// `PreferredNameStep`, and stored via `setPreferredName`.
     @discardableResult
     static func apply(_ outcome: AppleSignInOutcome, to profile: UserProfile?) -> Bool {
         switch outcome {
@@ -30,18 +30,19 @@ enum AccountSession {
             AccountIdentityStore.save(appleUserID: userID)
             profile?.accountLinked = true
 
-            // Apple's name is a suggestion, captured on the one occasion it is
-            // offered. `PersonalName.fromApple` drops anything unusable, so a
-            // Hide My Email relay address can never land in a greeting.
-            if let suggested = PersonalName.fromApple(givenName: givenName, familyName: familyName) {
-                if profile?.appleSuggestedName == nil {
-                    profile?.appleSuggestedName = suggested
-                }
-                // Seed the preferred name only when she has none, so the first
-                // greeting after signing in already knows her.
-                if PersonalName.usable(profile?.preferredName) == nil {
-                    profile?.preferredName = suggested
-                }
+            // Apple's name is a *suggestion*, captured on the one occasion it is
+            // offered, and nothing more. It is deliberately NOT written to
+            // `preferredName` here: what Caelyn calls her is her decision, and
+            // adopting whatever is on her Apple ID without asking is how apps end
+            // up greeting people by a name they never use. It becomes the prefill
+            // for the one question `PreferredNameStep` asks, and becomes her name
+            // only when she taps Continue.
+            //
+            // `PersonalName.fromApple` drops anything unusable, so a Hide My Email
+            // relay address can never reach the field, let alone a greeting.
+            if let suggested = PersonalName.fromApple(givenName: givenName, familyName: familyName),
+               profile?.appleSuggestedName == nil {
+                profile?.appleSuggestedName = suggested
             }
             log.info("Account: linked.")
             return true
@@ -95,7 +96,29 @@ enum AccountSession {
     /// An empty or unusable string clears it rather than storing junk, so the
     /// greeting falls back to the warm nameless version instead of rendering a
     /// blank gap after a comma.
+    ///
+    /// Either way this counts as her having answered the question, including when
+    /// she clears the field: deliberately choosing to have no name is an answer,
+    /// and she should not be asked again at the next sign-in.
     static func setPreferredName(_ raw: String?, on profile: UserProfile?) {
         profile?.preferredName = PersonalName.usable(raw)
+        profile?.hasConfirmedPreferredName = true
+    }
+
+    /// Whether to ask "what should Caelyn call you?" after this authorization.
+    ///
+    /// Asked once. A returning user who has already answered — on this device or
+    /// on another one that synced — signs straight in.
+    static func needsNameConfirmation(_ profile: UserProfile?) -> Bool {
+        guard let profile else { return false }
+        return !profile.hasConfirmedPreferredName
+    }
+
+    /// What the name field should start with: Apple's suggestion if there is a
+    /// usable one, otherwise empty. Never a placeholder, never an address.
+    static func namePrefill(for profile: UserProfile?) -> String {
+        PersonalName.usable(profile?.preferredName)
+            ?? PersonalName.usable(profile?.appleSuggestedName)
+            ?? ""
     }
 }

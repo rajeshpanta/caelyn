@@ -172,6 +172,7 @@
 		E693D6A0AD58B675641DDC53 /* WatchBridgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD588403958052343C310525 /* WatchBridgeService.swift */; };
 		E770FCFA78B811972499CE97 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F727008BDD9FE097F46B549E /* NotificationService.swift */; };
 		E7EFD62EE4149F6D65FEF932 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BADB877CCB0906D29FD665F9 /* AccountView.swift */; };
+		E97031C939601F4A59D9B288 /* PreferredNameStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F2165D6C7550601E68B1366 /* PreferredNameStep.swift */; };
 		EABD571DAC0941B3E5A2FAAF /* HealthSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F6BBC00F6BE7EB68B372D6 /* HealthSyncService.swift */; };
 		EAFC9E788FEAD10FAEEC1901 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133DA567417FA320181DEB05 /* Persistence.swift */; };
 		EBD8A8A5883E9AD187D8C2E2 /* InsightsStatsGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BBAE1207378ECD1DA48A5DE /* InsightsStatsGrid.swift */; };
@@ -261,6 +262,7 @@
 		0D48D4147BDA4F0E3B4942CB /* OnboardingSteps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSteps.swift; sourceTree = "<group>"; };
 		0E24994FC37F88D50DE9B59B /* CaelynApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynApp.swift; sourceTree = "<group>"; };
 		0ED36F8EF76DAB80A668C937 /* SymptomChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomChip.swift; sourceTree = "<group>"; };
+		0F2165D6C7550601E68B1366 /* PreferredNameStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferredNameStep.swift; sourceTree = "<group>"; };
 		0F4C4DF012FBD0A2568B5252 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		12EB370D7339101CB7E5FBC2 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		1324749F9ED0476DABEC79C3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -601,6 +603,7 @@
 				95030A62CE85285A1B7447CE /* ExportView.swift */,
 				1525588F818995E2E60CF533 /* HealthKitConnectView.swift */,
 				8A0CE13176EDA61E7E405D69 /* iCloudSyncView.swift */,
+				0F2165D6C7550601E68B1366 /* PreferredNameStep.swift */,
 				694A4E3C75EB26BBAF092ED8 /* PrivacyTrustView.swift */,
 				42F6A57085360293469134B1 /* RemindersView.swift */,
 				3931C56DD039472FB7265FA2 /* SettingsPickerSheets.swift */,
@@ -1264,6 +1267,7 @@
 				DBF563C84D39B503C5E28A8F /* PersonalName.swift in Sources */,
 				0AC306E91FF45E3C2DBEE4E5 /* PhaseGuideView.swift in Sources */,
 				30CB3F72A2205298FDF17583 /* PredictionEngine.swift in Sources */,
+				E97031C939601F4A59D9B288 /* PreferredNameStep.swift in Sources */,
 				AA3741F22A064C92E2075BAF /* PregnancyModeCard.swift in Sources */,
 				46D5AFC8BE254313ADAE3509 /* PreviewData.swift in Sources */,
 				BBC23E6131EC21D7AF843BFB /* PrivacyChip.swift in Sources */,
