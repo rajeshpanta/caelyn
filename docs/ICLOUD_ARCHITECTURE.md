@@ -161,7 +161,76 @@ deletion is reported as unfinished rather than shown as done. An unreachable iCl
 returns `.unavailable` and is never recorded as a deletion. No `CKError`,
 `CKAccountStatus` or `NSCocoaErrorDomain` string can reach the screen.
 
-## 7. Privacy and App Store metadata changes required
+## 7. Sign in with Apple — account-deletion compliance
+
+### What Caelyn receives and keeps
+
+`AppleSignInService` reads exactly three things off `ASAuthorizationAppleIDCredential`:
+`user`, `fullName?.givenName`, `fullName?.familyName`. It never touches
+`identityToken`, `authorizationCode`, `email`, `realUserStatus` or `state`.
+
+| Item | Received | Stored | Where | Lifetime | Deleted on account deletion |
+|---|---|---|---|---|---|
+| Stable user identifier | yes | yes | Keychain, `com.caelyn.account`, ThisDeviceOnly | until sign-out/delete | **yes** |
+| Given / family name | first authorization only | yes, if usable | `UserProfile.appleSuggestedName` | until deleted | **yes** |
+| Identity token (JWT) | **never read** | no | — | — | n/a |
+| Authorization code | **never read** | no | — | — | n/a |
+| Access token | never issued | no | — | — | n/a |
+| Refresh token | never issued | no | — | — | n/a |
+| Email / private relay | **not requested** | no | — | — | n/a |
+
+`preferredName` is deliberately kept — it is a preference she typed, like the first
+day of the week, and is separately clearable.
+
+### Why there is no programmatic token revocation
+
+Apple's account-deletion guidance says apps supporting Sign in with Apple *"should
+use the Sign in with Apple REST API to revoke user tokens."* That endpoint
+(`/auth/revoke`) requires two things Caelyn structurally does not have:
+
+- **`token`** — *"The user refresh token or access token intended to be revoked."*
+  Caelyn never reads the authorization code, so no token is ever issued to it.
+- **`client_secret`** — *"A secret JSON Web Token (JWT) that uses the Sign in with
+  Apple private key associated with your developer account."* Shipping that key in
+  the app would expose it to every user; obtaining one safely needs a server.
+
+Caelyn operates no server, by design. Building one to revoke a token that was never
+issued would mean a privacy-first period tracker starts making network calls to a
+Caelyn backend — a real privacy regression in exchange for a call with no argument
+to pass. **There is no user session with Apple to revoke.**
+
+What Caelyn does instead: deletes every trace of the identity locally, and tells her
+where to remove Caelyn from her Apple Account, because that is the only revocation
+that exists and only she can perform it.
+
+### Why keeping cycle history is compliant
+
+Apple: *"Deleting an account removes the account from the **developer's records**,
+along with any data associated with the account that the developer isn't legally
+required to maintain."*
+
+Caelyn has **no developer records**. There is no server and no Caelyn-held copy of
+anything. Her history lives on her device and, if she enabled sync, in her own
+private CloudKit database that Caelyn cannot read. It is also not *associated with
+the account*: it exists identically for someone who never signed in, it is created
+before and independently of any account, and it is unaffected by one.
+
+Deleting reproductive-health history because someone unlinked an Apple ID would be
+an active harm, not compliance. Permanent deletion remains obvious and in-app
+through **Delete my iCloud copy** and **Delete all data**, and the account-deletion
+screen names both.
+
+### What was added for compliance
+
+- **Auto-renewable subscription notice.** Apple: *"If the user has auto-renewable
+  subscriptions, notify them that their billing will continue through Apple and
+  request that they cancel their subscription before continuing."* Caelyn sells
+  monthly and yearly Pro subscriptions and said nothing. The delete-account
+  confirmation now warns when one is active and offers Apple's own
+  `https://apps.apple.com/account/subscriptions` link.
+- **Manual authorization guidance**, since Caelyn cannot revoke on her behalf.
+
+## 8. Privacy and App Store metadata changes required
 
 These need doing in App Store Connect and on the website — they are not code, and
 none of them has been done:
@@ -169,10 +238,12 @@ none of them has been done:
 1. **App Privacy → Data Types.** Adding Sign in with Apple means declaring
    `Identifiers → User ID` (linked to the user, App Functionality only — **not**
    tracking, and not advertising).
-   **Email Address is NOT declared.** Caelyn requested the `.email` scope through
-   1.2 and never read the value; 1.3 requests `[.fullName]` only, so there is no
-   address to declare. Hide My Email is unaffected — it is Apple's choice at the
-   sheet, not something the scope enables.
+   **Email Address is NOT declared.** No shipped version of Caelyn has ever
+   requested an email address: 1.2 and earlier had no Sign in with Apple at all,
+   and 1.3 requests `[.fullName]` only. (An early draft of the 1.3 branch briefly
+   requested `.email` and never read it; it was removed before release.) Hide My
+   Email is unaffected — it is Apple's choice at the sheet, not something the scope
+   enables.
    `Contact Info → Name` must be declared if the user sets a preferred name
    (App Functionality, linked to the user, not used for tracking).
 2. **Health data.** Cycle data now leaves the device *to the user's own iCloud*.

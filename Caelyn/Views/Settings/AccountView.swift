@@ -30,6 +30,7 @@ struct AccountView: View {
     @State private var needsRelaunchNotice = false
     @State private var cloudDeletionResult: String?
     @State private var isDeletingCloud = false
+    @State private var purchase = PurchaseService.shared
 
     var body: some View {
         ScrollView {
@@ -349,11 +350,24 @@ struct AccountView: View {
                 )
                 .accessibilityIdentifier("UIA.Account.DeleteAccount")
 
-                Text("Deleting your account removes the Apple sign-in from Caelyn. It does **not** delete what you've logged \u{2014} that stays on this iPhone, and any iCloud copy stays too. Each of those is its own button, and each asks you separately.")
-                    .font(CaelynFont.caption)
-                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(CaelynSpacing.md)
+                VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
+                    Text("Deleting your account removes the Apple sign-in from Caelyn. It does **not** delete what you've logged \u{2014} that stays on this iPhone, and any iCloud copy stays too. Each of those is its own button, and each asks you separately.")
+
+                    // Caelyn never receives a Sign in with Apple token, so there is
+                    // nothing for it to revoke on her behalf. Removing the app from
+                    // her Apple Account is something only she can do, and saying so
+                    // is more honest than a button that silently does nothing.
+                    Text("Caelyn only ever received an anonymous ID from Apple \u{2014} no tokens, no email \u{2014} so there's nothing for it to hand back. If you'd also like to remove Caelyn from your Apple Account, that's in iPhone Settings \u{2192} your name \u{2192} Sign in with Apple.")
+
+                    if hasAutoRenewingSubscription {
+                        Text("Your Caelyn Pro subscription is billed by Apple and won't stop on its own. Cancel it first if you don't want it to renew.")
+                            .foregroundStyle(CaelynColor.alertRose)
+                    }
+                }
+                .font(CaelynFont.caption)
+                .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(CaelynSpacing.md)
             }
         }
         .confirmationDialog("Sign out of Caelyn?", isPresented: $showSignOutConfirm, titleVisibility: .visible) {
@@ -363,10 +377,16 @@ struct AccountView: View {
             Text("Everything you've logged stays on this iPhone. You can sign back in any time.")
         }
         .confirmationDialog("Delete your Caelyn account?", isPresented: $showDeleteAccountConfirm, titleVisibility: .visible) {
+            // Apple's account-deletion guidance: where an auto-renewable
+            // subscription exists, tell her billing continues and give her the way
+            // to cancel before she goes ahead.
+            if hasAutoRenewingSubscription {
+                Button("Manage subscription") { openSubscriptionManagement() }
+            }
             Button("Delete account", role: .destructive) { deleteAccount() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This removes your Apple sign-in from Caelyn. Your cycle history is not deleted \u{2014} it stays on this iPhone, your iCloud copy stays too, and you'll still be able to open and use Caelyn exactly as before. Deleting either of those is a separate choice.")
+            Text(deleteAccountMessage)
         }
     }
 
@@ -383,6 +403,26 @@ struct AccountView: View {
     /// reproductive health history as a side effect of that. The two live behind
     /// two separate confirmations in two separate places, and this one says plainly
     /// what it does not do.
+    /// True when Apple is billing her on a renewing basis. Lifetime is a one-off
+    /// purchase and needs no warning.
+    private var hasAutoRenewingSubscription: Bool {
+        purchase.purchasedProductIDs.contains(PurchaseService.ProductID.monthly.rawValue)
+            || purchase.purchasedProductIDs.contains(PurchaseService.ProductID.yearly.rawValue)
+    }
+
+    private var deleteAccountMessage: String {
+        let base = "This removes your Apple sign-in from Caelyn. Your cycle history is not deleted \u{2014} it stays on this iPhone, your iCloud copy stays too, and you'll still be able to open and use Caelyn exactly as before. Deleting either of those is a separate choice."
+        guard hasAutoRenewingSubscription else { return base }
+        return base + "\n\nYour Caelyn Pro subscription is billed by Apple and will keep renewing until you cancel it."
+    }
+
+    private func openSubscriptionManagement() {
+        // The link Apple's own account-deletion guidance names.
+        if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+            UIApplication.shared.open(url)
+        }
+    }
+
     private func deleteAccount() {
         AccountSession.signOut(profile: profile)
         profile?.appleSuggestedName = nil

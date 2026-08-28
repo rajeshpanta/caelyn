@@ -108,6 +108,7 @@
 		87C388F7E2B1DF57EA5EB394 /* CyclePrediction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D5D74DF250AA8A6396C3896 /* CyclePrediction.swift */; };
 		89E77462A3A3AC83DE2F1656 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96EC40E0931D0DEAB6685E5E /* Assets.xcassets */; };
 		8BA147710A9BDEF061AEAD1B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B6E412412EA4D2F92337555C /* PrivacyInfo.xcprivacy */; };
+		8BF7658E3CB84E0298FAEA7E /* SignInWithAppleComplianceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FEB1D3B7FDD5A7DB98A5D7A /* SignInWithAppleComplianceTests.swift */; };
 		8D226211ADD88F0D7513CF4F /* WatchHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0188FEF8DFA34ECEDEE22AAB /* WatchHomeView.swift */; };
 		8DC6C9845609FAA8F8411FAC /* CaelynWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51EC99CA13B2B3BCD725DBE4 /* CaelynWatchApp.swift */; };
 		8F40B2801D830BE5BD40BCED /* Shapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3393953805D85FD844EA1DDC /* Shapes.swift */; };
@@ -333,6 +334,7 @@
 		5E3D7518B46566CE8231592C /* HealthKitReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitReader.swift; sourceTree = "<group>"; };
 		5F4166D3870A6F4C282B5832 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		5FDEAAC04C4AD4BB528B0A16 /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
+		5FEB1D3B7FDD5A7DB98A5D7A /* SignInWithAppleComplianceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInWithAppleComplianceTests.swift; sourceTree = "<group>"; };
 		6011FB7860B910ED48584777 /* WidgetDataSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataSync.swift; sourceTree = "<group>"; };
 		60AD87ED1BAC8968B70FAE43 /* HomeCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeCopy.swift; sourceTree = "<group>"; };
 		666910ABE0DF220B35EA4822 /* ImportPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportPlanner.swift; sourceTree = "<group>"; };
@@ -584,6 +586,7 @@
 				ADEDBAF6EEDC8F44BF3AE915 /* ImportSourceTests.swift */,
 				C3D2EA34ED769F42B4DC793B /* NaturalCyclesTests.swift */,
 				88FCBE3844BBD8ECD171A663 /* PeriodTrackerGPAppsTests.swift */,
+				5FEB1D3B7FDD5A7DB98A5D7A /* SignInWithAppleComplianceTests.swift */,
 			);
 			path = CaelynTests;
 			sourceTree = "<group>";
@@ -1118,6 +1121,7 @@
 				47E69C78CF1388CE0E9D2BE7 /* ImportSourceTests.swift in Sources */,
 				37D0C70431A345E55B922E0E /* NaturalCyclesTests.swift in Sources */,
 				44D7B8C7A55B262F9BDBD07A /* PeriodTrackerGPAppsTests.swift in Sources */,
+				8BF7658E3CB84E0298FAEA7E /* SignInWithAppleComplianceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

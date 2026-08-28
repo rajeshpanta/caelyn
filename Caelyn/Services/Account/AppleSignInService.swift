@@ -21,11 +21,14 @@ final class AppleSignInService: NSObject {
     ///
     /// Requests `.fullName` and nothing else.
     ///
-    /// Caelyn asked for `.email` until 1.3 and never once read the value. Requesting
-    /// a scope you do not use is asking someone to hand over an address for no
-    /// reason, and it drags an Email Address declaration onto the App Store privacy
-    /// label for data the app does not have. The name is the only thing Caelyn
-    /// actually wants, so it is the only thing it asks for.
+    /// An earlier draft of this 1.3 work requested `.email` alongside the name and
+    /// never once read the value. It was dropped before release, so **no shipped
+    /// version of Caelyn has ever asked for an email address** — 1.2 and earlier had
+    /// no Sign in with Apple at all, and 1.3 asks only for the name.
+    ///
+    /// Requesting a scope you do not use is asking someone to hand over an address
+    /// for no reason, and it drags an Email Address declaration onto the App Store
+    /// privacy label for data the app does not hold.
     ///
     /// Hide My Email is unaffected: it is Apple's choice at the sheet, not something
     /// Caelyn enables by requesting a scope. Dropping `.email` simply means the
