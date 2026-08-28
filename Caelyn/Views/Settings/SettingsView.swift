@@ -14,6 +14,7 @@ struct SettingsView: View {
     @State private var showingImportHistory = false
     @State private var showingParanoidConfirm = false
     @State private var showingCloudSync = false
+    @State private var showingAccount = false
     @State private var showingFirstDayPicker = false
     @State private var showingResetOnboardingConfirm = false
     @State private var showingDeleteFirst = false
@@ -82,6 +83,9 @@ struct SettingsView: View {
             }
             .navigationDestination(isPresented: $showingCloudSync) {
                 BackupInfoView()
+            }
+            .navigationDestination(isPresented: $showingAccount) {
+                AccountView()
             }
             .navigationDestination(isPresented: $showingReminders) {
                 RemindersView()
@@ -387,15 +391,30 @@ struct SettingsView: View {
         }
     }
 
+    /// What the Account row says at a glance. Reads the name she chose, then
+    /// whether she is signed in — never an email, and never a placeholder.
+    private var accountRowDetail: String {
+        if let name = profile?.displayName { return name }
+        return AccountIdentityStore.isSignedIn ? "Signed in" : "Optional"
+    }
+
     // MARK: - Data section
 
     private var dataSection: some View {
         SettingsSectionCard(title: "Data") {
             SettingsRow(
+                icon: "person.crop.circle",
+                iconColor: CaelynColor.primaryPlum,
+                title: "Account & iCloud",
+                detail: accountRowDetail,
+                action: { showingAccount = true }
+            )
+            SettingsDivider()
+            SettingsRow(
                 icon: "iphone",
                 iconColor: CaelynColor.primaryPlum,
                 title: "Backup",
-                detail: "On this device",
+                detail: Persistence.isSyncActive ? "iCloud + this device" : "On this device",
                 action: { showingCloudSync = true }
             )
             SettingsDivider()

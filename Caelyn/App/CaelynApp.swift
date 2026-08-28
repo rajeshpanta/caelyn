@@ -18,6 +18,14 @@ struct CaelynApp: App {
     /// and is presented once the app is actually usable.
     @State private var incomingFile: IncomingImportFile?
 
+    /// Keeps the one-entry-per-day invariant true while CloudKit is delivering
+    /// records mid-session. Built only for the live store: the screenshot and
+    /// UI-test containers are in-memory and have nothing to sync.
+    @State private var syncCoordinator: CloudSyncCoordinator? = {
+        guard !isScreenshotMode, !isOnboardingUITest else { return nil }
+        return CloudSyncCoordinator(container: Persistence.live)
+    }()
+
     var body: some Scene {
         WindowGroup {
             AppLockGate {
@@ -44,6 +52,8 @@ struct CaelynApp: App {
                 } else {
                     await PurchaseService.shared.loadProducts()
                     WatchBridgeService.shared.activate()
+                    syncCoordinator?.start()
+                    await reconcileAppleCredential()
                 }
             }
         }
@@ -60,7 +70,26 @@ struct CaelynApp: App {
                 // was closed. No-op unless she has connected and left a read
                 // toggle on.
                 Task { await HealthSyncService.syncOnForeground() }
+                // Apple can revoke the credential while Caelyn is backgrounded.
+                // Checking on foreground keeps the signed-in state honest — and an
+                // unreachable Apple deliberately changes nothing.
+                Task { await reconcileAppleCredential() }
             }
+        }
+    }
+
+    /// Ask Apple whether the stored credential still stands.
+    ///
+    /// Only ever ends the local session on an unambiguous revoked/notFound. Cycle
+    /// history is never involved: `AccountSession` cannot reach it.
+    @MainActor
+    private func reconcileAppleCredential() async {
+        guard let userID = AccountIdentityStore.appleUserID else { return }
+        let state = await AppleSignInService.credentialState(for: userID)
+        let context = Persistence.live.mainContext
+        let profile = (try? context.fetch(FetchDescriptor<UserProfile>()))?.first
+        if AccountSession.reconcile(state, profile: profile) {
+            context.saveOrLog()
         }
     }
 }

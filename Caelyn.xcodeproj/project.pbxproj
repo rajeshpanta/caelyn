@@ -93,6 +93,7 @@
 		76A85E09A594126D2B6DFAA8 /* CaelynWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7964B2E44B79AC36776C09E4 /* CaelynWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		776A3C2C7F8086C9E1FB0D1D /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */; };
 		79E714A8CB6876CD2F78846E /* SymptomChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED36F8EF76DAB80A668C937 /* SymptomChip.swift */; };
+		7A840C305CD88CB88704DBD2 /* CloudMigrationConflictTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF15144FE89140AF906ABB93 /* CloudMigrationConflictTests.swift */; };
 		7AE2136FA6880159B2EE1994 /* ClueSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A25009798C13A945B9DB9F2F /* ClueSource.swift */; };
 		7BAFF729C4DBF3F64901E1D1 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F4166D3870A6F4C282B5832 /* Typography.swift */; };
 		7BDFA27E1EBA79E24E84F7EF /* CaelynCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7110E218D7376F63A078A1C /* CaelynCard.swift */; };
@@ -114,6 +115,7 @@
 		94EF936F835F61CD2B65D964 /* HomePatternInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220787509170B408F4B03C6B /* HomePatternInsight.swift */; };
 		9793F7ACFFB971F837581A8D /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFE9A76ACD4C8CB6B8CE0C9 /* OnboardingStep.swift */; };
 		97A3A12A9A56E0E068EBADD4 /* TypicalRanges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1727D86385E84CE318EA3C08 /* TypicalRanges.swift */; };
+		98C6DBE7A8FE36BC9CF06D81 /* CloudSyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 260A08C2F86FD9290A10F580 /* CloudSyncCoordinator.swift */; };
 		A066E6508362459383647C7F /* CSVReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE2CB5819A7211A44FD02128 /* CSVReader.swift */; };
 		A07388C20552EFA03BDA067A /* HomeStreakCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2633FDCD19F5767C2E1AAE90 /* HomeStreakCard.swift */; };
 		A0D53E1481E2EEA060626F69 /* HealthKitReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E3D7518B46566CE8231592C /* HealthKitReader.swift */; };
@@ -166,6 +168,7 @@
 		E6736B444097A936BE0D10B9 /* WristTempOvulationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DEA117F0CC7A4A969A4459 /* WristTempOvulationEngine.swift */; };
 		E693D6A0AD58B675641DDC53 /* WatchBridgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD588403958052343C310525 /* WatchBridgeService.swift */; };
 		E770FCFA78B811972499CE97 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F727008BDD9FE097F46B549E /* NotificationService.swift */; };
+		E7EFD62EE4149F6D65FEF932 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BADB877CCB0906D29FD665F9 /* AccountView.swift */; };
 		EABD571DAC0941B3E5A2FAAF /* HealthSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8F6BBC00F6BE7EB68B372D6 /* HealthSyncService.swift */; };
 		EAFC9E788FEAD10FAEEC1901 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133DA567417FA320181DEB05 /* Persistence.swift */; };
 		EBD8A8A5883E9AD187D8C2E2 /* InsightsStatsGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BBAE1207378ECD1DA48A5DE /* InsightsStatsGrid.swift */; };
@@ -271,6 +274,7 @@
 		220787509170B408F4B03C6B /* HomePatternInsight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePatternInsight.swift; sourceTree = "<group>"; };
 		23413D59226D3A1BBCDC7148 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		24A0AB981C951A6DA8F812A3 /* ObservationBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservationBuilder.swift; sourceTree = "<group>"; };
+		260A08C2F86FD9290A10F580 /* CloudSyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncCoordinator.swift; sourceTree = "<group>"; };
 		2633FDCD19F5767C2E1AAE90 /* HomeStreakCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeStreakCard.swift; sourceTree = "<group>"; };
 		294EA3EE854C87EEF4D2311A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		29695E67A2AF8F0087B074D9 /* WatchQuickLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchQuickLogView.swift; sourceTree = "<group>"; };
@@ -388,6 +392,7 @@
 		B6E412412EA4D2F92337555C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B8F6BBC00F6BE7EB68B372D6 /* HealthSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSyncService.swift; sourceTree = "<group>"; };
 		B8FBF952865F40EC744AF966 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		BADB877CCB0906D29FD665F9 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		BD48D14EB120165091660899 /* InsightsEmptyState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsEmptyState.swift; sourceTree = "<group>"; };
 		BE2A0C99D118395AD1EFDB8A /* GenericTableSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericTableSource.swift; sourceTree = "<group>"; };
 		BE2CB5819A7211A44FD02128 /* CSVReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVReader.swift; sourceTree = "<group>"; };
@@ -410,6 +415,7 @@
 		D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
 		D85C561541868291999A9AF2 /* GlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlowTests.swift; sourceTree = "<group>"; };
 		DC4E6AEE82C3214565A6A2AE /* AccountTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTests.swift; sourceTree = "<group>"; };
+		DF15144FE89140AF906ABB93 /* CloudMigrationConflictTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudMigrationConflictTests.swift; sourceTree = "<group>"; };
 		E2702E1D3675E82E5037E3F5 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		E2BF3402959D855BEA0096A3 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		E35A9DECDE3CDA366CAFB7DA /* BringHistoryFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BringHistoryFlowTests.swift; sourceTree = "<group>"; };
@@ -565,6 +571,7 @@
 				DC4E6AEE82C3214565A6A2AE /* AccountTests.swift */,
 				E35A9DECDE3CDA366CAFB7DA /* BringHistoryFlowTests.swift */,
 				354545D943378E53A1B935B7 /* CaelynTests.swift */,
+				DF15144FE89140AF906ABB93 /* CloudMigrationConflictTests.swift */,
 				58917566D3D58FBFF324EE38 /* CloudSyncSafetyTests.swift */,
 				C455151FA14FB93DB163574F /* GlowEveTests.swift */,
 				D85C561541868291999A9AF2 /* GlowTests.swift */,
@@ -580,6 +587,7 @@
 			isa = PBXGroup;
 			children = (
 				23413D59226D3A1BBCDC7148 /* .gitkeep */,
+				BADB877CCB0906D29FD665F9 /* AccountView.swift */,
 				E52B85041FEDE2F496C92AB3 /* BirthControlView.swift */,
 				686ED94B3F2234B776EF9154 /* CycleSettingsView.swift */,
 				95030A62CE85285A1B7447CE /* ExportView.swift */,
@@ -666,6 +674,7 @@
 				57ED9FBF789EDA60FE1B4513 /* AccountSession.swift */,
 				AF0DF07ABEAA71E44E9F8C76 /* AppleSignInOutcome.swift */,
 				2C886EAA52EF63FB58A7B0CE /* AppleSignInService.swift */,
+				260A08C2F86FD9290A10F580 /* CloudSyncCoordinator.swift */,
 				334FC6BEFF52B1724C9C190B /* PersonalName.swift */,
 			);
 			path = Account;
@@ -1094,6 +1103,7 @@
 				EDC27385EA3B0A3DB336459F /* AccountTests.swift in Sources */,
 				DC7A6B723589A24DF3B6F3CD /* BringHistoryFlowTests.swift in Sources */,
 				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
+				7A840C305CD88CB88704DBD2 /* CloudMigrationConflictTests.swift in Sources */,
 				D2D5AB8D5834553A9CF7F06F /* CloudSyncSafetyTests.swift in Sources */,
 				55116106737A41E89CC2EEAC /* GlowEveTests.swift in Sources */,
 				17F0B4AE0C74C741F778F608 /* GlowTests.swift in Sources */,
@@ -1133,6 +1143,7 @@
 			files = (
 				B532F649285ED44265C8DF71 /* AccountIdentityStore.swift in Sources */,
 				0AC9AB39173B78AB17337993 /* AccountSession.swift in Sources */,
+				E7EFD62EE4149F6D65FEF932 /* AccountView.swift in Sources */,
 				1075D88F73A6362D96FBFA9D /* AdaptiveRow.swift in Sources */,
 				E0905B45C9B6DBBF071BE5D8 /* AppDelegate.swift in Sources */,
 				45D7233A755B333BD1199215 /* AppLockGate.swift in Sources */,
@@ -1152,6 +1163,7 @@
 				483F9E281B30959A42759DD7 /* CaelynExportSource.swift in Sources */,
 				AC5DA2BA4EAE6B7ED6191DED /* CalendarMath.swift in Sources */,
 				6D3293F70DFD8C6B2B7280B7 /* CalendarView.swift in Sources */,
+				98C6DBE7A8FE36BC9CF06D81 /* CloudSyncCoordinator.swift in Sources */,
 				7AE2136FA6880159B2EE1994 /* ClueSource.swift in Sources */,
 				036BA33CD4D86A7FBC7EB83A /* Color+Caelyn.swift in Sources */,
 				8365DE6D282CEB140AEA20BE /* ComponentGallery.swift in Sources */,
