@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var showingParanoidConfirm = false
     @State private var showingCloudSync = false
     @State private var showingAccount = false
+    @State private var deleteAllResult: String?
     @State private var showingFirstDayPicker = false
     @State private var showingResetOnboardingConfirm = false
     @State private var showingDeleteFirst = false
@@ -167,10 +168,35 @@ struct SettingsView: View {
             isPresented: $showingDeleteSecond,
             titleVisibility: .visible
         ) {
-            Button("Delete everything", role: .destructive) { deleteAllData() }
+            // When a cloud copy could exist, "delete everything" has two possible
+            // meanings and she must pick one. Guessing on her behalf would either
+            // leave reproductive health in iCloud she believes is gone, or destroy
+            // a copy she was relying on.
+            if mayHaveCloudCopy {
+                Button("Delete on this iPhone and iCloud", role: .destructive) {
+                    deleteAllData(scope: .thisDeviceAndCloud)
+                }
+                Button("Delete on this iPhone only", role: .destructive) {
+                    deleteAllData(scope: .thisDevice)
+                }
+            } else {
+                Button("Delete everything", role: .destructive) {
+                    deleteAllData(scope: .thisDevice)
+                }
+            }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Everything will be permanently removed.")
+            Text(mayHaveCloudCopy
+                 ? "You have a copy in iCloud as well as on this iPhone. Choose whether to remove both, or only this iPhone. Neither can be undone."
+                 : "Everything on this iPhone will be permanently removed.")
+        }
+        .alert("Delete all data", isPresented: Binding(
+            get: { deleteAllResult != nil },
+            set: { if !$0 { deleteAllResult = nil } }
+        )) {
+            Button("OK") { deleteAllResult = nil }
+        } message: {
+            Text(deleteAllResult ?? "")
         }
         .alert("Couldn't enable lock", isPresented: Binding(
             get: { lockToggleError != nil },
@@ -721,10 +747,30 @@ struct SettingsView: View {
         modelContext.saveOrLog()
     }
 
-    private func deleteAllData() {
+    /// True when there could be something of hers in iCloud to reason about.
+    ///
+    /// Covers sync being on, sync having been on until an interrupted deletion, and
+    /// a deletion that never confirmed. If any of those hold, the scope question is
+    /// real and she has to answer it.
+    private var mayHaveCloudCopy: Bool {
+        Persistence.isSyncEnabled || Persistence.isSyncActive || CloudDataDeletion.deletionIsPending
+    }
+
+    private func deleteAllData(scope: SecureWipeService.Scope) {
         // Complete secure wipe: SwiftData + notifications + Caelyn's Apple Health
-        // samples + widget snapshot + preference flags (Phase 5).
-        Task { await SecureWipeService.wipeEverything(modelContext: modelContext) }
+        // samples + widget snapshot + preference flags (Phase 5), plus the private
+        // iCloud copy when she asked for that too.
+        Task {
+            let cloudOutcome = await SecureWipeService.wipeEverything(
+                modelContext: modelContext, scope: scope
+            )
+            // Only claim the cloud half happened if it actually did. A wipe that
+            // reports success over a surviving iCloud copy is the worst possible
+            // outcome for someone deleting reproductive health.
+            if let cloudOutcome, !cloudOutcome.didDelete {
+                deleteAllResult = "Everything on this iPhone was deleted. \(cloudOutcome.message)"
+            }
+        }
         Haptics.warning()
     }
 }

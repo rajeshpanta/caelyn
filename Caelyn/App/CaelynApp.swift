@@ -54,6 +54,10 @@ struct CaelynApp: App {
                     WatchBridgeService.shared.activate()
                     syncCoordinator?.start()
                     await reconcileAppleCredential()
+                    // If she deleted her iCloud copy, make sure it stayed deleted.
+                    // Covers an interrupted deletion and a mirroring delegate that
+                    // recreated the zone before it was detached.
+                    await CloudDataDeletion.resolveOutstandingDeletion()
                 }
             }
         }

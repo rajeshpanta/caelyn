@@ -26,7 +26,10 @@ struct AccountView: View {
 
     @State private var showSignOutConfirm = false
     @State private var showDeleteAccountConfirm = false
+    @State private var showDeleteCloudConfirm = false
     @State private var needsRelaunchNotice = false
+    @State private var cloudDeletionResult: String?
+    @State private var isDeletingCloud = false
 
     var body: some View {
         ScrollView {
@@ -35,6 +38,7 @@ struct AccountView: View {
                 nameCard
                 accountCard
                 syncCard
+                cloudCopyCard
                 if isSignedIn { manageCard }
                 reassurance
             }
@@ -233,6 +237,13 @@ struct AccountView: View {
     private func setSync(_ on: Bool) {
         syncOn = on
         UserDefaults.standard.set(on, forKey: Persistence.syncEnabledKey)
+        if on {
+            // She has changed her mind after deleting a cloud copy. Clearing the
+            // marker is what stops the launch-time guard from deleting the new copy
+            // she has just asked for.
+            CloudDataDeletion.clearDeletionMarker()
+            cloudDeletionResult = nil
+        }
         // The container is built once per launch, so the switch takes effect on the
         // next one. Saying so is better than a toggle that appears to do nothing.
         needsRelaunchNotice = (on != Persistence.isSyncActive)
@@ -240,6 +251,79 @@ struct AccountView: View {
     }
 
     // MARK: - Managing the account (Apple requires deletion to be reachable in-app)
+
+    /// Deleting the iCloud copy. Deliberately its own card, not a row tucked under
+    /// the account, because it is not an account action: it is about her data, and
+    /// someone who has never signed in can still have a cloud copy to remove.
+    @ViewBuilder
+    private var cloudCopyCard: some View {
+        if syncOn || CloudDataDeletion.cloudCopyWasDeleted || CloudDataDeletion.deletionIsPending {
+            SettingsSectionCard(title: "Your iCloud copy") {
+                VStack(alignment: .leading, spacing: CaelynSpacing.sm) {
+                    if CloudDataDeletion.deletionIsPending {
+                        Text("A deletion didn't finish, so your iCloud copy may still be there. Caelyn will try again \u{2014} or you can retry now.")
+                            .font(CaelynFont.subheadline)
+                            .foregroundStyle(CaelynColor.alertRose)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.horizontal, CaelynSpacing.md)
+                            .padding(.top, CaelynSpacing.md)
+                    } else if CloudDataDeletion.cloudCopyWasDeleted && !syncOn {
+                        Text("You deleted your iCloud copy. Caelyn won't make a new one unless you turn sync back on.")
+                            .font(CaelynFont.subheadline)
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.horizontal, CaelynSpacing.md)
+                            .padding(.top, CaelynSpacing.md)
+                    }
+
+                    SettingsRow(
+                        icon: "icloud.slash",
+                        iconColor: CaelynColor.alertRose,
+                        title: isDeletingCloud ? "Deleting\u{2026}" : "Delete my iCloud copy",
+                        detail: nil,
+                        action: { showDeleteCloudConfirm = true },
+                        isDestructive: true
+                    )
+                    .disabled(isDeletingCloud)
+                    .accessibilityIdentifier("UIA.Account.DeleteCloud")
+
+                    Text("Removes the copy of your history stored in your private iCloud. What's on this iPhone stays exactly as it is \u{2014} this does not delete anything here.")
+                        .font(CaelynFont.caption)
+                        .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, CaelynSpacing.md)
+                        .padding(.bottom, CaelynSpacing.md)
+
+                    if let cloudDeletionResult {
+                        Text(cloudDeletionResult)
+                            .font(CaelynFont.caption)
+                            .foregroundStyle(CaelynColor.deepPlumText.opacity(0.7))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.horizontal, CaelynSpacing.md)
+                            .padding(.bottom, CaelynSpacing.md)
+                    }
+                }
+            }
+            .confirmationDialog("Permanently delete your iCloud copy?",
+                                isPresented: $showDeleteCloudConfirm, titleVisibility: .visible) {
+                Button("Delete iCloud copy", role: .destructive) { deleteCloudCopy() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This permanently removes your history from iCloud and cannot be undone. Your history on this iPhone is not deleted and Caelyn will keep working exactly as it does now. Sync will be turned off so no new copy is made.")
+            }
+        }
+    }
+
+    private func deleteCloudCopy() {
+        isDeletingCloud = true
+        Task {
+            let outcome = await CloudDataDeletion.deleteCloudCopy()
+            cloudDeletionResult = outcome.message
+            if outcome.didDelete { syncOn = false }
+            isDeletingCloud = false
+            if outcome.didDelete { Haptics.success() } else { Haptics.warning() }
+        }
+    }
 
     private var manageCard: some View {
         SettingsSectionCard(title: "Manage") {
@@ -265,7 +349,7 @@ struct AccountView: View {
                 )
                 .accessibilityIdentifier("UIA.Account.DeleteAccount")
 
-                Text("Deleting your account removes the Apple sign-in from Caelyn. It does **not** delete what you've logged \u{2014} that stays on this iPhone. To erase your history as well, use Settings \u{2192} Privacy \u{2192} Delete all data, which asks you separately.")
+                Text("Deleting your account removes the Apple sign-in from Caelyn. It does **not** delete what you've logged \u{2014} that stays on this iPhone, and any iCloud copy stays too. Each of those is its own button, and each asks you separately.")
                     .font(CaelynFont.caption)
                     .foregroundStyle(CaelynColor.deepPlumText.opacity(0.55))
                     .fixedSize(horizontal: false, vertical: true)
@@ -282,7 +366,7 @@ struct AccountView: View {
             Button("Delete account", role: .destructive) { deleteAccount() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This removes your Apple sign-in from Caelyn. Your cycle history is not deleted \u{2014} it stays on this iPhone, and you'll still be able to open and use Caelyn exactly as before.")
+            Text("This removes your Apple sign-in from Caelyn. Your cycle history is not deleted \u{2014} it stays on this iPhone, your iCloud copy stays too, and you'll still be able to open and use Caelyn exactly as before. Deleting either of those is a separate choice.")
         }
     }
 

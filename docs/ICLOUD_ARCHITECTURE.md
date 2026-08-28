@@ -125,16 +125,56 @@ app-lock and preview-hiding flags, PIN lockout counters, `caelyn.storeFailed`,
 `caelyn.syncEnabled` itself, the widget/watch snapshot, and every "seen this
 intro" flag. None of these are history; all of them are properties of one device.
 
-## 6. Privacy and App Store metadata changes required
+## 6. The deletion model (1.3)
+
+Four actions, deliberately distinct, each stating its own scope. None of them is
+allowed to do a second one's job quietly.
+
+| Action | Apple identity | Local history | iCloud copy |
+|---|---|---|---|
+| **Sign out** | removed | kept | kept |
+| **Delete Caelyn account** | removed | kept | kept |
+| **Delete my iCloud copy** | kept | **kept** | **removed**, sync switched off |
+| **Delete all data** | — | removed | removed *only if she picks that scope* |
+
+**Deleting the iCloud copy is a direct CloudKit zone deletion,** not "delete the
+rows and let sync carry it". Mirrored deletions are asynchronous: if Caelyn cleared
+the local rows, turned sync off and the app were killed a second later, the
+deletions would never finish uploading and the cloud copy would survive intact.
+Removing `com.apple.coredata.cloudkit.zone` is one server-side operation whose
+success can actually be checked.
+
+**Ordering.** Sync is switched off *before* the zone is removed, so the live mirror
+is not simultaneously pushing the local store back into it. In a both-halves wipe
+the cloud goes first: if the app dies mid-wipe, the safe half to have completed is
+the one that removes data from a server.
+
+**Resurrection guard.** `caelyn.cloudCopyDeletedAt` records that she chose to
+destroy the copy. While it stands and sync is off, every launch re-asserts the
+deletion — covering both an interrupted attempt and a mirroring delegate that
+recreated the zone before detaching. Signing back in never clears it, because
+signing in is an identity action. Deliberately re-enabling sync *does* clear it,
+because that is her changing her mind and she is entitled to a fresh copy.
+
+**Honesty.** `caelyn.cloudDeletionPending` survives a kill, so an unfinished
+deletion is reported as unfinished rather than shown as done. An unreachable iCloud
+returns `.unavailable` and is never recorded as a deletion. No `CKError`,
+`CKAccountStatus` or `NSCocoaErrorDomain` string can reach the screen.
+
+## 7. Privacy and App Store metadata changes required
 
 These need doing in App Store Connect and on the website — they are not code, and
 none of them has been done:
 
 1. **App Privacy → Data Types.** Adding Sign in with Apple means declaring
-   `Identifiers → User ID` (linked to the user, used for App Functionality only —
-   **not** tracking, and not advertising). If the `.email` scope stays requested,
-   `Contact Info → Email Address` must be declared even though Caelyn never reads
-   or stores the value; the honest alternative is to drop the scope.
+   `Identifiers → User ID` (linked to the user, App Functionality only — **not**
+   tracking, and not advertising).
+   **Email Address is NOT declared.** Caelyn requested the `.email` scope through
+   1.2 and never read the value; 1.3 requests `[.fullName]` only, so there is no
+   address to declare. Hide My Email is unaffected — it is Apple's choice at the
+   sheet, not something the scope enables.
+   `Contact Info → Name` must be declared if the user sets a preferred name
+   (App Functionality, linked to the user, not used for tracking).
 2. **Health data.** Cycle data now leaves the device *to the user's own iCloud*.
    Apple does not treat the user's private CloudKit database as a third-party
    disclosure, so "Data Not Collected" for health can stand — but the privacy
@@ -144,7 +184,19 @@ none of them has been done:
    user's own iCloud rather than a Caelyn server, the preferred name, and account
    deletion versus data deletion being separate actions.
 4. **Account deletion.** Apple requires an in-app route once an app offers account
-   creation. It exists at Settings → Account & iCloud → Delete Caelyn account, and
-   is deliberately distinct from Delete all data.
+   creation. It is at Settings → Account & iCloud → Delete Caelyn account.
+   The App Store review note should state plainly that Caelyn separates *account*
+   deletion from *health-data* deletion on purpose, and that both are reachable
+   in-app: Delete Caelyn account, Delete my iCloud copy, and Delete all data (which
+   asks whether she means this iPhone, or this iPhone and iCloud).
 5. **In-app copy already updated:** `BackupInfoView` no longer promises "not in
    iCloud either"; it now reads the real store state.
+
+5. **Data deletion description.** The App Privacy questionnaire's account-deletion
+   answer should describe all three routes, not just the identity one, and should
+   say that deleting the account does not delete health data — that being a
+   deliberate safety property rather than an omission.
+6. **iCloud/CloudKit disclosure.** The policy must say the copy lives in the user's
+   own private CloudKit database, that Caelyn operates no server and cannot read
+   it, that sync is opt-in and off by default, and that deleting the copy is a
+   one-way operation the user controls.

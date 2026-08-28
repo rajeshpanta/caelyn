@@ -19,12 +19,20 @@ final class AppleSignInService: NSObject {
 
     /// Present Sign in with Apple and wait for the answer.
     ///
-    /// Requests `.fullName` and `.email` only. The name is what Caelyn actually
-    /// wants; the email scope is what makes Hide My Email available to her, and the
-    /// address itself is never stored, never displayed and never used to greet her.
+    /// Requests `.fullName` and nothing else.
+    ///
+    /// Caelyn asked for `.email` until 1.3 and never once read the value. Requesting
+    /// a scope you do not use is asking someone to hand over an address for no
+    /// reason, and it drags an Email Address declaration onto the App Store privacy
+    /// label for data the app does not have. The name is the only thing Caelyn
+    /// actually wants, so it is the only thing it asks for.
+    ///
+    /// Hide My Email is unaffected: it is Apple's choice at the sheet, not something
+    /// Caelyn enables by requesting a scope. Dropping `.email` simply means the
+    /// relay address is never generated for Caelyn in the first place.
     func signIn() async -> AppleSignInOutcome {
         let request = ASAuthorizationAppleIDProvider().createRequest()
-        request.requestedScopes = [.fullName, .email]
+        request.requestedScopes = [.fullName]
 
         return await withCheckedContinuation { continuation in
             self.continuation = continuation

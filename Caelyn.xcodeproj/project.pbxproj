@@ -90,6 +90,7 @@
 		7346A991F2E84C669EEC8729 /* CycleAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893A18A5E786299D456D8D29 /* CycleAnalytics.swift */; };
 		74BDA36CDF822EC344FDF372 /* PINViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D583843EB06C575EF3737512 /* PINViews.swift */; };
 		752A55857B59D33AE4CA8258 /* CaelynWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 032976BC579EC7C7A9617A56 /* CaelynWidgetProvider.swift */; };
+		76697E7DE0C3CBE56D5C4D9A /* CloudDataDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA40956C4AF13D26E173249C /* CloudDataDeletion.swift */; };
 		76A85E09A594126D2B6DFAA8 /* CaelynWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7964B2E44B79AC36776C09E4 /* CaelynWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		776A3C2C7F8086C9E1FB0D1D /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */; };
 		79E714A8CB6876CD2F78846E /* SymptomChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED36F8EF76DAB80A668C937 /* SymptomChip.swift */; };
@@ -100,6 +101,7 @@
 		7DBE433603812776A07CD9F5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0573AB74971CE763A3A4BD08 /* Assets.xcassets */; };
 		7F1024C8295FD3DF972D0DD7 /* NoteReminder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156635F92B785405A30FC729 /* NoteReminder.swift */; };
 		803931A55523B64E90D9BE6A /* GenericJSONSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C319BE4C759A3F6DAA894EEF /* GenericJSONSource.swift */; };
+		83471F2D58721842DA6B530A /* DeletionModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBA600B41B69D3D0FFE33A9D /* DeletionModelTests.swift */; };
 		8365DE6D282CEB140AEA20BE /* ComponentGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 716AADA33C2AA6BA1134DF22 /* ComponentGallery.swift */; };
 		83B0DEEB56B767E74A81781D /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE228FE95D6CFB5B6AA94AA /* WidgetDataStore.swift */; };
 		8603B0B82792EFF57F08EF7D /* ImportSourceGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C31A3ABE813F13141355841 /* ImportSourceGuide.swift */; };
@@ -404,6 +406,7 @@
 		C455151FA14FB93DB163574F /* GlowEveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlowEveTests.swift; sourceTree = "<group>"; };
 		C5100528FE83F0873584CDBC /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
 		C7B8D0A8D8A1C1621780130A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		CA40956C4AF13D26E173249C /* CloudDataDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDataDeletion.swift; sourceTree = "<group>"; };
 		CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
 		CD38ADF5E6A9A8CFE29E0127 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		CD588403958052343C310525 /* WatchBridgeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBridgeService.swift; sourceTree = "<group>"; };
@@ -414,6 +417,7 @@
 		D583843EB06C575EF3737512 /* PINViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINViews.swift; sourceTree = "<group>"; };
 		D5DD10F808C40697FF2ADBCB /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
 		D85C561541868291999A9AF2 /* GlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlowTests.swift; sourceTree = "<group>"; };
+		DBA600B41B69D3D0FFE33A9D /* DeletionModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionModelTests.swift; sourceTree = "<group>"; };
 		DC4E6AEE82C3214565A6A2AE /* AccountTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTests.swift; sourceTree = "<group>"; };
 		DF15144FE89140AF906ABB93 /* CloudMigrationConflictTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudMigrationConflictTests.swift; sourceTree = "<group>"; };
 		E2702E1D3675E82E5037E3F5 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -573,6 +577,7 @@
 				354545D943378E53A1B935B7 /* CaelynTests.swift */,
 				DF15144FE89140AF906ABB93 /* CloudMigrationConflictTests.swift */,
 				58917566D3D58FBFF324EE38 /* CloudSyncSafetyTests.swift */,
+				DBA600B41B69D3D0FFE33A9D /* DeletionModelTests.swift */,
 				C455151FA14FB93DB163574F /* GlowEveTests.swift */,
 				D85C561541868291999A9AF2 /* GlowTests.swift */,
 				30AAE3B912A0684B01C599F7 /* HealthSyncTests.swift */,
@@ -674,6 +679,7 @@
 				57ED9FBF789EDA60FE1B4513 /* AccountSession.swift */,
 				AF0DF07ABEAA71E44E9F8C76 /* AppleSignInOutcome.swift */,
 				2C886EAA52EF63FB58A7B0CE /* AppleSignInService.swift */,
+				CA40956C4AF13D26E173249C /* CloudDataDeletion.swift */,
 				260A08C2F86FD9290A10F580 /* CloudSyncCoordinator.swift */,
 				334FC6BEFF52B1724C9C190B /* PersonalName.swift */,
 			);
@@ -1105,6 +1111,7 @@
 				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
 				7A840C305CD88CB88704DBD2 /* CloudMigrationConflictTests.swift in Sources */,
 				D2D5AB8D5834553A9CF7F06F /* CloudSyncSafetyTests.swift in Sources */,
+				83471F2D58721842DA6B530A /* DeletionModelTests.swift in Sources */,
 				55116106737A41E89CC2EEAC /* GlowEveTests.swift in Sources */,
 				17F0B4AE0C74C741F778F608 /* GlowTests.swift in Sources */,
 				CD63188C47D91DE234D29B77 /* HealthSyncTests.swift in Sources */,
@@ -1163,6 +1170,7 @@
 				483F9E281B30959A42759DD7 /* CaelynExportSource.swift in Sources */,
 				AC5DA2BA4EAE6B7ED6191DED /* CalendarMath.swift in Sources */,
 				6D3293F70DFD8C6B2B7280B7 /* CalendarView.swift in Sources */,
+				76697E7DE0C3CBE56D5C4D9A /* CloudDataDeletion.swift in Sources */,
 				98C6DBE7A8FE36BC9CF06D81 /* CloudSyncCoordinator.swift in Sources */,
 				7AE2136FA6880159B2EE1994 /* ClueSource.swift in Sources */,
 				036BA33CD4D86A7FBC7EB83A /* Color+Caelyn.swift in Sources */,
