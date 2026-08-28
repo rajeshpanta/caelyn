@@ -58,6 +58,9 @@ struct CaelynApp: App {
                     // Covers an interrupted deletion and a mirroring delegate that
                     // recreated the zone before it was detached.
                     await CloudDataDeletion.resolveOutstandingDeletion()
+                    // And honour a deletion made on a *different* device, which
+                    // this one would otherwise undo by recreating the zone.
+                    await CloudDataDeletion.honourRemoteDeletionIfNeeded()
                 }
             }
         }

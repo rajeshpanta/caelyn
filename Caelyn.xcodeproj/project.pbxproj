@@ -11,6 +11,7 @@
 		059ECBD2B5D95637170E757D /* CycleSummaryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46C3CD32C072709AFB2F6B44 /* CycleSummaryService.swift */; };
 		06AEC260294F6042F9C5CA33 /* ImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134E8D2776DED77063C07F64 /* ImportService.swift */; };
 		07E5A710DF8ECD1462E692D1 /* HomeHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8CB13185D631BA4005CD6C /* HomeHeader.swift */; };
+		0A46597A5BA7A78E172EEF3D /* CloudDeletionTombstone.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5EDF42DE253ADCA22E082DE /* CloudDeletionTombstone.swift */; };
 		0AC306E91FF45E3C2DBEE4E5 /* PhaseGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 715D50A0310476EA79B2472B /* PhaseGuideView.swift */; };
 		0AC9AB39173B78AB17337993 /* AccountSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57ED9FBF789EDA60FE1B4513 /* AccountSession.swift */; };
 		0B85370248819A80B49F144C /* WatchDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED14730ACF6862A0890288B1 /* WatchDataModel.swift */; };
@@ -411,6 +412,7 @@
 		C3D2EA34ED769F42B4DC793B /* NaturalCyclesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaturalCyclesTests.swift; sourceTree = "<group>"; };
 		C455151FA14FB93DB163574F /* GlowEveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlowEveTests.swift; sourceTree = "<group>"; };
 		C5100528FE83F0873584CDBC /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
+		C5EDF42DE253ADCA22E082DE /* CloudDeletionTombstone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDeletionTombstone.swift; sourceTree = "<group>"; };
 		C7B8D0A8D8A1C1621780130A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CA40956C4AF13D26E173249C /* CloudDataDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDataDeletion.swift; sourceTree = "<group>"; };
 		CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
@@ -689,6 +691,7 @@
 				AF0DF07ABEAA71E44E9F8C76 /* AppleSignInOutcome.swift */,
 				2C886EAA52EF63FB58A7B0CE /* AppleSignInService.swift */,
 				CA40956C4AF13D26E173249C /* CloudDataDeletion.swift */,
+				C5EDF42DE253ADCA22E082DE /* CloudDeletionTombstone.swift */,
 				260A08C2F86FD9290A10F580 /* CloudSyncCoordinator.swift */,
 				334FC6BEFF52B1724C9C190B /* PersonalName.swift */,
 			);
@@ -1182,6 +1185,7 @@
 				AC5DA2BA4EAE6B7ED6191DED /* CalendarMath.swift in Sources */,
 				6D3293F70DFD8C6B2B7280B7 /* CalendarView.swift in Sources */,
 				76697E7DE0C3CBE56D5C4D9A /* CloudDataDeletion.swift in Sources */,
+				0A46597A5BA7A78E172EEF3D /* CloudDeletionTombstone.swift in Sources */,
 				98C6DBE7A8FE36BC9CF06D81 /* CloudSyncCoordinator.swift in Sources */,
 				7AE2136FA6880159B2EE1994 /* ClueSource.swift in Sources */,
 				036BA33CD4D86A7FBC7EB83A /* Color+Caelyn.swift in Sources */,

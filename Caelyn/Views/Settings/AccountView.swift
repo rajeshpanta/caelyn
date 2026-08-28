@@ -258,10 +258,11 @@ struct AccountView: View {
         syncOn = on
         UserDefaults.standard.set(on, forKey: Persistence.syncEnabledKey)
         if on {
-            // She has changed her mind after deleting a cloud copy. Clearing the
-            // marker is what stops the launch-time guard from deleting the new copy
-            // she has just asked for.
-            CloudDataDeletion.clearDeletionMarker()
+            // She has changed her mind after deleting a cloud copy. This clears the
+            // local markers, records the consent, and lifts the tombstone — without
+            // the last part, every device would keep standing sync back down over a
+            // decision she has just reversed.
+            CloudDataDeletion.recordSyncConsentAndLiftTombstone()
             cloudDeletionResult = nil
         }
         // The container is built once per launch, so the switch takes effect on the

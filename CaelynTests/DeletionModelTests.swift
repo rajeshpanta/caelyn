@@ -441,3 +441,112 @@ final class CloudDeletionReachabilityTests: XCTestCase {
         XCTAssertTrue(mayHaveCloudCopy)
     }
 }
+
+/// Cross-device deletion: the copy stays deleted on devices that were never told.
+///
+/// The defect this exists to prevent is the worst one in the release. Every
+/// deletion marker is device-local, so deleting the cloud copy on one phone left
+/// another phone still syncing, still holding its own history, and quite happy to
+/// recreate the zone and upload the lot the next time it opened. Reproductive
+/// health she deliberately destroyed came back on its own.
+@MainActor
+final class CrossDeviceDeletionTests: XCTestCase {
+
+    override func setUpWithError() throws { clearAll() }
+    override func tearDownWithError() throws { clearAll() }
+
+    private func clearAll() {
+        let d = UserDefaults.standard
+        for key in [CloudDataDeletion.pendingKey, CloudDataDeletion.deletedAtKey,
+                    CloudDataDeletion.mayExistKey, Persistence.syncEnabledKey,
+                    CloudDeletionTombstone.syncConsentKey] {
+            d.removeObject(forKey: key)
+        }
+    }
+
+    private let earlier = Date(timeIntervalSince1970: 1_000_000)
+    private let later   = Date(timeIntervalSince1970: 2_000_000)
+
+    // MARK: - The rule
+
+    /// A device that never opted in must honour a deletion it knows nothing about.
+    func testADeviceWithNoRecordedConsentHonoursTheDeletion() {
+        XCTAssertEqual(
+            CloudDeletionTombstone.verdict(tombstone: later, localConsent: nil),
+            .honourDeletion
+        )
+    }
+
+    /// **The blocker.** Device B opted in before Device A deleted. B must stand down.
+    func testADeviceThatOptedInBeforeTheDeletionStandsDown() {
+        XCTAssertEqual(
+            CloudDeletionTombstone.verdict(tombstone: later, localConsent: earlier),
+            .honourDeletion,
+            "Otherwise this device recreates the zone and re-uploads what she deleted."
+        )
+    }
+
+    /// She changed her mind afterwards. Do not fight her.
+    func testOptingBackInAfterTheDeletionWins() {
+        XCTAssertEqual(
+            CloudDeletionTombstone.verdict(tombstone: earlier, localConsent: later),
+            .noAction,
+            "Re-enabling sync after deleting is a new decision and must be respected."
+        )
+    }
+
+    /// Same instant means one decision — enabling sync as part of it.
+    func testConsentAtTheSameInstantIsNotOverridden() {
+        XCTAssertEqual(
+            CloudDeletionTombstone.verdict(tombstone: earlier, localConsent: earlier),
+            .noAction
+        )
+    }
+
+    /// No tombstone, nothing to do — including offline, where `fetch` returns nil
+    /// and must never be read as "she deleted it".
+    func testNoTombstoneMeansNoAction() {
+        XCTAssertEqual(CloudDeletionTombstone.verdict(tombstone: nil, localConsent: nil), .noAction)
+        XCTAssertEqual(CloudDeletionTombstone.verdict(tombstone: nil, localConsent: earlier), .noAction)
+    }
+
+    /// An unreachable iCloud must not silently switch her sync off.
+    func testAnOfflineLaunchDoesNotStandSyncDown() {
+        UserDefaults.standard.set(true, forKey: Persistence.syncEnabledKey)
+        CloudDeletionTombstone.recordSyncConsent(at: earlier)
+
+        // fetch() returns nil when it cannot ask.
+        XCTAssertEqual(CloudDeletionTombstone.verdict(tombstone: nil, localConsent: earlier), .noAction)
+        XCTAssertTrue(Persistence.isSyncEnabled)
+    }
+
+    // MARK: - Consent bookkeeping
+
+    func testEnablingSyncRecordsConsentAndLiftsTheDeletion() {
+        UserDefaults.standard.set(Date(), forKey: CloudDataDeletion.deletedAtKey)
+        XCTAssertNil(CloudDeletionTombstone.localConsent)
+
+        CloudDataDeletion.recordSyncConsentAndLiftTombstone()
+
+        XCTAssertNotNil(CloudDeletionTombstone.localConsent, "Her decision has to be dated to beat an older tombstone.")
+        XCTAssertFalse(CloudDataDeletion.cloudCopyWasDeleted)
+    }
+
+    /// Consent recorded now must beat a tombstone written a moment ago, or
+    /// re-enabling sync would be undone by the next launch.
+    func testFreshConsentBeatsAnOlderTombstone() {
+        CloudDeletionTombstone.recordSyncConsent(at: later)
+        XCTAssertEqual(
+            CloudDeletionTombstone.verdict(tombstone: earlier, localConsent: CloudDeletionTombstone.localConsent),
+            .noAction
+        )
+    }
+
+    /// The tombstone is one timestamp and nothing else — no health data leaves the
+    /// device to make this work.
+    func testTheTombstoneCarriesOnlyATimestamp() {
+        XCTAssertEqual(CloudDeletionTombstone.recordType, "CaelynCloudDeletion")
+        XCTAssertEqual(CloudDeletionTombstone.deletedAtField, "deletedAt")
+        XCTAssertEqual(CloudDeletionTombstone.recordName, "cloudCopyDeletion")
+    }
+}

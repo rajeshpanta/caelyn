@@ -101,17 +101,24 @@ enum CloudDataDeletion {
             let zoneID = CKRecordZone.ID(zoneName: mirroredZoneName, ownerName: CKCurrentUserDefaultName)
             _ = try await database.modifyRecordZones(saving: [], deleting: [zoneID])
 
-            defaults.set(Date(), forKey: deletedAtKey)
+            let deletedAt = Date()
+            defaults.set(deletedAt, forKey: deletedAtKey)
             defaults.removeObject(forKey: pendingKey)
             defaults.removeObject(forKey: mayExistKey)
+            // Tell her other devices, or they will recreate the zone and upload
+            // their own copy the next time they open. The tombstone lives in the
+            // default zone, which deleting the mirrored zone does not touch.
+            await CloudDeletionTombstone.write(deletedAt: deletedAt)
             log.info("Cloud delete: private iCloud copy removed.")
             return .deleted
         } catch let error as CKError where error.code == .zoneNotFound || error.code == .userDeletedZone {
             // Already gone. Recording the marker anyway is correct: the outcome she
             // asked for is the outcome she has.
-            defaults.set(Date(), forKey: deletedAtKey)
+            let deletedAt = Date()
+            defaults.set(deletedAt, forKey: deletedAtKey)
             defaults.removeObject(forKey: pendingKey)
             defaults.removeObject(forKey: mayExistKey)
+            await CloudDeletionTombstone.write(deletedAt: deletedAt)
             log.info("Cloud delete: there was no iCloud copy to remove.")
             return .nothingToDelete
         } catch {
@@ -146,6 +153,34 @@ enum CloudDataDeletion {
     static func clearDeletionMarker() {
         UserDefaults.standard.removeObject(forKey: deletedAtKey)
         UserDefaults.standard.removeObject(forKey: pendingKey)
+    }
+
+    /// She has deliberately switched sync on. Record the consent locally and lift
+    /// the tombstone, so neither this device nor any other keeps standing sync
+    /// down over a decision she has since reversed.
+    static func recordSyncConsentAndLiftTombstone() {
+        clearDeletionMarker()
+        CloudDeletionTombstone.recordSyncConsent()
+        Task { await CloudDeletionTombstone.clear() }
+    }
+
+    /// Honour a deletion performed on another device.
+    ///
+    /// Returns true when this device stood down. Mirroring may already have
+    /// recreated the zone by the time this runs, so the copy is removed again as
+    /// well as sync being switched off — the end state is the one she asked for.
+    @discardableResult
+    static func honourRemoteDeletionIfNeeded() async -> Bool {
+        let tombstone = await CloudDeletionTombstone.fetch()
+        guard CloudDeletionTombstone.verdict(
+            tombstone: tombstone,
+            localConsent: CloudDeletionTombstone.localConsent
+        ) == .honourDeletion else { return false }
+
+        log.info("Cloud delete: honouring a deletion made on another device.")
+        UserDefaults.standard.set(false, forKey: Persistence.syncEnabledKey)
+        _ = await deleteCloudCopy()
+        return true
     }
 }
 
