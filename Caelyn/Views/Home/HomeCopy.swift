@@ -10,6 +10,18 @@ enum HomeCopy {
         }
     }
 
+    /// The same greeting, with her name when there is one worth using.
+    ///
+    /// `name` goes through `PersonalName.usable` first, so a nil, blank, or
+    /// relay-address name simply falls back to the nameless greeting rather than
+    /// producing "Good morning, ". All four time-of-day openers read naturally
+    /// with a name appended, which is why this is a suffix and not a rewrite.
+    static func greeting(for date: Date = .now, name: String?) -> String {
+        let base = greeting(for: date)
+        guard let name = PersonalName.usable(name) else { return base }
+        return "\(base), \(name)"
+    }
+
     static func greetingEmoji(for date: Date = .now) -> String {
         switch hour(from: date) {
         case 5..<12:  return "\u{2600}\u{FE0F}"

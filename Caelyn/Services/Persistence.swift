@@ -49,6 +49,21 @@ enum Persistence {
     static let syncEnabledKey = "caelyn.syncEnabled"
     static var isSyncEnabled: Bool { UserDefaults.standard.bool(forKey: syncEnabledKey) }
 
+    /// Which CloudKit database Caelyn mirrors into. Only ever the user's own
+    /// private one — a public database would publish reproductive health to every
+    /// installation of the app. Exposed as a string so a test can assert it and
+    /// fail loudly if anyone ever reaches for `.public`.
+    static let syncDatabaseDescription = "private"
+
+    /// Whether the CloudKit-backed store is the one that actually opened.
+    ///
+    /// **Read this, never `isSyncEnabled`, when telling her anything about sync.**
+    /// The preference records what she asked for; this records what happened. A
+    /// toggle that reports "syncing" while the container failed to open would be
+    /// telling her that her history is backed up when it is not — the one lie a
+    /// privacy-first app can never ship.
+    private(set) static var isSyncActive = false
+
     /// The user's PRIVATE CloudKit container. Provisioned via Xcode → Signing &
     /// Capabilities → iCloud → CloudKit (needs the developer's account). Until then
     /// the sync path fails closed to a local store.
@@ -72,6 +87,13 @@ enum Persistence {
                 cloudKitDatabase: .private(cloudKitContainerID)
             )
             if let container = try? ModelContainer(for: schema, configurations: [syncConfig]) {
+                // Same file on disk as the local configuration — mirroring is a
+                // property of how the store syncs, not of where it lives. That is
+                // why an existing user's history is simply picked up and uploaded
+                // rather than replaced by an empty cloud store, and there is a test
+                // pinning the two URLs together.
+                isSyncActive = true
+                log.info("SwiftData: opened the iCloud-mirrored store.")
                 return container
             }
             log.warning("SwiftData: iCloud sync store failed to open — falling back to local.")
