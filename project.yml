@@ -13,15 +13,15 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    # 1.2 — the migration release. 1.0 and 1.1 are both live; build 12 was the
-    # 1.1 upload, so this train starts at 13.
-    MARKETING_VERSION: "1.2"
+    # 1.3 — the account and private iCloud sync release. 1.0, 1.1 and 1.2 are
+    # all live; build 13 was the 1.2 upload, so this train starts at 14.
+    MARKETING_VERSION: "1.3"
     # Build numbers must rise within a version train. 1.0 is a fresh train (its
     # builds are separate from the 1.0.1 ones), but this stays strictly above the
     # highest number used anywhere so no upload can ever collide. Bump it before
     # every upload, and keep the widget/watch CFBundleVersion below identical — a
     # mismatch between the app and its embedded bundles trips ITMS-90473.
-    CURRENT_PROJECT_VERSION: 13
+    CURRENT_PROJECT_VERSION: 14
     DEVELOPMENT_TEAM: "7T9897GFKH"
   configs:
     # CloudKit mirroring receives silent pushes, and the entitlement value differs
@@ -179,8 +179,8 @@ targets:
       path: CaelynWidget/Info.plist
       properties:
         CFBundleDisplayName: CaelynWidget
-        CFBundleVersion: "13"
-        CFBundleShortVersionString: "1.2"
+        CFBundleVersion: "14"
+        CFBundleShortVersionString: "1.3"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
@@ -218,8 +218,8 @@ targets:
       path: CaelynWatch/Info.plist
       properties:
         CFBundleDisplayName: Caelyn
-        CFBundleVersion: "13"
-        CFBundleShortVersionString: "1.2"
+        CFBundleVersion: "14"
+        CFBundleShortVersionString: "1.3"
         WKApplication: true
         WKCompanionAppBundleIdentifier: smallpanta-icould.com.caelynperiodtracker
     entitlements:
