@@ -1,4 +1,5 @@
 import AuthenticationServices
+import StoreKit
 import SwiftData
 import SwiftUI
 
@@ -360,7 +361,7 @@ struct AccountView: View {
                     Text("Caelyn only ever received an anonymous ID from Apple \u{2014} no tokens, no email \u{2014} so there's nothing for it to hand back. If you'd also like to remove Caelyn from your Apple Account, that's in iPhone Settings \u{2192} your name \u{2192} Sign in with Apple.")
 
                     if hasAutoRenewingSubscription {
-                        Text("Your Caelyn Pro subscription is billed by Apple and won't stop on its own. Cancel it first if you don't want it to renew.")
+                        Text("Deleting your account won't cancel your Caelyn Pro subscription \u{2014} Apple bills that, not Caelyn. Manage or cancel it with Apple if you don't want it to renew.")
                             .foregroundStyle(CaelynColor.alertRose)
                     }
                 }
@@ -413,13 +414,24 @@ struct AccountView: View {
     private var deleteAccountMessage: String {
         let base = "This removes your Apple sign-in from Caelyn. Your cycle history is not deleted \u{2014} it stays on this iPhone, your iCloud copy stays too, and you'll still be able to open and use Caelyn exactly as before. Deleting either of those is a separate choice."
         guard hasAutoRenewingSubscription else { return base }
-        return base + "\n\nYour Caelyn Pro subscription is billed by Apple and will keep renewing until you cancel it."
+        return base + "\n\nDeleting your account does not cancel your Caelyn Pro subscription. Apple bills that, not Caelyn, and it keeps renewing until you cancel it with Apple."
     }
 
+    /// Apple's guidance names two routes: `showManageSubscription` on iOS 15+, or
+    /// the apps.apple.com link. Caelyn targets iOS 17, so the native sheet is the
+    /// right one — it keeps her inside Caelyn mid-decision instead of throwing her
+    /// out to the App Store app. The documented URL stays as the fallback for the
+    /// case where no foreground scene can be resolved.
     private func openSubscriptionManagement() {
-        // The link Apple's own account-deletion guidance names.
-        if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
-            UIApplication.shared.open(url)
+        Task {
+            let scene = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .first { $0.activationState == .foregroundActive }
+            if let scene {
+                try? await AppStore.showManageSubscriptions(in: scene)
+            } else if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                await UIApplication.shared.open(url)
+            }
         }
     }
 
