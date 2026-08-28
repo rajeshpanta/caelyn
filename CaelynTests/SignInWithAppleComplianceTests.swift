@@ -93,6 +93,50 @@ final class SignInWithAppleComplianceTests: XCTestCase {
         XCTAssertEqual(family, "Okonkwo")
     }
 
+    /// **The capability, not just the code.**
+    ///
+    /// Caelyn shipped `ASAuthorizationAppleIDProvider` for an entire branch without
+    /// `com.apple.developer.applesignin`. Nothing in the build complains: it
+    /// compiles, it links, the button draws — and the authorization sheet then fails
+    /// on device in a way no amount of Swift can catch. Found by a static audit
+    /// rather than by a hardware test, which is the only cheap way to find it.
+    func testTheSignInWithAppleEntitlementIsActuallyPresent() throws {
+        let entitlements = try source("Caelyn/Caelyn.entitlements")
+        XCTAssertTrue(entitlements.contains("com.apple.developer.applesignin"),
+                      "Sign in with Apple code without the entitlement fails at runtime on device.")
+        XCTAssertTrue(entitlements.contains("<string>Default</string>"))
+
+        // And it must survive project regeneration, so it has to be in project.yml
+        // — the entitlements file is generated from it.
+        let spec = try source("project.yml")
+        XCTAssertTrue(spec.contains("com.apple.developer.applesignin"),
+                      "xcodegen regenerates the entitlements file; the source of truth is project.yml.")
+    }
+
+    /// The other capabilities 1.3 depends on, pinned in the same place.
+    func testTheCloudKitAndAppGroupEntitlementsAreIntact() throws {
+        let entitlements = try source("Caelyn/Caelyn.entitlements")
+        for required in ["com.apple.developer.icloud-container-identifiers",
+                         "com.apple.developer.icloud-services",
+                         "com.apple.security.application-groups",
+                         "com.apple.developer.healthkit"] {
+            XCTAssertTrue(entitlements.contains(required), "\(required) is missing.")
+        }
+        XCTAssertTrue(entitlements.contains("iCloud.smallpanta-icould.com.caelynperiodtracker"))
+        XCTAssertTrue(entitlements.contains("group.smallpanta-icould.com.caelynperiodtracker"))
+    }
+
+    /// The App Group must match across app, widget and watch or the shared store
+    /// silently splits in three.
+    func testTheAppGroupMatchesAcrossEveryTarget() throws {
+        let group = "group.smallpanta-icould.com.caelynperiodtracker"
+        for file in ["Caelyn/Caelyn.entitlements",
+                     "CaelynWidget/CaelynWidget.entitlements",
+                     "CaelynWatch/CaelynWatch.entitlements"] {
+            XCTAssertTrue(try source(file).contains(group), "\(file) has a different App Group.")
+        }
+    }
+
     // MARK: - Deleting the account removes everything Caelyn actually holds
 
     /// Apple: deletion removes the account record and its associated personal data.

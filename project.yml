@@ -52,6 +52,11 @@ targets:
           - iCloud.smallpanta-icould.com.caelynperiodtracker
         com.apple.developer.icloud-services:
           - CloudKit
+        # Sign in with Apple — 1.3. Required for ASAuthorizationAppleIDProvider to
+        # work at all; without it the authorization sheet fails on device rather
+        # than in any way the code could catch usefully.
+        com.apple.developer.applesignin:
+          - Default
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
         com.apple.developer.usernotifications.time-sensitive: true
