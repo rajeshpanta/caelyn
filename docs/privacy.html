@@ -21,7 +21,7 @@
     <p class="lede">Caelyn is built so your cycle data stays on your device. This policy explains exactly what that means, what little information we may receive, and the rights you have over your data.</p>
 
     <div class="callout">
-      <strong>Plain‑English summary.</strong> Caelyn does not collect, sell, or share your cycle entries, symptoms, moods, notes, or any other health information, and we run no servers of our own. There are no analytics SDKs, no advertising trackers, and no third‑party data brokers in the app. Your cycle history lives only in a private database on your device — there is no cloud sync and no Caelyn server, so there is no copy of it anywhere else. If you delete the app, your cycle data is gone with it, so export a copy first if you want to keep it.
+      <strong>Plain‑English summary.</strong> Caelyn does not collect, sell, or share your cycle entries, symptoms, moods, notes, or any other health information, and we run no servers of our own. There are no analytics SDKs, no advertising trackers, and no third‑party data brokers in the app. Your cycle history lives in a private database on your device. If you switch on iCloud Sync, a copy is also kept in <em>your own</em> private iCloud — Apple's storage, tied to your Apple Account, which we cannot read and never receive. Sync is off unless you turn it on, and you can permanently delete the iCloud copy from inside the app at any time. There is still no Caelyn server and no Caelyn copy of your history.
     </div>
 
     <h2>1. Who we are</h2>
@@ -32,7 +32,8 @@
     <p>We want to be specific about what does <em>not</em> happen, because it is the unusual thing about Caelyn:</p>
     <ul>
       <li>We do not collect your cycle entries, period dates, flow levels, symptoms, mood check‑ins, pain logs, medication entries, or notes.</li>
-      <li>We do not collect your name, email address, phone number, or any account credentials. Caelyn has no account system.</li>
+      <li>We do not collect your email address or phone number. If you sign in with Apple, Caelyn asks Apple only for your name — never your email — and the only thing it keeps is an anonymous identifier Apple generates for this app. If you use Hide My Email, no relay address is created for Caelyn, because Caelyn does not ask for one.</li>
+      <li>The name Caelyn greets you by is one <em>you</em> type and confirm. It is stored on your device (and in your own iCloud if you enable sync), never sent to us.</li>
       <li>We do not collect your device identifier (IDFA), advertising ID, IP address, location, contacts, photos, or microphone input.</li>
       <li>We do not use third‑party analytics (no Google Analytics, no Firebase Analytics, no Mixpanel, no Amplitude, no Segment, no Sentry, etc.).</li>
       <li>We do not use advertising networks or behavioral tracking of any kind.</li>
@@ -49,12 +50,25 @@
     <p>This data is sandboxed by iOS — no other app on your device can read it. Caelyn does not back this database up to any server we control.</p>
     <p>If you have iCloud Backup enabled in iOS Settings, Apple may include the app's container in your encrypted iCloud backup. That backup is controlled by Apple and your Apple ID, not by Caelyn. You can review or disable this in iOS Settings → [your name] → iCloud → iCloud Backup.</p>
 
-    <h2>4. No cloud sync</h2>
-    <p>Caelyn does <strong>not</strong> sync your cycle data to iCloud or anywhere else. There is no cross-device sync feature in this version, and nothing about your cycle leaves the device apart from what you explicitly export or share with Apple Health.</p>
+    <h2>4. iCloud Sync — optional, and your iCloud, not ours</h2>
+    <p>Caelyn can keep your history available across your Apple devices using <strong>your own private iCloud database</strong>. It is off until you switch it on in Settings → Account &amp; iCloud.</p>
     <ul>
-      <li>Because there is no cloud copy, deleting the app (or erasing the device) deletes your cycle history with it. Settings → Export data saves a CSV or PDF you control, and Settings → Import data reads a Caelyn CSV back in — that export is your backup.</li>
-      <li>The one exception is Apple's own device backup described above, which is controlled by you and Apple, not by Caelyn.</li>
-      <li>If a private cross-device sync feature is added in a future version, it will be opt-in, clearly labelled in the app, and described here before it ships.</li>
+      <li>The copy lives in your personal iCloud account, in a private database only you can reach. It is Apple's storage, governed by Apple's privacy policy and your Apple Account.</li>
+      <li><strong>We never receive it and cannot read it.</strong> Caelyn still runs no servers. Nothing is stored in a public or shared iCloud database, ever.</li>
+      <li>With sync off, nothing about your cycle leaves the device apart from what you explicitly export or share with Apple Health. Deleting the app then deletes your history with it, so Settings → Export data is your backup.</li>
+      <li>You can permanently delete the iCloud copy at any time: Settings → Account &amp; iCloud → <em>Delete my iCloud copy</em>. That removes the cloud copy and leaves everything on your device untouched. Turning sync off on its own does <em>not</em> remove a copy already made — the delete action stays available for exactly that reason.</li>
+      <li>Settings → Delete all data asks whether you mean this device only, or this device and the iCloud copy.</li>
+      <li>Some things deliberately never sync, because they belong to one device: your app lock PIN, your Apple Health connection and permissions, and the position Caelyn has reached when reading from Apple Health.</li>
+    </ul>
+
+    <h2>4a. Signing in with Apple — optional</h2>
+    <p>Caelyn offers Sign in with Apple purely for identity and personalization. <strong>It is never required.</strong> Every feature works signed out, and your cycle history exists whether or not you ever sign in.</p>
+    <ul>
+      <li>Caelyn requests your <strong>name only</strong>. It does not request your email address.</li>
+      <li>Apple gives the name once, on the first authorization. Caelyn treats it as a <em>suggestion</em> and asks what you would like to be called; the name you confirm is the one used.</li>
+      <li>The only credential kept is Apple's anonymous per-app identifier, stored in the device Keychain and marked so it never travels to another device.</li>
+      <li><strong>Signing out never deletes anything.</strong> Neither does deleting your Caelyn account — that removes the Apple sign-in and nothing else. Deleting your history is a separate, clearly-labelled choice, because losing an account should never mean losing years of tracking.</li>
+      <li>Deleting your Caelyn account does not cancel a Caelyn Pro subscription. Apple bills that, and it continues until you cancel it with Apple.</li>
     </ul>
 
     <h2>5. Apple HealthKit</h2>
@@ -86,11 +100,11 @@
     <p>Caelyn is rated 12+ on the App Store and is not directed at children under 13. We do not knowingly collect personal information from children under 13 — and because we do not collect personal information from anyone, this commitment is straightforward. If you are a parent or guardian and believe a child under 13 has been using Caelyn, you can delete the app to remove all on‑device data.</p>
 
     <h2>10. Your rights</h2>
-    <p>Because all your cycle data is on your device, you have direct, immediate control over it without needing to ask us:</p>
+    <p>Because your cycle data lives on your device — and, if you enable sync, in your own iCloud rather than on any server of ours — you have direct, immediate control over it without needing to ask us:</p>
     <ul>
       <li><strong>Access:</strong> open the app to view all data we hold; use Settings → Export data to generate a CSV (or PDF on Pro) of every entry.</li>
       <li><strong>Correction:</strong> edit any entry in the Calendar or Log tab.</li>
-      <li><strong>Deletion:</strong> Settings → Delete all data wipes every entry, your profile, and your settings. Deleting the app from iOS also removes everything.</li>
+      <li><strong>Deletion:</strong> Settings → Delete all data wipes every entry, your profile, and your settings, and asks whether you mean this device only or the iCloud copy as well. Settings → Account &amp; iCloud → Delete my iCloud copy removes the cloud copy on its own, leaving the device untouched. Deleting the app removes everything on the device — but <em>not</em> an iCloud copy you have already made, so delete that first if you want it gone.</li>
       <li><strong>Portability:</strong> the CSV export is a standard, portable format that can be opened by any spreadsheet app or imported into another tracker.</li>
     </ul>
     <p>If you are in the European Economic Area, the United Kingdom, or Switzerland, the GDPR gives you these rights as a matter of law. If you are a California resident, the CCPA / CPRA gives you analogous rights, including the right to know, the right to delete, and the right to non‑discrimination. We do not sell or share personal information as those terms are defined in the CCPA / CPRA. For any rights request you cannot fulfil yourself in‑app, email <a href="mailto:rajesh.panta08@gmail.com">rajesh.panta08@gmail.com</a>.</p>
