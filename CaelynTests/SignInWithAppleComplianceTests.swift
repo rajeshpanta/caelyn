@@ -113,6 +113,26 @@ final class SignInWithAppleComplianceTests: XCTestCase {
                       "xcodegen regenerates the entitlements file; the source of truth is project.yml.")
     }
 
+    /// **Push, which CloudKit sync quietly depends on.**
+    ///
+    /// NSPersistentCloudKitContainer learns that something changed on another
+    /// device from a silent push. Without the entitlement the mirror still works,
+    /// but only when the app itself starts a cycle — so an edit made elsewhere does
+    /// not arrive until relaunch, which presents as a sync bug rather than a
+    /// missing capability. The value is per-configuration because the App Store
+    /// requires `production` and a development build requires `development`.
+    func testThePushEntitlementCloudKitNeedsIsPresent() throws {
+        let entitlements = try source("Caelyn/Caelyn.entitlements")
+        XCTAssertTrue(entitlements.contains("aps-environment"),
+                      "CloudKit mirroring cannot receive remote change pushes without it.")
+
+        let spec = try source("project.yml")
+        XCTAssertTrue(spec.contains("aps-environment"))
+        XCTAssertTrue(spec.contains("APS_ENVIRONMENT: development"))
+        XCTAssertTrue(spec.contains("APS_ENVIRONMENT: production"),
+                      "An App Store build must not ship the development APS environment.")
+    }
+
     /// The other capabilities 1.3 depends on, pinned in the same place.
     func testTheCloudKitAndAppGroupEntitlementsAreIntact() throws {
         let entitlements = try source("Caelyn/Caelyn.entitlements")

@@ -23,6 +23,14 @@ settings:
     # mismatch between the app and its embedded bundles trips ITMS-90473.
     CURRENT_PROJECT_VERSION: 13
     DEVELOPMENT_TEAM: "7T9897GFKH"
+  configs:
+    # CloudKit mirroring receives silent pushes, and the entitlement value differs
+    # between a development build and an App Store one — so it is driven from a
+    # build setting rather than hardcoded into the entitlements file.
+    Debug:
+      APS_ENVIRONMENT: development
+    Release:
+      APS_ENVIRONMENT: production
 
 targets:
   Caelyn:
@@ -57,6 +65,11 @@ targets:
         # than in any way the code could catch usefully.
         com.apple.developer.applesignin:
           - Default
+        # Push Notifications. Required by NSPersistentCloudKitContainer: CloudKit
+        # announces remote changes with a silent push, and without this the mirror
+        # only syncs when the app itself starts a cycle — so another device's edit
+        # would not land until relaunch.
+        aps-environment: $(APS_ENVIRONMENT)
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
         com.apple.developer.usernotifications.time-sensitive: true
