@@ -42,6 +42,13 @@ final class BringHistoryModel {
     /// advance the sync anchors, which a file import has no equivalent of.
     private var healthPlan: HealthSyncService.Plan?
 
+    /// True when this run came from Apple Health rather than a file.
+    ///
+    /// The confirmation screen needs it because a Health route has no file: telling
+    /// her to "choose a different file" when she never chose one is how she ends up
+    /// hunting for a file picker that was never going to appear.
+    var isHealthRoute: Bool { healthPlan != nil }
+
     private let calendar: Calendar
     private let ledger: ImportLedger
 

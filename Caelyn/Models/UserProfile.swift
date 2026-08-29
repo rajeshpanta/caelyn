@@ -82,6 +82,56 @@ final class UserProfile {
     var isPro: Bool = false
     var createdAt: Date = Date()
 
+    // MARK: - Who Caelyn is talking to (1.3)
+
+    /// What she has asked to be called. Hers to set and hers to clear — Apple's
+    /// suggestion never overwrites it once she has chosen.
+    ///
+    /// Synced: this is a preference, and a new device that greets her by name is
+    /// the whole point. Read it through `displayName`, never directly, so the
+    /// relay-address and blank-string rules can never be bypassed.
+    var preferredName: String?
+
+    /// The given name Apple handed back at first authorization, kept only as a
+    /// suggestion. Apple returns this exactly once — on later sign-ins the name
+    /// fields are nil — so it is persisted immediately or lost forever.
+    var appleSuggestedName: String?
+
+    /// True once she has actually answered "what should Caelyn call you?".
+    ///
+    /// Distinct from `preferredName != nil`, because choosing to have no name is a
+    /// real answer: leaving the field empty and tapping Continue means she wants
+    /// the warm nameless greeting, and asking again on the next sign-in would be
+    /// nagging her about a decision she already made.
+    ///
+    /// Synced, like the name itself — a second device should not re-ask.
+    var hasConfirmedPreferredName: Bool = false
+
+    /// True once she has been offered the account, either way.
+    ///
+    /// Asked once, just after onboarding. Declining is an answer and sets this too —
+    /// a second nag would turn an optional extra into a wall, which is the one thing
+    /// this feature must never be. Synced, so a new device does not re-ask.
+    var hasSeenAccountOffer: Bool = false
+
+    /// True once a Sign in with Apple credential has been linked.
+    ///
+    /// Identity only. It gates nothing: every feature works signed out, and
+    /// signing out flips this back to false without touching a single entry.
+    var accountLinked: Bool = false
+
+    /// The name to greet her by, or nil to stay warm and nameless.
+    ///
+    /// **Only ever the name she confirmed.** `appleSuggestedName` is deliberately
+    /// not a fallback here: it is the prefill for the one question Caelyn asks, and
+    /// nothing more. Falling back to it would mean greeting her by whatever is on
+    /// her Apple ID without her having agreed to it, which is the exact behaviour
+    /// this flow exists to avoid.
+    ///
+    /// Anything unusable (blank, an address, a private relay) resolves to nil
+    /// rather than to an awkward placeholder.
+    var displayName: String? { PersonalName.usable(preferredName) }
+
     init(
         averageCycleLength: Int = 28,
         averagePeriodLength: Int = 5,

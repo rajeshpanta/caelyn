@@ -186,7 +186,7 @@ struct HomeView: View {
         ScrollView {
             VStack(spacing: CaelynSpacing.lg) {
                 HomeHeader(
-                    greeting: HomeCopy.greeting(),
+                    greeting: HomeCopy.greeting(name: profile?.displayName),
                     cycleDay: cycleDay,
                     phase: phase
                 )

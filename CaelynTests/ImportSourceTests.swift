@@ -20,7 +20,7 @@ final class ImportSourceTests: XCTestCase {
     private let calendar = Calendar(identifier: .gregorian)
 
     override func setUpWithError() throws {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         container = try ModelContainer(for: CycleEntry.self, UserProfile.self, configurations: config)
         context = container.mainContext
         ledger = ImportLedger(fileURL: nil)
@@ -240,7 +240,7 @@ final class ImportSourceTests: XCTestCase {
         var seen: Set<String> = []
         for _ in 0..<5 {
             let container = try ModelContainer(for: CycleEntry.self, UserProfile.self,
-                                               configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+                                               configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none))
             var p = payload(json, name: "other.json")
             let plan = try ImportPlanner.plan(payload: &p, context: container.mainContext,
                                               ledger: ImportLedger(fileURL: nil),
@@ -634,7 +634,7 @@ final class ImportSourceTests: XCTestCase {
         // The written form carries a comma, so in a real CSV it arrives quoted.
         for (format, sample) in [("slashes", "2026/01/05"), ("dotted", "05.01.2026"), ("written", "\"Jan 5, 2026\"")] {
             let container = try ModelContainer(for: CycleEntry.self, UserProfile.self,
-                                               configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+                                               configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none))
             let scratch = container.mainContext
             var p = payload("date,flow\n\(sample),heavy")
             let plan = try ImportPlanner.plan(payload: &p, context: scratch, ledger: ImportLedger(fileURL: nil),

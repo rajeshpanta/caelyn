@@ -16,7 +16,36 @@ import WidgetKit
 @MainActor
 enum SecureWipeService {
 
-    static func wipeEverything(modelContext: ModelContext) async {
+    /// How far a wipe reaches.
+    ///
+    /// Made explicit in 1.3 because "delete everything" stopped having one obvious
+    /// meaning the moment a cloud copy could exist. Nothing may guess: the caller
+    /// states the scope, and the UI states it to her in the same words.
+    enum Scope: Equatable {
+        /// Everything on this iPhone. A cloud copy, if she has one, is left alone —
+        /// and the caller is responsible for saying so.
+        case thisDevice
+        /// This iPhone *and* the private iCloud copy.
+        case thisDeviceAndCloud
+    }
+
+    /// Wipe local storage, and optionally the iCloud copy first.
+    ///
+    /// **Cloud goes first, deliberately.** If the app dies mid-wipe, the safe half
+    /// to have completed is the one that removes data from a server: an interrupted
+    /// wipe then leaves history on a phone she is holding, rather than an untouched
+    /// copy in iCloud she believes is gone. Returns the cloud outcome so the caller
+    /// can report honestly instead of assuming.
+    @discardableResult
+    static func wipeEverything(
+        modelContext: ModelContext,
+        scope: Scope = .thisDevice
+    ) async -> CloudDataDeletion.Outcome? {
+        var cloudOutcome: CloudDataDeletion.Outcome?
+        if scope == .thisDeviceAndCloud {
+            cloudOutcome = await CloudDataDeletion.deleteCloudCopy()
+        }
+
         // 1. SwiftData — batch-delete every row of each model.
         try? modelContext.delete(model: CycleEntry.self)
         try? modelContext.delete(model: UserProfile.self)
@@ -59,9 +88,15 @@ enum SecureWipeService {
             "caelyn.seenLearnedPms",
             Persistence.syncEnabledKey,
             Persistence.storeFailedKey
+            // NOT CloudDataDeletion.deletedAtKey — see the note at the end.
         ] {
             defaults.removeObject(forKey: key)
         }
         RatingService.reset()
+
+        // The deletion marker is deliberately NOT cleared here. It is the record
+        // that she chose to destroy a cloud copy, and it is what stops a later
+        // launch quietly rebuilding one.
+        return cloudOutcome
     }
 }
