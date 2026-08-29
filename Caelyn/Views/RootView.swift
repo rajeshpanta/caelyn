@@ -11,6 +11,14 @@ struct RootView: View {
         profiles.first?.hasOnboarded ?? false
     }
 
+    /// Offer the account once she is through onboarding and looking at the app she
+    /// can already use — not during onboarding, where it would read as a sign-up
+    /// wall in front of a period tracker.
+    private var shouldOfferAccount: Bool {
+        guard let profile = profiles.first, profile.hasOnboarded else { return false }
+        return !profile.hasSeenAccountOffer && !profile.accountLinked
+    }
+
     var body: some View {
         Group {
             if isLoaded {
@@ -38,6 +46,13 @@ struct RootView: View {
             // incorrectly flash the onboarding screen on returning users.
             try? await Task.sleep(for: .milliseconds(120))
             withAnimation { isLoaded = true }
+        }
+        .sheet(isPresented: Binding(
+            get: { isLoaded && shouldOfferAccount },
+            set: { if !$0 { profiles.first?.hasSeenAccountOffer = true; modelContext.saveOrLog() } }
+        )) {
+            AccountOfferSheet(profile: profiles.first) { }
+                .presentationDetents([.large])
         }
         .overlay(alignment: .top) {
             if showStoreWarning { storeWarningBanner }

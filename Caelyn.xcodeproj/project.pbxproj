@@ -51,6 +51,7 @@
 		3DB284FE2C8F763A6E0F9199 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE50A90B788BB5D5BC97515 /* OnboardingFlow.swift */; };
 		3E39E536C02C7FD122CFCFF3 /* FloSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC427F6183476AF3FB089CA /* FloSource.swift */; };
 		3ED93C314D3398057BF14BBC /* HomeMoodCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D72FA6409165615CFC45E1 /* HomeMoodCheckIn.swift */; };
+		3F77901329169F824A9C8380 /* AccountOfferSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C351F64F7DEA1D1D74C651 /* AccountOfferSheet.swift */; };
 		403194B34DD4A2B53FADA0D2 /* QuickActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A923C9143914C0A18515A7F /* QuickActionButton.swift */; };
 		406EBA2FD8145B5B845DF2D0 /* ObservationBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24A0AB981C951A6DA8F812A3 /* ObservationBuilder.swift */; };
 		433BD4EC552A95D00B4B7F07 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B3516961D449934550DCF93 /* Haptics.swift */; };
@@ -326,6 +327,7 @@
 		5322159624E05FC0C7C1686B /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
 		53C42DDF815AFDFE00A7D214 /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
 		544E8077B17E70A1F5752069 /* CalendarMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMath.swift; sourceTree = "<group>"; };
+		54C351F64F7DEA1D1D74C651 /* AccountOfferSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountOfferSheet.swift; sourceTree = "<group>"; };
 		55A9CD6A95C7EC0C76441783 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		55CF157977EC9D07CEDE4334 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		57ED9FBF789EDA60FE1B4513 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSession.swift; sourceTree = "<group>"; };
@@ -605,6 +607,7 @@
 			isa = PBXGroup;
 			children = (
 				23413D59226D3A1BBCDC7148 /* .gitkeep */,
+				54C351F64F7DEA1D1D74C651 /* AccountOfferSheet.swift */,
 				BADB877CCB0906D29FD665F9 /* AccountView.swift */,
 				E52B85041FEDE2F496C92AB3 /* BirthControlView.swift */,
 				686ED94B3F2234B776EF9154 /* CycleSettingsView.swift */,
@@ -1167,6 +1170,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B532F649285ED44265C8DF71 /* AccountIdentityStore.swift in Sources */,
+				3F77901329169F824A9C8380 /* AccountOfferSheet.swift in Sources */,
 				0AC9AB39173B78AB17337993 /* AccountSession.swift in Sources */,
 				E7EFD62EE4149F6D65FEF932 /* AccountView.swift in Sources */,
 				1075D88F73A6362D96FBFA9D /* AdaptiveRow.swift in Sources */,

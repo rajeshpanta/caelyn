@@ -404,3 +404,106 @@ final class PreferredNameStepTests: XCTestCase {
         XCTAssertNil(profile.displayName)
     }
 }
+
+/// Discoverability: the account is offered once, up front, and is never a wall.
+@MainActor
+final class AccountOfferTests: XCTestCase {
+
+    private var container: ModelContainer!
+    private var context: ModelContext!
+    private var profile: UserProfile!
+
+    override func setUpWithError() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        container = try ModelContainer(for: CycleEntry.self, UserProfile.self, configurations: config)
+        context = container.mainContext
+        profile = UserProfile()
+        context.insert(profile)
+        AccountIdentityStore.signOut()
+    }
+
+    override func tearDownWithError() throws {
+        AccountIdentityStore.signOut()
+        container = nil; context = nil; profile = nil
+    }
+
+    /// Mirrors `RootView.shouldOfferAccount`, which is the production rule.
+    private func shouldOffer(_ p: UserProfile?) -> Bool {
+        guard let p, p.hasOnboarded else { return false }
+        return !p.hasSeenAccountOffer && !p.accountLinked
+    }
+
+    /// Never during onboarding — that would be a sign-up wall in front of a period
+    /// tracker, which is the one thing this feature must not be.
+    func testTheOfferNeverAppearsBeforeOnboardingFinishes() {
+        profile.hasOnboarded = false
+        XCTAssertFalse(shouldOffer(profile))
+    }
+
+    func testTheOfferAppearsOnceOnboardingIsDone() {
+        profile.hasOnboarded = true
+        XCTAssertTrue(shouldOffer(profile))
+    }
+
+    /// "Not now" is an answer. Asking twice would turn optional into nagging.
+    func testDecliningIsRememberedAndNeverAskedAgain() {
+        profile.hasOnboarded = true
+        profile.hasSeenAccountOffer = true      // what "Not now" sets
+        XCTAssertFalse(shouldOffer(profile))
+    }
+
+    func testSomeoneAlreadySignedInIsNotOffered() {
+        profile.hasOnboarded = true
+        profile.accountLinked = true
+        XCTAssertFalse(shouldOffer(profile))
+    }
+
+    /// A profile that arrived from another device carries the answer with it.
+    func testASyncedProfileThatAlreadyAnsweredIsNotReAsked() {
+        profile.hasOnboarded = true
+        profile.hasSeenAccountOffer = true
+        XCTAssertFalse(shouldOffer(profile))
+    }
+
+    /// Declining must not touch anything else — no history, no settings, no name.
+    func testDecliningChangesNothingButTheFlag() {
+        profile.hasOnboarded = true
+        profile.averageCycleLength = 31
+        AccountSession.setPreferredName("Nova", on: profile)
+        let entry = CycleEntry(date: Date())
+        entry.flow = .medium
+        context.insert(entry)
+        context.saveOrLog()
+
+        profile.hasSeenAccountOffer = true      // "Not now"
+
+        XCTAssertEqual(profile.averageCycleLength, 31)
+        XCTAssertEqual(profile.displayName, "Nova")
+        XCTAssertFalse(profile.accountLinked)
+        XCTAssertFalse(AccountIdentityStore.isSignedIn)
+        XCTAssertEqual((try? context.fetch(FetchDescriptor<CycleEntry>()))?.count, 1)
+    }
+
+    /// The flag is additive with a default, so a 1.2 store upgrades cleanly and
+    /// gets offered the account exactly once.
+    func testAnUpgradingUserIsOfferedItOnce() {
+        profile.hasOnboarded = true             // a 1.2 user, flag defaults false
+        XCTAssertFalse(profile.hasSeenAccountOffer)
+        XCTAssertTrue(shouldOffer(profile))
+    }
+
+    /// Settings must still reach it afterwards, whichever way she answered.
+    func testSettingsStillOffersTheAccountAfterDeclining() throws {
+        let source = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent()
+                .appending(path: "Caelyn/Views/Settings/SettingsView.swift"),
+            encoding: .utf8
+        )
+        XCTAssertTrue(source.contains("accountSection"), "Account must have its own Settings section.")
+        XCTAssertTrue(source.contains("title: \"Account & iCloud\""))
+        // And it must be first — the point of the change.
+        let body = source.range(of: "accountSection\n                    proSection")
+        XCTAssertNotNil(body, "Account must sit above everything else in Settings.")
+    }
+}

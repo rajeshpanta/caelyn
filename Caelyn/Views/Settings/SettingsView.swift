@@ -54,6 +54,7 @@ struct SettingsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
+                    accountSection
                     proSection
                     cycleSection
                     privacySection
@@ -424,10 +425,15 @@ struct SettingsView: View {
         return AccountIdentityStore.isSignedIn ? "Signed in" : "Optional"
     }
 
-    // MARK: - Data section
+    // MARK: - Account section
 
-    private var dataSection: some View {
-        SettingsSectionCard(title: "Data") {
+    /// First thing in Settings, on purpose.
+    ///
+    /// This was a row three levels down in Data, which is where the headline feature
+    /// of the release went to be never found. Name and iCloud backup are the two
+    /// things someone looks for first; they belong at the top.
+    private var accountSection: some View {
+        SettingsSectionCard(title: "Account") {
             SettingsRow(
                 icon: "person.crop.circle",
                 iconColor: CaelynColor.primaryPlum,
@@ -435,7 +441,13 @@ struct SettingsView: View {
                 detail: accountRowDetail,
                 action: { showingAccount = true }
             )
-            SettingsDivider()
+        }
+    }
+
+    // MARK: - Data section
+
+    private var dataSection: some View {
+        SettingsSectionCard(title: "Data") {
             SettingsRow(
                 icon: "iphone",
                 iconColor: CaelynColor.primaryPlum,

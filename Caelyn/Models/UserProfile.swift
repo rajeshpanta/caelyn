@@ -107,6 +107,13 @@ final class UserProfile {
     /// Synced, like the name itself — a second device should not re-ask.
     var hasConfirmedPreferredName: Bool = false
 
+    /// True once she has been offered the account, either way.
+    ///
+    /// Asked once, just after onboarding. Declining is an answer and sets this too —
+    /// a second nag would turn an optional extra into a wall, which is the one thing
+    /// this feature must never be. Synced, so a new device does not re-ask.
+    var hasSeenAccountOffer: Bool = false
+
     /// True once a Sign in with Apple credential has been linked.
     ///
     /// Identity only. It gates nothing: every feature works signed out, and
