@@ -534,3 +534,61 @@ final class BringHistoryFlowTests: XCTestCase {
         XCTAssertFalse(text.contains(":"), "no clock times in her import list")
     }
 }
+
+/// The confirmation screen must speak about the route she actually took.
+@MainActor
+final class ImportRouteCopyTests: XCTestCase {
+
+    private var container: ModelContainer!
+    private var context: ModelContext!
+    private var model: BringHistoryModel!
+    private let calendar = Calendar(identifier: .gregorian)
+
+    override func setUpWithError() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        container = try ModelContainer(for: CycleEntry.self, UserProfile.self, configurations: config)
+        context = container.mainContext
+        model = BringHistoryModel(calendar: calendar, ledger: ImportLedger(fileURL: nil))
+    }
+
+    override func tearDownWithError() throws {
+        container = nil; context = nil; model = nil
+    }
+
+    /// A file import is not a Health route, so it keeps the file wording.
+    func testAFileImportIsNotFlaggedAsAHealthRoute() async {
+        let csv = "date,flow\n2026-03-01,heavy\n"
+        await model.read(filename: "export.csv", data: Data(csv.utf8), context: context,
+                         today: calendar.date(from: DateComponents(year: 2026, month: 4, day: 1))!)
+        XCTAssertFalse(model.isHealthRoute, "A file import must not claim to be an Apple Health route.")
+    }
+
+    /// **The bug from the field.** A Health route has no file at all, so the empty
+    /// screen must not offer "Choose a different file" — a user following the
+    /// Period Tracker instructions went looking for a file picker that was never
+    /// going to appear.
+    func testTheHealthRouteCopyNeverMentionsAFile() throws {
+        let source = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent()
+                .appending(path: "Caelyn/Views/Import/BringHistoryView.swift"),
+            encoding: .utf8
+        )
+        XCTAssertTrue(source.contains("model.isHealthRoute ? \"Choose a different app\" : \"Choose a different file\""),
+                      "The empty-state button must match the route.")
+        XCTAssertTrue(source.contains("This is read from Apple Health on this iPhone"),
+                      "The privacy footer must describe Health, not a file, on a Health route.")
+    }
+
+    /// Whichever route it was, the privacy promise itself is unchanged.
+    func testBothRoutesStillPromiseNothingIsUploaded() throws {
+        let source = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent()
+                .appending(path: "Caelyn/Views/Import/BringHistoryView.swift"),
+            encoding: .utf8
+        )
+        let count = source.components(separatedBy: "Nothing is uploaded, and Caelyn has no server to upload it to.").count - 1
+        XCTAssertEqual(count, 2, "Both route variants must keep the promise.")
+    }
+}

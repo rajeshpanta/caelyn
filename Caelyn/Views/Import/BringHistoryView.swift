@@ -222,7 +222,8 @@ struct BringHistoryView: View {
                     .accessibilityIdentifier("UIA.Import.Cancel")
                 }
             } else {
-                CaelynButton(title: "Choose a different file", variant: .secondary) {
+                CaelynButton(title: model.isHealthRoute ? "Choose a different app" : "Choose a different file",
+                             variant: .secondary) {
                     model.cancel()
                 }
                 .accessibilityIdentifier("UIA.Import.Cancel")
@@ -332,7 +333,9 @@ struct BringHistoryView: View {
         HStack(alignment: .top, spacing: 6) {
             Image(systemName: "iphone")
                 .font(.system(size: 11, weight: .semibold))
-            Text("Your file is read on this iPhone. Nothing is uploaded, and Caelyn has no server to upload it to.")
+            Text(model.isHealthRoute
+                 ? "This is read from Apple Health on this iPhone. Nothing is uploaded, and Caelyn has no server to upload it to."
+                 : "Your file is read on this iPhone. Nothing is uploaded, and Caelyn has no server to upload it to.")
                 .font(CaelynFont.footnote)
                 .fixedSize(horizontal: false, vertical: true)
         }
