@@ -121,4 +121,21 @@ enum AccountSession {
             ?? PersonalName.usable(profile?.appleSuggestedName)
             ?? ""
     }
+
+    /// What the *inline* name field in Settings should start with.
+    ///
+    /// Differs from `namePrefill` in one respect that matters: it falls back to
+    /// Apple's suggestion only while the question is still unanswered. Once she has
+    /// confirmed a name — including by deliberately clearing the field, which
+    /// `setPreferredName` treats as an answer — her decision stands, and re-seeding
+    /// the field from her Apple ID would quietly overrule it every time she opened
+    /// Settings.
+    ///
+    /// Before this existed the field read `preferredName` alone, so a suggestion
+    /// captured at sign-in was stored and then never shown to anyone.
+    static func nameFieldDraft(for profile: UserProfile?) -> String {
+        guard let profile else { return "" }
+        if profile.hasConfirmedPreferredName { return profile.preferredName ?? "" }
+        return namePrefill(for: profile)
+    }
 }

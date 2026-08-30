@@ -55,7 +55,7 @@ struct AccountView: View {
         .task {
             availability = await CloudAccount.availability()
             isSignedIn = AccountIdentityStore.isSignedIn
-            nameDraft = profile?.preferredName ?? ""
+            nameDraft = AccountSession.nameFieldDraft(for: profile)
         }
         .sheet(item: Binding(
             get: { namePrompt.map(NamePrompt.init(prefill:)) },
@@ -64,7 +64,7 @@ struct AccountView: View {
             PreferredNameStep(prefill: prompt.prefill) { confirmed in
                 AccountSession.setPreferredName(confirmed, on: profile)
                 modelContext.saveOrLog()
-                nameDraft = profile?.preferredName ?? ""
+                nameDraft = AccountSession.nameFieldDraft(for: profile)
                 namePrompt = nil
             }
             .interactiveDismissDisabled()
@@ -131,7 +131,7 @@ struct AccountView: View {
 
     private func saveName() {
         AccountSession.setPreferredName(nameDraft, on: profile)
-        nameDraft = profile?.preferredName ?? ""
+        nameDraft = AccountSession.nameFieldDraft(for: profile)
         nameFieldFocused = false
         modelContext.saveOrLog()
         Haptics.success()
@@ -193,7 +193,7 @@ struct AccountView: View {
             if AccountSession.apply(outcome, to: profile) {
                 modelContext.saveOrLog()
                 isSignedIn = true
-                nameDraft = profile?.preferredName ?? ""
+                nameDraft = AccountSession.nameFieldDraft(for: profile)
                 Haptics.success()
                 // Asked once. A returning user who has already answered — here or
                 // on another device that synced — signs straight in.

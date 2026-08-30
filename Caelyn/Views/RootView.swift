@@ -7,16 +7,22 @@ struct RootView: View {
     @State private var isLoaded = false
     @State private var showStoreWarning = UserDefaults.standard.bool(forKey: Persistence.storeFailedKey)
 
+    /// Raise-only latch for the account offer.
+    ///
+    /// `offerIsDue` may switch this on; only `endAccountOffer()` switches it off.
+    /// Binding the sheet straight to the condition dismissed it the instant
+    /// `accountLinked` flipped at sign-in, tearing down the name step that runs
+    /// next. See `AccountOfferPolicy` for the full account.
+    @State private var isOfferingAccount = false
+
     private var hasOnboarded: Bool {
         profiles.first?.hasOnboarded ?? false
     }
 
-    /// Offer the account once she is through onboarding and looking at the app she
-    /// can already use — not during onboarding, where it would read as a sign-up
-    /// wall in front of a period tracker.
-    private var shouldOfferAccount: Bool {
-        guard let profile = profiles.first, profile.hasOnboarded else { return false }
-        return !profile.hasSeenAccountOffer && !profile.accountLinked
+    /// Whether the offer is *due*. Deliberately not the sheet's `isPresented`:
+    /// this goes false the moment she signs in, and the sheet must outlive that.
+    private var offerIsDue: Bool {
+        isLoaded && AccountOfferPolicy.isDue(for: profiles.first)
     }
 
     var body: some View {
@@ -47,17 +53,30 @@ struct RootView: View {
             try? await Task.sleep(for: .milliseconds(120))
             withAnimation { isLoaded = true }
         }
+        .onChange(of: offerIsDue, initial: true) { _, due in
+            // Raise only. Lowering is `endAccountOffer()`'s job alone.
+            if due { isOfferingAccount = true }
+        }
         .sheet(isPresented: Binding(
-            get: { isLoaded && shouldOfferAccount },
-            set: { if !$0 { profiles.first?.hasSeenAccountOffer = true; modelContext.saveOrLog() } }
+            get: { isOfferingAccount },
+            set: { if !$0 { endAccountOffer() } }
         )) {
-            AccountOfferSheet(profile: profiles.first) { }
+            AccountOfferSheet(profile: profiles.first) { endAccountOffer() }
                 .presentationDetents([.large])
         }
         .overlay(alignment: .top) {
             if showStoreWarning { storeWarningBanner }
         }
         .animation(.easeInOut(duration: 0.3), value: showStoreWarning)
+    }
+
+    /// Close the offer and record that it was answered, whichever way she went —
+    /// declining is an answer, and so is swiping the sheet away.
+    private func endAccountOffer() {
+        isOfferingAccount = false
+        guard let profile = profiles.first, !profile.hasSeenAccountOffer else { return }
+        profile.hasSeenAccountOffer = true
+        modelContext.saveOrLog()
     }
 
     /// Shown when the live store couldn't open and Caelyn fell back to a fresh /

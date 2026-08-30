@@ -51,25 +51,33 @@ Paste-ready text for App Store Connect. Nothing here has been applied — the AP
 > **iCloud sync uses the user's own private CloudKit database.** It is off by
 > default, opt-in, and no record of any kind is written to a public database.
 
-## App Privacy — required changes
+## App Privacy — no changes required
 
-| Data type | Declare? | Purpose | Linked | Tracking |
-|---|---|---|---|---|
-| **Identifiers → User ID** | **Add** | App Functionality | Yes | **No** |
-| **Contact Info → Name** | **Add** | App Functionality | Yes | **No** |
-| **Contact Info → Email Address** | **Do NOT declare** | — | — | — |
-| Health & Fitness | unchanged | — | — | — |
+**Verdict: leave the declaration as "Data Not Collected."**
 
-- **User ID** covers Apple's anonymous per-app identifier. It is never used for
-  advertising and never leaves the device.
-- **Name** covers the preferred name the user types. Stored on device and, with sync
-  on, in the user's own iCloud. Never transmitted to the developer.
-- **Email must not be declared.** No shipped Caelyn has ever requested an email
-  address: 1.2 and earlier had no Sign in with Apple, and 1.3 requests `[.fullName]`
-  only. There is no address to declare.
-- **Health data stays as-is.** A user's private CloudKit database is Apple storage
-  under the user's own account, not a third-party disclosure, and the developer
-  cannot read it.
+Apple's definition is the whole test:
+
+> "Collect" refers to transmitting data off the device in a way that allows you
+> and/or your third-party partners to access it for a period longer than what is
+> necessary to service the transmitted request in real time.
+
+The question is not "does data leave the phone" — it is "does it leave in a way the
+developer can read." Caelyn fails that test on every count, and the source is the
+evidence: no `URLSession`, no `URLRequest`, no networking of any kind, and zero
+third-party packages. There is no endpoint for data to arrive at.
+
+| Data type | Declare? | Why |
+|---|---|---|
+| Identifiers → User ID | **No** | Apple's identifier is written to the local Keychain and never transmitted. |
+| Contact Info → Name | **No** | Typed by the user; stored on device and in her own iCloud. Developer cannot read it. |
+| Contact Info → Email | **No** | Never requested. 1.3 asks for `[.fullName]` only. |
+| Health & Fitness | **No** | Same reasoning as Name: the private CloudKit database is Apple storage under the user's own account. |
+
+**Why over-declaring would be the worse error.** Declaring health data as collected
+and linked to identity would print "Health data linked to you" on the product page of
+a privacy-first period tracker — a statement that is both untrue and directly
+damaging. An inaccurate label is a problem in *both* directions, and the accurate
+answer here is the one already published.
 
 ## Account deletion questionnaire
 

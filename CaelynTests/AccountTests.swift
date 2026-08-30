@@ -427,10 +427,11 @@ final class AccountOfferTests: XCTestCase {
         container = nil; context = nil; profile = nil
     }
 
-    /// Mirrors `RootView.shouldOfferAccount`, which is the production rule.
+    /// Calls the production rule. It used to re-implement it inline, which meant
+    /// these tests passed against a copy of the logic and could never notice how
+    /// `RootView` actually used it — which is exactly where the bug was.
     private func shouldOffer(_ p: UserProfile?) -> Bool {
-        guard let p, p.hasOnboarded else { return false }
-        return !p.hasSeenAccountOffer && !p.accountLinked
+        AccountOfferPolicy.isDue(for: p)
     }
 
     /// Never during onboarding — that would be a sign-up wall in front of a period

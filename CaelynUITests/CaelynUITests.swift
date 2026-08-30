@@ -49,6 +49,42 @@ final class CaelynUITests: XCTestCase {
         return true
     }
 
+    /// Dismiss the one-time account offer if it is up.
+    ///
+    /// It presents over the home screen the first time someone arrives there,
+    /// which is correct product behaviour and therefore genuinely part of the
+    /// journey these tests walk. Declining is the path taken by someone who just
+    /// wants to use the app, so that is the path asserted here.
+    /// Decline iOS's notification permission alert, if it appears.
+    ///
+    /// It belongs to SpringBoard, not to Caelyn, so it cannot be reached through
+    /// `app.alerts` — the query has to address SpringBoard directly. The simulator
+    /// often never shows it at all, which is why this suite ran green there while
+    /// blocking on a real device at the reminders step.
+    ///
+    /// Declining is deliberate: onboarding must continue identically either way,
+    /// and it leaves the test device's own settings untouched.
+    @discardableResult
+    func declineNotificationsAlert(timeout: TimeInterval = 8) -> Bool {
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        for label in ["Don\u{2019}t Allow", "Don't Allow"] {
+            let button = springboard.buttons[label]
+            if button.waitForExistence(timeout: timeout / 2) {
+                button.tap()
+                return true
+            }
+        }
+        return false
+    }
+
+    @discardableResult
+    func dismissAccountOfferIfPresent(in app: XCUIApplication, timeout: TimeInterval = 5) -> Bool {
+        let notNow = app.buttons["UIA.AccountOffer.NotNow"]
+        guard notNow.waitForExistence(timeout: timeout) else { return false }
+        notNow.tap()
+        return true
+    }
+
     func testAppLaunches() throws {
         let app = XCUIApplication()
         app.launch()
@@ -127,13 +163,22 @@ final class CaelynUITests: XCTestCase {
                       "Declining Apple Health must still advance onboarding.")
         tapButton("Continue", in: app)
 
-        XCTAssertTrue(app.staticTexts["Keep Caelyn private 🔐"].waitForExistence(timeout: 5))
+        // On a real device iOS asks about notifications here and blocks until
+        // answered. Declining must not stop onboarding.
+        declineNotificationsAlert()
+
+        XCTAssertTrue(app.staticTexts["Keep Caelyn private 🔐"].waitForExistence(timeout: 10))
         XCTAssertFalse(app.buttons["Skip for now"].exists,
                        "The lock step must not frame declining as skipping.")
         tapButton("Continue", in: app)
 
         XCTAssertTrue(app.staticTexts["You're all set! 🎉"].waitForExistence(timeout: 5))
         tapButton("Open Caelyn", in: app)
+
+        // Straight out of onboarding she is offered an account. Declining it is
+        // an answer, and the app behind it must be fully usable immediately.
+        XCTAssertTrue(dismissAccountOfferIfPresent(in: app),
+                      "The account offer should greet someone who has just onboarded.")
 
         XCTAssertTrue(app.staticTexts["Your daily snapshot"].waitForExistence(timeout: 5))
         capture("First-Use-Home", app: app)
@@ -180,7 +225,13 @@ final class CaelynUITests: XCTestCase {
         }
 
         tapTab("Log", in: app)
-        XCTAssertTrue(app.staticTexts["Today's check-in"].waitForExistence(timeout: 3))
+        // The header reads "Today's check-in \u{00B7} Cycle day N", so match the prefix.
+        // An exact-string query could never match, whatever the app did.
+        let checkInHeader = app.staticTexts.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Today's check-in")
+        ).firstMatch
+        XCTAssertTrue(checkInHeader.waitForExistence(timeout: 3),
+                      "The Log tab should show today's check-in header.")
 
         let heavyFlow = app.buttons["Heavy flow"]
         reveal(heavyFlow, in: app)
@@ -190,7 +241,15 @@ final class CaelynUITests: XCTestCase {
         let pain = app.sliders["Pain level"]
         reveal(pain, in: app)
         pain.adjust(toNormalizedSliderPosition: 0.6)
-        XCTAssertTrue(String(describing: pain.value).contains("6"), "Pain should update to 6/10")
+        // A drag lands within a point or two of the target on real hardware, where
+        // the simulator hits it exactly. Assert the band the gesture means, not a
+        // single value the device cannot promise.
+        // The value reads like Optional("7/10"), so take the first run of digits —
+        // filtering every digit out of the whole string yields "710".
+        let painRaw = String(describing: pain.value)
+        let painValue = Int(painRaw.drop(while: { !$0.isNumber }).prefix(while: { $0.isNumber })) ?? -1
+        XCTAssertTrue((5...7).contains(painValue),
+                      "Pain should land near 6/10 after dragging to 60%, got \(painValue)")
 
         let painLocation = app.buttons["Pelvic pain pain location"]
         reveal(painLocation, in: app)
@@ -269,10 +328,28 @@ final class CaelynUITests: XCTestCase {
         note.tap()
         note.typeText(" Simulator real-world check.")
 
-        // Leaving the tab commits focused text fields. Calendar must immediately
-        // expose the same edited log and allow another change.
+        // KNOWN FAILURE, pre-existing and not a product defect.
+        //
+        // The note is deliberately still focused here: committing focused text on
+        // the way out is the behaviour this journey tests. But the software
+        // keyboard overlays the top of the tab bar (keyboard ends at y=874, the
+        // tab bar starts at y=849), so every tab button reports isHittable ==
+        // false and the switch never happens. Verified by dumping the tree at the
+        // failure: tabs=["Home:false", "Calendar:false", "Log:true", ...].
+        //
+        // Tried and rejected: app.swipeDown(); a slow swipe on
+        // app.scrollViews.firstMatch (there are three, and firstMatch is not the
+        // one LogView's .scrollDismissesKeyboard(.interactively) governs); an
+        // explicit press-and-drag confined to the area above the keyboard; and a
+        // coordinate tap low inside the tab button, below the keyboard's frame.
+        // The keyboard survives all four, on iPhone 15 Pro and 15 Pro Max alike.
+        //
+        // The fix belongs in the app or in this journey's structure — an explicit
+        // way to put the keyboard away — not in another gesture. Note also that
+        // the nav bar's label is empty here, so the assertion below is a second
+        // thing to revisit.
         tapTab("Calendar", in: app)
-        XCTAssertTrue(app.navigationBars["Calendar"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.navigationBars["Calendar"].waitForExistence(timeout: 5))
         let todayCell = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", ", today")).firstMatch
         XCTAssertTrue(todayCell.waitForExistence(timeout: 3))
         todayCell.tap()
@@ -398,9 +475,17 @@ final class CaelynUITests: XCTestCase {
 
         openSetting("Apple Health", in: app, expects: "Apple Health")
         XCTAssertTrue(app.staticTexts["Sync with Apple Health"].exists)
-        XCTAssertTrue(app.staticTexts["Menstrual flow"].exists)
-        XCTAssertTrue(app.staticTexts["Symptoms and pain"].exists)
-        XCTAssertTrue(app.staticTexts["Wrist temperature"].exists)
+        // Nothing is connected in the simulator, so this is the disconnected
+        // state: an explanation plus one neutrally-worded way in. The per-type
+        // toggles only exist after connecting.
+        //
+        // This deliberately no longer asserts "Menstrual flow", "Symptoms and
+        // pain" and "Wrist temperature". Those were removed on purpose: App
+        // Review 5.1.1(iv) rejected the screen for replicating Apple's own
+        // permission list, so asserting them would pin the app to the very
+        // content it was made to delete.
+        XCTAssertTrue(app.buttons["Continue"].exists || app.buttons["Unavailable on this device"].exists,
+                      "The disconnected state should offer a neutrally-worded way in.")
         backToSettings(from: "Apple Health", in: app)
 
         openSetting("Backup", in: app, expects: "Backup")
@@ -627,18 +712,31 @@ final class CaelynUITests: XCTestCase {
         let paranoidMode = settingButton("Paranoid Mode", in: app)
         reveal(paranoidMode, in: app)
         paranoidMode.tap()
-        XCTAssertTrue(app.sheets["Turn on Paranoid Mode?"].waitForExistence(timeout: 3))
-        app.buttons["Lock everything down"].tap()
+        // Match the dialog, then the button inside it. SwiftUI's confirmationDialog
+        // does not reliably expose its title as the element identifier, which is why
+        // the working query elsewhere in this file uses firstMatch.
+        let lockDown = app.buttons["Lock everything down"]
+        XCTAssertTrue(lockDown.waitForExistence(timeout: 5),
+                      "Paranoid Mode should confirm before changing several settings at once.")
+        lockDown.tap()
         XCTAssertEqual(hidePreview.value as? String, "1")
         XCTAssertEqual(privateNotifications.value as? String, "1")
 
         let deleteAll = settingButton("Delete all data", in: app)
         reveal(deleteAll, in: app)
         deleteAll.tap()
-        XCTAssertTrue(app.sheets["Delete all data?"].waitForExistence(timeout: 3))
-        app.buttons["Continue"].tap()
-        XCTAssertTrue(app.sheets["Are you absolutely sure?"].waitForExistence(timeout: 4))
-        app.buttons["Delete everything"].tap()
+        // As above, confirmationDialog is not exposed as a `sheets` element here,
+        // so assert on the buttons it presents — which is what matters anyway.
+        let continueButton = app.buttons["Continue"]
+        XCTAssertTrue(continueButton.waitForExistence(timeout: 5),
+                      "Deleting everything should ask first.")
+        continueButton.tap()
+        // Assert on the button unique to the second dialog: it is the thing that
+        // proves a second confirmation stands between her and losing everything.
+        let deleteEverything = app.buttons["Delete everything"]
+        XCTAssertTrue(deleteEverything.waitForExistence(timeout: 4),
+                      "A second confirmation must stand between her and deletion.")
+        deleteEverything.tap()
         XCTAssertTrue(app.staticTexts["Meet Caelyn"].waitForExistence(timeout: 12))
         XCTAssertFalse(app.buttons["Home"].exists)
         capture("Simulator-Delete-All-Data-First-Launch", app: app)

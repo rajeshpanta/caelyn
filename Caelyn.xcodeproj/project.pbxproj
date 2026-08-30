@@ -74,10 +74,12 @@
 		5B981B698B655F0DF9F07190 /* WidgetDataSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6011FB7860B910ED48584777 /* WidgetDataSync.swift */; };
 		5C104A68E2609F5ECD9CFC95 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5322159624E05FC0C7C1686B /* ExportService.swift */; };
 		5F745BA64C443BC266F66445 /* AppURLs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3D9A2E9305840410E900DE /* AppURLs.swift */; };
+		5FBD272D3467806EDC25A8ED /* AccountOfferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573753AA268C9DB80FD5960C /* AccountOfferTests.swift */; };
 		60CE2C6B72B2C3BC33887DC2 /* DataStatusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F8759E4F031305F132899D /* DataStatusCard.swift */; };
 		61B1000513AE1D2AC81ED400 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53C42DDF815AFDFE00A7D214 /* LogView.swift */; };
 		62140E22137E9BFD253F7C3D /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A9CD6A95C7EC0C76441783 /* Enums.swift */; };
 		661515C66A81E3DF7ABA7CE9 /* OnboardingSteps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D48D4147BDA4F0E3B4942CB /* OnboardingSteps.swift */; };
+		667E0033D1F278E85A4F35CC /* AccountOfferPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2C21642452B88C7C3F34B7 /* AccountOfferPolicy.swift */; };
 		670A3218F030EAAF4D349B2D /* MoodChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECDCA0268B520CF6DE71EE5 /* MoodChip.swift */; };
 		6816D3FE27E3DF6B5751EDF2 /* ImportHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90D024408E5BC54F0D8C5A72 /* ImportHistoryView.swift */; };
 		68B19BD4A1651FC72243F58E /* DayDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C4BC2802ED9E13B920ABEFD /* DayDetailSheet.swift */; };
@@ -260,6 +262,7 @@
 		0573AB74971CE763A3A4BD08 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		074FFFF68AC191D9677D35DB /* HomeQuickActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeQuickActions.swift; sourceTree = "<group>"; };
 		08F7B66C9C067BF416634B9E /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		0B2C21642452B88C7C3F34B7 /* AccountOfferPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountOfferPolicy.swift; sourceTree = "<group>"; };
 		0B3516961D449934550DCF93 /* Haptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Haptics.swift; sourceTree = "<group>"; };
 		0B69A196D7954169CBDBA685 /* PatternEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternEngine.swift; sourceTree = "<group>"; };
 		0C31A3ABE813F13141355841 /* ImportSourceGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportSourceGuide.swift; sourceTree = "<group>"; };
@@ -330,6 +333,7 @@
 		54C351F64F7DEA1D1D74C651 /* AccountOfferSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountOfferSheet.swift; sourceTree = "<group>"; };
 		55A9CD6A95C7EC0C76441783 /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		55CF157977EC9D07CEDE4334 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		573753AA268C9DB80FD5960C /* AccountOfferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountOfferTests.swift; sourceTree = "<group>"; };
 		57ED9FBF789EDA60FE1B4513 /* AccountSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSession.swift; sourceTree = "<group>"; };
 		58917566D3D58FBFF324EE38 /* CloudSyncSafetyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncSafetyTests.swift; sourceTree = "<group>"; };
 		59064BE929C94D1B84DE947C /* HealthKitSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitSync.swift; sourceTree = "<group>"; };
@@ -584,6 +588,7 @@
 		39AB51C6DFF8B4371C985737 /* CaelynTests */ = {
 			isa = PBXGroup;
 			children = (
+				573753AA268C9DB80FD5960C /* AccountOfferTests.swift */,
 				DC4E6AEE82C3214565A6A2AE /* AccountTests.swift */,
 				E35A9DECDE3CDA366CAFB7DA /* BringHistoryFlowTests.swift */,
 				354545D943378E53A1B935B7 /* CaelynTests.swift */,
@@ -693,6 +698,7 @@
 			isa = PBXGroup;
 			children = (
 				3388322BB0080456ADB2D64A /* AccountIdentityStore.swift */,
+				0B2C21642452B88C7C3F34B7 /* AccountOfferPolicy.swift */,
 				57ED9FBF789EDA60FE1B4513 /* AccountSession.swift */,
 				AF0DF07ABEAA71E44E9F8C76 /* AppleSignInOutcome.swift */,
 				2C886EAA52EF63FB58A7B0CE /* AppleSignInService.swift */,
@@ -1124,6 +1130,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5FBD272D3467806EDC25A8ED /* AccountOfferTests.swift in Sources */,
 				EDC27385EA3B0A3DB336459F /* AccountTests.swift in Sources */,
 				DC7A6B723589A24DF3B6F3CD /* BringHistoryFlowTests.swift in Sources */,
 				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
@@ -1170,6 +1177,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B532F649285ED44265C8DF71 /* AccountIdentityStore.swift in Sources */,
+				667E0033D1F278E85A4F35CC /* AccountOfferPolicy.swift in Sources */,
 				3F77901329169F824A9C8380 /* AccountOfferSheet.swift in Sources */,
 				0AC9AB39173B78AB17337993 /* AccountSession.swift in Sources */,
 				E7EFD62EE4149F6D65FEF932 /* AccountView.swift in Sources */,
@@ -1435,7 +1443,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1663,7 +1671,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 7T9897GFKH;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;

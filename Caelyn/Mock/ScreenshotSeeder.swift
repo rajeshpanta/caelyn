@@ -25,6 +25,11 @@ enum ScreenshotSeeder {
             hasOnboarded: true,
             lastPeriodStart: lastPeriodStart
         )
+        // Answer the one-time account offer. It belongs to a real first run, not
+        // to a synthetic already-established user: left unanswered it presents
+        // over the home screen, so it covers every App Store screenshot and
+        // blocks every tap the UI suite tries to make.
+        profile.hasSeenAccountOffer = true
         context.insert(profile)
 
         // 5 historical complete cycles + current cycle up to today
