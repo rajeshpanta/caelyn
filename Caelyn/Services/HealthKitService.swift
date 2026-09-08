@@ -1,5 +1,6 @@
 import Foundation
 import HealthKit
+import OSLog
 import SwiftData
 
 enum HealthKitError: Error, LocalizedError {
@@ -29,6 +30,8 @@ struct ImportResult {
 
 @MainActor
 enum HealthKitService {
+
+    private static let log = Logger(subsystem: "smallpanta-icould.com.caelynperiodtracker", category: "healthwrite")
 
     // HealthKit delivers query callbacks on its own queues. HKHealthStore is
     // designed to be shared across those callbacks, so this reference must not
@@ -125,6 +128,70 @@ enum HealthKitService {
     /// Used purely as a status hint — not a substitute for handling write errors.
     static func canWriteMenstrualFlow() -> Bool {
         store.authorizationStatus(for: menstrualFlowType) == .sharingAuthorized
+    }
+
+    // MARK: - Write authorization
+    //
+    // Unlike reads, HealthKit *does* disclose sharing status, so everything here is
+    // knowable and Caelyn is allowed to act on it and say it out loud.
+
+    /// The types a given write toggle actually needs.
+    @MainActor
+    enum WriteScope: CaseIterable {
+        case flow
+        case symptoms
+
+        var types: Set<HKSampleType> {
+            switch self {
+            case .flow:
+                return [menstrualFlowType]
+            case .symptoms:
+                return Set(symptomCategoryMap.values).union(painCategoryMap.values)
+            }
+        }
+
+        /// What she called it, for the one sentence Caelyn may need to show.
+        var label: String {
+            switch self {
+            case .flow:     return "flow"
+            case .symptoms: return "symptoms"
+            }
+        }
+    }
+
+    /// True only when every type in the scope is actually writable right now.
+    static func canWrite(_ scope: WriteScope) -> Bool {
+        guard isAvailable else { return false }
+        return scope.types.allSatisfy { store.authorizationStatus(for: $0) == .sharingAuthorized }
+    }
+
+    /// True when at least one type in the scope has never been asked about, so
+    /// Apple's sheet would still appear. Once every type is decided, asking again
+    /// shows nothing — which is why this gate exists rather than prompting blindly.
+    static func writeAuthorizationIsUndecided(_ scope: WriteScope) -> Bool {
+        guard isAvailable else { return false }
+        return scope.types.contains { store.authorizationStatus(for: $0) == .notDetermined }
+    }
+
+    /// Ask Apple for permission to write exactly this scope, and report whether
+    /// Caelyn can now actually do it.
+    ///
+    /// Requests only the types the toggle needs, so turning on "write flow" does not
+    /// ask about twelve symptom categories she never mentioned. Apple's sheet is the
+    /// only place access is granted; if every type is already decided iOS returns
+    /// immediately without showing anything, so this is safe to call and cannot
+    /// nag. The answer is then read back from HealthKit rather than assumed.
+    @discardableResult
+    static func requestWriteAuthorization(_ scope: WriteScope) async -> Bool {
+        guard isAvailable else { return false }
+        do {
+            try await store.requestAuthorization(toShare: scope.types, read: [])
+        } catch {
+            // A thrown error is not a denial — it means the request itself failed.
+            // Either way Caelyn reports what HealthKit says below, never a guess.
+            log.error("HealthKit write authorization request failed: \(error.localizedDescription, privacy: .public)")
+        }
+        return canWrite(scope)
     }
 
     // MARK: - Wrist temperature (int-3)
@@ -273,8 +340,14 @@ enum HealthKitService {
     /// entries list so we can determine if this entry is a cycle start.
     /// When flow is nil (cleared), removes any Caelyn-written flow sample for
     /// that date so HealthKit stays in sync with the user's actual log.
-    static func syncEntryToHealth(_ entry: CycleEntry, in entries: [CycleEntry], profile: UserProfile) async {
-        guard profile.healthKitConnected, isAvailable else { return }
+    /// Write one entry to Health.
+    ///
+    /// Returns false when Health refused the write. **Her Caelyn entry is already
+    /// saved before this runs and is never touched here** — a HealthKit failure can
+    /// delay or lose a copy in Apple Health, never her own history.
+    @discardableResult
+    static func syncEntryToHealth(_ entry: CycleEntry, in entries: [CycleEntry], profile: UserProfile) async -> Bool {
+        guard profile.healthKitConnected, isAvailable else { return false }
 
         var samples: [HKCategorySample] = []
 
@@ -293,8 +366,17 @@ enum HealthKitService {
             samples.append(contentsOf: symptomSamples(from: entry))
         }
 
-        guard !samples.isEmpty else { return }
-        try? await store.save(samples)
+        guard !samples.isEmpty else { return true }
+        do {
+            try await store.save(samples)
+            return true
+        } catch {
+            // Logged, never swallowed — and never surfaced as an alert here, because
+            // this fires on every tap in the log form. The Apple Health screen is
+            // where the honest status lives.
+            log.error("HealthKit write failed for one day: \(error.localizedDescription, privacy: .public)")
+            return false
+        }
     }
 
     /// Removes any menstrual-flow samples *this app* wrote for the given date.

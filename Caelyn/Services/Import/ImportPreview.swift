@@ -25,6 +25,11 @@ struct ImportPreview {
     var healthSourceLabel: String?
     /// That app's own name, for sentences that read better without "via Apple Health".
     var healthAppName: String?
+    /// Why an Apple Health read came back the way it did. Nil for file imports.
+    var healthOutcome: HealthSyncService.ReadOutcome?
+    /// Whether the *unfiltered* read saw anything at all. Only meaningful for a
+    /// source-filtered Health route.
+    var healthSawOtherAppsData = false
 
     var hasChanges: Bool { summary.changeCount > 0 }
 
@@ -70,21 +75,66 @@ struct ImportPreview {
     /// "Found 3 years of history in your Clue export".
     var headline: String {
         guard hasChanges else {
+            // The states Caelyn can actually distinguish come first. Everything
+            // else is "Caelyn asked and nothing came back", which is said calmly
+            // and without guessing at a reason.
+            switch healthOutcome {
+            case .unavailable:
+                return "Apple Health isn't available on this iPhone"
+            case .notConnected:
+                return "Caelyn isn't connected to Apple Health yet"
+            case .noReadTypesEnabled:
+                return "Caelyn isn't set to read anything from Apple Health"
+            case .read, .none:
+                break
+            }
             // "this file" is wrong for an Apple Health read — there is no file —
             // and it is the first line she sees when a route finds nothing, which
             // is exactly when the wording has to make sense.
             let subject = isAppleHealth ? (healthAppName ?? "Apple Health") : "this file"
-            return summary.keptUserValue > 0
-                ? "Everything in \(subject) is already in Caelyn"
-                : "Nothing new to bring over"
+            if summary.keptUserValue > 0 { return "Everything in \(subject) is already in Caelyn" }
+            if let app = healthAppName { return "Nothing from \(app) in Apple Health yet" }
+            return "Nothing new to bring over"
         }
         return "Found \(summary.daysAffected) day\(summary.daysAffected == 1 ? "" : "s") of history"
+    }
+
+    /// The one thing she could do next, when Caelyn genuinely knows what that is.
+    ///
+    /// Nil for every state Caelyn cannot diagnose — notably a read Apple declined,
+    /// which HealthKit does not disclose and which Caelyn therefore never claims.
+    var nextStep: String? {
+        switch healthOutcome {
+        case .notConnected:
+            return "Connect Apple Health in Settings → Apple Health, then try again."
+        case .noReadTypesEnabled:
+            return "Choose what Caelyn may read in Settings → Apple Health, then try again."
+        case .unavailable, .read, .none:
+            return nil
+        }
     }
 
     /// Where Caelyn thinks it came from, in her words.
     var sourceLine: String {
         if isAppleHealth {
+            switch healthOutcome {
+            case .unavailable:
+                return "This iPhone doesn't have Apple Health, so there's nothing for Caelyn to read."
+            case .notConnected:
+                return "Caelyn hasn't been given access to Apple Health, so it hasn't looked yet."
+            case .noReadTypesEnabled:
+                return "Everything Caelyn can read from Apple Health is currently switched off, so it asked for nothing."
+            case .read, .none:
+                break
+            }
             if let app = healthAppName {
+                // A filtered route that found nothing: say which of the two very
+                // different things happened, and neither of them is "you denied it".
+                guard hasChanges || summary.keptUserValue > 0 else {
+                    return healthSawOtherAppsData
+                        ? "Apple Health does have cycle data on this iPhone, but none of it came from \(app). Caelyn can only read what \(app) has put there — it can't reach inside the app itself."
+                        : "Caelyn looked at Apple Health on this iPhone and found no cycle history there yet, from \(app) or anything else."
+                }
                 return "From what \(app) has put into Apple Health on this iPhone."
             }
             return "From the cycle and fertility history already stored on your iPhone."
@@ -130,7 +180,9 @@ struct ImportPreview {
             decisions: plan.decisions,
             batchID: UUID(),
             healthSourceLabel: sourceFilter?.label,
-            healthAppName: sourceFilter?.appName
+            healthAppName: sourceFilter?.appName,
+            healthOutcome: plan.outcome,
+            healthSawOtherAppsData: plan.observationsBeforeFilter > 0
         )
     }
 

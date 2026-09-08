@@ -115,8 +115,21 @@ final class BringHistoryModel {
     /// her list of imports.
     private var healthSourceFilter: HealthSyncService.SourceFilter?
 
+    /// True once this run granted Apple Health access while no profile existed —
+    /// i.e. during onboarding. The onboarding step reads it so the profile it
+    /// creates at the end records that she connected, instead of silently
+    /// forgetting and leaving her reads switched off.
+    private(set) var connectedHealthWithoutProfile = false
+
+    /// Read Apple Health and build a preview.
+    ///
+    /// - Parameter profile: nil during onboarding, when no `UserProfile` exists
+    ///   yet. The profile is only ever consulted for *which types she has allowed*;
+    ///   with no profile the scope is everything Apple's sheet just asked about, so
+    ///   a new user can bring her history across before finishing onboarding. This
+    ///   used to `guard let` and silently return her to the source list.
     func readAppleHealth(
-        profile: UserProfile,
+        profile: UserProfile?,
         context: ModelContext,
         limitTo sourceFilter: HealthSyncService.SourceFilter? = nil,
         today: Date = .now
@@ -128,23 +141,34 @@ final class BringHistoryModel {
             return
         }
         // Ask for permission first if she hasn't connected yet; the sheet is
-        // Apple's and is the only place access is granted.
-        if !profile.healthKitConnected {
+        // Apple's and is the only place access is granted. With no profile there is
+        // nothing recording a previous connection, so we always ask — iOS shows the
+        // sheet once and returns immediately thereafter.
+        if profile?.healthKitConnected != true {
             do {
                 try await HealthKitService.requestReadAuthorization()
-                profile.healthKitConnected = true
-                profile.hkReadFlow = true
-                profile.hkReadSymptoms = true
-                profile.hkReadFertility = true
-                context.saveOrLog()
+                if let profile {
+                    profile.healthKitConnected = true
+                    profile.hkReadFlow = true
+                    profile.hkReadSymptoms = true
+                    profile.hkReadFertility = true
+                    context.saveOrLog()
+                } else {
+                    connectedHealthWithoutProfile = true
+                }
             } catch {
                 phase = .failed("Caelyn couldn't reach Apple Health just now.")
                 return
             }
         }
 
+        // The read scope: her toggles when there is a profile, everything the
+        // permission sheet covered when there is not.
+        let types = profile.map { HealthSyncService.enabledTypes(for: $0) }
+            ?? HealthDataCatalog.syncedSampleTypes
+
         let plan = await HealthSyncService.preview(
-            mode: .fullImport, profile: profile, context: context,
+            mode: .fullImport, types: types, context: context,
             ledger: ledger, limitTo: sourceFilter, calendar: calendar, today: today
         )
         healthPlan = plan
@@ -184,6 +208,15 @@ final class BringHistoryModel {
         guard result.succeeded else {
             // Nothing was written — the store was put back as it was.
             phase = .failed("Caelyn couldn't save that import, so nothing was changed. Please try again.")
+            return
+        }
+
+        // Success must mean success. If everything the preview offered turned out
+        // to be hers already — she logged those days while the preview was on
+        // screen — nothing was added, and a "your history is here" screen over zero
+        // new days would be a small lie.
+        guard result.summary.changeCount > 0 else {
+            phase = .failed("Nothing was added — everything in that import is already in Caelyn, exactly as you logged it.")
             return
         }
 

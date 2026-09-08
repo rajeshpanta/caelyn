@@ -30,6 +30,9 @@ private struct HealthKitConnectForm: View {
     @State private var isBackfilling = false
     @State private var isImporting = false
     @State private var statusBanner: StatusBanner?
+    /// The real, HealthKit-reported sharing status behind each write toggle.
+    @State private var flowWritable = false
+    @State private var symptomsWritable = false
 
     enum StatusBanner: Equatable {
         case success(String)
@@ -54,6 +57,7 @@ private struct HealthKitConnectForm: View {
             }
             .padding(CaelynSpacing.lg)
         }
+        .onAppear { refreshWriteStatus() }
     }
 
     // MARK: - Hero
@@ -118,7 +122,7 @@ private struct HealthKitConnectForm: View {
                     title: "Write flow to Health",
                     subtitle: "Send Caelyn's flow logs to Apple Health.",
                     icon: "drop.fill",
-                    isOn: bind(\.hkWriteFlow)
+                    isOn: bindWrite(\.hkWriteFlow, scope: .flow)
                 )
                 ToggleCard(
                     title: "Read flow from Health",
@@ -130,8 +134,9 @@ private struct HealthKitConnectForm: View {
                     title: "Write symptoms to Health",
                     subtitle: "Send Caelyn's symptom logs to Apple Health.",
                     icon: "sparkles",
-                    isOn: bind(\.hkWriteSymptoms)
+                    isOn: bindWrite(\.hkWriteSymptoms, scope: .symptoms)
                 )
+                if let note = writeStatusNote { writeStatusRow(note) }
                 ToggleCard(
                     title: "Read symptoms from Health",
                     subtitle: "Bring in symptoms and pain logged in other apps.",
@@ -236,6 +241,83 @@ private struct HealthKitConnectForm: View {
 
     // MARK: - Bindings + actions
 
+    /// A write toggle she can trust.
+    ///
+    /// Turning one on used to set a flag and nothing else: Apple's share sheet was
+    /// only ever shown by `connect()`, which is unreachable once connected. Someone
+    /// who joined through onboarding — read access only — could switch "Write flow
+    /// to Health" on and every write would fail silently for ever, with the toggle
+    /// sitting there saying it was on.
+    ///
+    /// Now the toggle asks Apple when the answer is still undecided, then reads the
+    /// real sharing status back. If Caelyn cannot write, the toggle does not stay on
+    /// and she is told why in plain words. HealthKit discloses sharing status (unlike
+    /// reads), so none of this is inference.
+    private func bindWrite(
+        _ keyPath: ReferenceWritableKeyPath<UserProfile, Bool>,
+        scope: HealthKitService.WriteScope
+    ) -> Binding<Bool> {
+        Binding(
+            get: { profile[keyPath: keyPath] },
+            set: { newValue in
+                guard newValue else {
+                    profile[keyPath: keyPath] = false
+                    modelContext.saveOrLog()
+                    return
+                }
+                Task {
+                    if HealthKitService.canWrite(scope) {
+                        profile[keyPath: keyPath] = true
+                    } else if HealthKitService.writeAuthorizationIsUndecided(scope) {
+                        // Apple's sheet, and only Apple's sheet, grants this.
+                        profile[keyPath: keyPath] = await HealthKitService.requestWriteAuthorization(scope)
+                    } else {
+                        // Already decided, and the answer was no. Asking again shows
+                        // her nothing, so don't — say where it can be changed instead.
+                        profile[keyPath: keyPath] = false
+                    }
+                    modelContext.saveOrLog()
+                    refreshWriteStatus()
+                    if !profile[keyPath: keyPath] {
+                        statusBanner = .error("Apple Health isn't letting Caelyn write \(scope.label) right now. You can change that in iOS Settings → Health → Data Access & Devices → Caelyn. Everything you log stays in Caelyn either way.")
+                    }
+                }
+            }
+        )
+    }
+
+    /// A quiet, truthful line when a toggle is on but Health has since stopped
+    /// accepting the writes — revoked in iOS Settings, most often.
+    private var writeStatusNote: String? {
+        var blocked: [String] = []
+        if profile.hkWriteFlow, !flowWritable { blocked.append("flow") }
+        if profile.hkWriteSymptoms, !symptomsWritable { blocked.append("symptoms") }
+        guard !blocked.isEmpty else { return nil }
+        return "Apple Health is not currently accepting Caelyn's \(ImportCopy.list(blocked)). Everything you log is still saved in Caelyn. You can change access in iOS Settings → Health → Data Access & Devices → Caelyn."
+    }
+
+    private func writeStatusRow(_ note: String) -> some View {
+        CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.alertRose.opacity(0.10)) {
+            HStack(alignment: .top, spacing: CaelynSpacing.sm) {
+                Image(systemName: "exclamationmark.circle")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(CaelynColor.alertRose)
+                Text(note)
+                    .font(CaelynFont.subheadline)
+                    .foregroundStyle(CaelynColor.deepPlumText.opacity(0.8))
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("UIA.Health.WriteBlocked")
+    }
+
+    private func refreshWriteStatus() {
+        flowWritable = HealthKitService.canWrite(.flow)
+        symptomsWritable = HealthKitService.canWrite(.symptoms)
+    }
+
     private func bind(_ keyPath: ReferenceWritableKeyPath<UserProfile, Bool>) -> Binding<Bool> {
         Binding(
             get: { profile[keyPath: keyPath] },
@@ -256,14 +338,14 @@ private struct HealthKitConnectForm: View {
             // so a write probe cannot distinguish "declined" from "granted read
             // only". Never infer a denial from it — individual writes no-op
             // harmlessly — and never tell people to go turn something on.
-            let canWrite = HealthKitService.canWriteMenstrualFlow()
             profile.healthKitConnected = true
-            profile.hkWriteFlow = canWrite
-            profile.hkWriteSymptoms = canWrite
+            profile.hkWriteFlow = HealthKitService.canWrite(.flow)
+            profile.hkWriteSymptoms = HealthKitService.canWrite(.symptoms)
             profile.hkReadFlow = true
             profile.hkReadSymptoms = true
             profile.hkReadFertility = true
             modelContext.saveOrLog()
+            refreshWriteStatus()
             statusBanner = .success("Your choices are saved. Caelyn uses only what you allowed, and you can change that any time in iOS Settings → Privacy & Security → Health.")
         } catch {
             statusBanner = .error("Couldn't connect — \(error.localizedDescription)")

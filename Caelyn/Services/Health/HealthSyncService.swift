@@ -22,6 +22,24 @@ enum HealthSyncService {
         var acceptsOwnSource: Bool { self == .fullImport }
     }
 
+    /// Why a read produced what it produced.
+    ///
+    /// Only the states Caelyn can genuinely know are represented. HealthKit never
+    /// discloses read authorization, so "she said no" is deliberately absent: a
+    /// denied read and an empty Health both come back as `.read` with nothing in
+    /// it, and Caelyn says the same calm thing about both rather than guessing.
+    enum ReadOutcome: Equatable {
+        /// Caelyn actually asked HealthKit. Whatever came back is the answer.
+        case read
+        /// HealthKit does not exist on this device (iPad, or missing usage strings).
+        case unavailable
+        /// She has not connected Caelyn to Apple Health yet.
+        case notConnected
+        /// She is connected, but every Caelyn read toggle is off — so Caelyn asked
+        /// for nothing. This is Caelyn's own setting and is entirely knowable.
+        case noReadTypesEnabled
+    }
+
     struct Plan {
         var decisions: [ImportReconciler.Decision] = []
         var summary = ImportReconciler.Summary()
@@ -30,8 +48,24 @@ enum HealthSyncService {
         var types: [HKSampleType] = []
         /// Set when this plan was narrowed to one app's records.
         var sourceFilter: SourceFilter?
+        /// Why this plan looks the way it does. Defaults to `.read` so a plan built
+        /// by hand describes "Caelyn asked and this is what came back".
+        var outcome: ReadOutcome = .read
+
+        /// How many observations the read produced *before* any source filter.
+        ///
+        /// Kept so a filtered route can tell her the truth about which of two very
+        /// different things happened: Apple Health holds cycle data but none of it
+        /// came from this app, or Apple Health holds nothing at all. Without it both
+        /// collapse into "nothing found", and she cannot tell whether to go back and
+        /// switch the other app's sharing on.
+        var observationsBeforeFilter = 0
 
         var hasChanges: Bool { !summary.isEmpty }
+
+        /// True when Caelyn reached HealthKit but nothing came back for this route.
+        /// Distinct from the states where Caelyn never asked.
+        var queriedAndFoundNothing: Bool { outcome == .read && summary.isEmpty }
     }
 
     // MARK: - Which types she has allowed
@@ -109,6 +143,7 @@ enum HealthSyncService {
         )
     }
 
+    /// Preview for a connected profile — the everyday path.
     static func preview(
         mode: Mode,
         profile: UserProfile,
@@ -118,14 +153,37 @@ enum HealthSyncService {
         calendar: Calendar = .current,
         today: Date = .now
     ) async -> Plan {
-        guard HealthKitService.isAvailable, profile.healthKitConnected else { return Plan() }
+        guard HealthKitService.isAvailable else { return Plan(outcome: .unavailable) }
+        guard profile.healthKitConnected else { return Plan(outcome: .notConnected) }
         let types = enabledTypes(for: profile)
-        guard !types.isEmpty else { return Plan() }
+        guard !types.isEmpty else { return Plan(outcome: .noReadTypesEnabled) }
+        return await preview(mode: mode, types: types, context: context, ledger: ledger,
+                             limitTo: sourceFilter, calendar: calendar, today: today)
+    }
+
+    /// Preview for an explicit set of types.
+    ///
+    /// **Why this exists.** Reading Apple Health needs a *read scope*, not a
+    /// `UserProfile` — the profile was only ever consulted to work out which types
+    /// her toggles allow. Taking the scope directly is what lets the same import
+    /// run during onboarding, before a profile exists, instead of dead-ending.
+    static func preview(
+        mode: Mode,
+        types: [HKSampleType],
+        context: ModelContext,
+        ledger: ImportLedger = .shared,
+        limitTo sourceFilter: SourceFilter? = nil,
+        calendar: Calendar = .current,
+        today: Date = .now
+    ) async -> Plan {
+        guard HealthKitService.isAvailable else { return Plan(outcome: .unavailable) }
+        guard !types.isEmpty else { return Plan(outcome: .noReadTypesEnabled) }
 
         var read = mode == .fullImport
             ? await HealthKitReader.readAll(types: types, calendar: calendar)
             : await HealthKitReader.readChanges(types: types, calendar: calendar)
 
+        let totalBeforeFilter = read.observations.count
         if let sourceFilter {
             read.observations = read.observations.filter { sourceFilter.bundleIDs.contains($0.sourceBundleID) }
             // Deletions are identified by record id alone, and a record from
@@ -152,6 +210,7 @@ enum HealthSyncService {
         plan.readResult = read
         plan.types = types
         plan.sourceFilter = sourceFilter
+        plan.observationsBeforeFilter = totalBeforeFilter
         return plan
     }
 

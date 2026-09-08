@@ -294,9 +294,12 @@ final class GlowEveTests: XCTestCase {
     }
 
     func testEmptyAndPartialAccessStayCalm() {
-        // Nothing found at all.
+        // Nothing found at all. The headline names Eve rather than saying a bare
+        // "nothing new", so she can tell which of the two things happened — and it
+        // still never suggests she did something wrong.
         let empty = ImportPreview.fromHealth(HealthSyncService.Plan(), sourceFilter: .glowEve)
-        XCTAssertEqual(empty.headline, "Nothing new to bring over")
+        XCTAssertEqual(empty.headline, "Nothing from Eve in Apple Health yet")
+        XCTAssertNil(empty.nextStep, "Caelyn cannot diagnose this, so it must not suggest a fix.")
 
         // Some types unreadable — a partial grant looks like this.
         var partial = HealthSyncService.Plan()

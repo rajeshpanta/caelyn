@@ -2,6 +2,14 @@ import Foundation
 
 /// What to tell her about getting a file out of each app.
 ///
+/// **On the Apple Health routes and backfill.** Caelyn reads Apple Health; it
+/// cannot read another app's private database. Whether a given app writes its
+/// *existing history* into Health when sharing is switched on, or only what it
+/// records from that moment onward, is that app's behaviour — and it is documented
+/// for none of the four routed here. No copy in this file may promise the
+/// historical case. The honest shape is: here is how to switch sharing on, and
+/// Caelyn will show you exactly what turned up.
+///
 /// The instructions are the feature. Caelyn can read a Clue export perfectly, but
 /// that is worth nothing if she never finds the button that produces one — and
 /// both Clue and Flo bury it. None of this mentions a file format, because which
@@ -64,7 +72,7 @@ struct ImportSourceGuide {
         subtitle: "Cycle and fertility history already on your iPhone",
         icon: "heart.text.square.fill",
         steps: [],
-        note: "Nothing leaves your iPhone. Caelyn reads what's already stored there and shows you what it found before adding anything.",
+        note: "Nothing leaves your iPhone. Caelyn reads the cycle history already stored in Apple Health on this device — whatever your other apps have put there — and shows you what it found before adding anything.",
         actionLabel: "Continue"
     )
 
@@ -95,10 +103,9 @@ struct ImportSourceGuide {
             "Open Period Tracker and go to its Settings.",
             "Find the Health or Apple Health option — it may sit under Data or General.",
             "Turn it on, and allow it to write your cycle data when iOS asks.",
-            "Give it a minute to hand everything over.",
-            "Come back here and Caelyn will show you what it found."
+            "Give it a minute, then come back here and Caelyn will show you what it found."
         ],
-        note: "This is the app by GP Apps with the big pink flower, not the pink diary one. Apple Health is the way across: your periods, temperatures, cervical mucus, ovulation and pregnancy tests and symptoms can travel this way. Your written notes, moods and weight can't — Apple Health has nowhere to put them. Caelyn will show you exactly what it found before anything is added.",
+        note: "This is the app by GP Apps with the big pink flower, not the pink diary one. Caelyn reads what Period Tracker puts into Apple Health — it can't reach inside the app itself. Whether that includes your older history or only what it records from now on is Period Tracker's decision, not Caelyn's. Periods, temperatures, cervical mucus, ovulation and pregnancy tests and symptoms are the kinds of thing that can travel this way; written notes, moods and weight can't, because Apple Health has nowhere to put them. Caelyn will show you exactly what it found before anything is added, and if nothing turns up that means it isn't in Apple Health.",
         actionLabel: "Continue to Apple Health"
     )
 
@@ -128,10 +135,9 @@ struct ImportSourceGuide {
             "Open Natural Cycles and go to Settings.",
             "Tap Integrations, then Apple Health.",
             "Turn on exporting to Apple Health, and allow it when iOS asks.",
-            "Give it a minute to hand your cycle data over.",
-            "Come back here and Caelyn will show you what it found."
+            "Give it a minute, then come back here and Caelyn will show you what it found."
         ],
-        note: "Natural Cycles can't pass your temperatures to Apple Health — that's a limit on their side, and it applies to everyone except users of their own thermometer. So your period days and cycle history come across, but your temperature chart usually won't. Caelyn will show you exactly what it found before anything is added.",
+        note: "Natural Cycles can't pass your temperatures to Apple Health — that's a limit on their side, and it applies to everyone except users of their own thermometer, so your temperature chart usually won't come across. Caelyn reads whatever Natural Cycles has put into Apple Health; how far back that reaches is their decision, not Caelyn's. You'll see exactly what it found before anything is added.",
         actionLabel: "Continue to Apple Health"
     )
 
@@ -157,10 +163,9 @@ struct ImportSourceGuide {
             "Open Glow and go to the More tab.",
             "Tap Connect with health apps, then turn on Health app.",
             "Glow will send you to iOS Settings — tap All Categories on, then Allow.",
-            "Give it a minute to hand your history over.",
-            "Come back here and Caelyn will show you what it found."
+            "Give it a minute, then come back here and Caelyn will show you what it found."
         ],
-        note: "That third step is the one people miss: switching Glow on isn't enough by itself, because iOS keeps every category off until you tap All Categories on. Glow can also email you a spreadsheet of your data if you write to their support team, but Caelyn can't read that file yet. Whatever comes across, you'll see it here before anything is added.",
+        note: "That third step is the one people miss: switching Glow on isn't enough by itself, because iOS keeps every category off until you tap All Categories on. Caelyn reads what Glow puts into Apple Health; whether that includes your older history or only new entries is Glow's decision, not Caelyn's. Glow can also email you a spreadsheet of your data if you write to their support team, but Caelyn can't read that file. Whatever comes across, you'll see it here before anything is added.",
         actionLabel: "Continue to Apple Health"
     )
 
@@ -187,10 +192,9 @@ struct ImportSourceGuide {
             "Open Eve and go to the More tab.",
             "Tap Connect with health apps, then turn on Health app.",
             "When iOS asks, allow all the categories — it keeps them off otherwise.",
-            "Give it a minute to hand your history over.",
-            "Come back here and Caelyn will show you what it found."
+            "Give it a minute, then come back here and Caelyn will show you what it found."
         ],
-        note: "Eve shares three things with Apple Health: your periods, spotting, and when you've had sex. Those come across. The moods, symptoms and temperatures you've logged in Eve don't — Eve doesn't pass those to Health at all. Caelyn will show you exactly what it found before anything is added.",
+        note: "Eve shares three things with Apple Health: your periods, spotting, and when you've had sex. The moods, symptoms and temperatures you've logged in Eve don't travel — Eve doesn't pass those to Health at all. Caelyn reads whatever Eve has put there; how far back that goes is Eve's decision, not Caelyn's. You'll see exactly what it found before anything is added.",
         actionLabel: "Continue to Apple Health"
     )
 

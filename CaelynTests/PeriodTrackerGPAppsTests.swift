@@ -436,11 +436,24 @@ final class PeriodTrackerGPAppsTests: XCTestCase {
         XCTAssertEqual(summary.daysAffected, 0)
         XCTAssertEqual(entries().count, 0)
 
+        // Other apps *did* write to Health; Period Tracker did not. Caelyn must say
+        // that truthfully rather than implying Health is empty — and must not
+        // suggest she denied anything, which HealthKit never tells it.
         var plan = HealthSyncService.Plan()
         plan.summary = summary
+        plan.observationsBeforeFilter = otherAppsDataset().count
         let preview = ImportPreview.fromHealth(plan, sourceFilter: .periodTrackerGPApps)
         XCTAssertFalse(preview.hasChanges)
-        XCTAssertEqual(preview.headline, "Nothing new to bring over")
+        XCTAssertEqual(preview.headline, "Nothing from Period Tracker in Apple Health yet")
+        XCTAssertTrue(preview.sourceLine.contains("does have cycle data"),
+                      "Health had data from other apps; saying it was empty would be false.")
+        XCTAssertNil(preview.nextStep)
+
+        // And when Health genuinely holds nothing at all, it says that instead.
+        var bare = HealthSyncService.Plan()
+        bare.summary = summary
+        let empty = ImportPreview.fromHealth(bare, sourceFilter: .periodTrackerGPApps)
+        XCTAssertTrue(empty.sourceLine.contains("no cycle history there yet"))
     }
 
     func testPeriodTrackerPresentButWritingOnlyUnsupportedTypesIsAlsoCalm() {

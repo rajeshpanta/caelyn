@@ -925,7 +925,10 @@ struct HealthStep: View {
             }
         }
         .sheet(isPresented: $showingBringHistory) {
-            BringHistoryView()
+            // No profile exists yet at this point in onboarding. The import runs
+            // anyway; if it granted Apple Health access, record that here so
+            // `OnboardingViewModel.complete` switches her read toggles on.
+            BringHistoryView(onHealthConnected: { vm.healthKitConnected = true })
         }
         .onAppear {
             // Auto-skip if HealthKit isn't available (e.g. iPad). Respect the nav

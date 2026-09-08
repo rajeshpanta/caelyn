@@ -262,7 +262,8 @@ final class NaturalCyclesTests: XCTestCase {
     func testEmptyResultNamesNaturalCyclesAndStaysCalm() {
         let preview = ImportPreview.fromHealth(HealthSyncService.Plan(), sourceFilter: .naturalCycles)
         XCTAssertFalse(preview.hasChanges)
-        XCTAssertEqual(preview.headline, "Nothing new to bring over")
+        XCTAssertEqual(preview.headline, "Nothing from Natural Cycles in Apple Health yet")
+        XCTAssertNil(preview.nextStep, "Caelyn cannot diagnose this, so it must not suggest a fix.")
         let text = ([preview.headline, preview.sourceLine, preview.safetyLine] + preview.caveats).joined(separator: " ")
         for banned in ["enable", "denied", "permission", "HKCategory", "grant", "this file"] {
             XCTAssertFalse(text.lowercased().contains(banned.lowercased()), "'\(banned)' leaked into her copy")

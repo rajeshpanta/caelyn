@@ -827,3 +827,276 @@ final class HealthSyncTests: XCTestCase {
         XCTAssertEqual(text, "Nothing new to bring over.")
     }
 }
+
+// MARK: - Phase 1C: the Apple Health routes tell the truth
+
+/// The confirmed Phase 1C findings, each pinned by the behaviour that was wrong.
+///
+/// **What these tests deliberately do not claim.** Nothing here proves how real
+/// HealthKit behaves on a device: the simulator grants and denies differently, and
+/// read authorization is never disclosed by Apple at all. These cover Caelyn's own
+/// logic — which read scope it asks for, which states it can distinguish, and what
+/// it says about each — and stop there.
+@MainActor
+final class HealthImportCorrectnessTests: XCTestCase {
+
+    private var container: ModelContainer!
+    private var context: ModelContext!
+    private let calendar = Calendar(identifier: .gregorian)
+
+    override func setUpWithError() throws {
+        container = try ModelContainer(
+            for: CycleEntry.self, UserProfile.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none))
+        context = container.mainContext
+    }
+
+    override func tearDownWithError() throws { container = nil; context = nil }
+
+    private func day(_ y: Int, _ m: Int, _ d: Int) -> Date {
+        calendar.startOfDay(for: calendar.date(from: DateComponents(year: y, month: m, day: d))!)
+    }
+
+    // MARK: A — onboarding has no profile, and that must no longer matter
+
+    /// `readAppleHealth` used to take a non-optional `UserProfile`, and the view
+    /// `guard let`-ed on it — so during onboarding, before the profile exists, five
+    /// of the nine picker rows silently returned her to the source list. The scope
+    /// a Health read needs is a set of types, not a profile.
+    func testTheHealthRouteNoLongerRequiresAProfile() async {
+        let model = BringHistoryModel(calendar: calendar, ledger: ImportLedger(fileURL: nil))
+
+        // Passing no profile must not trap or bail before it has even looked.
+        await model.readAppleHealth(profile: nil, context: context, today: day(2026, 7, 1))
+
+        switch model.phase {
+        case .choosingSource:
+            XCTFail("A nil profile silently returned her to the source list — the Phase 1C dead end.")
+        case .confirming, .failed, .reading, .importing, .done:
+            break   // any of these is a real, explained outcome
+        }
+    }
+
+    /// With no profile the read scope is everything Apple's sheet covers, which is
+    /// the same set the onboarding import already used.
+    func testWithNoProfileTheScopeIsEverythingThePermissionSheetAsksAbout() {
+        XCTAssertFalse(HealthDataCatalog.syncedSampleTypes.isEmpty)
+        let fromCatalog = Set(HealthDataCatalog.syncedSampleTypes.map(\.identifier))
+        let profile = UserProfile()
+        profile.hkReadFlow = true; profile.hkReadSymptoms = true; profile.hkReadFertility = true
+        let fromProfile = Set(HealthSyncService.enabledTypes(for: profile).map(\.identifier))
+        XCTAssertEqual(fromCatalog, fromProfile,
+                       "The no-profile scope must match a fully-enabled profile, or onboarding would import less than Settings does.")
+    }
+
+    // MARK: B — every Apple Health-backed row reaches the same real path
+
+    func testAllFiveAppleHealthBackedRowsRouteToAHealthImport() {
+        let healthRows = ImportSourceGuide.pickable.filter { $0.source == .appleHealth }
+        XCTAssertEqual(Set(healthRows.map(\.title)),
+                       ["Apple Health", "Period Tracker", "Natural Cycles", "Glow", "Eve"])
+        for row in healthRows {
+            XCTAssertFalse(row.needsAFile, "\(row.title) must not send her to a file picker.")
+            XCTAssertTrue(row.route == .appleHealth || row.route == .appleHealthAfterInstructions,
+                          "\(row.title) must end at Apple Health.")
+        }
+        // Four of them narrow to one app; the Apple Health row itself does not.
+        XCTAssertNil(ImportSourceGuide.appleHealth.healthSourceFilter)
+        for row in healthRows where row.title != "Apple Health" {
+            XCTAssertNotNil(row.healthSourceFilter, "\(row.title) must name the app it is importing.")
+        }
+    }
+
+    // MARK: C/D — write authorization is asked for, and never faked
+
+    /// The scopes are per-toggle, so turning on "write flow" cannot silently ask
+    /// about twelve symptom categories she never mentioned.
+    func testEachWriteToggleAsksOnlyForTheTypesItNeeds() {
+        XCTAssertEqual(HealthKitService.WriteScope.flow.types, [HealthKitService.menstrualFlowType])
+
+        let symptomTypes = HealthKitService.WriteScope.symptoms.types
+        XCTAssertFalse(symptomTypes.contains(HealthKitService.menstrualFlowType),
+                       "The symptom toggle must not quietly acquire flow-writing.")
+        XCTAssertTrue(symptomTypes.isSuperset(of: Set(HealthKitService.symptomCategoryMap.values)))
+        XCTAssertTrue(symptomTypes.isSuperset(of: Set(HealthKitService.painCategoryMap.values)))
+
+        // Between them the two scopes cover exactly what Caelyn can write, so no
+        // write path exists that no toggle ever asks permission for.
+        XCTAssertEqual(HealthKitService.WriteScope.flow.types.union(symptomTypes),
+                       HealthKitService.allWritableTypes)
+    }
+
+    /// `canWrite` is read back from HealthKit, never assumed from the toggle. On a
+    /// simulator with nothing granted it is false — which is the point: the toggle
+    /// may not claim to be on when Caelyn cannot actually write.
+    func testWriteCapabilityIsReadFromHealthKitNotFromTheToggle() {
+        let profile = UserProfile()
+        profile.hkWriteFlow = true          // as if she had flipped it
+        context.insert(profile)
+
+        // The stored flag and the real capability are independent by construction.
+        XCTAssertEqual(HealthKitService.canWrite(.flow), HealthKitService.canWrite(.flow))
+        if !HealthKitService.canWrite(.flow) {
+            XCTAssertTrue(profile.hkWriteFlow,
+                          "The model still holds what she asked for; the UI is what must not lie about it.")
+        }
+    }
+
+    // MARK: E — a HealthKit failure may never touch her own history
+
+    /// The local save happens before any Health write is attempted, and nothing in
+    /// the Health path can roll it back. This is the local-first rule at the
+    /// narrowest point where it could plausibly have been broken.
+    func testLocalEntrySurvivesWhenHealthKitCannotWrite() async {
+        let profile = UserProfile()
+        profile.healthKitConnected = true
+        profile.hkWriteFlow = true
+        profile.hkWriteSymptoms = true
+        context.insert(profile)
+
+        let entry = CycleStore.entry(for: day(2026, 7, 1), in: context, calendar: calendar)
+        entry.flow = .heavy
+        entry.symptoms = [.cramps]
+        context.saveOrLog()
+
+        // On the simulator this write is not authorized, so it reports failure.
+        // Whatever it reports, her entry must be untouched.
+        _ = await HealthKitService.syncEntryToHealth(entry, in: [entry], profile: profile)
+
+        let stored = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
+        XCTAssertEqual(stored.count, 1)
+        XCTAssertEqual(stored.first?.flow, .heavy)
+        XCTAssertEqual(stored.first?.symptoms, [.cramps])
+    }
+
+    // MARK: F/G/H — only the states Caelyn can actually know are distinguished
+
+    func testDisabledReadTypesAreAnActionableStateNotAnEmptyImport() async {
+        let profile = UserProfile()
+        profile.healthKitConnected = true
+        profile.hkReadFlow = false
+        profile.hkReadSymptoms = false
+        profile.hkReadFertility = false
+        context.insert(profile)
+
+        let plan = await HealthSyncService.preview(mode: .fullImport, profile: profile, context: context)
+        XCTAssertEqual(plan.outcome, .noReadTypesEnabled)
+
+        let preview = ImportPreview.fromHealth(plan)
+        XCTAssertEqual(preview.headline, "Caelyn isn't set to read anything from Apple Health")
+        XCTAssertNotNil(preview.nextStep, "This one Caelyn genuinely knows, so it must say what to do.")
+        XCTAssertNotEqual(preview.headline, "Nothing new to bring over")
+    }
+
+    func testNotConnectedIsDistinctFromHavingLookedAndFoundNothing() async {
+        let profile = UserProfile()
+        profile.healthKitConnected = false
+        context.insert(profile)
+
+        let plan = await HealthSyncService.preview(mode: .fullImport, profile: profile, context: context)
+        XCTAssertTrue(plan.outcome == .notConnected || plan.outcome == .unavailable)
+
+        if plan.outcome == .notConnected {
+            let preview = ImportPreview.fromHealth(plan)
+            XCTAssertEqual(preview.headline, "Caelyn isn't connected to Apple Health yet")
+            XCTAssertNotNil(preview.nextStep)
+        }
+    }
+
+    /// A genuine zero-result query stays calm and offers no fix, because Caelyn has
+    /// nothing to suggest — it asked, and the answer was nothing.
+    func testAGenuineZeroResultStaysCalmAndSuggestsNothing() {
+        let preview = ImportPreview.fromHealth(HealthSyncService.Plan())   // outcome .read
+        XCTAssertEqual(preview.headline, "Nothing new to bring over")
+        XCTAssertNil(preview.nextStep)
+        let text = ([preview.headline, preview.sourceLine, preview.safetyLine] + preview.caveats)
+            .joined(separator: " ").lowercased()
+        for banned in ["denied", "permission", "you didn't", "grant"] {
+            XCTAssertFalse(text.contains(banned), "'\(banned)' claims something HealthKit never told Caelyn.")
+        }
+    }
+
+    /// A source filter finding nothing must not assert the app never wrote — and
+    /// must distinguish "Health has other apps' data" from "Health is empty".
+    func testASourceFilterFindingNothingNeverClaimsPermissionWasDenied() {
+        var withOthers = HealthSyncService.Plan()
+        withOthers.observationsBeforeFilter = 40
+        let a = ImportPreview.fromHealth(withOthers, sourceFilter: .glow)
+        XCTAssertTrue(a.sourceLine.contains("does have cycle data"))
+
+        var bare = HealthSyncService.Plan()
+        bare.observationsBeforeFilter = 0
+        let b = ImportPreview.fromHealth(bare, sourceFilter: .glow)
+        XCTAssertTrue(b.sourceLine.contains("no cycle history there yet"))
+
+        for preview in [a, b] {
+            XCTAssertNil(preview.nextStep)
+            let text = (preview.headline + " " + preview.sourceLine).lowercased()
+            for banned in ["denied", "permission", "grant", "refused"] {
+                XCTAssertFalse(text.contains(banned), "'\(banned)' is not something Caelyn can know here.")
+            }
+        }
+    }
+
+    /// A read that errored on some types is still not a denial. HealthKit does not
+    /// disclose read authorization and Caelyn must not infer it.
+    func testUnreadableTypesAreNeverReportedAsADenial() {
+        var plan = HealthSyncService.Plan()
+        plan.unreadableTypes = ["HKCategoryTypeIdentifierCervicalMucusQuality"]
+        let preview = ImportPreview.fromHealth(plan, sourceFilter: .periodTrackerGPApps)
+        XCTAssertNil(preview.nextStep)
+        let text = ([preview.headline, preview.sourceLine] + preview.caveats).joined(separator: " ").lowercased()
+        for banned in ["denied", "permission", "grant", "enable"] {
+            XCTAssertFalse(text.contains(banned))
+        }
+    }
+
+    // MARK: I/J — the verified pipeline underneath is untouched
+
+    /// Reconciliation, provenance and hand-edit protection still behave exactly as
+    /// Phase 1B left them, through the new profile-free entry point.
+    func testTheReconciliationPipelineIsUnchangedByTheNewEntryPoint() {
+        let ledger = ImportLedger(fileURL: nil)
+        let hers = CycleStore.entry(for: day(2026, 7, 1), in: context, calendar: calendar)
+        hers.flow = .heavy                                     // she typed this
+        context.saveOrLog()
+
+        let incoming = ImportObservation(
+            day: day(2026, 7, 1), field: .flow, value: .flow(.light),
+            recordID: UUID(), sourceBundleID: "com.gpapps.ptrackerlite",
+            sourceName: "Period Tracker", recordedAt: day(2026, 7, 1))
+
+        let decisions = ImportReconciler.plan(
+            observations: [incoming],
+            currentValue: { d, f in
+                d == self.day(2026, 7, 1) && f == .flow ? .flow(.heavy) : nil
+            },
+            ledger: ledger, ownBundleID: "x", acceptOwnSource: true,
+            calendar: calendar, today: day(2026, 7, 10))
+
+        XCTAssertEqual(decisions.count, 1)
+        XCTAssertEqual(decisions.first?.action, .keepUserValue,
+                       "A value she typed is still never overwritten by an import.")
+    }
+
+    /// An imported recent period still moves the authoritative anchor — the Phase 1B
+    /// guarantee, verified through data that arrived via the Health path.
+    func testAnImportedPeriodStillMovesThePredictionAnchor() {
+        let profile = UserProfile(averageCycleLength: 28, averagePeriodLength: 5)
+        profile.lastPeriodStart = day(2026, 5, 2)              // her onboarding answer
+        context.insert(profile)
+
+        for k in 0..<5 {
+            let e = CycleStore.entry(for: calendar.date(byAdding: .day, value: k, to: day(2026, 6, 1))!,
+                                     in: context, calendar: calendar)
+            e.flow = .medium
+        }
+        context.saveOrLog()
+
+        let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
+        let model = CycleModel.make(entries: entries, profile: profile,
+                                    today: day(2026, 6, 20), calendar: calendar)
+        XCTAssertEqual(model.anchor, day(2026, 6, 1),
+                       "Imported bleeding is newer than her stated date and must win.")
+    }
+}

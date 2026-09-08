@@ -15,6 +15,11 @@ struct BringHistoryView: View {
     /// asking her where her history is.
     var incomingFile: IncomingImportFile?
 
+    /// Called when an Apple Health route granted access while no profile existed.
+    /// Onboarding uses it to carry the connection into the profile it creates at
+    /// the end; everywhere else there is already a profile and this stays nil.
+    var onHealthConnected: (() -> Void)?
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -357,12 +362,17 @@ struct BringHistoryView: View {
         }
     }
 
+    /// Begin an Apple Health route.
+    ///
+    /// **`profile` is deliberately allowed to be nil.** During onboarding no
+    /// `UserProfile` exists yet, and this used to `guard let` and bail — which
+    /// dropped her back on the source list with no explanation, silently, for five
+    /// of the nine rows. The read scope no longer depends on a profile.
     private func startAppleHealth(limitTo filter: HealthSyncService.SourceFilter? = nil) async {
-        guard let profile else {
-            model.dismissError()
-            return
-        }
         await model.readAppleHealth(profile: profile, context: modelContext, limitTo: filter)
+        // Onboarding has no profile to record the connection on, so tell the step
+        // that owns the profile-to-be.
+        if model.connectedHealthWithoutProfile { onHealthConnected?() }
     }
 }
 

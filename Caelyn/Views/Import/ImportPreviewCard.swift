@@ -15,6 +15,9 @@ struct ImportPreviewCard: View {
     let safetyLine: String
     let caveats: [String]
     var spanDescription: String?
+    /// The one thing she could do next, when Caelyn genuinely knows it. Shown only
+    /// for states Caelyn can diagnose — never as a guess about Apple's permissions.
+    var nextStep: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.md) {
@@ -34,6 +37,21 @@ struct ImportPreviewCard: View {
                         .font(CaelynFont.subheadline)
                         .foregroundStyle(CaelynColor.deepPlumText.opacity(0.65))
                         .fixedSize(horizontal: false, vertical: true)
+
+                    if let nextStep {
+                        HStack(alignment: .firstTextBaseline, spacing: CaelynSpacing.xs) {
+                            Image(systemName: "arrow.right.circle")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(CaelynColor.primaryPlum)
+                            Text(nextStep)
+                                .font(CaelynFont.subheadline)
+                                .foregroundStyle(CaelynColor.primaryPlum)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.top, 2)
+                        .accessibilityElement(children: .combine)
+                        .accessibilityIdentifier("UIA.Import.NextStep")
+                    }
 
                     if !breakdown.isEmpty {
                         VStack(alignment: .leading, spacing: CaelynSpacing.xs) {
@@ -100,5 +118,6 @@ struct ImportPreviewCard: View {
         safetyLine = preview.safetyLine
         caveats = preview.caveats
         spanDescription = preview.spanDescription(calendar: calendar)
+        nextStep = preview.nextStep
     }
 }
