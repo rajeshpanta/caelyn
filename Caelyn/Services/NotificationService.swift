@@ -18,10 +18,10 @@ enum NotificationService {
     ///      from earlier app versions that used to schedule them.
     ///   2. The smart-tap router knows the rawValue prefix even if we never
     ///      schedule new ones.
-    /// Caelyn's "private envelopes" architecture intentionally keeps cycle and
-    /// ovulation events as in-app cards (HomeHeroCard / activePeriodPrompt /
-    /// latePeriodPrompt) rather than OS notifications — they never travel to
-    /// the lock screen, Notification Center, Apple Watch, or notification logs.
+    /// Cycle and ovulation events also appear as in-app cards (HomeHeroCard /
+    /// activePeriodPrompt / latePeriodPrompt). The notifications for them are
+    /// opt-in and carry no cycle detail on the lock screen when Private
+    /// notifications is on — see `content(for:isPrivate:)`.
     enum Category: String, CaseIterable {
         case periodUpcoming = "caelyn.period.upcoming"
         case dailyCheckIn   = "caelyn.daily.checkin"
@@ -155,8 +155,14 @@ enum NotificationService {
     ///
     /// This replaces the old repeating-trigger model so we can suppress *today's*
     /// reminder when the user has already logged the relevant data. Period and
-    /// ovulation are intentionally not scheduled — they live as in-app cards.
-    static func sync(profile: UserProfile, todayEntry: CycleEntry?) async {
+    /// ovulation one-shots are scheduled here too, but only when she has switched
+    /// those reminders on.
+    /// - Parameter cycle: the authoritative derivation of her cycle, so a period
+    ///   reminder lands on the date Home is actually showing her. The scheduler
+    ///   used to predict from `profile.averageCycleLength` and
+    ///   `profile.lastPeriodStart`, which nothing kept current — for a 33-day cycle
+    ///   answered as 28 the reminder fired a full week before Home's own date.
+    static func sync(profile: UserProfile, cycle: CycleModel, todayEntry: CycleEntry?) async {
         await cancelAll()
 
         guard await authorizationStatus() == .authorized else { return }
@@ -204,13 +210,7 @@ enum NotificationService {
             }
         }
 
-        if let lastPeriod = profile.lastPeriodStart {
-            let nextPeriod = PredictionEngine.nextPeriodStart(
-                lastPeriodStart: lastPeriod,
-                today: today,
-                cycleLength: profile.averageCycleLength
-            )
-
+        if let nextPeriod = cycle.nextPeriodStart {
             if profile.remindPeriodStart {
                 let daysOffset = -max(0, profile.periodReminderDaysBefore)
                 // Try preferred reminder day first; fall back to the period start day itself
@@ -236,8 +236,7 @@ enum NotificationService {
                 }
             }
 
-            if profile.remindOvulation {
-                let ovulationDay = PredictionEngine.ovulationEstimate(nextPeriodStart: nextPeriod)
+            if profile.remindOvulation, let ovulationDay = cycle.ovulationEstimate {
                 if let fire = scheduledFireDate(
                     on: ovulationDay,
                     hour: profile.ovulationReminderHour,
@@ -332,13 +331,12 @@ enum NotificationService {
         let cal = Calendar.current
         let today = cal.startOfDay(for: .now)
         let todayEntry = entries.first { cal.isDate($0.date, inSameDayAs: today) }
-        await sync(profile: profile, todayEntry: todayEntry)
+        let cycle = CycleModel.make(entries: entries, profile: profile, today: today)
+        await sync(profile: profile, cycle: cycle, todayEntry: todayEntry)
 
         // Note-to-self reminders live in the same sync so cancelAll doesn't orphan
         // them, and cycle-relative ones re-resolve against the current prediction.
-        let nextPeriodStart = profile.lastPeriodStart.map {
-            PredictionEngine.nextPeriodStart(lastPeriodStart: $0, today: today, cycleLength: profile.averageCycleLength)
-        }
+        let nextPeriodStart = cycle.nextPeriodStart
         await scheduleNoteReminders(
             entries: entries,
             context: context,

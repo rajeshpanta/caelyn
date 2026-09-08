@@ -3,6 +3,40 @@ import Foundation
 enum PredictionEngine {
     private static var calendar: Calendar { Calendar.current }
 
+    /// The largest gap, in days, between two logged bleeding days that Caelyn
+    /// still reads as **one** period.
+    ///
+    /// 2 means "one unlogged day in the middle is forgiven": she logged the 1st
+    /// and the 3rd, and that is one period with a hole in it, not two periods two
+    /// days apart.
+    ///
+    /// **This is the single definition of a flow streak.** `cycles`,
+    /// `consecutiveFlowDays`, `mostRecentPeriodStart` and
+    /// `CalendarMath.activePeriodWindow` all read it, and they used to disagree:
+    /// the other three forgave a missed day while `cycles` split on any gap at
+    /// all. One forgotten log therefore turned a 29-day cycle into a 3-day one,
+    /// pulled the learned average from 29 down to 21, moved the predicted period
+    /// eight days early, and raised a health-style "significant variation"
+    /// warning she had not earned.
+    static let sameStreakGapTolerance = 2
+
+    /// The shortest reconstructed cycle Caelyn will let into its statistics.
+    ///
+    /// A "cycle" shorter than this is not physiology, it is bookkeeping — a hole
+    /// in her logging, a spotting day recorded well before the period proper, or
+    /// an import that only carried scattered days. The gap tolerance above stops
+    /// the common case at source; this is the backstop for everything else, and it
+    /// sits below the shortest cycle anyone actually has (~21 days, and lower in
+    /// polymenorrhea) so a genuinely short cycle is still hers and still counted.
+    static let minimumPlausibleCycleLength = 15
+
+    /// The cycles that may inform an average, a spread, or anything Caelyn says
+    /// about her health. Reconstruction stays faithful; the statistics get the
+    /// subset that can actually be true.
+    static func plausibleCycles(_ cycles: [Cycle]) -> [Cycle] {
+        cycles.filter { $0.length >= minimumPlausibleCycleLength }
+    }
+
     /// Reconstruct cycles from logged entries.
     /// A cycle starts at the first day of a flow streak and runs until the day before
     /// the next flow streak begins. The most recent (in-progress) cycle has length 0
@@ -23,7 +57,8 @@ enum PredictionEngine {
         var periodStarts: [Date] = [dayStarts[0]]
         for i in 1..<dayStarts.count {
             let gap = calendar.dateComponents([.day], from: dayStarts[i - 1], to: dayStarts[i]).day ?? 0
-            if gap > 1 {
+            // A missed day mid-period is forgiven; a real gap starts a new period.
+            if gap > sameStreakGapTolerance {
                 periodStarts.append(dayStarts[i])
             }
         }
@@ -42,15 +77,24 @@ enum PredictionEngine {
         return cycles
     }
 
+    /// How many days the period at `start` ran for, measured to the last bleeding
+    /// day of the same streak.
+    ///
+    /// Forgives the same one-day hole `cycles` does, so "logged day 1, forgot day
+    /// 3, logged days 4 and 5" is a five-day period rather than a two-day one.
+    /// Walking stops as soon as the gap exceeds the tolerance, so it can never
+    /// wander into the next period.
     private static func consecutiveFlowDays(from start: Date, in daySet: Set<Date>) -> Int {
-        var count = 0
+        guard daySet.contains(start) else { return 0 }
+        var lastLogged = start
         var cursor = start
-        while daySet.contains(cursor) {
-            count += 1
-            guard let next = calendar.date(byAdding: .day, value: 1, to: cursor) else { break }
+        while let next = calendar.date(byAdding: .day, value: 1, to: cursor) {
             cursor = next
+            let gap = calendar.dateComponents([.day], from: lastLogged, to: cursor).day ?? 0
+            if gap > sameStreakGapTolerance { break }
+            if daySet.contains(cursor) { lastLogged = cursor }
         }
-        return count
+        return (calendar.dateComponents([.day], from: start, to: lastLogged).day ?? 0) + 1
     }
 
     /// Recency-weighted mean of recent cycle lengths. More recent cycles count more
@@ -58,14 +102,16 @@ enum PredictionEngine {
     /// when the user's cycle changes. Falls back to user-entered value when fewer
     /// than 2 cycles logged.
     static func averageCycleLength(of cycles: [Cycle], fallback: Int) -> Int {
-        guard cycles.count >= 2 else { return clampCycleLength(fallback) }
-        let recent = Array(cycles.suffix(6))
+        let usable = plausibleCycles(cycles)
+        guard usable.count >= 2 else { return clampCycleLength(fallback) }
+        let recent = Array(usable.suffix(6))
         return clampCycleLength(weightedMean(recent.map(\.length)))
     }
 
     static func averagePeriodLength(of cycles: [Cycle], fallback: Int) -> Int {
-        guard cycles.count >= 2 else { return clampPeriodLength(fallback) }
-        let recent = Array(cycles.suffix(6))
+        let usable = plausibleCycles(cycles)
+        guard usable.count >= 2 else { return clampPeriodLength(fallback) }
+        let recent = Array(usable.suffix(6))
         return clampPeriodLength(weightedMean(recent.map(\.periodLength)))
     }
 
@@ -77,10 +123,21 @@ enum PredictionEngine {
     /// Variation: half the spread of recent cycle lengths (±N days), rounded so a
     /// 15-day spread reads ±8, not ±7 (int-1).
     static func cycleLengthVariation(of cycles: [Cycle]) -> Int {
-        guard cycles.count >= 2 else { return 0 }
-        let lengths = cycles.suffix(6).map(\.length)
+        let usable = plausibleCycles(cycles)
+        guard usable.count >= 2 else { return 0 }
+        let lengths = usable.suffix(6).map(\.length)
         guard let minLen = lengths.min(), let maxLen = lengths.max() else { return 0 }
         return Int((Double(maxLen - minLen) / 2.0).rounded())
+    }
+
+    /// Index of the first element not before `date` in a sorted array of days.
+    private static func lowerBound(_ days: [Date], notBefore date: Date) -> Int {
+        var low = 0, high = days.count
+        while low < high {
+            let mid = (low + high) / 2
+            if days[mid] < date { low = mid + 1 } else { high = mid }
+        }
+        return low
     }
 
     /// Exponentially-weighted mean: newest value has weight 1.0, each prior step
@@ -146,7 +203,7 @@ enum PredictionEngine {
         var streakStart = last
         for i in stride(from: dayStarts.count - 2, through: 0, by: -1) {
             let gap = calendar.dateComponents([.day], from: dayStarts[i], to: dayStarts[i + 1]).day ?? 0
-            if gap <= 2 { streakStart = dayStarts[i] } else { break }
+            if gap <= sameStreakGapTolerance { streakStart = dayStarts[i] } else { break }
         }
         return streakStart
     }
@@ -186,15 +243,19 @@ enum PredictionEngine {
     /// averaged over cycles. Returns nil — so callers use the 14-day default —
     /// until ≥3 cycles carry a usable signal. Clamped to a physiologic 9–17 days (int-1).
     static func learnedLutealLength(entries: [CycleEntry], cycles: [Cycle]) -> Int? {
+        // Normalise the (few) ovulation markers once. Doing it per cycle meant
+        // start-of-day arithmetic over every entry for every cycle — 200 ms on five
+        // years of history, paid on every read.
+        let markerDays = entries
+            .filter { $0.ovulationTestResult == .positive || $0.ovulationTestResult == .lhSurge }
+            .map { calendar.startOfDay(for: $0.date) }
+            .sorted()
+        guard !markerDays.isEmpty else { return nil }
+
         var lengths: [Int] = []
         for cycle in cycles {
             guard let cycleEnd = calendar.date(byAdding: .day, value: cycle.length, to: cycle.start) else { continue }
-            let markers = entries.compactMap { e -> Date? in
-                let d = calendar.startOfDay(for: e.date)
-                guard d >= cycle.start && d < cycleEnd else { return nil }
-                guard e.ovulationTestResult == .positive || e.ovulationTestResult == .lhSurge else { return nil }
-                return d
-            }.sorted()
+            let markers = markerDays.filter { $0 >= cycle.start && $0 < cycleEnd }
             if let ovulation = markers.last {
                 let luteal = calendar.dateComponents([.day], from: ovulation, to: cycleEnd).day ?? 0
                 if luteal >= 9 && luteal <= 17 { lengths.append(luteal) }
@@ -219,24 +280,30 @@ enum PredictionEngine {
         let pmsSymptoms: Set<Symptom> = [.bloating, .cravings, .tenderBreasts, .fatigue, .acne, .cramps]
         let pmsMoods: Set<Mood>       = [.anxious, .irritable, .moody, .sad, .sensitive, .lowEnergy]
 
+        // Normalise the PMS-marker days once, sorted, rather than re-scanning and
+        // re-truncating every entry for every cycle (the same 200 ms trap as
+        // `learnedLutealLength`). Sorted, so the earliest marker in a window is the
+        // first one at or after its start.
+        let markerDays = entries
+            .filter { entry in
+                let hasMood    = entry.mood.map { pmsMoods.contains($0) } ?? false
+                let hasSymptom = entry.symptoms.contains { pmsSymptoms.contains($0) }
+                return hasMood || hasSymptom
+            }
+            .map { calendar.startOfDay(for: $0.date) }
+            .sorted()
+        guard !markerDays.isEmpty else { return nil }
+
         var onsets: [Int] = []
         for cycle in cycles {
             guard let windowStart = calendar.date(byAdding: .day, value: -14, to: cycle.start) else { continue }
             let periodDay = calendar.startOfDay(for: cycle.start)
 
-            let windowEntries = entries.filter {
-                let d = calendar.startOfDay(for: $0.date)
-                return d >= windowStart && d < periodDay
-            }
-
-            // Find the *earliest* PMS marker in the pre-period window.
-            let pmsEntries = windowEntries.filter { entry in
-                let hasMood    = entry.mood.map { pmsMoods.contains($0) } ?? false
-                let hasSymptom = entry.symptoms.contains { pmsSymptoms.contains($0) }
-                return hasMood || hasSymptom
-            }
-
-            if let earliest = pmsEntries.map({ calendar.startOfDay(for: $0.date) }).min() {
+            // Binary search rather than a linear scan: `markerDays` can hold one
+            // entry per logged day across years, and this runs once per cycle.
+            let i = lowerBound(markerDays, notBefore: windowStart)
+            if i < markerDays.count, markerDays[i] < periodDay {
+                let earliest = markerDays[i]
                 let daysUntil = calendar.dateComponents([.day], from: earliest, to: periodDay).day ?? 0
                 if daysUntil > 0 { onsets.append(daysUntil) }
             }
@@ -303,6 +370,10 @@ enum PredictionEngine {
     /// Determines whether logged cycle data suggests irregular cycles.
     /// Requires at least 3 completed cycles for any determination.
     static func irregularCycleStatus(from cycles: [Cycle]) -> IrregularCycleStatus {
+        // Nothing Caelyn says about her health may rest on a cycle that cannot be
+        // real. A single missed log used to be enough to produce "your cycle length
+        // varies significantly … may indicate hormonal fluctuation".
+        let cycles = plausibleCycles(cycles)
         guard cycles.count >= 3 else { return .insufficient }
 
         let lengths = cycles.map(\.length)

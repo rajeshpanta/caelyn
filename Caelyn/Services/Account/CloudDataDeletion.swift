@@ -59,6 +59,21 @@ enum CloudDataDeletion {
     /// True when Caelyn has reason to believe a private cloud copy exists.
     static var cloudCopyMayExist: Bool { UserDefaults.standard.bool(forKey: mayExistKey) }
 
+    /// The whole question — "could anything of hers be in iCloud right now?" — in
+    /// one place, because three screens ask it and they must never disagree.
+    ///
+    /// Covers sync being on, sync having been on until she switched it off, a
+    /// mirrored store that actually opened this launch, and a deletion that never
+    /// confirmed. `isSyncActive` is in here deliberately: it records what the store
+    /// did, not what the preference says, and the preference alone changes nothing
+    /// until the next launch.
+    static var cloudCopyMayExistNow: Bool {
+        Persistence.isSyncEnabled
+            || Persistence.isSyncActive
+            || cloudCopyMayExist
+            || deletionIsPending
+    }
+
     /// Record that the mirrored store opened, so a copy is presumed to exist from
     /// here until she deletes it. Idempotent.
     static func noteCloudCopyMayExist() {

@@ -231,7 +231,21 @@ final class DeletionModelTests: XCTestCase {
 
     // MARK: - 6. Delete all data, and its scope
 
-    func testDeletingLocalOnlyRemovesEverythingHereAndNothingInTheCloud() async {
+    /// **What this proves:** a `.thisDevice` wipe clears every local row and never
+    /// reaches for CloudKit itself.
+    ///
+    /// **What it does NOT prove, and cannot:** that the deletions stay off the
+    /// network. This container is `cloudKitDatabase: .none`, so there is no mirror
+    /// to export anything. The real `Persistence.live` may well be mirrored, and
+    /// whether `NSPersistentCloudKitContainer` then pushes these deletions to her
+    /// iCloud is Apple's scheduler's business — unobservable from a unit test and
+    /// answerable only on two real devices. The old name for this test claimed the
+    /// opposite and is why that risk stayed invisible.
+    ///
+    /// The scope question is settled in the UI instead: see
+    /// `DeleteAllOfferTests`, which pins the rule that withholds a local-only
+    /// delete whenever a cloud copy may exist.
+    func testALocalOnlyWipeClearsEveryRowAndAttemptsNoCloudDeletion() async {
         seedHistory()
         UserDefaults.standard.set(Date(), forKey: CloudDataDeletion.deletedAtKey)
 
@@ -428,8 +442,9 @@ final class CloudDeletionReachabilityTests: XCTestCase {
         XCTAssertEqual(remaining, 25, "Delete my iCloud copy must never reach the device's own history.")
     }
 
-    /// The delete-all scope question uses the same signal, so a user with sync off
-    /// and a prior copy is still asked which storage she means.
+    /// The delete-all scope decision uses the same signal, so a user with sync off
+    /// and a prior copy is still treated as having something in iCloud — which is
+    /// what withholds the local-only delete from her dialog.
     func testDeleteAllStillAsksAboutScopeWhenSyncIsOffButACopyExists() {
         CloudDataDeletion.noteCloudCopyMayExist()
         UserDefaults.standard.set(false, forKey: Persistence.syncEnabledKey)
@@ -548,5 +563,253 @@ final class CrossDeviceDeletionTests: XCTestCase {
         XCTAssertEqual(CloudDeletionTombstone.recordType, "CaelynCloudDeletion")
         XCTAssertEqual(CloudDeletionTombstone.deletedAtField, "deletedAt")
         XCTAssertEqual(CloudDeletionTombstone.recordName, "cloudCopyDeletion")
+    }
+}
+
+// MARK: - Delete-all scope: what the dialog may offer
+
+/// The rule that decides whether "Delete all data" is allowed to show a delete
+/// that claims to stay on this iPhone.
+///
+/// **The defect this exists to prevent.** `Persistence.live` is built once per
+/// launch. If it opened with CloudKit mirroring, it stays mirrored for the whole
+/// process — switching the sync preference off only changes what the *next*
+/// launch builds. So a "this iPhone only" wipe would delete rows on a live
+/// mirrored store, and the mirror would carry those deletions to her iCloud and
+/// on to every other device she owns. She would tap a button that said "only this
+/// iPhone" and lose her history on an iPad she never touched.
+///
+/// Caelyn cannot prove the deletion stays local, so it does not offer it. These
+/// tests pin that rule. They deliberately do **not** claim anything about what
+/// CloudKit does with the deletions — that is unobservable here.
+@MainActor
+final class DeleteAllOfferTests: XCTestCase {
+
+    override func setUpWithError() throws { clearFlags() }
+    override func tearDownWithError() throws { clearFlags() }
+
+    private func clearFlags() {
+        let d = UserDefaults.standard
+        for key in [CloudDataDeletion.pendingKey, CloudDataDeletion.deletedAtKey,
+                    CloudDataDeletion.mayExistKey, Persistence.syncEnabledKey] {
+            d.removeObject(forKey: key)
+        }
+    }
+
+    // MARK: The rule itself
+
+    func testALocalOnlyDeleteIsWithheldWheneverACloudCopyMayExist() {
+        XCTAssertEqual(SecureWipeService.deleteAllOffer(mayHaveCloudCopy: true), .deviceAndCloudOnly)
+        XCTAssertFalse(SecureWipeService.deleteAllOffer(mayHaveCloudCopy: true).offersLocalOnlyDelete,
+                       "No button may promise a local-only delete while the store could be mirrored.")
+    }
+
+    func testAUserWhoNeverSyncedKeepsTheOrdinaryLocalDelete() {
+        XCTAssertEqual(SecureWipeService.deleteAllOffer(mayHaveCloudCopy: false), .deviceOnly)
+        XCTAssertTrue(SecureWipeService.deleteAllOffer(mayHaveCloudCopy: false).offersLocalOnlyDelete,
+                      "With no cloud copy possible, a plain local wipe is both safe and truthful.")
+    }
+
+    // MARK: Every state that must count as "a copy may exist"
+
+    func testSyncTurnedOnCountsAsACloudCopy() {
+        UserDefaults.standard.set(true, forKey: Persistence.syncEnabledKey)
+        XCTAssertTrue(CloudDataDeletion.cloudCopyMayExistNow)
+        XCTAssertEqual(SecureWipeService.deleteAllOffer(mayHaveCloudCopy: CloudDataDeletion.cloudCopyMayExistNow),
+                       .deviceAndCloudOnly)
+    }
+
+    /// Switching sync off does not remove what was already uploaded, and — more to
+    /// the point here — does not un-mirror the container this launch is holding.
+    func testSyncSwitchedOffAfterAPriorCopyStillCountsAsACloudCopy() {
+        CloudDataDeletion.noteCloudCopyMayExist()
+        UserDefaults.standard.set(false, forKey: Persistence.syncEnabledKey)
+        XCTAssertTrue(CloudDataDeletion.cloudCopyMayExistNow)
+        XCTAssertEqual(SecureWipeService.deleteAllOffer(mayHaveCloudCopy: CloudDataDeletion.cloudCopyMayExistNow),
+                       .deviceAndCloudOnly)
+    }
+
+    func testAnUnfinishedCloudDeletionStillCountsAsACloudCopy() {
+        UserDefaults.standard.set(true, forKey: CloudDataDeletion.pendingKey)
+        XCTAssertTrue(CloudDataDeletion.cloudCopyMayExistNow)
+        XCTAssertEqual(SecureWipeService.deleteAllOffer(mayHaveCloudCopy: CloudDataDeletion.cloudCopyMayExistNow),
+                       .deviceAndCloudOnly)
+    }
+
+    func testAUserWhoNeverSyncedIsNotToldAboutICloudAtAll() {
+        XCTAssertFalse(CloudDataDeletion.cloudCopyMayExistNow,
+                       "Nothing may imply a cloud copy for someone who has never had one.")
+    }
+
+    /// The wipe scope is still expressible — this is a UI restriction, not a
+    /// capability removal. Whatever replaces it later can still ask for either.
+    func testBothWipeScopesRemainAvailableToCallers() {
+        XCTAssertNotEqual(SecureWipeService.Scope.thisDevice, SecureWipeService.Scope.thisDeviceAndCloud)
+    }
+}
+
+// MARK: - Local-first contract
+
+/// Caelyn is local-first: the device holds the real data, and iCloud — when she
+/// turns it on — is an additional synchronised copy, never a replacement.
+///
+/// These tests pin the parts of that contract that are genuinely checkable on this
+/// machine: store configuration, and the merge rule that decides what happens when
+/// a record arrives from another device. They make **no claim** about Apple's
+/// network behaviour; nothing here proves that a sync succeeded or failed, because
+/// nothing here can.
+@MainActor
+final class LocalFirstContractTests: XCTestCase {
+
+    private let calendar = Calendar(identifier: .gregorian)
+
+    private func day(_ y: Int, _ m: Int, _ d: Int) -> Date {
+        calendar.startOfDay(for: calendar.date(from: DateComponents(year: y, month: m, day: d))!)
+    }
+
+    // MARK: Storage shape
+
+    /// Sync must not turn the store into a cloud-only or memory-only one. Both
+    /// configurations are on-disk, and they are the same file, so enabling sync
+    /// adds a mirror to the history she already has rather than opening a new one.
+    func testTheSyncedStoreIsStillAnOnDiskLocalStore() {
+        let local = ModelConfiguration(schema: Persistence.schema,
+                                       isStoredInMemoryOnly: false, cloudKitDatabase: .none)
+        let synced = ModelConfiguration(schema: Persistence.schema,
+                                        isStoredInMemoryOnly: false,
+                                        cloudKitDatabase: .private(Persistence.cloudKitContainerID))
+        XCTAssertFalse(local.isStoredInMemoryOnly)
+        XCTAssertFalse(synced.isStoredInMemoryOnly,
+                       "A mirrored store must still be a real file on the device. Cloud is a copy, never the only copy.")
+        XCTAssertEqual(local.url, synced.url,
+                       "Sync mirrors the existing store; it must never open a different one.")
+    }
+
+    /// There is no cloud-only mode to fall into, and the mirror only ever targets
+    /// her own private database.
+    func testCaelynHasNoCloudOnlyStorageMode() {
+        XCTAssertEqual(Persistence.syncDatabaseDescription, "private",
+                       "Only ever the user's own private database — never a public or shared one.")
+
+        // Every store Caelyn can open. The in-memory one is the last-resort fallback
+        // for an unreadable store, kept so a corrupt file cannot make the app
+        // unlaunchable; it is the only non-disk configuration and it is never a
+        // *cloud* mode. Nothing here can be both mirrored and non-local.
+        let localOnDisk = ModelConfiguration(schema: Persistence.schema,
+                                             isStoredInMemoryOnly: false, cloudKitDatabase: .none)
+        let mirroredOnDisk = ModelConfiguration(schema: Persistence.schema,
+                                                isStoredInMemoryOnly: false,
+                                                cloudKitDatabase: .private(Persistence.cloudKitContainerID))
+        for config in [localOnDisk, mirroredOnDisk] {
+            XCTAssertFalse(config.isStoredInMemoryOnly,
+                           "A configuration that syncs must still write to this device.")
+        }
+    }
+
+    // MARK: Offline writes
+
+    /// A write is a local SwiftData save. No network call stands between her tap
+    /// and her history being on disk, so logging works with the radios off.
+    func testLoggingPersistsWithoutAnyNetworkInvolvement() throws {
+        let container = try ModelContainer(
+            for: CycleEntry.self, UserProfile.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none))
+        let context = container.mainContext
+
+        let entry = CycleStore.entry(for: day(2026, 5, 4), in: context, calendar: calendar)
+        entry.flow = .heavy
+        entry.symptoms = [.cramps]
+        context.saveOrLog()
+
+        let stored = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
+        XCTAssertEqual(stored.count, 1)
+        XCTAssertEqual(stored.first?.flow, .heavy)
+    }
+
+    /// Reading history is a local fetch too — predictions included. Nothing in the
+    /// path from entries to a prediction can be blocked by an unreachable iCloud.
+    func testHistoryAndPredictionsAreReadableWithNoCloudInvolvement() throws {
+        let container = try ModelContainer(
+            for: CycleEntry.self, UserProfile.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none))
+        let context = container.mainContext
+        for offset in stride(from: 0, to: 87, by: 29) {
+            let start = calendar.date(byAdding: .day, value: offset, to: day(2026, 4, 1))!
+            for k in 0..<5 {
+                let e = CycleStore.entry(for: calendar.date(byAdding: .day, value: k, to: start)!,
+                                         in: context, calendar: calendar)
+                e.flow = .medium
+            }
+        }
+        context.saveOrLog()
+
+        let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
+        let model = CycleModel.make(entries: entries, profile: nil,
+                                    today: day(2026, 7, 7), calendar: calendar)
+        XCTAssertEqual(model.cycles.count, 2)
+        XCTAssertEqual(model.cycleLength, 29)
+        XCTAssertNotNil(model.nextPeriodStart)
+    }
+
+    // MARK: A record arriving from another device
+
+    /// The merge is additive. A row that arrives holding nothing — an older or
+    /// emptier copy from another device — can never blank a field this device has.
+    /// This is the rule that stops a bad sync from looking like data loss.
+    func testAnEmptierIncomingCopyCannotEraseLocalHistory() throws {
+        let container = try ModelContainer(
+            for: CycleEntry.self, UserProfile.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none))
+        let context = container.mainContext
+        let today = day(2026, 5, 4)
+
+        // What this device holds, richly logged.
+        let mine = CycleEntry(date: today, flow: .heavy, symptoms: [.cramps])
+        mine.date = today
+        mine.note = "rough day"
+        mine.pain = 7
+        mine.updatedAt = Date(timeIntervalSince1970: 2_000)
+        context.insert(mine)
+
+        // What arrives from elsewhere for the same day: newer, and almost empty.
+        let incoming = CycleEntry(date: today)
+        incoming.date = today
+        incoming.mood = .tired
+        incoming.updatedAt = Date(timeIntervalSince1970: 9_000)
+        context.insert(incoming)
+        context.saveOrLog()
+
+        CycleStore.dedupeSameDay(in: context, calendar: calendar)
+
+        let rows = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
+        XCTAssertEqual(rows.count, 1, "Same-day rows merge to one.")
+        let merged = try XCTUnwrap(rows.first)
+        XCTAssertEqual(merged.flow, .heavy, "A newer, emptier row must not blank the flow she logged.")
+        XCTAssertEqual(merged.note, "rough day", "Nor her note.")
+        XCTAssertEqual(merged.pain, 7, "Nor her pain score.")
+        XCTAssertTrue(merged.symptoms.contains(.cramps), "Nor her symptoms.")
+        XCTAssertEqual(merged.mood, .tired, "And what did arrive is kept.")
+    }
+
+    /// Running the reconciliation repeatedly — which is what a series of remote
+    /// notifications causes — converges instead of eroding anything.
+    func testRepeatedReconciliationNeverErodesHistory() throws {
+        let container = try ModelContainer(
+            for: CycleEntry.self, UserProfile.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none))
+        let context = container.mainContext
+        for k in 0..<5 {
+            let e = CycleStore.entry(for: calendar.date(byAdding: .day, value: k, to: day(2026, 5, 4))!,
+                                     in: context, calendar: calendar)
+            e.flow = .medium
+            e.symptoms = [.cramps]
+        }
+        context.saveOrLog()
+
+        for _ in 0..<5 { CycleStore.dedupeSameDay(in: context, calendar: calendar) }
+
+        let rows = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
+        XCTAssertEqual(rows.count, 5)
+        XCTAssertTrue(rows.allSatisfy { $0.flow == .medium && $0.symptoms == [.cramps] })
     }
 }

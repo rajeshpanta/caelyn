@@ -10,48 +10,27 @@ struct InsightsView: View {
 
     private var profile: UserProfile? { profiles.first }
 
-    private var cycles: [Cycle] {
-        PredictionEngine.cycles(from: entries)
+    /// The same derivation Home, the calendar, the reminders and the widget use.
+    private var cycle: CycleModel {
+        CycleModel.make(entries: entries, profile: profile)
     }
+
+    private var cycles: [Cycle] { cycle.cycles }
 
     private var patternInsights: [PatternInsight] {
-        PatternEngine.insights(from: entries, cycles: cycles, profile: profile)
+        PatternEngine.insights(from: entries, cycle: cycle, profile: profile)
     }
 
-    private var avgCycleLength: Int {
-        PredictionEngine.averageCycleLength(of: cycles, fallback: profile?.averageCycleLength ?? 28)
-    }
-
-    private var avgPeriodLength: Int {
-        PredictionEngine.averagePeriodLength(of: cycles, fallback: profile?.averagePeriodLength ?? 5)
-    }
-
-    private var cycleVariation: Int {
-        PredictionEngine.cycleLengthVariation(of: cycles)
-    }
-
-    private var confidence: Confidence {
-        PredictionEngine.confidence(cycleCount: cycles.count)
-    }
+    private var avgCycleLength: Int { cycle.cycleLength }
+    private var avgPeriodLength: Int { cycle.periodLength }
+    private var cycleVariation: Int { cycle.variation }
+    private var confidence: Confidence { cycle.confidence }
 
     // Current-state facts for the on-device summary (int-4) + temperature (int-3).
-    private var lastStart: Date? { profile?.lastPeriodStart }
-    private var currentCycleDay: Int {
-        guard let l = lastStart else { return 1 }
-        return PredictionEngine.currentCycleDay(lastPeriodStart: l, cycleLength: avgCycleLength)
-    }
-    private var nextStart: Date? {
-        guard let l = lastStart else { return nil }
-        return PredictionEngine.nextPeriodStart(lastPeriodStart: l, cycleLength: avgCycleLength)
-    }
-    private var currentPhase: CyclePhase {
-        guard lastStart != nil else { return .unknown }
-        return PredictionEngine.phase(forCycleDay: currentCycleDay, periodLength: avgPeriodLength, cycleLength: avgCycleLength)
-    }
-    private var daysUntilPeriod: Int {
-        guard let n = nextStart else { return 0 }
-        return PredictionEngine.daysUntil(n, from: .now)
-    }
+    private var currentCycleDay: Int { cycle.cycleDay }
+    private var nextStart: Date? { cycle.nextPeriodStart }
+    private var currentPhase: CyclePhase { cycle.phase }
+    private var daysUntilPeriod: Int { cycle.daysUntilPeriod }
     private var bbtSeries: [(date: Date, temp: Double)] {
         entries.compactMap { e in e.basalTemperature.map { (date: e.date, temp: $0) } }
     }

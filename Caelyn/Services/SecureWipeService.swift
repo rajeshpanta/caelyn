@@ -22,11 +22,45 @@ enum SecureWipeService {
     /// meaning the moment a cloud copy could exist. Nothing may guess: the caller
     /// states the scope, and the UI states it to her in the same words.
     enum Scope: Equatable {
-        /// Everything on this iPhone. A cloud copy, if she has one, is left alone —
-        /// and the caller is responsible for saying so.
+        /// Everything on this iPhone.
+        ///
+        /// **Only safe to offer when no cloud copy can exist.** If the running
+        /// `Persistence.live` opened mirrored, these deletions belong to the mirror
+        /// and it will export them — so this scope is not "local" in that state.
+        /// `deleteAllOffer(mayHaveCloudCopy:)` is what keeps it off the screen then.
         case thisDevice
         /// This iPhone *and* the private iCloud copy.
         case thisDeviceAndCloud
+    }
+
+    /// What the "Delete all data" dialog is allowed to offer.
+    ///
+    /// **Why a local-only delete is withheld while a cloud copy may exist.**
+    /// `Persistence.live` is built once per launch. When it opened with CloudKit
+    /// mirroring, it stays mirrored for the whole process: switching the sync
+    /// preference off writes a `UserDefaults` flag that is only read the *next*
+    /// time the container is built. So a "this iPhone only" wipe would delete rows
+    /// on a live mirrored store, and those deletions are the mirror's to export —
+    /// to her iCloud, and from there to every other device she owns.
+    ///
+    /// Caelyn cannot truthfully promise that deletion stays local, so it does not
+    /// offer it. The both-places delete is retained because it is the one that
+    /// already does exactly what its label says, and Cancel is always there.
+    /// A genuine local-only wipe needs the container torn down and reopened
+    /// unmirrored; that is a deliberate future piece of work, not a label change.
+    enum DeleteAllOffer: Equatable {
+        /// No cloud copy can exist, so a plain local wipe is safe and truthful.
+        case deviceOnly
+        /// A cloud copy may exist: only the device-and-iCloud wipe is offered.
+        case deviceAndCloudOnly
+
+        /// True when the dialog may show a delete that claims to stay on this device.
+        var offersLocalOnlyDelete: Bool { self == .deviceOnly }
+    }
+
+    /// The single rule behind the dialog, exposed so it can be tested without a UI.
+    static func deleteAllOffer(mayHaveCloudCopy: Bool) -> DeleteAllOffer {
+        mayHaveCloudCopy ? .deviceAndCloudOnly : .deviceOnly
     }
 
     /// Wipe local storage, and optionally the iCloud copy first.

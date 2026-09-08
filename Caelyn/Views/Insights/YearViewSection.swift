@@ -29,12 +29,9 @@ struct YearViewSection: View {
             // Free shows the last 6 months (raised from 3); Pro shows the full year.
             let months = isPro ? monthsToShow : Array(monthsToShow.suffix(6))
 
-            let nextPeriodStart: Date? = {
-                guard let last = profile?.lastPeriodStart else { return nil }
-                let cycles = PredictionEngine.cycles(from: entries)
-                let avgCycleLength = PredictionEngine.averageCycleLength(of: cycles, fallback: profile?.averageCycleLength ?? 28)
-                return PredictionEngine.nextPeriodStart(lastPeriodStart: last, today: .now, cycleLength: avgCycleLength)
-            }()
+            // Same derivation as every other surface — the mini-months must not
+            // mark a different week from the calendar tab.
+            let nextPeriodStart = CycleModel.make(entries: entries, profile: profile).nextPeriodStart
 
             LazyVGrid(
                 columns: Array(repeating: GridItem(.flexible()), count: hSizeClass == .regular ? 3 : 2),

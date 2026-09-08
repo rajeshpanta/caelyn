@@ -203,10 +203,12 @@ enum ExportService {
 
     private static func drawClinicalSummary(page: inout PDFPageContext, entries: [CycleEntry], cycles: [Cycle], profile: UserProfile?, ctx: UIGraphicsPDFRendererContext) {
         guard !cycles.isEmpty else { return }
-        let avgCycle  = PredictionEngine.averageCycleLength(of: cycles, fallback: profile?.averageCycleLength ?? 28)
-        let avgPeriod = PredictionEngine.averagePeriodLength(of: cycles, fallback: profile?.averagePeriodLength ?? 5)
-        let variation = PredictionEngine.cycleLengthVariation(of: cycles)
-        let irregular = PredictionEngine.irregularCycleStatus(from: cycles)
+        // The report a doctor reads must match the app she is holding.
+        let cycle = CycleModel.make(entries: entries, profile: profile)
+        let avgCycle  = cycle.cycleLength
+        let avgPeriod = cycle.periodLength
+        let variation = cycle.variation
+        let irregular = cycle.irregularStatus
         let regularityText: String
         switch irregular {
         case .regular:       regularityText = "Regular (within normal range)"
@@ -250,7 +252,10 @@ enum ExportService {
     /// hand their doctor the timing signals Caelyn noticed. Computed locally — no
     /// network. The report-wide disclaimer already states it is not a diagnosis.
     private static func drawInsightsSection(page: inout PDFPageContext, entries: [CycleEntry], cycles: [Cycle], profile: UserProfile?, ctx: UIGraphicsPDFRendererContext) {
-        let insights = PatternEngine.insights(from: entries, cycles: cycles, profile: profile)
+        let insights = PatternEngine.insights(
+            from: entries,
+            cycle: CycleModel.make(entries: entries, profile: profile),
+            profile: profile)
         guard !insights.isEmpty else { return }
         if page.y > page.contentBottom - 70 { breakPage(page: &page, ctx: ctx) }
         drawSectionHeader("Patterns Caelyn Noticed", page: &page, ctx: ctx.cgContext)

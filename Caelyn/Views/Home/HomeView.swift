@@ -18,10 +18,6 @@ struct HomeView: View {
     @State private var appeared = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    /// The period anchor as it was just before "Log Period today" moved it to today,
-    /// so an immediate undo can restore it rather than wiping the baseline (review HIGH).
-    @State private var anchorBeforeTodayLog: Date?
-
     private var profile: UserProfile? { profiles.first }
 
     private var today: Date { Calendar.current.startOfDay(for: .now) }
@@ -30,57 +26,32 @@ struct HomeView: View {
         entries.first { Calendar.current.isDate($0.date, inSameDayAs: today) }
     }
 
-    private var cycles: [Cycle] {
-        PredictionEngine.cycles(from: entries)
+    /// The one derivation of her cycle. Every number on this screen — and on the
+    /// calendar, the Log tab, the widget, the reminder scheduler — comes from here,
+    /// so they can no longer disagree about the same history.
+    private var cycle: CycleModel {
+        CycleModel.make(entries: entries, profile: profile, today: today)
     }
 
-    private var cycleLength: Int {
-        PredictionEngine.averageCycleLength(of: cycles, fallback: profile?.averageCycleLength ?? 28)
-    }
+    private var cycles: [Cycle] { cycle.cycles }
+    private var cycleLength: Int { cycle.cycleLength }
+    private var periodLength: Int { cycle.periodLength }
+    private var lutealLength: Int { cycle.lutealLength }
 
-    private var periodLength: Int {
-        PredictionEngine.averagePeriodLength(of: cycles, fallback: profile?.averagePeriodLength ?? 5)
-    }
+    /// Derived from logged bleeding, with her stated date as the seed — never a
+    /// stored fact that each write path has to remember to update.
+    private var lastPeriodStart: Date? { cycle.anchor }
 
-    /// Per-user luteal length learned from confirmed ovulation signals; 14-day
-    /// default until enough data (int-1).
-    private var lutealLength: Int {
-        PredictionEngine.learnedLutealLength(entries: entries, cycles: cycles) ?? 14
-    }
-
-    private var lastPeriodStart: Date? {
-        profile?.lastPeriodStart
-    }
-
-    private var cycleDay: Int {
-        guard let lastPeriodStart else { return 1 }
-        return PredictionEngine.currentCycleDay(
-            lastPeriodStart: lastPeriodStart,
-            today: today,
-            cycleLength: cycleLength
-        )
-    }
-
-    private var nextStart: Date? {
-        guard let lastPeriodStart else { return nil }
-        return PredictionEngine.nextPeriodStart(
-            lastPeriodStart: lastPeriodStart,
-            today: today,
-            cycleLength: cycleLength
-        )
-    }
-
-    private var phase: CyclePhase {
-        guard lastPeriodStart != nil else { return .unknown }
-        return PredictionEngine.phase(forCycleDay: cycleDay, periodLength: periodLength, cycleLength: cycleLength, lutealLength: lutealLength)
-    }
+    private var cycleDay: Int { cycle.cycleDay }
+    private var nextStart: Date? { cycle.nextPeriodStart }
+    private var phase: CyclePhase { cycle.phase }
 
     /// Everything the personalized hint + guide sheet need (nil until 1 cycle
     /// exists, so day-1 users keep the static hint and generic guide).
     private var guidePersonal: PhaseGuidePersonal? {
         guard phase != .unknown, !cycles.isEmpty else { return nil }
         let gentle = profile?.gentleModeEnabled ?? false
-        let insights = PatternEngine.insights(from: entries, cycles: cycles, profile: profile)
+        let insights = PatternEngine.insights(from: entries, cycle: cycle, profile: profile)
         let patternLine = insights.first { $0.relatedPhase == phase }?.body
         let teaching = CycleSummaryService.TeachingFacts(
             phase: phase,
@@ -93,7 +64,7 @@ struct HomeView: View {
             teaching: teaching,
             avgCycle: cycleLength,
             periodLength: periodLength,
-            variation: PredictionEngine.cycleLengthVariation(of: cycles),
+            variation: cycle.variation,
             avgPain: CycleAnalytics.averagePeriodPain(entries: entries, cycles: cycles).map { Int($0.rounded()) },
             learnedLuteal: PredictionEngine.learnedLutealLength(entries: entries, cycles: cycles),
             pmsDaysBefore: PredictionEngine.adaptivePmsDaysBefore(entries: entries, cycles: cycles)
@@ -130,49 +101,15 @@ struct HomeView: View {
             .sorted { ($0.noteReminderAt ?? .distantPast) > ($1.noteReminderAt ?? .distantPast) }
     }
 
-    private var daysUntilPeriod: Int {
-        guard let nextStart else { return 0 }
-        return PredictionEngine.daysUntil(nextStart, from: today)
-    }
-
-    private var adaptivePmsDays: Int {
-        PredictionEngine.adaptivePmsDaysBefore(entries: entries, cycles: cycles) ?? 5
-    }
-
-    private var irregularStatus: IrregularCycleStatus {
-        PredictionEngine.irregularCycleStatus(from: cycles)
-    }
-
-    private var daysUntilPMS: Int {
-        guard let nextStart else { return 0 }
-        let pmsStart = PredictionEngine.pmsWindow(nextPeriodStart: nextStart, daysBefore: adaptivePmsDays).lowerBound
-        return PredictionEngine.daysUntil(pmsStart, from: today)
-    }
-
-    private var daysUntilOvulation: Int {
-        guard let nextStart else { return 0 }
-        let ovulation = PredictionEngine.ovulationEstimate(nextPeriodStart: nextStart, lutealLength: lutealLength)
-        return PredictionEngine.daysUntil(ovulation, from: today)
-    }
-
-    private var fertileWindow: ClosedRange<Date>? {
-        guard let nextStart else { return nil }
-        return PredictionEngine.fertileWindow(nextPeriodStart: nextStart, lutealLength: lutealLength)
-    }
-
-    private var daysUntilFertileWindowStart: Int {
-        guard let window = fertileWindow else { return 0 }
-        return PredictionEngine.daysUntil(window.lowerBound, from: today)
-    }
-
-    private var predictedWindow: ClosedRange<Date>? {
-        guard let nextStart else { return nil }
-        return PredictionEngine.predictedPeriodWindow(nextPeriodStart: nextStart, periodLength: periodLength)
-    }
-
-    private var confidence: Confidence {
-        PredictionEngine.confidence(cycleCount: cycles.count)
-    }
+    private var daysUntilPeriod: Int { cycle.daysUntilPeriod }
+    private var adaptivePmsDays: Int { cycle.pmsDaysBefore }
+    private var irregularStatus: IrregularCycleStatus { cycle.irregularStatus }
+    private var daysUntilPMS: Int { cycle.daysUntilPMS }
+    private var daysUntilOvulation: Int { cycle.daysUntilOvulation }
+    private var fertileWindow: ClosedRange<Date>? { cycle.fertileWindow }
+    private var daysUntilFertileWindowStart: Int { cycle.daysUntilFertileWindowStart }
+    private var predictedWindow: ClosedRange<Date>? { cycle.predictedPeriodWindow }
+    private var confidence: Confidence { cycle.confidence }
 
     private var ttcResult: TTCFertilityEngine.FertilityResult {
         TTCFertilityEngine.result(
@@ -200,7 +137,7 @@ struct HomeView: View {
                     phase: phase,
                     daysUntilPeriod: daysUntilPeriod,
                     predictedWindow: predictedWindow,
-                    variation: PredictionEngine.cycleLengthVariation(of: cycles),
+                    variation: cycle.variation,
                     confidence: confidence,
                     personal: guidePersonal
                 )
@@ -290,7 +227,7 @@ struct HomeView: View {
                         daysUntilFertileWindowStart: daysUntilFertileWindowStart,
                         fertileWindow: fertileWindow,
                         currentPhase: phase,
-                        variation: PredictionEngine.cycleLengthVariation(of: cycles),
+                        variation: cycle.variation,
                         isLate: isPeriodLate
                     )
                 )
@@ -525,44 +462,17 @@ struct HomeView: View {
 
     // MARK: - Active period awareness
 
-    private var activePeriodWindow: ClosedRange<Date>? {
-        CalendarMath.activePeriodWindow(
-            in: entries,
-            periodLength: profile?.averagePeriodLength ?? 5,
-            today: today
-        )
-    }
+    private var activePeriodWindow: ClosedRange<Date>? { cycle.activePeriodWindow }
+    private var isInActivePeriodWindow: Bool { cycle.isInActivePeriodWindow }
+    private var dayInPeriod: Int? { cycle.dayInPeriod }
 
-    private var isInActivePeriodWindow: Bool {
-        activePeriodWindow?.contains(today) ?? false
-    }
-
-    private var dayInPeriod: Int? {
-        guard let window = activePeriodWindow else { return nil }
-        let diff = Calendar.current.dateComponents([.day], from: window.lowerBound, to: today).day ?? 0
-        return diff + 1
-    }
-
-    private var isPeriodLate: Bool {
-        guard let lastPeriodStart else { return false }
-        // Late if today is past the *un-rolled* expected start AND nothing has
-        // been logged in the active period window. `nextStart` is rolled forward
-        // to always be >= today, so it could never detect lateness (stz-009).
-        let expected = PredictionEngine.expectedPeriodStart(
-            lastPeriodStart: lastPeriodStart,
-            cycleLength: cycleLength
-        )
-        return today > expected && activePeriodWindow == nil
-    }
-
-    private var daysLate: Int {
-        guard let lastPeriodStart else { return 0 }
-        return PredictionEngine.daysLate(
-            lastPeriodStart: lastPeriodStart,
-            today: today,
-            cycleLength: cycleLength
-        )
-    }
+    /// Late means past the un-rolled expected start with no bleeding logged since.
+    /// Now measured from the derived anchor, so a period she logged from the Log
+    /// tab actually counts — it used to be measured from a stale stored date, and
+    /// Home told her "Caelyn hasn't seen your period this cycle" for months after
+    /// she had logged it (stz-009 plus the anchor fix).
+    private var isPeriodLate: Bool { cycle.isPeriodLate }
+    private var daysLate: Int { cycle.daysLate }
 
     @ViewBuilder
     private var periodStatePrompt: some View {
@@ -680,7 +590,7 @@ struct HomeView: View {
 
     @ViewBuilder
     private var periodStartEditRow: some View {
-        if let start = profile?.lastPeriodStart, isInActivePeriodWindow {
+        if let start = cycle.anchor, isInActivePeriodWindow {
             let fmt: DateFormatter = {
                 let f = DateFormatter()
                 f.dateFormat = "MMM d"
@@ -792,10 +702,8 @@ struct HomeView: View {
             entry.updatedAt = .now
             entryToSync = entry
         }
-        if cal.isDateInToday(profile?.lastPeriodStart ?? .distantPast) {
-            // Recompute from remaining flow rather than blindly nil-ing (review HIGH).
-            profile?.lastPeriodStart = PredictionEngine.mostRecentPeriodStart(from: entries, today: today)
-        }
+        // Nothing to un-anchor: the anchor is derived from the flow that is left,
+        // so removing today's period moves it back on its own.
         modelContext.saveOrLog()
         Haptics.selection()
         if let captured = entryToSync {
@@ -814,15 +722,10 @@ struct HomeView: View {
             if existing.flow != nil {
                 existing.flow = nil
                 existing.updatedAt = .now
-                // If today was the recorded period start, RESTORE the prior anchor
-                // rather than nil-ing it — nil-ing wipes an established user's whole
-                // baseline on an accidental-tap undo (review HIGH). Prefer the value
-                // captured before this tap; else the most recent prior flow streak.
-                if Calendar.current.isDateInToday(profile?.lastPeriodStart ?? .distantPast) {
-                    profile?.lastPeriodStart = anchorBeforeTodayLog
-                        ?? PredictionEngine.mostRecentPeriodStart(from: entries, today: today)
-                }
-                anchorBeforeTodayLog = nil
+                // Undoing an accidental tap needs no bookkeeping any more. The
+                // anchor follows the flow that remains, so it falls back to her
+                // previous period by itself — which is what the captured-anchor
+                // dance here used to be for (review HIGH).
                 modelContext.saveOrLog()
                 let snapshot = entries
                 let captured = existing
@@ -838,29 +741,10 @@ struct HomeView: View {
             modelContext.insert(target)
         }
 
-        // Decide whether to update profile.lastPeriodStart to today.
-        // We only override if today truly looks like a NEW cycle start —
-        // not if the profile already records a recent period start
-        // (e.g. user said "my last period was 3 days ago" during onboarding,
-        // then taps Log Period today; we shouldn't lose that info).
-        let cal = Calendar.current
-        let yesterday = cal.date(byAdding: .day, value: -1, to: today) ?? today
-        let yesterdayHasFlow = entries.contains {
-            cal.isDate($0.date, inSameDayAs: yesterday) && $0.flow != nil
-        }
-        if !yesterdayHasFlow {
-            let periodLen = profile?.averagePeriodLength ?? 5
-            let recentlyStarted: Bool = {
-                guard let existing = profile?.lastPeriodStart else { return false }
-                let daysSince = cal.dateComponents([.day], from: existing, to: today).day ?? Int.max
-                return daysSince >= 0 && daysSince <= periodLen
-            }()
-            if !recentlyStarted {
-                anchorBeforeTodayLog = profile?.lastPeriodStart   // remember for an undo
-                profile?.lastPeriodStart = today
-            }
-        }
-
+        // The flow entry IS the fact. Whether today starts a new cycle is worked
+        // out from the logged streak by `CycleModel`, so there is no stored anchor
+        // to second-guess here — which is what used to leave every other logging
+        // path (Log tab, day sheet, Watch, imports) predicting from a stale date.
         modelContext.saveOrLog()
         Haptics.success()
 

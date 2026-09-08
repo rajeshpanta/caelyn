@@ -16,46 +16,32 @@ enum WidgetSnapshotBuilder {
         return f
     }()
 
-    static func build(profile: UserProfile?, entries: [CycleEntry], isPro: Bool) -> WidgetSnapshot {
-        let today = Calendar.current.startOfDay(for: Date())
-        let cycles = PredictionEngine.cycles(from: entries)
+    /// - Parameter now: injectable only so a test can prove the widget shows the
+    ///   same cycle day as the app for a given history. Production always passes
+    ///   the real clock.
+    static func build(profile: UserProfile?, entries: [CycleEntry], isPro: Bool,
+                      now: Date = Date()) -> WidgetSnapshot {
+        let today = Calendar.current.startOfDay(for: now)
+        // The widget and the Watch show the same numbers as the app because they
+        // are literally the same derivation, computed once here.
+        let cycle = CycleModel.make(entries: entries, profile: profile, today: today)
 
-        let cycleLength = PredictionEngine.averageCycleLength(
-            of: cycles, fallback: profile?.averageCycleLength ?? 28)
-        let periodLength = PredictionEngine.averagePeriodLength(
-            of: cycles, fallback: profile?.averagePeriodLength ?? 5)
-
-        let lastStart = profile?.lastPeriodStart
-
-        let cycleDay: Int = {
-            guard let last = lastStart else { return 1 }
-            return PredictionEngine.currentCycleDay(
-                lastPeriodStart: last, today: today, cycleLength: cycleLength)
-        }()
-
-        let phase: CyclePhase = {
-            guard lastStart != nil else { return .unknown }
-            return PredictionEngine.phase(
-                forCycleDay: cycleDay, periodLength: periodLength, cycleLength: cycleLength)
-        }()
-
-        let nextStart: Date? = {
-            guard let last = lastStart else { return nil }
-            return PredictionEngine.nextPeriodStart(
-                lastPeriodStart: last, today: today, cycleLength: cycleLength)
-        }()
+        let cycleLength = cycle.cycleLength
+        let periodLength = cycle.periodLength
+        let lastStart = cycle.anchor
+        let cycleDay = cycle.cycleDay
+        let phase = cycle.phase
+        let nextStart = cycle.nextPeriodStart
 
         let daysUntilPeriod = nextStart.map { PredictionEngine.daysUntil($0, from: today) } ?? -1
 
         let periodWindowText: String = {
-            guard let s = nextStart else { return "" }
-            let w = PredictionEngine.predictedPeriodWindow(nextPeriodStart: s, periodLength: periodLength)
+            guard let w = cycle.predictedPeriodWindow else { return "" }
             return "\(dateFmt.string(from: w.lowerBound))–\(dateFmt.string(from: w.upperBound))"
         }()
 
         var lines: [String] = []
-        if let s = nextStart {
-            let fertile = PredictionEngine.fertileWindow(nextPeriodStart: s)
+        if nextStart != nil, let fertile = cycle.fertileWindow {
             let daysToFertile = PredictionEngine.daysUntil(fertile.lowerBound, from: today)
             let fertileRange = "\(dateFmt.string(from: fertile.lowerBound))–\(dateFmt.string(from: fertile.upperBound))"
             if phase != .ovulation && daysToFertile <= 14 {
@@ -67,8 +53,7 @@ enum WidgetSnapshotBuilder {
                     lines.append("Fertile window in \(daysToFertile) days")
                 }
             }
-            let pmsStart = PredictionEngine.pmsWindow(nextPeriodStart: s).lowerBound
-            let daysToPMS = PredictionEngine.daysUntil(pmsStart, from: today)
+            let daysToPMS = cycle.daysUntilPMS
             if phase != .pms && daysToPMS > 0 && daysToPMS <= 14 {
                 lines.append("PMS may begin in \(daysToPMS) day\(daysToPMS == 1 ? "" : "s")")
             }

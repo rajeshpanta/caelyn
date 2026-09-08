@@ -18,13 +18,11 @@ struct LogView: View {
         return f.string(from: selectedDate)
     }
 
+    /// "Cycle day N" here is the same number Home's ring shows. It used to be
+    /// computed from the stored onboarding cycle length against a stored anchor, so
+    /// the two screens could say "Day 31" and "Day 3" about the same afternoon.
     private var cycleDay: Int {
-        guard let profile = profiles.first, let lastPeriod = profile.lastPeriodStart else { return 1 }
-        return PredictionEngine.currentCycleDay(
-            lastPeriodStart: lastPeriod,
-            today: selectedDate,
-            cycleLength: profile.averageCycleLength
-        )
+        CycleModel.make(entries: entries, profile: profiles.first, today: selectedDate).cycleDay
     }
 
     private var hasEntryOnSelectedDate: Bool {

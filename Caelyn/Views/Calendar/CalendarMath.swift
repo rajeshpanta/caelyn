@@ -23,7 +23,23 @@ struct DayState: Equatable {
 }
 
 enum CalendarMath {
-    static let calendar = Calendar.current
+    /// A fresh calendar per access, exactly as `PredictionEngine.calendar` has
+    /// always been.
+    ///
+    /// **This was `static let calendar = Calendar.current`, and that one shared
+    /// instance was the Phase 1B keyboard-focus bug.** Once `CycleModel.make`
+    /// started calling `activePeriodWindow`, the Log tab's body became a hot caller
+    /// of this global while the daily form had a text field focused, and typing
+    /// into the medication field lost focus mid-entry.
+    ///
+    /// Isolated by single-variable bisection: reading the same `flow`/`date`
+    /// properties through `PredictionEngine` is fine, and an equivalent amount of
+    /// unrelated work is fine — only routing entry reads through this shared
+    /// `Calendar` reproduced it, and only handing out a fresh value fixed it.
+    /// `Calendar` is a value type over a mutating cached reference, so one instance
+    /// shared between the Calendar tab and a view being typed into is not something
+    /// to hold onto for a small measured saving.
+    static var calendar: Calendar { Calendar.current }
 
     /// 42-day grid (6 weeks × 7 days) covering the visible month plus leading/trailing days.
     static func daysGrid(for month: Date, firstDayOfWeek: Int = 1) -> [Date] {
@@ -58,14 +74,17 @@ enum CalendarMath {
     }
 
     /// Compute the marker for a given date based on entries + predictions.
-    /// Pass `adaptivePmsDaysBefore` to personalise the PMS highlight window.
+    ///
+    /// - Parameter cycle: the authoritative derivation, computed once for the whole
+    ///   grid. The calendar used to predict from `profile.averageCycleLength` and
+    ///   `profile.lastPeriodStart` while Home predicted from her learned history,
+    ///   so the highlighted week could miss Home's predicted window entirely.
     static func dayState(
         for date: Date,
         month: Date,
         entries: [CycleEntry],
-        profile: UserProfile?,
-        today: Date = .now,
-        adaptivePmsDaysBefore: Int = 5
+        cycle: CycleModel,
+        today: Date = .now
     ) -> DayState {
         let day = calendar.startOfDay(for: date)
         let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: month)) ?? month
@@ -91,9 +110,8 @@ enum CalendarMath {
         // Active period window: if there's a recent flow streak whose expected
         // duration covers `day`, mark it as "expected — fill me in".
         // Only applies to past/today — future days cannot be logged yet.
-        let periodLength = profile?.averagePeriodLength ?? 5
         if !isFuture,
-           let activeWindow = activePeriodWindow(in: entries, periodLength: periodLength, today: today),
+           let activeWindow = cycle.activePeriodWindow,
            activeWindow.contains(day) {
             return DayState(
                 date: day,
@@ -106,22 +124,11 @@ enum CalendarMath {
             )
         }
 
-        // Future predictions require a profile + last period.
+        // Predictions need an anchor; without one Caelyn marks nothing.
         var marker: DayMarker = .empty
-        if let profile, let last = profile.lastPeriodStart {
-            let cycleLength = profile.averageCycleLength
-            let nextStart = PredictionEngine.nextPeriodStart(
-                lastPeriodStart: last,
-                today: today,
-                cycleLength: cycleLength
-            )
-            let predictedWindow = PredictionEngine.predictedPeriodWindow(
-                nextPeriodStart: nextStart,
-                periodLength: periodLength
-            )
-            let pmsRange = PredictionEngine.pmsWindow(nextPeriodStart: nextStart, daysBefore: adaptivePmsDaysBefore)
-            let fertileRange = PredictionEngine.fertileWindow(nextPeriodStart: nextStart)
-
+        if let predictedWindow = cycle.predictedPeriodWindow,
+           let pmsRange = cycle.pmsWindow,
+           let fertileRange = cycle.fertileWindow {
             if predictedWindow.contains(day) {
                 marker = .predictedPeriod
             } else if pmsRange.contains(day) {
@@ -157,16 +164,17 @@ enum CalendarMath {
             .sorted()
         guard let lastFlow = flowDates.last else { return nil }
 
-        // Find the start of the most recent flow streak. We tolerate gaps of
-        // up to 1 unlogged day (diff <= 2) so that "logged Day 1, skipped Day 2,
-        // logged Day 3" is treated as one continuous period — not two streaks.
-        // This is the difference between forgiving the user and punishing them.
+        // Find the start of the most recent flow streak, forgiving the same
+        // one-day hole every other streak reader forgives — "logged Day 1, skipped
+        // Day 2, logged Day 3" is one continuous period, not two. The tolerance is
+        // `PredictionEngine.sameStreakGapTolerance` so this can never drift out of
+        // agreement with cycle reconstruction again.
         var streakStart = lastFlow
         for i in stride(from: flowDates.count - 2, through: 0, by: -1) {
             let prev = flowDates[i]
             let next = flowDates[i + 1]
             let diff = calendar.dateComponents([.day], from: prev, to: next).day ?? 0
-            if diff <= 2 {
+            if diff <= PredictionEngine.sameStreakGapTolerance {
                 streakStart = prev
             } else {
                 break

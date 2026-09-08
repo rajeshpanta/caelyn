@@ -802,11 +802,31 @@ final class CaelynTests: XCTestCase {
 
     // MARK: - Phase 4 (int-1): adaptive prediction engine
 
+    /// The clamp still bounds anything that reaches the average.
+    ///
+    /// **Changed deliberately.** This test used to feed two 5-day "cycles" and
+    /// assert they were clamped up to 18 — i.e. that an impossible reconstruction
+    /// still moved her learned cycle length. That is the contamination the
+    /// plausibility floor now prevents: a cycle that short is a hole in her
+    /// logging, and it is discarded rather than averaged and clamped. The clamp is
+    /// still exercised below, with cycles that could actually be real.
     func testAverageCycleLengthClampedToRealisticBounds() {
         let longCycles = [Cycle(start: .now, length: 90, periodLength: 5), Cycle(start: .now, length: 90, periodLength: 5)]
         XCTAssertEqual(PredictionEngine.averageCycleLength(of: longCycles, fallback: 28), 45, "clamped to max 45")
-        let shortCycles = [Cycle(start: .now, length: 5, periodLength: 2), Cycle(start: .now, length: 5, periodLength: 2)]
-        XCTAssertEqual(PredictionEngine.averageCycleLength(of: shortCycles, fallback: 28), 18, "clamped to min 18")
+
+        let shortButReal = [Cycle(start: .now, length: 16, periodLength: 3), Cycle(start: .now, length: 16, periodLength: 3)]
+        XCTAssertEqual(PredictionEngine.averageCycleLength(of: shortButReal, fallback: 28), 18, "clamped to min 18")
+    }
+
+    /// The other half of that change, stated as its own expectation: an impossible
+    /// cycle is ignored entirely, so her prediction stays on the value she gave
+    /// rather than being dragged to the floor by a logging artefact.
+    func testImpossiblyShortCyclesAreIgnoredRatherThanClamped() {
+        let artefacts = [Cycle(start: .now, length: 5, periodLength: 2), Cycle(start: .now, length: 5, periodLength: 2)]
+        XCTAssertEqual(PredictionEngine.averageCycleLength(of: artefacts, fallback: 28), 28,
+                       "Nothing real is being described here, so nothing may be learned from it.")
+        XCTAssertEqual(PredictionEngine.cycleLengthVariation(of: artefacts), 0)
+        XCTAssertEqual(PredictionEngine.irregularCycleStatus(from: artefacts), .insufficient)
     }
 
     func testCycleLengthVariationRoundsNotTruncates() {
@@ -849,16 +869,24 @@ final class CaelynTests: XCTestCase {
     func testSymptomLeadTimeCorrelation() {
         let cal = Calendar.current
         let base = cal.startOfDay(for: cal.date(byAdding: .day, value: -120, to: .now)!)
-        var cycles: [Cycle] = []
         var entries: [CycleEntry] = []
+        // Four period starts 28 days apart => three completed cycles. Built from
+        // real flow entries so the insight runs against the same derivation the
+        // app uses, rather than a hand-made cycle list the app could never produce.
+        for i in 0..<4 {
+            let start = cal.date(byAdding: .day, value: i * 28, to: base)!
+            for k in 0..<5 {
+                entries.append(CycleEntry(date: cal.date(byAdding: .day, value: k, to: start)!, flow: .medium))
+            }
+        }
         for i in 0..<3 {
             let start = cal.date(byAdding: .day, value: i * 28, to: base)!
-            cycles.append(Cycle(start: start, length: 28, periodLength: 5))
             // Headache consistently 2 days before the next period start.
             let day = cal.date(byAdding: .day, value: 26, to: start)!
             entries.append(CycleEntry(date: day, symptoms: [.headache]))
         }
-        let results = PatternEngine.insights(from: entries, cycles: cycles, profile: UserProfile())
+        let cycle = CycleModel.make(entries: entries, profile: UserProfile())
+        let results = PatternEngine.insights(from: entries, cycle: cycle, profile: UserProfile())
         XCTAssertTrue(
             results.contains { ($0.supportingValue?.contains("~2d") ?? false) },
             "Expected a ~2-day lead-time correlation insight"
@@ -870,17 +898,24 @@ final class CaelynTests: XCTestCase {
     func testConditionInsightsSurfaceForEnabledModes() {
         let cal = Calendar.current
         let base = cal.startOfDay(for: cal.date(byAdding: .day, value: -90, to: .now)!)
-        let cycles = [
-            Cycle(start: base, length: 28, periodLength: 5),
-            Cycle(start: cal.date(byAdding: .day, value: 28, to: base)!, length: 30, periodLength: 5)
-        ]
+        // Two completed cycles (28 then 30 days) reconstructed from logged flow.
+        var entries: [CycleEntry] = []
+        for start in [0, 28, 58] {
+            let day = cal.date(byAdding: .day, value: start, to: base)!
+            for k in 0..<5 {
+                entries.append(CycleEntry(date: cal.date(byAdding: .day, value: k, to: day)!, flow: .medium))
+            }
+        }
         let profile = UserProfile()
         profile.pcosEnabled = true
-        let results = PatternEngine.insights(from: [], cycles: cycles, profile: profile)
+        let cycle = CycleModel.make(entries: entries, profile: profile)
+        XCTAssertEqual(cycle.cycles.map(\.length), [28, 30])
+
+        let results = PatternEngine.insights(from: entries, cycle: cycle, profile: profile)
         XCTAssertTrue(results.contains { $0.category == .condition }, "PCOS mode should surface a condition insight")
 
         let noMode = UserProfile()
-        let none = PatternEngine.insights(from: [], cycles: cycles, profile: noMode)
+        let none = PatternEngine.insights(from: entries, cycle: cycle, profile: noMode)
         XCTAssertFalse(none.contains { $0.category == .condition }, "No condition insight without an enabled mode")
     }
 
@@ -1186,5 +1221,453 @@ final class CaelynTests: XCTestCase {
         XCTAssertEqual(merged.pain, 3)
         XCTAssertEqual(merged.basalTemperature, 36.5)
         XCTAssertEqual(Set(merged.symptoms), Set([.cramps, .headache]), "symptoms are unioned, not lost")
+    }
+}
+
+// MARK: - One prediction, everywhere
+
+/// The prediction correctness suite: one authoritative cycle model, one streak
+/// rule, and an anchor that follows the flow she has actually logged.
+///
+/// Each fixture here reproduces a defect that was verified against the real
+/// engine before it was fixed, and the comments name what the old behaviour was
+/// so a regression is recognisable rather than merely red.
+@MainActor
+final class CycleModelTests: XCTestCase {
+
+    private var calendar: Calendar {
+        var c = Calendar(identifier: .gregorian)
+        c.timeZone = .current
+        return c
+    }
+
+    private func d(_ y: Int, _ m: Int, _ day: Int) -> Date {
+        calendar.startOfDay(for: calendar.date(from: DateComponents(year: y, month: m, day: day))!)
+    }
+
+    /// Flow entries for `count` periods `cycleLength` days apart, `periodLength`
+    /// days each. `skip` removes one day index from the period at `skipInPeriod`.
+    private func history(
+        from start: Date,
+        cycleLength: Int,
+        periodLength: Int = 5,
+        count: Int,
+        skipDayIndex: Int? = nil,
+        skipInPeriod: Int? = nil
+    ) -> [CycleEntry] {
+        var entries: [CycleEntry] = []
+        for period in 0..<count {
+            let periodStart = calendar.date(byAdding: .day, value: period * cycleLength, to: start)!
+            for k in 0..<periodLength {
+                if let skipDayIndex, let skipInPeriod, period == skipInPeriod, k == skipDayIndex { continue }
+                let day = calendar.date(byAdding: .day, value: k, to: periodStart)!
+                let e = CycleEntry(date: day, flow: .medium)
+                e.date = calendar.startOfDay(for: day)
+                entries.append(e)
+            }
+        }
+        return entries
+    }
+
+    private func profile(cycleLength: Int = 28, periodLength: Int = 5, lastPeriodStart: Date? = nil) -> UserProfile {
+        let p = UserProfile(averageCycleLength: cycleLength, averagePeriodLength: periodLength)
+        p.lastPeriodStart = lastPeriodStart
+        return p
+    }
+
+    // MARK: A — every prediction consumer agrees
+
+    /// The verified divergence: real cycles of 33 days, "28" answered at
+    /// onboarding. Home/Insights/widget/PDF read the learned 33; the calendar, the
+    /// Log tab, the notification scheduler and PatternEngine read the stored 28.
+    /// Home predicted 19 September while the calendar highlighted 14–18 — windows
+    /// that did not even overlap — and the reminder fired on the 12th.
+    func testEveryPredictionConsumerAgreesOnTheSameHistory() {
+        let start = d(2026, 2, 1)
+        let entries = history(from: start, cycleLength: 33, count: 7)
+        let today = d(2026, 8, 20)
+        let stored = profile(cycleLength: 28, lastPeriodStart: d(2026, 2, 1))
+
+        let cycle = CycleModel.make(entries: entries, profile: stored, today: today, calendar: calendar)
+
+        XCTAssertEqual(cycle.cycles.map(\.length), Array(repeating: 33, count: 6))
+        XCTAssertEqual(cycle.cycleLength, 33, "The learned length, not the onboarding guess.")
+        XCTAssertEqual(stored.averageCycleLength, 28, "The stored seed is untouched — it is just no longer consulted for predictions.")
+
+        let expectedNext = d(2026, 9, 20)
+        XCTAssertEqual(cycle.nextPeriodStart, expectedNext)
+
+        // Home / Insights / widget / PDF: all built from this same model.
+        let widget = WidgetSnapshotBuilder.build(profile: stored, entries: entries, isPro: false, now: today)
+        XCTAssertEqual(widget.cycleLength, cycle.cycleLength)
+        XCTAssertEqual(widget.anchorPeriodStart, cycle.anchor)
+        XCTAssertEqual(widget.periodLength, cycle.periodLength)
+        XCTAssertEqual(widget.cycleDay, cycle.cycleDay)
+        XCTAssertEqual(widget.daysUntilPeriod, cycle.daysUntilPeriod)
+
+        // Calendar: the day the grid paints as a predicted period day must be a day
+        // inside the model's own predicted window.
+        let window = try! XCTUnwrap(cycle.predictedPeriodWindow)
+        let state = CalendarMath.dayState(
+            for: window.lowerBound, month: window.lowerBound,
+            entries: entries, cycle: cycle, today: today)
+        XCTAssertEqual(state.marker, .predictedPeriod,
+                       "The calendar must highlight the week the model predicts, not one derived from the stored 28.")
+
+        // A day inside the *old* stored-28 window must no longer be highlighted.
+        let staleNext = PredictionEngine.nextPeriodStart(
+            lastPeriodStart: cycle.anchor!, today: today, cycleLength: 28)
+        let staleState = CalendarMath.dayState(
+            for: staleNext, month: staleNext, entries: entries, cycle: cycle, today: today)
+        XCTAssertNotEqual(staleState.marker, .predictedPeriod,
+                          "The old 28-day window must no longer be painted as her period.")
+
+        // Log tab: same cycle day as Home, on the same afternoon.
+        XCTAssertEqual(
+            CycleModel.make(entries: entries, profile: stored, today: today, calendar: calendar).cycleDay,
+            cycle.cycleDay)
+    }
+
+    /// The A2 fixture: late in a 33-day cycle, Home used to say "Cycle day 31" and
+    /// the Log tab "Cycle day 3" about the same afternoon.
+    func testCycleDayIsTheSameNumberOnEverySurface() {
+        let entries = history(from: d(2026, 2, 1), cycleLength: 33, count: 7)
+        let anchor = d(2026, 8, 18)
+        let today = calendar.date(byAdding: .day, value: 30, to: anchor)!
+        let stored = profile(cycleLength: 28, lastPeriodStart: d(2026, 2, 1))
+
+        let cycle = CycleModel.make(entries: entries, profile: stored, today: today, calendar: calendar)
+        XCTAssertEqual(cycle.cycleDay, 31)
+        XCTAssertEqual(
+            WidgetSnapshotBuilder.build(profile: stored, entries: entries, isPro: false, now: today).cycleDay,
+            cycle.cycleDay,
+            "The widget and the app must not disagree about what day of her cycle it is.")
+    }
+
+    // MARK: B — one missed flow-log day inside a period
+
+    /// The verified fixture: three clean 29-day cycles, then one forgotten day in
+    /// the middle of the fourth period. Before the fix this produced
+    /// `[29, 29, 29, 3]`, a learned length of 21, a prediction eight days early,
+    /// and a "significant variation … may indicate hormonal fluctuation" banner.
+    func testAMissedDayInsideAPeriodDoesNotInventAShortCycle() {
+        let start = d(2026, 4, 1)
+        let clean = history(from: start, cycleLength: 29, count: 4)
+        let holed = history(from: start, cycleLength: 29, count: 4, skipDayIndex: 2, skipInPeriod: 3)
+        let today = d(2026, 7, 7)
+        let stored = profile(cycleLength: 28)
+
+        let cleanModel = CycleModel.make(entries: clean, profile: stored, today: today, calendar: calendar)
+        let holedModel = CycleModel.make(entries: holed, profile: stored, today: today, calendar: calendar)
+
+        XCTAssertEqual(cleanModel.cycles.map(\.length), [29, 29, 29])
+        XCTAssertEqual(holedModel.cycles.map(\.length), [29, 29, 29],
+                       "A forgotten day is a hole in a period, not the end of one.")
+        XCTAssertEqual(holedModel.cycleLength, cleanModel.cycleLength,
+                       "Forgetting to log for a day must not change what Caelyn predicts.")
+        XCTAssertEqual(holedModel.nextPeriodStart, cleanModel.nextPeriodStart)
+        XCTAssertEqual(holedModel.variation, cleanModel.variation)
+    }
+
+    /// The same hole, mid-history rather than at the end. Before the fix this split
+    /// one 29-day cycle into `3, 26`.
+    func testAMissedDayMidHistoryDoesNotSplitACycleInTwo() {
+        let start = d(2026, 4, 1)
+        let holed = history(from: start, cycleLength: 29, count: 6, skipDayIndex: 2, skipInPeriod: 4)
+        let today = calendar.date(byAdding: .day, value: 5 * 29 + 10, to: start)!
+        let model = CycleModel.make(entries: holed, profile: profile(), today: today, calendar: calendar)
+
+        XCTAssertEqual(model.cycles.map(\.length), [29, 29, 29, 29, 29])
+        XCTAssertFalse(model.cycles.contains { $0.length < PredictionEngine.minimumPlausibleCycleLength })
+    }
+
+    /// The period itself is still five days long, hole and all — it is not
+    /// suddenly a two-day period.
+    func testAPeriodWithAHoleStillMeasuresItsRealLength() {
+        let entries = history(from: d(2026, 4, 1), cycleLength: 29, periodLength: 5,
+                              count: 3, skipDayIndex: 2, skipInPeriod: 0)
+        let model = CycleModel.make(entries: entries, profile: profile(),
+                                    today: d(2026, 6, 10), calendar: calendar)
+        XCTAssertEqual(model.cycles.first?.periodLength, 5)
+    }
+
+    // MARK: H — no clinical-sounding warning from an invalid micro-cycle
+
+    /// The banner text is health-adjacent ("may indicate hormonal fluctuation"),
+    /// so it must never be raised by a logging artefact.
+    func testNoIrregularityWarningFromAForgottenLog() {
+        let start = d(2026, 4, 1)
+        let holed = history(from: start, cycleLength: 29, count: 4, skipDayIndex: 2, skipInPeriod: 3)
+        let model = CycleModel.make(entries: holed, profile: profile(),
+                                    today: d(2026, 7, 7), calendar: calendar)
+
+        if case .irregular(let reason) = model.irregularStatus {
+            XCTFail("A single missed log raised a health warning: \(reason.rawValue) — \(reason.note)")
+        }
+    }
+
+    /// Backstop: even if something else manufactures an impossible cycle, it may
+    /// not reach an average, a spread, or an irregularity verdict.
+    func testImplausiblyShortCyclesCannotContaminateTheStatistics() {
+        let real = [Cycle(start: d(2026, 1, 1), length: 29, periodLength: 5),
+                    Cycle(start: d(2026, 1, 30), length: 29, periodLength: 5),
+                    Cycle(start: d(2026, 2, 28), length: 29, periodLength: 5)]
+        let polluted = real + [Cycle(start: d(2026, 3, 29), length: 3, periodLength: 2)]
+
+        XCTAssertEqual(PredictionEngine.averageCycleLength(of: polluted, fallback: 28),
+                       PredictionEngine.averageCycleLength(of: real, fallback: 28))
+        XCTAssertEqual(PredictionEngine.cycleLengthVariation(of: polluted),
+                       PredictionEngine.cycleLengthVariation(of: real))
+        XCTAssertEqual(PredictionEngine.irregularCycleStatus(from: polluted),
+                       PredictionEngine.irregularCycleStatus(from: real))
+    }
+
+    /// A genuinely short cycle is still hers, and Caelyn still says so. The floor
+    /// exists to exclude artefacts, not to hide polymenorrhea.
+    func testAGenuinelyShortCycleIsStillCountedAndStillReported() {
+        let short = [Cycle(start: d(2026, 1, 1), length: 19, periodLength: 4),
+                     Cycle(start: d(2026, 1, 20), length: 20, periodLength: 4),
+                     Cycle(start: d(2026, 2, 9), length: 19, periodLength: 4)]
+        XCTAssertEqual(PredictionEngine.plausibleCycles(short).count, 3)
+        XCTAssertEqual(PredictionEngine.irregularCycleStatus(from: short),
+                       .irregular(reason: .shortCycles))
+    }
+
+    // MARK: C — logging from the Log tab moves the anchor
+
+    /// The verified C1 fixture. She logs three periods from the Log tab, which
+    /// never wrote `profile.lastPeriodStart`, so Home stayed anchored to her
+    /// onboarding answer of 4 May and reported her 31 days late on day 4 of her
+    /// period.
+    func testAPeriodLoggedFromTheLogTabBecomesTheAnchor() {
+        var entries: [CycleEntry] = []
+        for start in [d(2026, 5, 4), d(2026, 6, 1), d(2026, 6, 29)] {
+            for k in 0..<5 {
+                let day = calendar.date(byAdding: .day, value: k, to: start)!
+                let e = CycleEntry(date: day, flow: .medium)
+                e.date = calendar.startOfDay(for: day)
+                entries.append(e)
+            }
+        }
+        // The seed is the onboarding answer and was never updated by the Log tab.
+        let stored = profile(lastPeriodStart: d(2026, 5, 4))
+        let model = CycleModel.make(entries: entries, profile: stored,
+                                    today: d(2026, 7, 2), calendar: calendar)
+
+        XCTAssertEqual(model.anchor, d(2026, 6, 29), "The anchor follows the flow she logged.")
+        XCTAssertEqual(model.daysLate, 0)
+        XCTAssertFalse(model.isPeriodLate)
+    }
+
+    /// The C4 fixture, and the worst symptom of the stale anchor: three weeks after
+    /// her period ended, Home rendered the late prompt every single day.
+    func testHomeDoesNotClaimHerPeriodIsMissingAfterSheLoggedIt() {
+        var entries: [CycleEntry] = []
+        for start in [d(2026, 5, 4), d(2026, 6, 1), d(2026, 6, 29)] {
+            for k in 0..<5 {
+                let day = calendar.date(byAdding: .day, value: k, to: start)!
+                let e = CycleEntry(date: day, flow: .medium)
+                e.date = calendar.startOfDay(for: day)
+                entries.append(e)
+            }
+        }
+        let stored = profile(lastPeriodStart: d(2026, 5, 4))
+
+        for today in [d(2026, 7, 6), d(2026, 7, 12), d(2026, 7, 20)] {
+            let model = CycleModel.make(entries: entries, profile: stored, today: today, calendar: calendar)
+            XCTAssertFalse(model.isPeriodLate,
+                           "On \(today) Caelyn still claimed her period was missing.")
+        }
+
+        // And she IS told, correctly, once she genuinely is late.
+        let reallyLate = CycleModel.make(entries: entries, profile: stored,
+                                         today: d(2026, 8, 5), calendar: calendar)
+        XCTAssertTrue(reallyLate.isPeriodLate)
+        XCTAssertEqual(reallyLate.daysLate, 9)
+    }
+
+    // MARK: D — the calendar day sheet writes through the same path
+
+    /// The day sheet and the Log tab both edit a `CycleEntry`; neither ever touched
+    /// the stored anchor. Adding flow on an earlier day must move the effective
+    /// anchor exactly as logging from Home would.
+    func testFlowAddedFromTheDaySheetMovesTheAnchor() {
+        var entries = history(from: d(2026, 5, 4), cycleLength: 28, count: 2)
+        let stored = profile(lastPeriodStart: d(2026, 5, 4))
+        let today = d(2026, 7, 5)
+
+        let before = CycleModel.make(entries: entries, profile: stored, today: today, calendar: calendar)
+        XCTAssertEqual(before.anchor, d(2026, 6, 1))
+
+        // She opens 29 June on the calendar and marks it as a period day.
+        let added = CycleEntry(date: d(2026, 6, 29), flow: .medium)
+        added.date = d(2026, 6, 29)
+        entries.append(added)
+
+        let after = CycleModel.make(entries: entries, profile: stored, today: today, calendar: calendar)
+        XCTAssertEqual(after.anchor, d(2026, 6, 29), "Editing a day is enough; nothing else has to remember.")
+    }
+
+    // MARK: E — an import changes predictions
+
+    /// The C2 fixture. "Your predictions now use this history" was not true: no
+    /// import path wrote the anchor, so Home kept predicting from the onboarding
+    /// seed. Here the import is more recent than the seed, so it must win.
+    func testAnImportedRecentPeriodChangesThePrediction() {
+        // Four years of history, most recent period 1 June.
+        var entries: [CycleEntry] = []
+        var start = d(2022, 7, 5)
+        while start <= d(2026, 6, 1) {
+            for k in 0..<5 {
+                let day = calendar.date(byAdding: .day, value: k, to: start)!
+                let e = CycleEntry(date: day, flow: .medium)
+                e.date = calendar.startOfDay(for: day)
+                entries.append(e)
+            }
+            start = calendar.date(byAdding: .day, value: 31, to: start)!
+        }
+        let stored = profile(lastPeriodStart: d(2026, 5, 2))
+        let today = d(2026, 6, 25)
+
+        let model = CycleModel.make(entries: entries, profile: stored, today: today, calendar: calendar)
+        XCTAssertEqual(model.anchor, d(2026, 5, 31), "The imported period is newer than the seed and wins.")
+        XCTAssertEqual(model.cycleLength, 31, "And the learned length comes from the imported cycles.")
+        XCTAssertGreaterThan(model.cycles.count, 40)
+    }
+
+    /// The mirror image, which the anchor rule must also get right: an explicit
+    /// "my period started on the 20th" is newer than anything the import contains,
+    /// so importing older history must not drag her backwards.
+    func testAnImportOlderThanHerStatedPeriodDoesNotOverrideIt() {
+        var entries: [CycleEntry] = []
+        var start = d(2025, 7, 5)
+        while start <= d(2026, 5, 31) {
+            for k in 0..<5 {
+                let day = calendar.date(byAdding: .day, value: k, to: start)!
+                let e = CycleEntry(date: day, flow: .medium)
+                e.date = calendar.startOfDay(for: day)
+                entries.append(e)
+            }
+            start = calendar.date(byAdding: .day, value: 31, to: start)!
+        }
+        let stated = profile(lastPeriodStart: d(2026, 6, 20))
+        let model = CycleModel.make(entries: entries, profile: stated,
+                                    today: d(2026, 6, 25), calendar: calendar)
+        XCTAssertEqual(model.anchor, d(2026, 6, 20),
+                       "What she told Caelyn stands until logged bleeding contradicts it.")
+    }
+
+    // MARK: F — deleting the newest period falls back to the one before
+
+    /// The C3 fixture. Deleting the most recent period from the Log tab left the
+    /// anchor pointing at a day that no longer held any flow, and the resulting
+    /// numbers looked plausible — which is worse than looking broken.
+    func testDeletingTheNewestPeriodFallsBackToThePreviousOne() {
+        var entries: [CycleEntry] = []
+        for start in [d(2026, 5, 4), d(2026, 6, 1), d(2026, 6, 29)] {
+            for k in 0..<5 {
+                let day = calendar.date(byAdding: .day, value: k, to: start)!
+                let e = CycleEntry(date: day, flow: .medium)
+                e.date = calendar.startOfDay(for: day)
+                entries.append(e)
+            }
+        }
+        // The anchor was correct at the time it was written.
+        let stored = profile(lastPeriodStart: d(2026, 5, 4))
+        let today = d(2026, 7, 5)
+        XCTAssertEqual(CycleModel.make(entries: entries, profile: stored, today: today, calendar: calendar).anchor,
+                       d(2026, 6, 29))
+
+        // She deletes every day of the 29 June period.
+        let remaining = entries.filter { $0.date < d(2026, 6, 29) }
+        let after = CycleModel.make(entries: remaining, profile: stored, today: today, calendar: calendar)
+
+        XCTAssertEqual(after.anchor, d(2026, 6, 1),
+                       "The anchor must fall back to a period that actually exists.")
+        XCTAssertNotEqual(after.anchor, d(2026, 6, 29),
+                          "It must never point at a date with no period on it.")
+    }
+
+    /// Deleting *everything* leaves the seed she gave at onboarding — a stated
+    /// fact, not a phantom period.
+    func testDeletingAllFlowFallsBackToTheOnboardingSeed() {
+        let stored = profile(lastPeriodStart: d(2026, 5, 4))
+        let model = CycleModel.make(entries: [], profile: stored,
+                                    today: d(2026, 5, 20), calendar: calendar)
+        XCTAssertEqual(model.anchor, d(2026, 5, 4))
+        XCTAssertTrue(model.hasPrediction)
+    }
+
+    // MARK: G — the onboarding seed still works before there is any history
+
+    func testTheOnboardingSeedAlonePredictsNormally() {
+        let stored = profile(cycleLength: 30, periodLength: 4, lastPeriodStart: d(2026, 5, 4))
+        let model = CycleModel.make(entries: [], profile: stored,
+                                    today: d(2026, 5, 14), calendar: calendar)
+
+        XCTAssertEqual(model.anchor, d(2026, 5, 4))
+        XCTAssertEqual(model.cycleLength, 30, "With no cycles to learn from, her answer is the fallback.")
+        XCTAssertEqual(model.periodLength, 4)
+        XCTAssertEqual(model.cycleDay, 11)
+        XCTAssertEqual(model.nextPeriodStart, d(2026, 6, 3))
+        XCTAssertEqual(model.confidence, .low)
+    }
+
+    /// "Not sure", nothing imported, nothing logged: Caelyn says nothing rather
+    /// than inventing a cycle day.
+    func testNotSureAndNoHistoryMeansNoPredictionAtAll() {
+        let model = CycleModel.make(entries: [], profile: profile(lastPeriodStart: nil),
+                                    today: d(2026, 5, 14), calendar: calendar)
+        XCTAssertNil(model.anchor)
+        XCTAssertFalse(model.hasPrediction)
+        XCTAssertNil(model.nextPeriodStart)
+        XCTAssertEqual(model.phase, .unknown)
+        XCTAssertFalse(model.isPeriodLate, "Nothing to be late for.")
+    }
+
+    /// And with no profile at all — the moment before onboarding completes.
+    func testNoProfileYieldsNoPrediction() {
+        let model = CycleModel.make(entries: [], profile: nil,
+                                    today: d(2026, 5, 14), calendar: calendar)
+        XCTAssertNil(model.anchor)
+        XCTAssertEqual(model.cycleLength, 28)
+        XCTAssertEqual(model.phase, .unknown)
+    }
+
+    // MARK: The streak rule is genuinely shared
+
+    /// `cycles`, `mostRecentPeriodStart` and `CalendarMath.activePeriodWindow` used
+    /// to disagree about what one period is. They now read the same tolerance.
+    func testEveryStreakReaderAgreesAboutTheSamePeriod() {
+        let start = d(2026, 6, 29)
+        var entries: [CycleEntry] = []
+        for k in [0, 1, 3, 4] {                       // day 3 (index 2) forgotten
+            let day = calendar.date(byAdding: .day, value: k, to: start)!
+            let e = CycleEntry(date: day, flow: .medium)
+            e.date = calendar.startOfDay(for: day)
+            entries.append(e)
+        }
+        let today = d(2026, 7, 2)
+
+        XCTAssertEqual(PredictionEngine.mostRecentPeriodStart(from: entries, today: today), start)
+        XCTAssertEqual(CalendarMath.activePeriodWindow(in: entries, periodLength: 5, today: today)?.lowerBound, start)
+        XCTAssertEqual(CycleModel.make(entries: entries, profile: profile(), today: today, calendar: calendar).anchor,
+                       start)
+    }
+
+    /// A real gap still separates two periods — the tolerance forgives one day,
+    /// not a fortnight.
+    func testARealGapStillStartsANewPeriod() {
+        var entries: [CycleEntry] = []
+        for start in [d(2026, 6, 1), d(2026, 6, 29)] {
+            for k in 0..<5 {
+                let day = calendar.date(byAdding: .day, value: k, to: start)!
+                let e = CycleEntry(date: day, flow: .medium)
+                e.date = calendar.startOfDay(for: day)
+                entries.append(e)
+            }
+        }
+        let cycles = PredictionEngine.cycles(from: entries, today: d(2026, 7, 5))
+        XCTAssertEqual(cycles.map(\.length), [28])
     }
 }

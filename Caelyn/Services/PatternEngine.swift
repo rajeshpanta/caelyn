@@ -67,14 +67,21 @@ enum PatternEngine {
 
     /// Run all pattern detectors and return insights sorted by confidence, highest first.
     /// Requires at least 2 completed cycles; returns empty array with fewer.
+    /// - Parameter cycle: the authoritative derivation of her cycle. Pattern
+    ///   detection used to read `profile.averageCycleLength` — the onboarding
+    ///   number, which nothing updates — so it placed symptoms in phases computed
+    ///   from a different cycle length than the one Home was showing. It takes the
+    ///   shared model now, and `profile` is only consulted for the condition modes
+    ///   she has switched on.
     static func insights(
         from entries: [CycleEntry],
-        cycles: [Cycle],
+        cycle: CycleModel,
         profile: UserProfile?
     ) -> [PatternInsight] {
+        let cycles = cycle.cycles
         guard cycles.count >= 2 else { return [] }
-        let cycleLength = profile?.averageCycleLength ?? 28
-        let periodLength = profile?.averagePeriodLength ?? 5
+        let cycleLength = cycle.cycleLength
+        let periodLength = cycle.periodLength
 
         var results: [PatternInsight] = []
 

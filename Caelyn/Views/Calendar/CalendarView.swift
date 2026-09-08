@@ -11,7 +11,6 @@ struct CalendarView: View {
 
     private var profile: UserProfile? { profiles.first }
     private var firstDayOfWeek: Int { profile?.firstDayOfWeek ?? Calendar.current.firstWeekday }
-    private var cycles: [Cycle] { PredictionEngine.cycles(from: entries) }
 
     private var monthTransition: AnyTransition {
         swipeDirection > 0
@@ -29,7 +28,6 @@ struct CalendarView: View {
                         entries: entries,
                         profile: profile,
                         firstDayOfWeek: firstDayOfWeek,
-                        cycles: cycles,
                         onPrev: prev,
                         onNext: next,
                         onDayTap: { date in selectedDay = date }

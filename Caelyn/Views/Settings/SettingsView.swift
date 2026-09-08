@@ -13,6 +13,9 @@ struct SettingsView: View {
     @State private var showingBringHistory = false
     @State private var showingImportHistory = false
     @State private var showingParanoidConfirm = false
+    /// Set after Paranoid Mode runs while a mirrored store is still open, so the
+    /// one thing it cannot finish this launch is said out loud rather than implied.
+    @State private var paranoidRelaunchNotice: String?
     @State private var showingCloudSync = false
     @State private var showingAccount = false
     @State private var deleteAllResult: String?
@@ -169,26 +172,30 @@ struct SettingsView: View {
             isPresented: $showingDeleteSecond,
             titleVisibility: .visible
         ) {
-            // When a cloud copy could exist, "delete everything" has two possible
-            // meanings and she must pick one. Guessing on her behalf would either
-            // leave reproductive health in iCloud she believes is gone, or destroy
-            // a copy she was relying on.
-            if mayHaveCloudCopy {
+            // Which deletes she may choose from is one rule, and it lives in
+            // `SecureWipeService.deleteAllOffer` so it can be tested without a UI.
+            //
+            // A "this iPhone only" delete is deliberately NOT offered while a cloud
+            // copy may exist. The running container is the one that opened at
+            // launch, mirroring and all, so those deletions would be the mirror's
+            // to export — to her iCloud and on to her other devices. Caelyn cannot
+            // promise that deletion stays local, so it does not put the words on a
+            // button. Deleting only the cloud copy is still reachable on its own,
+            // in Account & iCloud.
+            switch deleteAllOffer {
+            case .deviceAndCloudOnly:
                 Button("Delete on this iPhone and iCloud", role: .destructive) {
                     deleteAllData(scope: .thisDeviceAndCloud)
                 }
-                Button("Delete on this iPhone only", role: .destructive) {
-                    deleteAllData(scope: .thisDevice)
-                }
-            } else {
+            case .deviceOnly:
                 Button("Delete everything", role: .destructive) {
                     deleteAllData(scope: .thisDevice)
                 }
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text(mayHaveCloudCopy
-                 ? "You have a copy in iCloud as well as on this iPhone. Choose whether to remove both, or only this iPhone. Neither can be undone."
+            Text(deleteAllOffer == .deviceAndCloudOnly
+                 ? "You have a copy in iCloud as well as on this iPhone. This removes both, so your history goes from your other devices too. It cannot be undone.\n\nTo remove only the iCloud copy and keep this iPhone's, use Account & iCloud."
                  : "Everything on this iPhone will be permanently removed.")
         }
         .alert("Delete all data", isPresented: Binding(
@@ -400,8 +407,26 @@ struct SettingsView: View {
             Button("Lock everything down", role: .destructive) { enableParanoidMode() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("One tap: turns OFF Apple Health sharing, cancels all reminders, hides the app preview, and switches notifications to private. App Lock and PIN stay under your control in this list.")
+            Text(paranoidConfirmMessage)
         }
+        .alert("Paranoid Mode is on", isPresented: Binding(
+            get: { paranoidRelaunchNotice != nil },
+            set: { if !$0 { paranoidRelaunchNotice = nil } }
+        )) {
+            Button("OK") { paranoidRelaunchNotice = nil }
+        } message: {
+            Text(paranoidRelaunchNotice ?? "")
+        }
+    }
+
+    /// What Paranoid Mode promises, which depends on whether a mirrored store is
+    /// open right now. Everything else it does takes effect on the tap; iCloud sync
+    /// is the one switch the running container cannot honour until the next launch,
+    /// so it is named separately rather than folded into the same sentence.
+    private var paranoidConfirmMessage: String {
+        let base = "One tap: turns OFF Apple Health sharing, cancels all reminders, hides the app preview, and switches notifications to private. App Lock and PIN stay under your control in this list."
+        guard Persistence.isSyncActive else { return base }
+        return base + "\n\nIt also switches iCloud sync off. That one finishes when you reopen Caelyn."
     }
 
     // MARK: - Health section
@@ -499,8 +524,13 @@ struct SettingsView: View {
     /// back on individually.
     private func enableParanoidMode() {
         guard let profile else { return }
-        // Data egress off. The sync flag has no UI in 1.0 (see BackupInfoView) but
-        // is cleared anyway so Paranoid Mode stays correct if sync is ever restored.
+        // Data egress off. Switching the sync preference off is recorded here, but
+        // it is read when the container is built — so if `Persistence.live` opened
+        // mirrored this launch it keeps mirroring until Caelyn is reopened. That is
+        // exactly what `paranoidRelaunchNotice` tells her, in the same words the
+        // sync toggle in Account & iCloud already uses. Nothing here may imply that
+        // uploading stopped the instant she tapped.
+        let syncWasActiveThisLaunch = Persistence.isSyncActive
         UserDefaults.standard.set(false, forKey: Persistence.syncEnabledKey)
         profile.healthKitConnected = false
         profile.hkReadFlow = false
@@ -522,6 +552,9 @@ struct SettingsView: View {
         modelContext.saveOrLog()
         Task { await NotificationService.cancelAll() }
         Haptics.success()
+        if syncWasActiveThisLaunch {
+            paranoidRelaunchNotice = "Apple Health sharing, reminders and previews are off now. iCloud sync is switched off too, and finishes when you reopen Caelyn — until then your history is still mirroring to your own iCloud. Nothing is lost either way; it is all here on this iPhone."
+        }
     }
 
     // MARK: - App section
@@ -762,13 +795,13 @@ struct SettingsView: View {
     /// True when there could be something of hers in iCloud to reason about.
     ///
     /// Covers sync being on, sync having been on until an interrupted deletion, and
-    /// a deletion that never confirmed. If any of those hold, the scope question is
-    /// real and she has to answer it.
-    private var mayHaveCloudCopy: Bool {
-        Persistence.isSyncEnabled
-            || Persistence.isSyncActive
-            || CloudDataDeletion.cloudCopyMayExist
-            || CloudDataDeletion.deletionIsPending
+    /// a deletion that never confirmed. If any of those hold, a local-only delete
+    /// cannot be promised and is not offered.
+    private var mayHaveCloudCopy: Bool { CloudDataDeletion.cloudCopyMayExistNow }
+
+    /// Which deletes the second dialog may offer. One rule, in `SecureWipeService`.
+    private var deleteAllOffer: SecureWipeService.DeleteAllOffer {
+        SecureWipeService.deleteAllOffer(mayHaveCloudCopy: mayHaveCloudCopy)
     }
 
     private func deleteAllData(scope: SecureWipeService.Scope) {
