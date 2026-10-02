@@ -52,6 +52,18 @@ final class BringHistoryModel {
     private let calendar: Calendar
     private let ledger: ImportLedger
 
+    /// How the model asks Apple Health for read access.
+    ///
+    /// In the app this is Apple's own permission sheet, which is the only place
+    /// access can be granted. A unit-test host has no UI to present that sheet on,
+    /// so `requestAuthorization` never resumes there — the continuation is simply
+    /// abandoned and the whole suite stalls on whichever test called this first,
+    /// with no failure and no timeout. The seam lets a test answer for it; nothing
+    /// in the app ever replaces the default.
+    var requestHealthReadAccess: () async throws -> Void = {
+        try await HealthKitService.requestReadAuthorization()
+    }
+
     init(calendar: Calendar = .current, ledger: ImportLedger = .shared) {
         self.calendar = calendar
         self.ledger = ledger
@@ -146,7 +158,7 @@ final class BringHistoryModel {
         // sheet once and returns immediately thereafter.
         if profile?.healthKitConnected != true {
             do {
-                try await HealthKitService.requestReadAuthorization()
+                try await requestHealthReadAccess()
                 if let profile {
                     profile.healthKitConnected = true
                     profile.hkReadFlow = true

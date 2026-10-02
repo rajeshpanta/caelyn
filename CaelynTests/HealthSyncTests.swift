@@ -865,6 +865,9 @@ final class HealthImportCorrectnessTests: XCTestCase {
     /// a Health read needs is a set of types, not a profile.
     func testTheHealthRouteNoLongerRequiresAProfile() async {
         let model = BringHistoryModel(calendar: calendar, ledger: ImportLedger(fileURL: nil))
+        // Answer for Apple's permission sheet. Without this the real call waits on
+        // a sheet no test host can present, and the suite stops here forever.
+        model.requestHealthReadAccess = {}
 
         // Passing no profile must not trap or bail before it has even looked.
         await model.readAppleHealth(profile: nil, context: context, today: day(2026, 7, 1))
