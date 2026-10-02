@@ -9,10 +9,34 @@ struct DailyLogForm: View {
     @Query(sort: \CycleEntry.date, order: .reverse) private var allEntries: [CycleEntry]
     @Query private var profiles: [UserProfile]
 
+    // Three fields are typed rather than tapped, so each keeps a local draft the
+    // keyboard can edit without a store write per keystroke. Everything else on
+    // this form binds to the entry directly.
     @State private var noteDraft: String = ""
     @State private var showAdvanced: Bool = false
     @State private var medicationDraft: String = ""
     @State private var basalTempDraft: String = ""
+
+    // What each draft was last seeded from — the value Caelyn put in the field,
+    // as opposed to what she typed into it.
+    //
+    // **Why a draft needs a seed.** A draft used to be filled once in `.onAppear`
+    // and written back unconditionally when the field lost focus or the form went
+    // away. The form therefore could not tell "the value I'm holding" from "the
+    // value she typed", and nothing re-filled it when the entry changed
+    // underneath. Delete the day and the drafts kept the deleted note, medication
+    // and temperature; leaving the tab wrote all three back and the day she had
+    // just permanently deleted reappeared. The same stale copy could overwrite a
+    // newer note arriving from her other device over iCloud, or a value an import
+    // had just written to the day she happened to have open.
+    //
+    // A draft equal to its seed is untouched: Caelyn may replace it, and must
+    // never write it anywhere. A draft that differs is hers: nothing may
+    // overwrite it, and it is the only thing a commit is allowed to store.
+    @State private var noteSeed: String = ""
+    @State private var medicationSeed: String = ""
+    @State private var basalTempSeed: String = ""
+
     @State private var showAddSymptom = false
     @State private var newSymptomDraft = ""
     @FocusState private var noteFocused: Bool
@@ -27,6 +51,52 @@ struct DailyLogForm: View {
         return allEntries.first { Calendar.current.isDate($0.date, inSameDayAs: target) }
     }
 
+    // MARK: - Drafts and their seeds
+
+    /// The stored temperature as the field spells it, so a draft and a seed are
+    /// always compared in the same form.
+    private static func tempText(_ value: Double?) -> String {
+        value.map { String(format: "%.2f", $0) } ?? ""
+    }
+
+    /// The three stored values this form mirrors, as text.
+    private struct StoredText: Equatable {
+        var note: String
+        var medication: String
+        var temperature: String
+    }
+
+    private var storedText: StoredText {
+        StoredText(
+            note: entry?.note ?? "",
+            medication: entry?.medication ?? "",
+            temperature: Self.tempText(entry?.basalTemperature)
+        )
+    }
+
+    /// Fill every field from the entry and mark all three untouched.
+    private func seedDrafts() {
+        let stored = storedText
+        noteDraft = stored.note;              noteSeed = stored.note
+        medicationDraft = stored.medication;  medicationSeed = stored.medication
+        basalTempDraft = stored.temperature;  basalTempSeed = stored.temperature
+    }
+
+    /// Show a value that changed underneath the form — but only in a field she is
+    /// not partway through editing, so an in-progress edit is never yanked out
+    /// from under her.
+    private func adopt(_ stored: StoredText) {
+        if noteDraft == noteSeed, stored.note != noteSeed {
+            noteDraft = stored.note; noteSeed = stored.note
+        }
+        if medicationDraft == medicationSeed, stored.medication != medicationSeed {
+            medicationDraft = stored.medication; medicationSeed = stored.medication
+        }
+        if basalTempDraft == basalTempSeed, stored.temperature != basalTempSeed {
+            basalTempDraft = stored.temperature; basalTempSeed = stored.temperature
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: CaelynSpacing.lg) {
             flowSection
@@ -39,10 +109,21 @@ struct DailyLogForm: View {
             noteSection
             advancedSection
         }
-        .onAppear {
-            noteDraft = entry?.note ?? ""
-            medicationDraft = entry?.medication ?? ""
-            basalTempDraft = entry?.basalTemperature.map { String(format: "%.2f", $0) } ?? ""
+        .onAppear { seedDrafts() }
+        .onChange(of: storedText) { _, stored in
+            // The entry changed without this form doing it: she deleted the day,
+            // an import wrote to it, or iCloud delivered a newer version from
+            // another device.
+            guard entry != nil else {
+                // The day has no entry at all now. There is nothing to write
+                // back, and anything still sitting in a field belongs to the
+                // entry that was just removed — including an edit she had not
+                // committed, because deleting the day is the later and more
+                // explicit of the two instructions.
+                seedDrafts()
+                return
+            }
+            adopt(stored)
         }
         .onDisappear {
             commitNote()
@@ -957,35 +1038,47 @@ struct DailyLogForm: View {
         }
     }
 
+    // Each commit stores only what she actually typed. The leading guard is what
+    // stops a stale draft being written back over a delete, an import, or a newer
+    // value from another device — see the note on the seeds above.
+
     private func commitNote() {
+        guard noteDraft != noteSeed else { return }          // she never touched it
         let value = noteDraft.isEmpty ? nil : noteDraft
         guard value != nil || entry != nil else { return }   // don't create an empty entry (stz-011)
-        guard entry?.note != value else { return }           // skip no-op rewrite
+        guard entry?.note != value else { noteSeed = noteDraft; return }   // skip no-op rewrite
         withEntry { $0.note = value }
+        noteSeed = noteDraft
     }
 
     private func commitMedication() {
+        guard medicationDraft != medicationSeed else { return }
         let value = medicationDraft.isEmpty ? nil : medicationDraft
         guard value != nil || entry != nil else { return }   // don't create an empty entry (stz-011)
-        guard entry?.medication != value else { return }     // skip no-op rewrite
+        guard entry?.medication != value else { medicationSeed = medicationDraft; return }
         withEntry { $0.medication = value }
+        medicationSeed = medicationDraft
     }
 
     private func commitBasalTemp() {
+        guard basalTempDraft != basalTempSeed else { return }
         let trimmed = basalTempDraft.trimmingCharacters(in: .whitespaces)
         if trimmed.isEmpty {
             // Nothing to clear and no entry → don't create a phantom one (stz-011).
-            guard entry?.basalTemperature != nil else { return }
+            guard entry?.basalTemperature != nil else { basalTempSeed = basalTempDraft; return }
             withEntry { $0.basalTemperature = nil }
+            basalTempSeed = basalTempDraft
         } else if let value = Double(trimmed), value >= 35.0, value <= 42.0 {
             // Skip the write when unchanged so merely revisiting a day never
             // rewrites (and never re-rounds) the stored temperature (stz-012).
-            guard entry?.basalTemperature != value else { return }
+            guard entry?.basalTemperature != value else { basalTempSeed = basalTempDraft; return }
             withEntry { $0.basalTemperature = value }
+            basalTempSeed = basalTempDraft
         } else {
             // Out of realistic range — reset the field to the last saved value
             // at full precision so a 2-decimal reading isn't truncated (stz-012).
-            basalTempDraft = entry?.basalTemperature.map { String(format: "%.2f", $0) } ?? ""
+            basalTempDraft = Self.tempText(entry?.basalTemperature)
+            basalTempSeed = basalTempDraft
         }
     }
 }

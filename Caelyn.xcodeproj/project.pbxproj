@@ -73,6 +73,7 @@
 		58B3689F2054DF67F23594B9 /* CaelynButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29AD7A95A766A2973718AE3D /* CaelynButton.swift */; };
 		5B981B698B655F0DF9F07190 /* WidgetDataSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6011FB7860B910ED48584777 /* WidgetDataSync.swift */; };
 		5C104A68E2609F5ECD9CFC95 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5322159624E05FC0C7C1686B /* ExportService.swift */; };
+		5EFF9DB1A2AAC795A02773D6 /* DailyLogDraftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A49053B105434503B1B9DFB /* DailyLogDraftTests.swift */; };
 		5F745BA64C443BC266F66445 /* AppURLs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3D9A2E9305840410E900DE /* AppURLs.swift */; };
 		5FBD272D3467806EDC25A8ED /* AccountOfferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573753AA268C9DB80FD5960C /* AccountOfferTests.swift */; };
 		60CE2C6B72B2C3BC33887DC2 /* DataStatusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F8759E4F031305F132899D /* DataStatusCard.swift */; };
@@ -338,6 +339,7 @@
 		58917566D3D58FBFF324EE38 /* CloudSyncSafetyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncSafetyTests.swift; sourceTree = "<group>"; };
 		59064BE929C94D1B84DE947C /* HealthKitSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitSync.swift; sourceTree = "<group>"; };
 		590EF59CCF6828268AE024A3 /* CycleRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleRingView.swift; sourceTree = "<group>"; };
+		5A49053B105434503B1B9DFB /* DailyLogDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyLogDraftTests.swift; sourceTree = "<group>"; };
 		5A6D8A6D5E649BC3272BA4A4 /* BiometricService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricService.swift; sourceTree = "<group>"; };
 		5B5C57C3693134752F42ED43 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		5B8CB13185D631BA4005CD6C /* HomeHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeHeader.swift; sourceTree = "<group>"; };
@@ -594,6 +596,7 @@
 				354545D943378E53A1B935B7 /* CaelynTests.swift */,
 				DF15144FE89140AF906ABB93 /* CloudMigrationConflictTests.swift */,
 				58917566D3D58FBFF324EE38 /* CloudSyncSafetyTests.swift */,
+				5A49053B105434503B1B9DFB /* DailyLogDraftTests.swift */,
 				DBA600B41B69D3D0FFE33A9D /* DeletionModelTests.swift */,
 				C455151FA14FB93DB163574F /* GlowEveTests.swift */,
 				D85C561541868291999A9AF2 /* GlowTests.swift */,
@@ -1136,6 +1139,7 @@
 				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
 				7A840C305CD88CB88704DBD2 /* CloudMigrationConflictTests.swift in Sources */,
 				D2D5AB8D5834553A9CF7F06F /* CloudSyncSafetyTests.swift in Sources */,
+				5EFF9DB1A2AAC795A02773D6 /* DailyLogDraftTests.swift in Sources */,
 				83471F2D58721842DA6B530A /* DeletionModelTests.swift in Sources */,
 				55116106737A41E89CC2EEAC /* GlowEveTests.swift in Sources */,
 				17F0B4AE0C74C741F778F608 /* GlowTests.swift in Sources */,
