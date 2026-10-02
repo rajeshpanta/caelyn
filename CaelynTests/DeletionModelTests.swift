@@ -813,3 +813,121 @@ final class LocalFirstContractTests: XCTestCase {
         XCTAssertTrue(rows.allSatisfy { $0.flow == .medium && $0.symptoms == [.cramps] })
     }
 }
+
+// MARK: - The privacy screen tells the truth about sync
+
+/// The claims on `PrivacyTrustView`, which are also what the App Store screenshot
+/// shows.
+///
+/// **The defect this exists to prevent.** These were flat constants written before
+/// 1.3. They said "there is no copy of it anywhere else, including with us",
+/// "Caelyn never asks for your email, name…", "Caelyn makes no network calls of
+/// its own" and "your data exists in exactly one place: this device". Then 1.3
+/// shipped optional Sign in with Apple and optional private iCloud sync, and every
+/// one of those stopped being true for anyone who switched either on — while the
+/// screen kept saying them, and kept being the marketing screenshot.
+///
+/// Privacy is this app's whole wedge, so an overstatement here costs more than
+/// anywhere else in the product.
+@MainActor
+final class PrivacyCopyTruthfulnessTests: XCTestCase {
+
+    override func setUpWithError() throws { clearCloudFlags() }
+    override func tearDownWithError() throws { clearCloudFlags() }
+
+    private func clearCloudFlags() {
+        let d = UserDefaults.standard
+        for key in [CloudDataDeletion.pendingKey, CloudDataDeletion.deletedAtKey,
+                    CloudDataDeletion.mayExistKey, Persistence.syncEnabledKey] {
+            d.removeObject(forKey: key)
+        }
+    }
+
+    private func allCopy() -> String {
+        let view = PrivacyTrustView()
+        let promises = view.promises.map { "\($0.title). \($0.body)" }
+        let faq = view.threatModel.map { "\($0.q). \($0.a)" }
+        return (promises + faq).joined(separator: "\n")
+    }
+
+    // MARK: With a cloud copy, no absolute may survive
+
+    func testNoAbsoluteLocalOnlyClaimSurvivesOnceACloudCopyMayExist() {
+        UserDefaults.standard.set(true, forKey: Persistence.syncEnabledKey)
+        XCTAssertTrue(PrivacyTrustView().hasCloudCopy)
+
+        let copy = allCopy()
+        let falseOnceSynced = [
+            "no copy of it anywhere else",
+            "exactly one place",
+            "makes no network calls of its own",
+            "stays only on your device"
+        ]
+        for claim in falseOnceSynced {
+            XCTAssertFalse(copy.contains(claim),
+                           "“\(claim)” is not true once her history is also in iCloud.")
+        }
+    }
+
+    /// Saying it plainly is the point — not just omitting the false claim.
+    func testTheCloudCopyIsNamedAndAttributedToHerOwnAppleAccount() {
+        UserDefaults.standard.set(true, forKey: Persistence.syncEnabledKey)
+        let copy = allCopy()
+        XCTAssertTrue(copy.contains("iCloud"), "A copy exists; the screen must say so.")
+        XCTAssertTrue(copy.contains("Apple Account"),
+                      "It must say whose cloud it is, not just that one exists.")
+        XCTAssertTrue(copy.lowercased().contains("cannot read it"),
+                      "The reassurance that matters: Caelyn still cannot read it.")
+    }
+
+    /// Sync having been switched off does not remove a copy already made, and the
+    /// screen must not revert to the absolute claims while one may still be there.
+    func testSyncSwitchedOffAfterAPriorCopyKeepsTheHonestCopy() {
+        CloudDataDeletion.noteCloudCopyMayExist()
+        UserDefaults.standard.set(false, forKey: Persistence.syncEnabledKey)
+        XCTAssertTrue(PrivacyTrustView().hasCloudCopy)
+        XCTAssertFalse(allCopy().contains("no copy of it anywhere else"))
+    }
+
+    // MARK: With no cloud copy, the strong version is earned and kept
+
+    func testWithNoCloudCopyTheStrongClaimsAreStillMade() {
+        XCTAssertFalse(PrivacyTrustView().hasCloudCopy)
+        let copy = allCopy()
+        XCTAssertTrue(copy.contains("no copy of it anywhere else"),
+                      "Sync is off by default; that user has earned the strongest true statement.")
+        XCTAssertTrue(copy.contains("exactly one place"))
+    }
+
+    // MARK: The account claim, in every state
+
+    /// Caelyn requests `.fullName` and `PreferredNameStep` asks her what to be
+    /// called, so "never asks for your name" was simply false. What remains true —
+    /// and is the thing worth promising — is that it never asks for email, age or
+    /// location, and that the account gates nothing.
+    func testTheAccountClaimNeverDeniesAskingForAName() {
+        for synced in [false, true] {
+            UserDefaults.standard.set(synced, forKey: Persistence.syncEnabledKey)
+            let copy = allCopy()
+            XCTAssertFalse(copy.contains("never asks for your email, name"),
+                           "Caelyn does ask for a name — optionally, but it asks.")
+            XCTAssertTrue(copy.contains("never asks for your email, age, or location"),
+                          "The part that is still true must still be said.")
+            XCTAssertTrue(copy.contains("Signing in is optional"),
+                          "The account gates nothing, and that is the real promise.")
+        }
+    }
+
+    /// Whatever the state, nothing may claim Caelyn itself holds or can read her
+    /// history — that is the claim the whole product rests on.
+    func testCaelynNeverClaimsToHoldOrReadHerData() {
+        for synced in [false, true] {
+            UserDefaults.standard.set(synced, forKey: Persistence.syncEnabledKey)
+            let copy = allCopy()
+            XCTAssertTrue(copy.contains("runs no servers") || copy.contains("run no server"),
+                          "No Caelyn server is true in every state and must be said.")
+            XCTAssertTrue(copy.contains("nothing for us to hand over")
+                          || copy.contains("nothing for Caelyn to hand over"))
+        }
+    }
+}

@@ -2,17 +2,38 @@ import SwiftUI
 
 struct PrivacyTrustView: View {
 
-    private let promises: [(icon: String, title: String, body: String, color: Color)] = [
+    /// Whether anything of hers could be in iCloud right now.
+    ///
+    /// Reads the same rule the delete flow uses, so this screen and that dialog can
+    /// never disagree about whether a cloud copy exists.
+    var hasCloudCopy: Bool { CloudDataDeletion.cloudCopyMayExistNow }
+
+    /// The promises, told truthfully for the state she is actually in.
+    ///
+    /// **Why this is conditional.** Until 1.3 these were flat constants, and they
+    /// said things like "there is no copy of it anywhere else" and "Caelyn never
+    /// asks for your name". Then 1.3 shipped optional Sign in with Apple and
+    /// optional private iCloud sync, and those absolutes stopped being true for
+    /// anyone who switched either on — while this screen kept saying them, and kept
+    /// being the screenshot on the App Store.
+    ///
+    /// Sync is off by default, so the strong version is still the honest one for
+    /// most people and is not watered down for them. The moment a cloud copy can
+    /// exist, the copy says so plainly: whose cloud it is, that Caelyn cannot read
+    /// it, and what still never leaves.
+    var promises: [(icon: String, title: String, body: String, color: Color)] {[
         (
             icon: "iphone",
             title: "No server — ever",
-            body: "Caelyn has no database, no server, and no cloud of its own. Every entry stays only on your device — there is no copy of it anywhere else, including with us.",
+            body: hasCloudCopy
+                ? "Caelyn has no database, no server, and no cloud of its own. Your entries live on this device and — because you switched on iCloud sync — in your own private iCloud. That copy sits in Apple's storage under your Apple Account. Caelyn never receives it and cannot read it."
+                : "Caelyn has no database, no server, and no cloud of its own. Every entry stays only on your device — there is no copy of it anywhere else, including with us.",
             color: CaelynColor.primaryPlum
         ),
         (
             icon: "person.slash",
             title: "No account required",
-            body: "Caelyn never asks for your email, name, age, or location. We don't know who you are, and we prefer it that way.",
+            body: "Signing in is optional and unlocks nothing — every feature works signed out, and signing out never touches a single entry. Caelyn never asks for your email, age, or location. If you do sign in, Apple hands over a random ID and nothing else; the only thing Caelyn asks you for is a name to say hello with, and leaving it blank is a perfectly good answer.",
             color: CaelynColor.primaryPlum
         ),
         (
@@ -24,13 +45,17 @@ struct PrivacyTrustView: View {
         (
             icon: "list.bullet.rectangle.portrait",
             title: "Exactly what's stored, and where",
-            body: "Your cycle logs live in an on-device database. If you set a PIN, only a salted hash of it is kept in the device Keychain — never the PIN itself. Preferences sit in local app storage. None of it is in any cloud of ours.",
+            body: hasCloudCopy
+                ? "Your cycle logs live in an on-device database, and are mirrored to your own private iCloud while sync is on. Your PIN never syncs — only a salted hash of it is kept in this device's Keychain, and your Apple Health connection stays on this device too. None of it is in any cloud of ours."
+                : "Your cycle logs live in an on-device database. If you set a PIN, only a salted hash of it is kept in the device Keychain — never the PIN itself. Preferences sit in local app storage. None of it is in any cloud of ours.",
             color: CaelynColor.primaryPlum
         ),
         (
             icon: "wifi.slash",
             title: "The only data that leaves your phone",
-            body: "Caelyn makes no network calls of its own and runs no servers. The only things that ever leave are what you export yourself, what you choose to share with Apple Health, and purchase checks handled by Apple.",
+            body: hasCloudCopy
+                ? "Caelyn runs no servers of its own, so nothing is ever sent to us. What leaves this phone is what you export yourself, what you choose to share with Apple Health, your own private iCloud copy while sync is on, and purchase checks handled by Apple."
+                : "Caelyn runs no servers of its own, so nothing is ever sent to us. The only things that ever leave are what you export yourself, what you choose to share with Apple Health, and purchase checks handled by Apple.",
             color: CaelynColor.primaryPlum
         ),
         (
@@ -60,14 +85,16 @@ struct PrivacyTrustView: View {
         (
             icon: "lock.shield.fill",
             title: "Subpoena-resistant by design",
-            body: "Because we hold no data and run no server, there is nothing for us to hand over — even if legally compelled. This isn't a policy; it's the architecture.",
+            body: hasCloudCopy
+                ? "Because we hold no data and run no server, there is nothing for us to hand over — even if legally compelled. This isn't a policy; it's the architecture. Your iCloud copy lives in your own Apple Account, so anything concerning it is between you and Apple, under their policies — never ours."
+                : "Because we hold no data and run no server, there is nothing for us to hand over — even if legally compelled. This isn't a policy; it's the architecture.",
             color: CaelynColor.alertRose
         )
-    ]
+    ]}
 
     /// The threat model, in plain language: concrete "what if" scenarios and what
     /// actually happens in each. Privacy must be PROVABLE, not promised (S7).
-    private let threatModel: [(q: String, a: String)] = [
+    var threatModel: [(q: String, a: String)] {[
         (
             q: "Someone picks up my phone",
             a: "With App Lock on, Caelyn locks itself the moment it leaves the foreground — Face ID, Touch ID, or your PIN to get back in. \"Hide app preview\" blanks it in the app switcher, and private notifications never show cycle details on your lock screen."
@@ -78,7 +105,9 @@ struct PrivacyTrustView: View {
         ),
         (
             q: "A court orders Caelyn to hand over my data",
-            a: "There is nothing to hand over. We run no servers and keep no copies. Your data exists in exactly one place: this device."
+            a: hasCloudCopy
+                ? "There is nothing for Caelyn to hand over: we run no servers and keep no copies. Your history is on this device and, since you switched sync on, in your own private iCloud — held under your Apple Account rather than by us."
+                : "There is nothing to hand over. We run no servers and keep no copies. Your data exists in exactly one place: this device."
         ),
         (
             q: "I lose my phone",
@@ -88,7 +117,7 @@ struct PrivacyTrustView: View {
             q: "Caelyn (the company) disappears",
             a: "The app keeps working — it never depended on a server. Your data stays on your device, and Export (CSV/PDF) is always there to take it anywhere else."
         ),
-    ]
+    ]}
 
     var body: some View {
         ScrollView {
