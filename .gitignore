@@ -52,4 +52,10 @@ fastlane/test_output/
 
 # Build/test artifacts
 *.xcresult/
-screenshots/
+# Raw capture output is an artifact; the curated App Store sets under store/ and
+# store-v2/ are deliverables. Git cannot re-include a path inside an excluded
+# directory, so screenshots/ itself has to stay un-excluded and its contents
+# excluded individually.
+screenshots/*
+!screenshots/store/
+!screenshots/store-v2/

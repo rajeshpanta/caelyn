@@ -149,11 +149,134 @@ final class ScreenshotTests: XCTestCase {
         snapshot("06b_PaywallPricing")
     }
 
+
+    // MARK: - App Store set
+    //
+    // These eight captures are the raw material for the published store frames.
+    // `screenshots/store-v2/_build/` crops and composes them, so the names here
+    // and the names in those scripts have to stay in step. Both idioms run the
+    // same tests: the iPhone frames and the iPad frames differ only in how the
+    // composers crop, not in what is photographed.
+    //
+    //   xcodebuild test -project Caelyn.xcodeproj -scheme Caelyn \
+    //     -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' \
+    //     -only-testing:CaelynUITests/ScreenshotTests/testStore1_Home ...
+    //
+    // Pin the status bar first so every frame reads 9:41 with a full battery:
+    //   xcrun simctl status_bar <udid> override --time "9:41" \
+    //     --cellularBars 4 --wifiBars 3 --batteryState charged --batteryLevel 100
+
+    /// Home on an ovulation day — the billboard frame.
+    func testStore1_Home() throws {
+        tap(tab: "Home")
+        sleep(2)
+        snapshot("S1_Home")
+    }
+
+    /// The phase guide, which carries the typical-range table ("is this normal?")
+    /// above the fold and the common questions below it. Both are captured
+    /// because the phone frame uses the first and the iPad frame the second.
+    func testStore2_PhaseGuide() throws {
+        tap(tab: "Home")
+        sleep(2)
+        let badge = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS 'Ovulation window' OR label CONTAINS 'phase'")
+        ).firstMatch
+        if badge.waitForExistence(timeout: 6) { badge.tap(); sleep(2) }
+        snapshot("S2_PhaseGuide")
+        app.swipeUp()
+        sleep(1)
+        snapshot("S2b_PhaseGuideQuestions")
+    }
+
+    /// The privacy page — the claim the whole product rests on.
+    func testStore3_Privacy() throws {
+        tap(tab: "Settings")
+        sleep(2)
+        let row = scrollUntil("Your privacy")
+        if row.exists { row.tap(); sleep(2) }
+        snapshot("S3_Privacy")
+    }
+
+    /// Insights: four big numbers, then the learned-about-you rows.
+    func testStore4_Insights() throws {
+        tap(tab: "Insights")
+        sleep(2)
+        snapshot("S4_Insights")
+    }
+
+    /// A month with a complete cycle in it. The current month has barely started,
+    /// so the calendar frame has to step back one month to show colour.
+    func testStore5_Calendar() throws {
+        tap(tab: "Calendar")
+        sleep(2)
+        goToPreviousMonth()
+        snapshot("S5_Calendar")
+    }
+
+    /// A day that was actually logged — medium flow, pain 5/10, cramps and
+    /// fatigue. Matching on a bare "2," used to select the grid's trailing cell
+    /// from the *next* month, which is empty; "20" is mid-period in the seed.
+    func testStore6_LoggedDay() throws {
+        tap(tab: "Calendar")
+        sleep(2)
+        goToPreviousMonth()
+        let day = app.buttons.matching(NSPredicate(format: "label BEGINSWITH '20'")).firstMatch
+        if day.waitForExistence(timeout: 5) { day.tap() }
+        sleep(2)
+        snapshot("S6_LoggedDay")
+        app.swipeUp()
+        sleep(1)
+        snapshot("S6b_LoggedDaySymptoms")
+    }
+
+    /// The import sheet, which names the apps Caelyn can read from. Most installs
+    /// in this category are switchers, so this is the frame that speaks to them.
+    func testStore7_BringHistory() throws {
+        tap(tab: "Settings")
+        sleep(2)
+        let row = scrollUntil("Bring your history")
+        if row.exists { row.tap(); sleep(2) }
+        snapshot("S7_BringHistory")
+    }
+
+    /// Export — the reason to still be logging in month six.
+    func testStore8_Export() throws {
+        tap(tab: "Settings")
+        sleep(2)
+        let row = scrollUntil("Export data")
+        if row.exists { row.tap(); sleep(2) }
+        snapshot("S8_Export")
+    }
+
     // MARK: - Helpers
 
     private func tap(tab name: String) {
-        let btn = app.buttons[name]
+        // iPad's sidebar-adaptable TabView publishes each tab twice — once in the
+        // sidebar, once in the collapsed tab bar — so an exact-label query is
+        // ambiguous there and `tap()` throws "Multiple matching elements found".
+        // firstMatch resolves to the visible one on both idioms.
+        let btn = app.buttons.matching(NSPredicate(format: "label == %@", name)).firstMatch
         if btn.waitForExistence(timeout: 5) { btn.tap() }
+    }
+
+    /// Scrolls the first scroll view until a button whose label contains `label`
+    /// is on screen and hittable. Settings is long enough on both idioms that the
+    /// import and export rows start below the fold.
+    private func scrollUntil(_ label: String, swipes: Int = 10) -> XCUIElement {
+        let el = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", label)).firstMatch
+        for _ in 0..<swipes {
+            if el.exists && el.isHittable { return el }
+            app.scrollViews.firstMatch.swipeUp()
+        }
+        return el
+    }
+
+    private func goToPreviousMonth() {
+        let prev = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS 'Previous' OR label CONTAINS 'chevron.left'")
+        ).firstMatch
+        if prev.exists { prev.tap(); sleep(2) }
     }
 
     private func snapshot(_ name: String) {
