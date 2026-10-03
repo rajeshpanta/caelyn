@@ -85,8 +85,20 @@ final class OnboardingViewModel {
     }
 
     func complete(in modelContext: ModelContext) {
-        if let existing = try? modelContext.fetch(FetchDescriptor<UserProfile>()),
-           !existing.isEmpty {
+        // A profile can already exist here for one reason: iCloud delivered hers
+        // from another device while she was still answering. This used to return
+        // straight away, which dropped every answer she had just given AND left
+        // `hasOnboarded` false on the row that survived — so onboarding reappeared
+        // on the next launch, and again on the one after that.
+        //
+        // Her existing profile wins, because it carries settings, reminders and a
+        // name she has already chosen. It is adopted rather than replaced: marked
+        // onboarded so she gets into the app, and filled in only where it has
+        // nothing of its own to say.
+        if let existing = (try? modelContext.fetch(FetchDescriptor<UserProfile>()))?
+            .sorted(by: { $0.createdAt < $1.createdAt }).first {
+            adopt(existing)
+            modelContext.saveOrLog()
             return
         }
         let profile = UserProfile(
@@ -118,5 +130,27 @@ final class OnboardingViewModel {
         }
         modelContext.insert(profile)
         modelContext.saveOrLog()
+    }
+
+    /// Bring a profile that already exists into the app, without overwriting
+    /// anything it already knows.
+    private func adopt(_ profile: UserProfile) {
+        profile.hasOnboarded = true
+
+        // Only answer what it has not answered. A synced profile's own cycle
+        // settings are hers too, and more considered than a first-run guess.
+        if profile.lastPeriodStart == nil {
+            profile.lastPeriodStart = notSureLastPeriod ? importedLastPeriodStart : lastPeriodStart
+        }
+        if profile.trackingGoals.isEmpty {
+            profile.trackingGoals = Array(trackingGoals)
+        }
+        if healthKitConnected, !profile.healthKitConnected {
+            profile.healthKitConnected = true
+            profile.hkReadFlow = true
+            profile.hkReadSymptoms = true
+            profile.hkReadFertility = true
+        }
+        if enableLock { profile.lockEnabled = true }
     }
 }

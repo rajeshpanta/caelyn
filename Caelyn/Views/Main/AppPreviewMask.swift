@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct AppPreviewMask: ViewModifier {
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
     @Environment(\.scenePhase) private var scenePhase
 
     private var hidePreview: Bool { profiles.first?.hidePreview ?? false }

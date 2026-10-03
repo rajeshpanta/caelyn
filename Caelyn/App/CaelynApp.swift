@@ -103,7 +103,7 @@ struct CaelynApp: App {
 
 /// Reads the user's theme preference and applies `preferredColorScheme`.
 private struct ThemedContentView: View {
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
 
     private var colorScheme: ColorScheme? {
         switch profiles.first?.theme ?? .system {

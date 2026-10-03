@@ -13,7 +13,7 @@ import SwiftUI
 struct AccountView: View {
 
     @Environment(\.modelContext) private var modelContext
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
     private var profile: UserProfile? { profiles.first }
 
     @State private var signInService = AppleSignInService()

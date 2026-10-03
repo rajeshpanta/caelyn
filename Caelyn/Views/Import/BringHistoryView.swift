@@ -23,7 +23,7 @@ struct BringHistoryView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
 
     @State private var model = BringHistoryModel()
     @State private var guideSource: ImportSourceGuide?

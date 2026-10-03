@@ -3,7 +3,7 @@ import SwiftData
 import UserNotifications
 
 struct RemindersView: View {
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
 
     var body: some View {
         Group {

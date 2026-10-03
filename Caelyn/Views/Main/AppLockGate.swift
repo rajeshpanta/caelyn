@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct AppLockGate<Content: View>: View {
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.modelContext) private var modelContext
 

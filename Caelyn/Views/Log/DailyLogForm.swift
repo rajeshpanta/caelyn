@@ -7,7 +7,7 @@ struct DailyLogForm: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \CycleEntry.date, order: .reverse) private var allEntries: [CycleEntry]
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
 
     // Three fields are typed rather than tapped, so each keeps a local draft the
     // keyboard can edit without a store write per keystroke. Everything else on

@@ -3,7 +3,7 @@ import SwiftData
 
 struct DataStatusCard: View {
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
 
     var body: some View {
         CaelynCard(padding: CaelynSpacing.md, background: CaelynColor.sage.opacity(0.6), shadow: .subtle) {

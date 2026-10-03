@@ -3,7 +3,7 @@ import SwiftData
 
 struct InsightsView: View {
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
 
     @State private var purchase = PurchaseService.shared
     @State private var showingPaywall = false

@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct SettingsView: View {
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
     @Query private var entries: [CycleEntry]
     @Environment(\.modelContext) private var modelContext
     @Environment(\.openURL) private var openURL

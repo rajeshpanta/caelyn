@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct HomeView: View {
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
     @Environment(\.modelContext) private var modelContext
 

@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct RootView: View {
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
     @Environment(\.modelContext) private var modelContext
     @State private var isLoaded = false
     @State private var showStoreWarning = UserDefaults.standard.bool(forKey: Persistence.storeFailedKey)
@@ -46,6 +46,11 @@ struct RootView: View {
             // sync race could have introduced (Phase 6 removed the `.unique`
             // store constraint; uniqueness-by-day is enforced in code instead).
             CycleStore.dedupeSameDay(in: modelContext)
+
+            // And the same for her profile. Two rows would make `profiles.first`
+            // a coin flip, so her name, theme and reminder times could change
+            // between launches with nothing to explain it.
+            ProfileStore.dedupe(in: modelContext)
 
             // Brief delay lets SwiftData hydrate from the store before we make
             // routing decisions. Without this, a brief [] from @Query would

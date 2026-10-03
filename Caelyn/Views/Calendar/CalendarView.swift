@@ -3,7 +3,7 @@ import SwiftData
 
 struct CalendarView: View {
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
 
     @State private var visibleMonth: Date = Calendar.current.startOfDay(for: .now)
     @State private var selectedDay: Date?

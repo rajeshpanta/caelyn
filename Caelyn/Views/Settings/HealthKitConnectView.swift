@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct HealthKitConnectView: View {
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
 
     var body: some View {
         Group {

@@ -116,7 +116,7 @@ extension CyclePhase {
 // MARK: - View modifier (applied in CaelynApp)
 
 struct WidgetDataSyncModifier: ViewModifier {
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
     @Environment(\.scenePhase) private var scenePhase
 

@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct BirthControlView: View {
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
     @Environment(\.modelContext) private var modelContext
 
     private var profile: UserProfile? { profiles.first }

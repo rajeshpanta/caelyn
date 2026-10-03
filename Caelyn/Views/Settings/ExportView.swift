@@ -3,7 +3,7 @@ import SwiftData
 
 struct ExportView: View {
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
     @Environment(\.dismiss) private var dismiss
 
     @State private var purchase = PurchaseService.shared

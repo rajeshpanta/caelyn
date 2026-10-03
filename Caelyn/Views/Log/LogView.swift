@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct LogView: View {
-    @Query private var profiles: [UserProfile]
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
 
     @State private var selectedDate: Date = Calendar.current.startOfDay(for: .now)
