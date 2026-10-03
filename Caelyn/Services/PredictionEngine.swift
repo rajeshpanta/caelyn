@@ -1,7 +1,16 @@
 import Foundation
 
 enum PredictionEngine {
-    private static var calendar: Calendar { Calendar.current }
+
+    // Every function that does day arithmetic takes the calendar it should use.
+    //
+    // It used to read a private `Calendar.current` of its own, which meant
+    // `CycleModel.make(calendar:)` — the one place that advertises a calendar —
+    // could only honour it in three spots: cycle reconstruction, every average,
+    // the cycle day and both windows quietly used the global instead. A test
+    // that pinned a calendar was therefore testing almost none of the maths it
+    // appeared to. The parameter is defaulted, so no existing caller changes,
+    // and naming it `calendar` means the bodies below are untouched.
 
     /// The largest gap, in days, between two logged bleeding days that Caelyn
     /// still reads as **one** period.
@@ -41,7 +50,8 @@ enum PredictionEngine {
     /// A cycle starts at the first day of a flow streak and runs until the day before
     /// the next flow streak begins. The most recent (in-progress) cycle has length 0
     /// and is excluded from this list — use `currentCycleDay` for the live cycle.
-    static func cycles(from entries: [CycleEntry], today: Date = .now) -> [Cycle] {
+    static func cycles(from entries: [CycleEntry], today: Date = .now,
+                      calendar: Calendar = .current) -> [Cycle] {
         // Exclude future-dated flow: a flow tap dated ahead of today must not be
         // treated as a period start, or it fabricates a huge phantom cycle that
         // skews every average and can false-trigger the irregular banner (stz-014).
@@ -71,7 +81,7 @@ enum PredictionEngine {
             let start = periodStarts[i]
             let nextStart = periodStarts[i + 1]
             let length = calendar.dateComponents([.day], from: start, to: nextStart).day ?? 0
-            let periodLength = consecutiveFlowDays(from: start, in: daySet)
+            let periodLength = consecutiveFlowDays(from: start, in: daySet, calendar: calendar)
             cycles.append(Cycle(start: start, length: length, periodLength: periodLength))
         }
         return cycles
@@ -84,7 +94,8 @@ enum PredictionEngine {
     /// 3, logged days 4 and 5" is a five-day period rather than a two-day one.
     /// Walking stops as soon as the gap exceeds the tolerance, so it can never
     /// wander into the next period.
-    private static func consecutiveFlowDays(from start: Date, in daySet: Set<Date>) -> Int {
+    private static func consecutiveFlowDays(from start: Date, in daySet: Set<Date>,
+                                            calendar: Calendar) -> Int {
         guard daySet.contains(start) else { return 0 }
         var lastLogged = start
         var cursor = start
@@ -156,7 +167,8 @@ enum PredictionEngine {
     }
 
     /// Cycle day (1-indexed) computed by wrapping at cycleLength.
-    static func currentCycleDay(lastPeriodStart: Date, today: Date = .now, cycleLength: Int) -> Int {
+    static func currentCycleDay(lastPeriodStart: Date, today: Date = .now, cycleLength: Int,
+                                calendar: Calendar = .current) -> Int {
         let lp = calendar.startOfDay(for: lastPeriodStart)
         let t = calendar.startOfDay(for: today)
         let days = calendar.dateComponents([.day], from: lp, to: t).day ?? 0
@@ -165,7 +177,8 @@ enum PredictionEngine {
     }
 
     /// Predicted next period start (today projected into the next cycle).
-    static func nextPeriodStart(lastPeriodStart: Date, today: Date = .now, cycleLength: Int) -> Date {
+    static func nextPeriodStart(lastPeriodStart: Date, today: Date = .now, cycleLength: Int,
+                                calendar: Calendar = .current) -> Date {
         let lp = calendar.startOfDay(for: lastPeriodStart)
         let t = calendar.startOfDay(for: today)
         let safeLen = max(cycleLength, 1)
@@ -183,7 +196,8 @@ enum PredictionEngine {
     /// The *un-rolled* expected period start: lastPeriodStart + one cycle.
     /// Unlike `nextPeriodStart`, this is NOT advanced past today — so it can be in
     /// the past, which is exactly what late-period detection needs (stz-009).
-    static func expectedPeriodStart(lastPeriodStart: Date, cycleLength: Int) -> Date {
+    static func expectedPeriodStart(lastPeriodStart: Date, cycleLength: Int,
+                                    calendar: Calendar = .current) -> Date {
         let lp = calendar.startOfDay(for: lastPeriodStart)
         let safeLen = max(cycleLength, 1)
         return calendar.date(byAdding: .day, value: safeLen, to: lp) ?? lp
@@ -192,7 +206,8 @@ enum PredictionEngine {
     /// Start of the most recent flow streak on or before `today` — used to recover
     /// the period anchor after an entry is removed, instead of blindly clearing it.
     /// Tolerates 1-day gaps (matches activePeriodWindow). nil if no flow remains.
-    static func mostRecentPeriodStart(from entries: [CycleEntry], today: Date = .now) -> Date? {
+    static func mostRecentPeriodStart(from entries: [CycleEntry], today: Date = .now,
+                                      calendar: Calendar = .current) -> Date? {
         let cutoff = calendar.startOfDay(for: today)
         let dayStarts = entries
             .filter { $0.flow != nil }
@@ -209,14 +224,17 @@ enum PredictionEngine {
     }
 
     /// How many days past the expected start the period is, or 0 if not late.
-    static func daysLate(lastPeriodStart: Date, today: Date = .now, cycleLength: Int) -> Int {
-        let expected = expectedPeriodStart(lastPeriodStart: lastPeriodStart, cycleLength: cycleLength)
+    static func daysLate(lastPeriodStart: Date, today: Date = .now, cycleLength: Int,
+                         calendar: Calendar = .current) -> Int {
+        let expected = expectedPeriodStart(lastPeriodStart: lastPeriodStart,
+                                          cycleLength: cycleLength, calendar: calendar)
         let t = calendar.startOfDay(for: today)
         return max(0, calendar.dateComponents([.day], from: expected, to: t).day ?? 0)
     }
 
     /// Predicted period window: nextStart through nextStart + (periodLength - 1).
-    static func predictedPeriodWindow(nextPeriodStart: Date, periodLength: Int) -> ClosedRange<Date> {
+    static func predictedPeriodWindow(nextPeriodStart: Date, periodLength: Int,
+                                      calendar: Calendar = .current) -> ClosedRange<Date> {
         let safeLen = max(periodLength, 1)
         let end = calendar.date(byAdding: .day, value: safeLen - 1, to: nextPeriodStart) ?? nextPeriodStart
         return nextPeriodStart...end
@@ -224,15 +242,18 @@ enum PredictionEngine {
 
     /// Estimated ovulation day: nextStart − lutealLength. Defaults to the standard
     /// 14-day luteal model; pass `learnedLutealLength(...)` to personalise (int-1).
-    static func ovulationEstimate(nextPeriodStart: Date, lutealLength: Int = 14) -> Date {
+    static func ovulationEstimate(nextPeriodStart: Date, lutealLength: Int = 14,
+                                  calendar: Calendar = .current) -> Date {
         calendar.date(byAdding: .day, value: -max(1, lutealLength), to: nextPeriodStart) ?? nextPeriodStart
     }
 
     /// Fertile window: the 5-day window where conception is most likely.
     /// Sperm survive up to 5 days; the egg lives ~12-24 hours post-ovulation.
     /// Window spans ovulation-day-4 through ovulation-day+1 (peak = ovulation day).
-    static func fertileWindow(nextPeriodStart: Date, lutealLength: Int = 14) -> ClosedRange<Date> {
-        let ovulation = ovulationEstimate(nextPeriodStart: nextPeriodStart, lutealLength: lutealLength)
+    static func fertileWindow(nextPeriodStart: Date, lutealLength: Int = 14,
+                              calendar: Calendar = .current) -> ClosedRange<Date> {
+        let ovulation = ovulationEstimate(nextPeriodStart: nextPeriodStart,
+                                          lutealLength: lutealLength, calendar: calendar)
         let start = calendar.date(byAdding: .day, value: -4, to: ovulation) ?? ovulation
         let end   = calendar.date(byAdding: .day, value: 1,  to: ovulation) ?? ovulation
         return start...end
@@ -242,7 +263,8 @@ enum PredictionEngine {
     /// positive / surge): days from the peak LH day to the next period start,
     /// averaged over cycles. Returns nil — so callers use the 14-day default —
     /// until ≥3 cycles carry a usable signal. Clamped to a physiologic 9–17 days (int-1).
-    static func learnedLutealLength(entries: [CycleEntry], cycles: [Cycle]) -> Int? {
+    static func learnedLutealLength(entries: [CycleEntry], cycles: [Cycle],
+                                    calendar: Calendar = .current) -> Int? {
         // Normalise the (few) ovulation markers once. Doing it per cycle meant
         // start-of-day arithmetic over every entry for every cycle — 200 ms on five
         // years of history, paid on every read.
@@ -267,7 +289,8 @@ enum PredictionEngine {
 
     /// PMS window ending the day before the predicted period.
     /// `daysBefore` defaults to 5; pass `adaptivePmsDaysBefore()` to personalise.
-    static func pmsWindow(nextPeriodStart: Date, daysBefore: Int = 5) -> ClosedRange<Date> {
+    static func pmsWindow(nextPeriodStart: Date, daysBefore: Int = 5,
+                          calendar: Calendar = .current) -> ClosedRange<Date> {
         let end = calendar.date(byAdding: .day, value: -1, to: nextPeriodStart) ?? nextPeriodStart
         let start = calendar.date(byAdding: .day, value: -daysBefore, to: nextPeriodStart) ?? end
         return start...end
@@ -276,7 +299,8 @@ enum PredictionEngine {
     /// Returns the average number of days before the period start at which PMS
     /// symptoms / moods first appear, derived from actual logged data. Returns nil
     /// when fewer than 3 cycles have qualifying markers (fallback to the default 5).
-    static func adaptivePmsDaysBefore(entries: [CycleEntry], cycles: [Cycle]) -> Int? {
+    static func adaptivePmsDaysBefore(entries: [CycleEntry], cycles: [Cycle],
+                                      calendar: Calendar = .current) -> Int? {
         let pmsSymptoms: Set<Symptom> = [.bloating, .cravings, .tenderBreasts, .fatigue, .acne, .cramps]
         let pmsMoods: Set<Mood>       = [.anxious, .irritable, .moody, .sad, .sensitive, .lowEnergy]
 
@@ -350,7 +374,8 @@ enum PredictionEngine {
     }
 
     /// Days from `today` to `target` (truncated to start-of-day, never negative for future dates).
-    static func daysUntil(_ target: Date, from today: Date = .now) -> Int {
+    static func daysUntil(_ target: Date, from today: Date = .now,
+                          calendar: Calendar = .current) -> Int {
         let t = calendar.startOfDay(for: today)
         let target = calendar.startOfDay(for: target)
         return max(0, calendar.dateComponents([.day], from: t, to: target).day ?? 0)

@@ -191,13 +191,13 @@ struct CycleModel {
     /// (its fertile window depends on it) and is re-rendered when it changes, which
     /// is correct. The Log tab never touches it.
     var lutealLength: Int {
-        PredictionEngine.learnedLutealLength(entries: entries, cycles: cycles) ?? 14
+        PredictionEngine.learnedLutealLength(entries: entries, cycles: cycles, calendar: calendar) ?? 14
     }
 
     /// How many days before her period PMS actually starts for her. Lazy for the
     /// same reason: it reads `symptoms` and `mood` on every entry.
     var pmsDaysBefore: Int {
-        PredictionEngine.adaptivePmsDaysBefore(entries: entries, cycles: cycles) ?? 5
+        PredictionEngine.adaptivePmsDaysBefore(entries: entries, cycles: cycles, calendar: calendar) ?? 5
     }
 
     // MARK: - Building
@@ -209,7 +209,7 @@ struct CycleModel {
         calendar: Calendar = .current
     ) -> CycleModel {
         let day = calendar.startOfDay(for: today)
-        let allCycles = PredictionEngine.cycles(from: entries, today: day)
+        let allCycles = PredictionEngine.cycles(from: entries, today: day, calendar: calendar)
         let cycles = PredictionEngine.plausibleCycles(allCycles)
 
         let cycleLength = PredictionEngine.averageCycleLength(
@@ -219,7 +219,7 @@ struct CycleModel {
 
         // Logged bleeding is the truth; the profile value is the seed she gave
         // before there was any. The later of the two wins — see the type's note.
-        let logged = PredictionEngine.mostRecentPeriodStart(from: entries, today: day)
+        let logged = PredictionEngine.mostRecentPeriodStart(from: entries, today: day, calendar: calendar)
         let seed = profile?.lastPeriodStart.map { calendar.startOfDay(for: $0) }
         let anchor: Date?
         switch (logged, seed) {
@@ -236,7 +236,7 @@ struct CycleModel {
             periodLength: periodLength,
             variation: PredictionEngine.cycleLengthVariation(of: cycles),
             activePeriodWindow: CalendarMath.activePeriodWindow(
-                in: entries, periodLength: periodLength, today: day),
+                in: entries, periodLength: periodLength, today: day, calendar: calendar),
             entries: entries,
             today: day,
             calendar: calendar
@@ -262,7 +262,7 @@ struct CycleModel {
     var cycleDay: Int {
         guard let anchor else { return 1 }
         return PredictionEngine.currentCycleDay(
-            lastPeriodStart: anchor, today: today, cycleLength: cycleLength)
+            lastPeriodStart: anchor, today: today, cycleLength: cycleLength, calendar: calendar)
     }
 
     var phase: CyclePhase {
@@ -277,54 +277,59 @@ struct CycleModel {
     var nextPeriodStart: Date? {
         guard let anchor else { return nil }
         return PredictionEngine.nextPeriodStart(
-            lastPeriodStart: anchor, today: today, cycleLength: cycleLength)
+            lastPeriodStart: anchor, today: today, cycleLength: cycleLength, calendar: calendar)
     }
 
     /// The un-rolled expected start — may be in the past, which is what lateness
     /// is measured against.
     var expectedPeriodStart: Date? {
         guard let anchor else { return nil }
-        return PredictionEngine.expectedPeriodStart(lastPeriodStart: anchor, cycleLength: cycleLength)
+        return PredictionEngine.expectedPeriodStart(lastPeriodStart: anchor, cycleLength: cycleLength,
+                                                    calendar: calendar)
     }
 
     var predictedPeriodWindow: ClosedRange<Date>? {
         nextPeriodStart.map {
-            PredictionEngine.predictedPeriodWindow(nextPeriodStart: $0, periodLength: periodLength)
+            PredictionEngine.predictedPeriodWindow(nextPeriodStart: $0, periodLength: periodLength,
+                                                   calendar: calendar)
         }
     }
 
     var ovulationEstimate: Date? {
         nextPeriodStart.map {
-            PredictionEngine.ovulationEstimate(nextPeriodStart: $0, lutealLength: lutealLength)
+            PredictionEngine.ovulationEstimate(nextPeriodStart: $0, lutealLength: lutealLength,
+                                               calendar: calendar)
         }
     }
 
     var fertileWindow: ClosedRange<Date>? {
         nextPeriodStart.map {
-            PredictionEngine.fertileWindow(nextPeriodStart: $0, lutealLength: lutealLength)
+            PredictionEngine.fertileWindow(nextPeriodStart: $0, lutealLength: lutealLength,
+                                           calendar: calendar)
         }
     }
 
     var pmsWindow: ClosedRange<Date>? {
         nextPeriodStart.map {
-            PredictionEngine.pmsWindow(nextPeriodStart: $0, daysBefore: pmsDaysBefore)
+            PredictionEngine.pmsWindow(nextPeriodStart: $0, daysBefore: pmsDaysBefore,
+                                       calendar: calendar)
         }
     }
 
     var daysUntilPeriod: Int {
-        nextPeriodStart.map { PredictionEngine.daysUntil($0, from: today) } ?? 0
+        nextPeriodStart.map { PredictionEngine.daysUntil($0, from: today, calendar: calendar) } ?? 0
     }
 
     var daysUntilPMS: Int {
-        pmsWindow.map { PredictionEngine.daysUntil($0.lowerBound, from: today) } ?? 0
+        pmsWindow.map { PredictionEngine.daysUntil($0.lowerBound, from: today, calendar: calendar) } ?? 0
     }
 
     var daysUntilOvulation: Int {
-        ovulationEstimate.map { PredictionEngine.daysUntil($0, from: today) } ?? 0
+        ovulationEstimate.map { PredictionEngine.daysUntil($0, from: today, calendar: calendar) } ?? 0
     }
 
     var daysUntilFertileWindowStart: Int {
-        fertileWindow.map { PredictionEngine.daysUntil($0.lowerBound, from: today) } ?? 0
+        fertileWindow.map { PredictionEngine.daysUntil($0.lowerBound, from: today, calendar: calendar) } ?? 0
     }
 
     // MARK: - Lateness
@@ -340,7 +345,7 @@ struct CycleModel {
     var daysLate: Int {
         guard let anchor else { return 0 }
         return PredictionEngine.daysLate(
-            lastPeriodStart: anchor, today: today, cycleLength: cycleLength)
+            lastPeriodStart: anchor, today: today, cycleLength: cycleLength, calendar: calendar)
     }
 
     /// Late means past the expected start with no bleeding logged since. Both

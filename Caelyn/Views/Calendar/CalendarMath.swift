@@ -23,8 +23,8 @@ struct DayState: Equatable {
 }
 
 enum CalendarMath {
-    /// A fresh calendar per access, exactly as `PredictionEngine.calendar` has
-    /// always been.
+    /// Every function here takes the calendar it should use, defaulted so no
+    /// caller has to change.
     ///
     /// **This was `static let calendar = Calendar.current`, and that one shared
     /// instance was the Phase 1B keyboard-focus bug.** Once `CycleModel.make`
@@ -38,11 +38,12 @@ enum CalendarMath {
     /// `Calendar` reproduced it, and only handing out a fresh value fixed it.
     /// `Calendar` is a value type over a mutating cached reference, so one instance
     /// shared between the Calendar tab and a view being typed into is not something
-    /// to hold onto for a small measured saving.
-    static var calendar: Calendar { Calendar.current }
+    /// to hold onto for a small measured saving. A parameter now carries it
+    /// instead, so there is no shared instance left to hold onto at all.
 
     /// 42-day grid (6 weeks × 7 days) covering the visible month plus leading/trailing days.
-    static func daysGrid(for month: Date, firstDayOfWeek: Int = 1) -> [Date] {
+    static func daysGrid(for month: Date, firstDayOfWeek: Int = 1,
+                         calendar: Calendar = .current) -> [Date] {
         var cal = calendar
         cal.firstWeekday = firstDayOfWeek
 
@@ -64,7 +65,8 @@ enum CalendarMath {
     }
 
     /// Weekday symbols ordered by firstDayOfWeek (e.g. ["S","M","T","W","T","F","S"]).
-    static func weekdaySymbols(firstDayOfWeek: Int = 1) -> [String] {
+    static func weekdaySymbols(firstDayOfWeek: Int = 1,
+                               calendar: Calendar = .current) -> [String] {
         var cal = calendar
         let safeFirst = max(1, min(7, firstDayOfWeek))
         cal.firstWeekday = safeFirst
@@ -84,7 +86,8 @@ enum CalendarMath {
         month: Date,
         entries: [CycleEntry],
         cycle: CycleModel,
-        today: Date = .now
+        today: Date = .now,
+        calendar: Calendar = .current
     ) -> DayState {
         let day = calendar.startOfDay(for: date)
         let monthStart = calendar.date(from: calendar.dateComponents([.year, .month], from: month)) ?? month
@@ -155,7 +158,8 @@ enum CalendarMath {
     static func activePeriodWindow(
         in entries: [CycleEntry],
         periodLength: Int,
-        today: Date = .now
+        today: Date = .now,
+        calendar: Calendar = .current
     ) -> ClosedRange<Date>? {
         let flowDates = entries
             .filter { $0.flow != nil }
