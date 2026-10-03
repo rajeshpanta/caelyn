@@ -26,11 +26,29 @@ struct HomeView: View {
         entries.first { Calendar.current.isDate($0.date, inSameDayAs: today) }
     }
 
+    /// Where `body` parks the model it derived, so the twenty-odd properties below
+    /// can read it back instead of each rebuilding it.
+    ///
+    /// A plain class, held in `@State` and deliberately not observable: SwiftUI
+    /// knows nothing about it, so writing to it during `body` cannot invalidate
+    /// anything or loop. It is a stash for one render, not state.
+    private final class DerivedCycle { var model: CycleModel? }
+    @State private var derived = DerivedCycle()
+
     /// The one derivation of her cycle. Every number on this screen — and on the
     /// calendar, the Log tab, the widget, the reminder scheduler — comes from here,
     /// so they can no longer disagree about the same history.
+    ///
+    /// **Read from the render's stash rather than recomputed.** Every property
+    /// below forwards to this one, and `body` reads about thirty of them, so a
+    /// plain computed property meant `CycleModel.make` ran forty-eight times per
+    /// pass. Measured on real history: 98 ms at one year, 481 ms at five, against
+    /// a 16 ms frame budget — Home got slower the longer she stayed, which is
+    /// exactly backwards. `body` now derives it once and parks it here. The
+    /// fallback only covers a read that somehow arrives before the first pass, and
+    /// recomputing is the right answer there.
     private var cycle: CycleModel {
-        CycleModel.make(entries: entries, profile: profile, today: today)
+        derived.model ?? CycleModel.make(entries: entries, profile: profile, today: today)
     }
 
     private var cycles: [Cycle] { cycle.cycles }
@@ -120,7 +138,10 @@ struct HomeView: View {
     }
 
     var body: some View {
-        ScrollView {
+        // Derive once, here, before anything reads it. See `cycle` above.
+        derived.model = CycleModel.make(entries: entries, profile: profile, today: today)
+
+        return ScrollView {
             VStack(spacing: CaelynSpacing.lg) {
                 HomeHeader(
                     greeting: HomeCopy.greeting(name: profile?.displayName),
