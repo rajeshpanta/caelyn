@@ -786,9 +786,30 @@ final class CaelynUITests: XCTestCase {
     }
 
     private func tapTab(_ label: String, in app: XCUIApplication) {
+        // The keyboard covers the tab bar on a phone, so every tab button reports
+        // isHittable == false while it is up and the tap lands on a key instead.
+        // That is what made this suite's journey test fail for reasons that had
+        // nothing to do with what it was testing. Put the keyboard away first —
+        // which is also what a person does, now there is a Done button to do it
+        // with.
+        dismissKeyboardIfPresent(in: app)
         let button = app.buttons[label]
         XCTAssertTrue(button.waitForExistence(timeout: 4), "Missing tab: \(label)")
         button.tap()
+    }
+
+    /// Dismiss the keyboard via the app's own Done button, falling back to the
+    /// interactive drag for any field that predates it.
+    func dismissKeyboardIfPresent(in app: XCUIApplication) {
+        guard app.keyboards.element.exists else { return }
+        let done = app.buttons["keyboardDone"]
+        if done.exists && done.isHittable {
+            done.tap()
+        } else {
+            app.swipeDown()
+        }
+        // Give the keyboard time to retract before anything under it is tapped.
+        _ = app.keyboards.element.waitForNonExistence(timeout: 3)
     }
 
     private func reveal(
@@ -798,6 +819,11 @@ final class CaelynUITests: XCTestCase {
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
+        // Anything under the keyboard is unreachable no matter how far we scroll,
+        // and `isHittable` does not account for the keyboard overlay — so the tap
+        // lands on a key and the next action fails somewhere unrelated. Put the
+        // keyboard away first, which is what a person has to do too.
+        dismissKeyboardIfPresent(in: app)
         for _ in 0..<maxSwipes {
             if element.exists && element.isHittable { return }
             app.swipeUp()

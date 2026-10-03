@@ -141,6 +141,33 @@ struct DailyLogForm: View {
         .onChange(of: basalFocused) { _, focused in
             if !focused { commitBasalTemp() }
         }
+        .toolbar {
+            // An explicit way to put the keyboard away.
+            //
+            // Temperature uses the decimal pad, which has no return key, and the
+            // note is a TextEditor where return inserts a newline — so for two of
+            // the three typed fields the only way out was to drag the scroll view,
+            // with nothing on screen saying so. On a phone the keyboard also
+            // covers the tab bar, so until it was dismissed she could not leave
+            // the tab either.
+            //
+            // Clearing focus is what already triggers each commit, so Done saves
+            // by the same path as tapping away.
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { dismissKeyboard() }
+                    .font(CaelynFont.body.weight(.semibold))
+                    .foregroundStyle(CaelynColor.primaryPlum)
+                    .accessibilityIdentifier("keyboardDone")
+            }
+        }
+    }
+
+    private func dismissKeyboard() {
+        noteFocused = false
+        medicationFocused = false
+        basalFocused = false
+        newSymptomFocused = false
     }
 
     // MARK: - Flow
