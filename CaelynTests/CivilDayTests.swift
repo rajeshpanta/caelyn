@@ -279,3 +279,40 @@ final class CivilDayTests: XCTestCase {
         }
     }
 }
+
+/// The small Pass-D fixes, each of which was a thing Caelyn said that was not true.
+@MainActor
+final class CaelynSaysOnlyWhatItKnowsTests: XCTestCase {
+
+    /// Home's ovulation headline is "Estimated ovulation window". The hint sits
+    /// directly beneath it, and for anyone without a completed cycle there is no
+    /// personalised line to replace it — so the same sentence appeared twice.
+    func testTheOvulationHintDoesNotRepeatTheHomeHeadline() {
+        let headline = HomeCopy.phaseHeadline(.ovulation, cycleDay: 14, daysUntilPeriod: 14)
+        let hint = CyclePhase.ovulation.hint
+        func normalised(_ s: String) -> String {
+            s.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: " ."))
+        }
+        XCTAssertNotEqual(normalised(headline), normalised(hint),
+            "Home stacks the same sentence twice during ovulation")
+        XCTAssertFalse(hint.isEmpty)
+    }
+
+    /// Every phase hint should be worth the line it occupies.
+    func testNoPhaseHintEchoesItsOwnHeadline() {
+        for phase in CyclePhase.allCases where phase != .unknown {
+            let headline = HomeCopy.phaseHeadline(phase, cycleDay: 10, daysUntilPeriod: 7)
+            let hint = phase.hint
+            XCTAssertNotEqual(headline.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: " .")),
+                              hint.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: " .")),
+                              "\(phase) says the same thing twice")
+        }
+    }
+
+    /// With nothing logged and nothing stated, there is no cycle day to show.
+    func testThereIsNoCycleDayToShowWithoutAnAnchor() {
+        let model = CycleModel.make(entries: [], profile: nil, today: Date())
+        XCTAssertFalse(model.hasPrediction,
+            "the Log tab's header keys off this; if it is ever true with no anchor it will print `Cycle day 1`")
+    }
+}

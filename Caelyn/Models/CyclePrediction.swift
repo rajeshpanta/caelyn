@@ -32,7 +32,11 @@ enum CyclePhase: String, CaseIterable, Identifiable {
         switch self {
         case .menstrual:  return "Take it easy today."
         case .follicular: return "A fresh-energy phase."
-        case .ovulation:  return "Estimated ovulation window."
+        // Not "Estimated ovulation window" — that is already the headline
+        // directly above it on Home, and for anyone without a completed cycle
+        // there is no personalised line to replace this one, so she saw the same
+        // sentence twice. Which is roughly every new user, two weeks in.
+        case .ovulation:  return "Your most fertile days, estimated."
         case .luteal:     return "Your body is settling in."
         case .pms:        return "Be gentle with yourself."
         case .unknown:    return "Log a cycle to learn your patterns."

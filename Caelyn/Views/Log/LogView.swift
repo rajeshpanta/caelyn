@@ -21,16 +21,16 @@ struct LogView: View {
     /// "Cycle day N" here is the same number Home's ring shows. It used to be
     /// computed from the stored onboarding cycle length against a stored anchor, so
     /// the two screens could say "Day 31" and "Day 3" about the same afternoon.
-    private var cycleDay: Int {
-        CycleModel.make(entries: entries, profile: profiles.first, today: selectedDate).cycleDay
+    private var cycle: CycleModel {
+        CycleModel.make(entries: entries, profile: profiles.first, today: selectedDate)
     }
 
     private var hasEntryOnSelectedDate: Bool {
-        entries.contains { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
+        entries.contains { $0.dayKey == CivilDay.key(for: selectedDate) }
     }
 
     private var entryOnSelectedDate: CycleEntry? {
-        entries.first { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
+        entries.first { $0.dayKey == CivilDay.key(for: selectedDate) }
     }
 
     @Environment(\.modelContext) private var modelContext
@@ -128,7 +128,7 @@ struct LogView: View {
         let cal = Calendar.current
         let isSelected = cal.isDate(date, inSameDayAs: selectedDate)
         let isTodayDate = cal.isDate(date, inSameDayAs: today)
-        let hasEntry = entries.contains { cal.isDate($0.date, inSameDayAs: date) }
+        let hasEntry = entries.contains { $0.dayKey == CivilDay.key(for: date, calendar: cal) }
 
         let dayNum = cal.component(.day, from: date)
         let dayAbbrev: String = {
@@ -190,7 +190,14 @@ struct LogView: View {
             // One string, not three Texts in an HStack: side by side their
             // minimum widths add up past the screen at accessibility sizes, which
             // forced the whole screen wider and clipped it off both edges.
-            Text("\(isToday ? "Today's check-in" : "Past log") · Cycle day \(cycleDay)")
+            // The cycle-day clause only when there is a cycle to count. With no
+            // period logged and none stated at onboarding, `cycleDay` falls back
+            // to 1 — and printing that tells her she is on day one of a cycle
+            // Caelyn knows nothing about. Home has suppressed this since stz-010;
+            // the Log tab was still saying it.
+            Text(cycle.hasPrediction
+                 ? "\(isToday ? "Today's check-in" : "Past log") · Cycle day \(cycle.cycleDay)"
+                 : (isToday ? "Today's check-in" : "Past log"))
                 .font(CaelynFont.subheadline)
                 .foregroundStyle(CaelynColor.deepPlumText.opacity(0.6))
                 .fixedSize(horizontal: false, vertical: true)

@@ -23,7 +23,7 @@ struct HomeView: View {
     private var today: Date { Calendar.current.startOfDay(for: .now) }
 
     private var todayEntry: CycleEntry? {
-        entries.first { Calendar.current.isDate($0.date, inSameDayAs: today) }
+        entries.first { $0.dayKey == CivilDay.key(for: today) }
     }
 
     /// Where `body` parks the model it derived, so the twenty-odd properties below
@@ -703,7 +703,7 @@ struct HomeView: View {
         // Existing logs on any other dates are intentionally left untouched —
         // historical logs are the source of truth for cycle tracking and exports.
         // Users can clear any day's log themselves via the Log tab.
-        if let existing = entries.first(where: { cal.isDate($0.date, inSameDayAs: newDay) }) {
+        if let existing = entries.first(where: { $0.dayKey == CivilDay.key(for: newDay, calendar: cal) }) {
             if existing.flow == nil { existing.flow = .medium }
             existing.updatedAt = .now
         } else {
@@ -718,7 +718,7 @@ struct HomeView: View {
     private func removePeriodLog() {
         let cal = Calendar.current
         var entryToSync: CycleEntry?
-        if let entry = entries.first(where: { cal.isDate($0.date, inSameDayAs: today) }) {
+        if let entry = entries.first(where: { $0.dayKey == CivilDay.key(for: today, calendar: cal) }) {
             entry.flow = nil
             entry.updatedAt = .now
             entryToSync = entry

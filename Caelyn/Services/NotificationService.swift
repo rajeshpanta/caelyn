@@ -330,7 +330,7 @@ enum NotificationService {
         let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
         let cal = Calendar.current
         let today = cal.startOfDay(for: .now)
-        let todayEntry = entries.first { cal.isDate($0.date, inSameDayAs: today) }
+        let todayEntry = entries.first { $0.dayKey == CivilDay.key(for: today, calendar: cal) }
         let cycle = CycleModel.make(entries: entries, profile: profile, today: today)
         await sync(profile: profile, cycle: cycle, todayEntry: todayEntry)
 

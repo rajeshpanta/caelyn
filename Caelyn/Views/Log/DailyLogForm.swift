@@ -47,8 +47,10 @@ struct DailyLogForm: View {
     private var profile: UserProfile? { profiles.first }
 
     private var entry: CycleEntry? {
-        let target = Calendar.current.startOfDay(for: date)
-        return allEntries.first { Calendar.current.isDate($0.date, inSameDayAs: target) }
+        // By stored day, matching the funnel in `withEntry` — an instant
+        // comparison stops finding the right row once she changes timezone.
+        let key = CivilDay.key(for: date)
+        return allEntries.first { $0.dayKey == key }
     }
 
     // MARK: - Drafts and their seeds
@@ -967,8 +969,13 @@ struct DailyLogForm: View {
     // MARK: - Mutations
 
     private func withEntry(_ mutate: (CycleEntry) -> Void) {
-        let target = entry ?? CycleEntry(date: date)
-        if entry == nil { modelContext.insert(target) }
+        // Through the funnel, not around it. Resolving the day from the `@Query`
+        // array and inserting when it comes back empty is a read of a snapshot
+        // that is only as fresh as the last render; `CycleStore.entry(for:)`
+        // fetches, so it cannot hand out a second row for a day that already has
+        // one. It also keys and files the new entry, which a bare
+        // `CycleEntry(date:)` leaves to the initialiser's own calendar.
+        let target = CycleStore.entry(for: date, in: modelContext)
         mutate(target)
         target.updatedAt = .now
         modelContext.saveOrLog()

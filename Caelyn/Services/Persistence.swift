@@ -21,31 +21,37 @@ enum Persistence {
     static let schema = Schema([CycleEntry.self, UserProfile.self])
 
     // MIGRATION POLICY — read before changing any @Model.
-    // v1.0 ships with no explicit SchemaMigrationPlan on purpose: the app has never
-    // been distributed, so every App Store install is a FRESH store of the current
-    // schema — no historical `.unique`/old-schema store exists in production to
-    // migrate. Additive changes rely on SwiftData lightweight migration, backstopped
-    // by `preserveStoreAside` (never loses data) + `CycleStore.dedupeSameDay`.
-    // The FIRST post-launch schema change that is NOT purely additive (renames,
-    // type changes, constraint changes) MUST introduce a VersionedSchema +
-    // SchemaMigrationPlan and be tested against a real pre-change store on device.
+    // There is still no explicit SchemaMigrationPlan, on purpose. Every schema
+    // change so far has been purely additive with an inline default, which
+    // SwiftData migrates automatically and which CloudKit requires anyway; adding
+    // a VersionedSchema for one of those buys nothing and costs a migration plan
+    // to maintain. Backstopped by `preserveStoreAside` (never loses data),
+    // `CycleStore.dedupeSameDay` and `ProfileStore.dedupe`.
+    //
+    // Note that a new property whose value is DERIVED FROM EXISTING DATA is no
+    // longer a lightweight migration. `CycleEntry.dayKey` is backfilled as
+    // ordinary app code inside `dedupeSameDay`, which already walks every row at
+    // launch — not in a migration stage. Do the same for the next one.
+    //
+    // The first change that is NOT purely additive (renames, type changes,
+    // constraint changes) MUST introduce a VersionedSchema + SchemaMigrationPlan
+    // and be tested against a real pre-change store on device.
 
-    /// The live SwiftData container. Caelyn 1.0 is **local only** — every entry
-    /// stays on-device with no Caelyn account and no Caelyn server, ever, and no
-    /// cloud copy of any kind. The `isSyncEnabled` branch below is dormant
-    /// scaffolding for a future opt-in private-CloudKit mirror; nothing in the app
-    /// can set that flag today, and without the iCloud entitlement the branch would
-    /// fail closed to the local store anyway. If a store can't open we fall back so
-    /// data always opens with zero loss. A total failure is unrecoverable —
-    /// fatalError so the crash log captures the exact error.
+    /// The live SwiftData container. Caelyn is **local first**: every entry is
+    /// written to this device and never to a Caelyn server, because there is no
+    /// Caelyn server. Since 1.3 she may additionally switch on a mirror to her own
+    /// private CloudKit database — an extra synchronised copy, never a
+    /// replacement, and off until she asks for it. A local write never waits on
+    /// the network. If a store can't open we fall back so data always opens with
+    /// zero loss. A total failure is unrecoverable — fatalError so the crash log
+    /// captures the exact error.
     static let storeFailedKey = "caelyn.storeFailed"
 
-    /// Opt-in iCloud sync flag. **Unreachable in 1.0** — there is no UI that can
-    /// set it (see `BackupInfoView`) because the app ships with no iCloud/CloudKit
-    /// entitlement, so the mirroring path below could only ever fail closed to the
-    /// local store. The plumbing is kept so restoring sync is a UI change plus a
-    /// capability, not a rewrite. Changing the flag takes effect on the next launch
-    /// (the container is built once, here).
+    /// Opt-in iCloud sync flag, set from Settings → Account & iCloud since 1.3.
+    /// Off by default. Changing it takes effect on the next launch, because the
+    /// container is built once, here. Read `isSyncActive` — not this — when
+    /// telling her anything about sync: this records what she asked for, that
+    /// records what actually happened.
     static let syncEnabledKey = "caelyn.syncEnabled"
     static var isSyncEnabled: Bool { UserDefaults.standard.bool(forKey: syncEnabledKey) }
 

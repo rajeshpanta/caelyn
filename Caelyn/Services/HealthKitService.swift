@@ -605,6 +605,6 @@ enum HealthKitService {
         let cal = Calendar.current
         let prevDay = cal.date(byAdding: .day, value: -1,
                                to: CivilDay.localDate(for: entry.dayKey, calendar: cal)) ?? entry.date
-        return !entries.contains { cal.isDate($0.date, inSameDayAs: prevDay) && $0.flow != nil }
+        return !entries.contains { $0.dayKey == CivilDay.key(for: prevDay, calendar: cal) && $0.flow != nil }
     }
 }
