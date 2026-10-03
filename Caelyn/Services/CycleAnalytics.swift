@@ -162,7 +162,7 @@ enum CycleAnalytics {
             }
         }
         let pains = entries
-            .filter { periodDays.contains(cal.startOfDay(for: $0.date)) }
+            .filter { periodDays.contains(CivilDay.localDate(for: $0.dayKey, calendar: cal)) }
             .compactMap(\.pain)
         guard !pains.isEmpty else { return nil }
         return Double(pains.reduce(0, +)) / Double(pains.count)
@@ -184,7 +184,7 @@ enum CycleAnalytics {
         let loggedDays = Set(
             entries
                 .filter { $0.hasContent }
-                .map { cal.startOfDay(for: $0.date) }
+                .map { CivilDay.localDate(for: $0.dayKey, calendar: cal) }
         )
         var cursor = cal.startOfDay(for: today)
         // Today not logged yet? Start counting from yesterday — no penalty.
@@ -214,7 +214,7 @@ enum CycleAnalytics {
         let loggedDays = Set(
             entries
                 .filter { $0.hasContent }
-                .map { cal.startOfDay(for: $0.date) }
+                .map { CivilDay.localDate(for: $0.dayKey, calendar: cal) }
         )
         return (0..<days).compactMap { offset -> (Date, Bool)? in
             guard let date = cal.date(byAdding: .day, value: -offset, to: cal.startOfDay(for: today)) else { return nil }

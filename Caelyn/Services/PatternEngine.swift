@@ -278,7 +278,7 @@ enum PatternEngine {
             let windowStart = calendar.date(byAdding: .day, value: -windowDays, to: cycle.start) ?? cycle.start
 
             let windowEntries = entries.filter {
-                let d = calendar.startOfDay(for: $0.date)
+                let d = CivilDay.localDate(for: $0.dayKey, calendar: calendar)
                 return d >= windowStart && d <= windowEnd
             }
             let symptomsInWindow = Set(windowEntries.flatMap(\.symptoms))
@@ -462,7 +462,7 @@ enum PatternEngine {
         for cycle in cycles {
             let end = calendar.date(byAdding: .day, value: cycle.periodLength, to: cycle.start) ?? cycle.start
             let periodEntries = entries.filter {
-                let d = calendar.startOfDay(for: $0.date)
+                let d = CivilDay.localDate(for: $0.dayKey, calendar: calendar)
                 return d >= cycle.start && d < end
             }
             pains += periodEntries.compactMap(\.pain)

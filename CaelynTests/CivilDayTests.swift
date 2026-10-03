@@ -316,3 +316,44 @@ final class CaelynSaysOnlyWhatItKnowsTests: XCTestCase {
             "the Log tab's header keys off this; if it is ever true with no anchor it will print `Cycle day 1`")
     }
 }
+
+/// Nothing may go back to working out an entry's day from its instant.
+///
+/// This is a source audit rather than a behavioural test because the failure it
+/// guards against is invisible until someone changes timezone: the code compiles,
+/// the tests pass at home, and the bug only appears on holiday. Nine sites were
+/// still doing it after the first sweep of the obvious ones — a shell grep had
+/// silently eaten the `$0` in its pattern — so this checks the source directly.
+@MainActor
+final class EntryDayDerivationAuditTests: XCTestCase {
+
+    func testNoEntryLookupInfersTheDayFromItsInstant() throws {
+        let root = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()      // CaelynTests
+            .deletingLastPathComponent()      // repo root
+            .appending(path: "Caelyn")
+        guard FileManager.default.fileExists(atPath: root.path) else {
+            throw XCTSkip("source tree not reachable from this host")
+        }
+
+        var offenders: [String] = []
+        let files = FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil)!
+        for case let url as URL in files where url.pathExtension == "swift" {
+            let text = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+            for (i, rawLine) in text.split(separator: "\n", omittingEmptySubsequences: false).enumerated() {
+                let line = String(rawLine)
+                guard !line.trimmingCharacters(in: .whitespaces).hasPrefix("//"),
+                      !line.trimmingCharacters(in: .whitespaces).hasPrefix("///") else { continue }
+                let infersFromInstant =
+                    (line.contains("inSameDayAs:") && line.contains(".date"))
+                    || line.contains("startOfDay(for: entry.date)")
+                    || line.contains("startOfDay(for: $0.date)")
+                if infersFromInstant {
+                    offenders.append("\(url.lastPathComponent):\(i + 1)")
+                }
+            }
+        }
+        XCTAssertTrue(offenders.isEmpty,
+            "these work out an entry's day from its stored instant, which drifts the moment she changes timezone — use `entry.dayKey` or `CivilDay.localDate(for:)`: \(offenders)")
+    }
+}
