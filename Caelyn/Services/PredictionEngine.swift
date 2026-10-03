@@ -58,7 +58,7 @@ enum PredictionEngine {
         let cutoff = calendar.startOfDay(for: today)
         let dayStarts: [Date] = entries
             .filter { $0.flow != nil }
-            .map { calendar.startOfDay(for: $0.date) }
+            .map { CivilDay.localDate(for: $0.dayKey, calendar: calendar) }
             .filter { $0 <= cutoff }
             .sorted()
 
@@ -211,7 +211,7 @@ enum PredictionEngine {
         let cutoff = calendar.startOfDay(for: today)
         let dayStarts = entries
             .filter { $0.flow != nil }
-            .map { calendar.startOfDay(for: $0.date) }
+            .map { CivilDay.localDate(for: $0.dayKey, calendar: calendar) }
             .filter { $0 <= cutoff }
             .sorted()
         guard let last = dayStarts.last else { return nil }
@@ -270,7 +270,7 @@ enum PredictionEngine {
         // years of history, paid on every read.
         let markerDays = entries
             .filter { $0.ovulationTestResult == .positive || $0.ovulationTestResult == .lhSurge }
-            .map { calendar.startOfDay(for: $0.date) }
+            .map { CivilDay.localDate(for: $0.dayKey, calendar: calendar) }
             .sorted()
         guard !markerDays.isEmpty else { return nil }
 
@@ -314,7 +314,7 @@ enum PredictionEngine {
                 let hasSymptom = entry.symptoms.contains { pmsSymptoms.contains($0) }
                 return hasMood || hasSymptom
             }
-            .map { calendar.startOfDay(for: $0.date) }
+            .map { CivilDay.localDate(for: $0.dayKey, calendar: calendar) }
             .sorted()
         guard !markerDays.isEmpty else { return nil }
 

@@ -9,6 +9,29 @@ final class CycleEntry {
     // `CycleStore.dedupeSameDay` runs at launch to merge any same-day duplicates
     // that a migration or sync race could introduce.
     var date: Date = Date()
+
+    /// Which calendar day this entry *is*, as `yyyyMMdd`, written in the calendar
+    /// she was living in at the time and never recomputed.
+    ///
+    /// `date` above is still the instant and still means exactly what it always
+    /// meant — formatters, exports, charts and Apple Health all keep reading it.
+    /// This is the identity: two entries are the same day when their keys match,
+    /// which stays true after she flies somewhere. See `CivilDay`.
+    ///
+    /// Defaulted to 0 so the schema change is a lightweight migration (SwiftData
+    /// requires a default or an optional for CloudKit mirroring either way).
+    /// A 0 means "written before this property existed"; `CycleStore.dedupeSameDay`
+    /// backfills those at launch.
+    var dayKey: Int = 0
+
+    /// Local midnight on the day this entry belongs to.
+    ///
+    /// Prefer this over `Calendar.current.startOfDay(for: entry.date)` everywhere —
+    /// it is the same type in the same space, but it comes from the stored key
+    /// rather than from re-truncating an instant, so it cannot drift when she
+    /// travels.
+    var day: Date { CivilDay.localDate(for: dayKey) }
+
     var flow: FlowLevel?
     var pain: Int?
     var painTypes: [PainType] = []
@@ -48,6 +71,7 @@ final class CycleEntry {
         note: String? = nil
     ) {
         self.date = Calendar.current.startOfDay(for: date)
+        self.dayKey = CivilDay.key(for: date)
         self.flow = flow
         self.pain = pain
         self.painTypes = painTypes

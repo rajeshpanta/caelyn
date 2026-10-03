@@ -146,7 +146,7 @@ enum ImportPlanner {
 
         let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
         var byDay: [Date: CycleEntry] = [:]
-        for entry in entries { byDay[calendar.startOfDay(for: entry.date)] = entry }
+        for entry in entries { byDay[CivilDay.localDate(for: entry.dayKey, calendar: calendar)] = entry }
 
         let decisions = ImportReconciler.plan(
             observations: parsed.observations,
@@ -198,7 +198,7 @@ enum ImportPlanner {
 
         let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
         var byDay: [Date: CycleEntry] = [:]
-        for entry in entries { byDay[calendar.startOfDay(for: entry.date)] = entry }
+        for entry in entries { byDay[CivilDay.localDate(for: entry.dayKey, calendar: calendar)] = entry }
 
         let decisions = ImportReconciler.plan(
             observations: parsed.observations,
@@ -278,7 +278,7 @@ enum ImportPlanner {
         let claims = ledger.claims(inBatch: batchID)
         let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
         var byDay: [Date: CycleEntry] = [:]
-        for entry in entries { byDay[calendar.startOfDay(for: entry.date)] = entry }
+        for entry in entries { byDay[CivilDay.localDate(for: entry.dayKey, calendar: calendar)] = entry }
 
         var decisions: [ImportReconciler.Decision] = []
         for claim in claims {

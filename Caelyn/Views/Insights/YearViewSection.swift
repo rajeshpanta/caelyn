@@ -89,7 +89,7 @@ private struct MiniMonthView: View {
     private var entryMap: [Date: CycleEntry] {
         Dictionary(
             entries.compactMap { entry -> (Date, CycleEntry)? in
-                let d = cal.startOfDay(for: entry.date)
+                let d = CivilDay.localDate(for: entry.dayKey, calendar: cal)
                 return (d, entry)
             },
             uniquingKeysWith: { first, _ in first }

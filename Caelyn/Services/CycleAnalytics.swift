@@ -143,7 +143,7 @@ enum CycleAnalytics {
             }
         }
         var counts: [Symptom: Int] = [:]
-        for entry in entries where dates.contains(cal.startOfDay(for: entry.date)) {
+        for entry in entries where dates.contains(CivilDay.localDate(for: entry.dayKey, calendar: cal)) {
             for s in entry.symptoms { counts[s, default: 0] += 1 }
         }
         return counts.max(by: { $0.value < $1.value })?.key

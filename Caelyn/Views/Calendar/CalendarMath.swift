@@ -95,7 +95,8 @@ enum CalendarMath {
         let isToday = calendar.isDate(day, inSameDayAs: today)
         let isFuture = day > calendar.startOfDay(for: today)
 
-        let entry = entries.first { calendar.isDate($0.date, inSameDayAs: day) }
+        let dayKey = CivilDay.key(for: day, calendar: calendar)
+        let entry = entries.first { $0.dayKey == dayKey }
 
         // Logged period takes precedence.
         if let flow = entry?.flow {
@@ -163,7 +164,7 @@ enum CalendarMath {
     ) -> ClosedRange<Date>? {
         let flowDates = entries
             .filter { $0.flow != nil }
-            .map { calendar.startOfDay(for: $0.date) }
+            .map { CivilDay.localDate(for: $0.dayKey, calendar: calendar) }
             .filter { $0 <= calendar.startOfDay(for: today) }   // exclude future-dated flow (stz-014)
             .sorted()
         guard let lastFlow = flowDates.last else { return nil }
