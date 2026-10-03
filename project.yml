@@ -21,7 +21,7 @@ settings:
     # highest number used anywhere so no upload can ever collide. Bump it before
     # every upload, and keep the widget/watch CFBundleVersion below identical — a
     # mismatch between the app and its embedded bundles trips ITMS-90473.
-    CURRENT_PROJECT_VERSION: 15
+    CURRENT_PROJECT_VERSION: 16
     DEVELOPMENT_TEAM: "7T9897GFKH"
   configs:
     # CloudKit mirroring receives silent pushes, and the entitlement value differs

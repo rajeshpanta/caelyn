@@ -4,7 +4,7 @@ Everything here fits Apple's character limits and matches the shipping code
 (`Caelyn.storekit`, `PurchaseService.swift`, `project.yml`). Paste verbatim.
 
 Bundle ID: `smallpanta-icould.com.caelynperiodtracker` (hyphen — bundle IDs allow it)
-Version: 1.0 · Build: 8
+Version: 1.3 · Build: 16
 
 IAP Product IDs use an **underscore**: App Store Connect rejects hyphens in
 product IDs ("Only alphanumeric characters, periods, and underscores are
@@ -15,8 +15,13 @@ hyphenated IDs compiled in and is dead — build 8 is the first uploadable one.
 
 ## Name (30)
 
+Matches the live listing. 30/30 characters, and it carries both of the terms
+Apple indexes hardest — "Period" and "Cycle" — in the same shape Clue and Flo
+use. An earlier draft of this file said "Caelyn Period Tracker", which is nine
+characters shorter and gives up "Cycle" for nothing; don't paste that.
+
 ```
-Caelyn Period Tracker
+Caelyn: Period & Cycle Tracker
 ```
 
 ## Subtitle (30)
