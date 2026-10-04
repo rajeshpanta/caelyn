@@ -47,6 +47,20 @@ enum Persistence {
     /// captures the exact error.
     static let storeFailedKey = "caelyn.storeFailed"
 
+    /// True when the app is running on the seeded, in-memory screenshot store.
+    ///
+    /// Everything that reports on storage has to know, because that container is
+    /// never mirrored: it has no cloud copy and cannot acquire one. Without this,
+    /// the privacy screen read the *device's* real sync preference and announced
+    /// a cloud copy of data that only exists in memory — which is how an App
+    /// Store capture ended up saying "because you switched on iCloud sync"
+    /// underneath a headline promising it never leaves the phone.
+    static var isDemoStore: Bool {
+        CommandLine.arguments.contains("--screenshot-mode")
+            || CommandLine.arguments.contains("--screenshot-paywall")
+            || CommandLine.arguments.contains("--ui-test-onboarding")
+    }
+
     /// Opt-in iCloud sync flag, set from Settings → Account & iCloud since 1.3.
     /// Off by default. Changing it takes effect on the next launch, because the
     /// container is built once, here. Read `isSyncActive` — not this — when

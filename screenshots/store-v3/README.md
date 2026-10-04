@@ -104,16 +104,40 @@ cd _build && python3 build_iphone.py && python3 build_ipad.py
 Requires Pillow. Fonts: **New York** and **SF** ship with macOS; **SF Pro Display
 Black** comes from Apple's SF Pro download and lives in `~/Library/Fonts`.
 
-## Why these are simulator captures, not device captures
+## Where these come from
 
-Not a fallback — a requirement.
+**iPhone frames are captured on a real iPhone 17 Pro Max** ("SMILE"), which
+renders natively at exactly **1320×2868** — the 6.9" slot's required size. An
+earlier pass used the simulator on the grounds that no phone here could produce
+that size; that was wrong, and based on the iPhone 15 Pro Max, which renders
+1290×2796 and genuinely cannot.
 
-* **iPhone.** The App Store 6.9" slot is **1320×2868**. A physical iPhone 15 Pro
-  Max renders at **1290×2796** and cannot fill it. The simulator runs the same
-  binary and renders identically at the exact required size.
-* **iPad.** The 13" slot is **2064×2752**. The connected iPad is a 12.9"
-  4th-generation at **2048×2732**.
+Capturing on the device needed three things worth writing down:
 
-The data is not mocked up either: every frame is the real app running under
-`--screenshot-mode`, which seeds a believable five-cycle history into an
-in-memory store. Real screens, real layout, real type — invented history.
+* The device must be in the provisioning profile. SMILE was not, and Xcode has
+  no Apple ID signed in, so `xcodebuild` was run with `-allowProvisioningUpdates
+  -allowProvisioningDeviceRegistration` and an App Store Connect API key from
+  `~/.appstoreconnect/private_keys/`. That registers the device and regenerates
+  the development profiles; it touches nothing on the store listing.
+* The device must be in light appearance:
+  `xcrun devicectl device settings appearance --device <udid> --mode light`.
+  It was in dark mode, and dark panels on pale grounds look like a mistake.
+* The device's own iCloud sync state used to leak into the capture. See below.
+
+**iPad frames are still simulator captures**, and that one is unavoidable: the
+13" slot is **2064×2752** and the connected iPad is a 12.9" 4th-generation at
+**2048×2732**.
+
+The data is seeded, not mocked: every frame is the real app under
+`--screenshot-mode`, which populates an in-memory store with a believable
+five-cycle history. Real screens, real layout, real type — invented history.
+
+### One app change this forced
+
+`--screenshot-mode` is meant to be hermetic, but `CloudDataDeletion
+.cloudCopyMayExistNow` read the *device's* real sync preference. SMILE has
+iCloud sync on, so the privacy screen truthfully announced a cloud copy — of
+data that only exists in memory — directly under a headline promising it never
+leaves the phone. `Persistence.isDemoStore` now makes the demo store report what
+is actually true of it: an in-memory container is never mirrored and has no
+cloud copy, however the device around it is configured.

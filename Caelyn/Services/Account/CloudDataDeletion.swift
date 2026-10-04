@@ -68,7 +68,11 @@ enum CloudDataDeletion {
     /// did, not what the preference says, and the preference alone changes nothing
     /// until the next launch.
     static var cloudCopyMayExistNow: Bool {
-        Persistence.isSyncEnabled
+        // The screenshot store lives in memory and is never mirrored, so there is
+        // nothing of hers in any cloud however the device itself is configured.
+        if Persistence.isDemoStore { return false }
+
+        return Persistence.isSyncEnabled
             || Persistence.isSyncActive
             || cloudCopyMayExist
             || deletionIsPending
