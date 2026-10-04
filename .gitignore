@@ -59,3 +59,4 @@ fastlane/test_output/
 screenshots/*
 !screenshots/store/
 !screenshots/store-v2/
+!screenshots/store-v3/
