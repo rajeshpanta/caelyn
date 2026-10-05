@@ -39,11 +39,36 @@ enum PredictionEngine {
     /// polymenorrhea) so a genuinely short cycle is still hers and still counted.
     static let minimumPlausibleCycleLength = 15
 
+    /// A gap this long is not a long cycle; it is a different situation.
+    ///
+    /// Ninety days with no period is the clinical threshold for amenorrhoea, and
+    /// the reasons for it — pregnancy, the months after birth, breastfeeding,
+    /// hormonal contraception, PCOS, perimenopause, illness, or simply not having
+    /// opened the app for a year — are not cycle lengths. Averaging one in does
+    /// not make the average slightly wrong, it makes it describe something that
+    /// never happened.
+    static let maximumPlausibleCycleLength = 90
+
     /// The cycles that may inform an average, a spread, or anything Caelyn says
     /// about her health. Reconstruction stays faithful; the statistics get the
     /// subset that can actually be true.
+    ///
+    /// **The ceiling matters as much as the floor.** Without it, a woman who had a
+    /// baby had one 400-day "cycle" in her history permanently. `clampCycleLength`
+    /// hid the worst of it from the prediction by capping at 45, but nothing
+    /// capped the rest: her variation read as ±190 days, and
+    /// `irregularCycleStatus` saw a length over 45 and told her — every time she
+    /// opened Insights, for the rest of her life — that her cycles were irregular
+    /// with skipped periods. The gap never leaves her history, so neither did the
+    /// message.
+    ///
+    /// A genuinely skipped period still lands inside the bound and still reports
+    /// as one. That distinction is the point: a 50-day cycle is a skipped period,
+    /// and 400 days is not a cycle at all.
     static func plausibleCycles(_ cycles: [Cycle]) -> [Cycle] {
-        cycles.filter { $0.length >= minimumPlausibleCycleLength }
+        cycles.filter {
+            $0.length >= minimumPlausibleCycleLength && $0.length <= maximumPlausibleCycleLength
+        }
     }
 
     /// Reconstruct cycles from logged entries.

@@ -54,18 +54,48 @@ final class WatchDataModel: NSObject, ObservableObject, WCSessionDelegate {
     // MARK: - WCSessionDelegate
 
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        DispatchQueue.main.async { self.snapshot = WidgetDataStore.read() }
-    }
-
-    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
-        if let data = applicationContext["snapshot"] as? Data,
-           let snap = try? JSONDecoder().decode(WidgetSnapshot.self, from: data) {
-            DispatchQueue.main.async { self.snapshot = snap }
+        // The last context is replayed here rather than through
+        // `didReceiveApplicationContext`, which only fires on a *change* — so a
+        // wipe that happened while the watch app was closed would otherwise never
+        // be seen, and the stale snapshot would come straight back.
+        let received = session.receivedApplicationContext
+        DispatchQueue.main.async {
+            if received["cleared"] != nil {
+                self.snapshot = nil
+                WidgetDataStore.clear()
+            } else {
+                self.snapshot = WidgetDataStore.read()
+            }
         }
     }
 
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        apply(applicationContext)
+    }
+
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
-        if let data = message["snapshot"] as? Data,
+        apply(message)
+    }
+
+    /// One place to read an incoming payload, so the clear cannot be handled in
+    /// one delivery path and forgotten in the other.
+    ///
+    /// **The clear matters as much as the snapshot.** Before this, the watch could
+    /// only ever be *given* data: every path set `snapshot`, none unset it. So a
+    /// "Delete all data" on the phone left her cycle day, phase and next predicted
+    /// period sitting on her wrist, and the application context is persistent, so
+    /// it survived relaunching the watch app. After the duress wipe — whose entire
+    /// promise is an app that looks brand new — the watch was still counting.
+    private func apply(_ payload: [String: Any]) {
+        if payload["cleared"] != nil {
+            DispatchQueue.main.async {
+                self.snapshot = nil
+                self.pendingLogSent = false
+                WidgetDataStore.clear()
+            }
+            return
+        }
+        if let data = payload["snapshot"] as? Data,
            let snap = try? JSONDecoder().decode(WidgetSnapshot.self, from: data) {
             DispatchQueue.main.async { self.snapshot = snap }
         }

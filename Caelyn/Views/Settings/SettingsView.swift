@@ -12,7 +12,13 @@ struct SettingsView: View {
     @State private var showingPINManage = false
     @State private var showingBringHistory = false
     @State private var showingImportHistory = false
-    @State private var showingParanoidConfirm = false
+    /// Which of the privacy confirmations is on screen. One piece of state for all
+    /// three because they share one dialog — see the modifier for why.
+    @State private var privacyConfirm: PrivacyConfirm?
+    /// Observed rather than read, so the switch reflects the value it was given.
+    /// `AutoSweepSettings` is still the authority everywhere outside this view;
+    /// this reads the same key.
+    @AppStorage(AutoSweepSettings.enabledKey) private var autoEraseOn = false
     /// Set after Paranoid Mode runs while a mirrored store is still open, so the
     /// one thing it cannot finish this launch is said out loud rather than implied.
     @State private var paranoidRelaunchNotice: String?
@@ -383,10 +389,16 @@ struct SettingsView: View {
                     icon: "clock.badge.exclamationmark",
                     iconColor: CaelynColor.alertRose,
                     title: "Auto-erase if inactive",
-                    subtitle: "Permanently deletes all data if Caelyn isn't opened for \(profile.autoWipeAfterDays) days.",
+                    subtitle: "Permanently deletes all data if Caelyn isn't opened for \(AutoSweepSettings.afterDays) days.",
                     isOn: Binding(
-                        get: { profile.autoWipeEnabled },
-                        set: { profile.autoWipeEnabled = $0; modelContext.saveOrLog() }
+                        get: { autoEraseOn },
+                        // Arming this is the most destructive thing in Settings and
+                        // the only one that acts on its own, with no prompt at the
+                        // moment it fires. Paranoid Mode, right below, confirms —
+                        // and it only changes settings. This has to as well.
+                        set: { on in
+                            if on { privacyConfirm = .armAutoErase } else { autoEraseOn = false }
+                        }
                     )
                 )
                 SettingsDivider()
@@ -395,19 +407,48 @@ struct SettingsView: View {
                     iconColor: CaelynColor.alertRose,
                     title: "Paranoid Mode",
                     detail: "Maximum privacy in one tap",
-                    action: { showingParanoidConfirm = true }
+                    action: { privacyConfirm = .paranoidMode }
                 )
             }
         }
+        // One dialog, switched on which question is being asked, rather than one
+        // modifier per question. SwiftUI's presentation modifiers are not reliably
+        // independent when several of the same kind are stacked on one view, and
+        // these three are all confirmations of destructive privacy actions — the
+        // last place to find out which one wins. Modelling the question as state
+        // makes a fourth safe to add.
         .confirmationDialog(
-            "Turn on Paranoid Mode?",
-            isPresented: $showingParanoidConfirm,
-            titleVisibility: .visible
-        ) {
-            Button("Lock everything down", role: .destructive) { enableParanoidMode() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text(paranoidConfirmMessage)
+            privacyConfirm?.title ?? "",
+            isPresented: Binding(
+                get: { privacyConfirm != nil },
+                set: { if !$0 { privacyConfirm = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: privacyConfirm
+        ) { which in
+            switch which {
+            case .armAutoErase:
+                Button("Turn on auto-erase", role: .destructive) { autoEraseOn = true }
+                Button("Cancel", role: .cancel) {}
+            case .disableLockWithDuress:
+                Button("Turn off App Lock", role: .destructive) {
+                    profile?.lockEnabled = false
+                    modelContext.saveOrLog()
+                }
+                Button("Keep App Lock on", role: .cancel) {}
+            case .paranoidMode:
+                Button("Lock everything down", role: .destructive) { enableParanoidMode() }
+                Button("Cancel", role: .cancel) {}
+            }
+        } message: { which in
+            switch which {
+            case .armAutoErase:
+                Text("If you don't open Caelyn for \(AutoSweepSettings.afterDays) days, everything you've logged is permanently deleted \u{2014} with no warning and no way to get it back. This only applies to this iPhone.")
+            case .disableLockWithDuress:
+                Text(PINSettingsPolicy.disablingLockWithDuressWarning)
+            case .paranoidMode:
+                Text(paranoidConfirmMessage)
+            }
         }
         .alert("Paranoid Mode is on", isPresented: Binding(
             get: { paranoidRelaunchNotice != nil },
@@ -711,6 +752,14 @@ struct SettingsView: View {
                     lockToggleError = "Set an App PIN or add a passcode in iOS Settings, then try again."
                     return
                 }
+                // Switching the lock off disconnects an armed duress PIN, because
+                // the lock screen is the only place it can be typed. Confirm
+                // rather than let a safety feature stop working quietly.
+                if !newValue,
+                   PINSettingsPolicy.needsDuressWarningWhenDisablingLock(hasDuressPIN: PINService.hasDuress) {
+                    privacyConfirm = .disableLockWithDuress
+                    return
+                }
                 profile.lockEnabled = newValue
                 modelContext.saveOrLog()
             }
@@ -826,4 +875,33 @@ struct SettingsView: View {
 #Preview {
     SettingsView()
         .modelContainer(Persistence.preview)
+}
+
+/// The three privacy confirmations, which share one dialog.
+///
+/// Several `confirmationDialog` modifiers stacked on one view are not reliably
+/// independent in SwiftUI, and all three of these confirm a destructive privacy
+/// action — the last place to leave it to chance which presentation wins.
+@MainActor
+enum PrivacyConfirm: Identifiable, CaseIterable {
+    /// Arms a timer that deletes everything she has logged, with no prompt at the
+    /// moment it fires.
+    case armAutoErase
+    /// Disconnects an armed duress PIN, because the lock screen is the only place
+    /// it can be typed.
+    case disableLockWithDuress
+    case paranoidMode
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .armAutoErase:
+            return "Auto-erase everything after \(AutoSweepSettings.afterDays) days?"
+        case .disableLockWithDuress:
+            return "Turn off App Lock?"
+        case .paranoidMode:
+            return "Turn on Paranoid Mode?"
+        }
+    }
 }

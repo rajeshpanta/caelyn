@@ -222,11 +222,31 @@ enum ImportReconciler {
 
         // 4. Deletions. A record vanishing at its source only clears a field that
         //    Caelyn still owns and that still holds exactly what was imported.
+        //
+        //    And only when the source has not also sent a value for the same day
+        //    and field in this very batch. Several trackers represent an *edit* as
+        //    a delete plus a re-add under a fresh record id, so the batch arrives
+        //    carrying both halves: the new reading, and a deletion of the record
+        //    the old reading came from.
+        //
+        //    `currentValue` reads the store as it stands now, before any of this
+        //    plan's writes, so on an edit the old value is still there and the
+        //    claim still matches. The clear was appended after the update and
+        //    applied after it too — so her corrected reading was written and then
+        //    erased, and a day that held nothing else was deleted outright. She
+        //    edited a value in her old app and watched Caelyn lose the day.
+        //
+        //    A real deletion sends no replacement, so it still clears.
+        let replacedInThisBatch = Set(best.keys)
         for recordID in deletedRecordIDs {
             for claim in ledger.claims(forRecord: recordID) {
                 guard let field = ImportObservation.Field(ledgerKey: claim.fieldKey),
                       let day = dayFromKey(claim.dayKey, calendar: calendar)
                 else { continue }
+                guard !replacedInThisBatch.contains(Key(day: day, field: field)) else {
+                    // An edit, not a deletion. Step 3 already decided this field.
+                    continue
+                }
                 guard let stored = currentValue(day, field), stored.ledgerValue == claim.importedValue else {
                     // She has since changed or cleared it — leave it alone.
                     continue

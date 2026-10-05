@@ -12,6 +12,15 @@ struct AppLockGate<Content: View>: View {
     @State private var showingPINPad = false
     @State private var pinError: String?
 
+    /// Shared with `AppLockWindow`, which draws the lock above presented sheets.
+    @State private var lockModel = AppLockModel()
+    /// Whether the window took the lock. `@State` rather than reading
+    /// `AppLockWindow.isPresenting` directly: that is a plain property, so
+    /// changing it does not re-render this view, and the gate went on drawing its
+    /// own PIN pad underneath the window's — two live locks, every digit matching
+    /// twice.
+    @State private var lockInWindow = false
+
     let content: () -> Content
 
     private var lockEnabled: Bool { profiles.first?.lockEnabled ?? false }
@@ -28,30 +37,34 @@ struct AppLockGate<Content: View>: View {
                 .opacity(showLockScreen ? 0 : 1)
                 .allowsHitTesting(!showLockScreen)
 
-            if showLockScreen {
-                if showPINEntry {
-                    PINPadView(
-                        title: "Enter PIN",
-                        subtitle: "Unlock Caelyn",
-                        length: 4,
-                        errorMessage: pinError,
-                        onSubmit: verifyPIN,
-                        onCancel: BiometricService.canAuthenticate ? { showingPINPad = false; pinError = nil } : nil
-                    )
-                    .background(CaelynColor.backgroundCream.ignoresSafeArea())
-                } else {
-                    LockScreen(
-                        biometricKind: BiometricService.availableKind(),
-                        canAuthenticate: BiometricService.canAuthenticate,
-                        pinAvailable: PINService.isSet,
-                        errorMessage: errorMessage,
-                        isAuthenticating: attemptingAuth,
-                        onUnlock: { Task { await tryUnlock() } },
-                        onUsePIN: { showingPINPad = true; pinError = nil }
-                    )
-                }
+            // Still drawn here as well as in the window. The window is what puts
+            // the lock above presented sheets, but if there is no scene to attach
+            // one to this is what she gets — which is exactly the behaviour that
+            // shipped before, rather than a blank screen.
+            if showLockScreen, !lockInWindow {
+                AppLockOverlay(model: lockModel)
             }
         }
+        .onAppear {
+            syncLockModel()
+            // Launching straight into a locked app: `onChange` never fires for a
+            // value that was already true.
+            if showLockScreen { lockInWindow = AppLockWindow.shared.present(model: lockModel) }
+        }
+        .onDisappear { AppLockWindow.shared.dismiss(); lockInWindow = false }
+        .onChange(of: showLockScreen) { _, locked in
+            syncLockModel()
+            if locked {
+                lockInWindow = AppLockWindow.shared.present(model: lockModel)
+            } else {
+                AppLockWindow.shared.dismiss()
+                lockInWindow = false
+            }
+        }
+        .onChange(of: showPINEntry) { _, _ in syncLockModel() }
+        .onChange(of: pinError) { _, _ in syncLockModel() }
+        .onChange(of: errorMessage) { _, _ in syncLockModel() }
+        .onChange(of: attemptingAuth) { _, _ in syncLockModel() }
         .task { await sweepThenRecordActivity() }   // launch: auto-sweep if the window elapsed
         .task(id: lockEnabled) {
             if lockEnabled && !isUnlocked && BiometricService.canAuthenticate {
@@ -76,6 +89,23 @@ struct AppLockGate<Content: View>: View {
         }
     }
 
+    /// Push the gate's state into the model the window renders from, and hand it
+    /// the actions. Called whenever anything the lock displays changes.
+    private func syncLockModel() {
+        lockModel.showPINEntry = showPINEntry
+        lockModel.pinError = pinError
+        lockModel.biometricError = errorMessage
+        lockModel.isAuthenticating = attemptingAuth
+        lockModel.biometricKind = BiometricService.availableKind()
+        lockModel.canAuthenticate = BiometricService.canAuthenticate
+        lockModel.pinAvailable = PINService.isSet
+        lockModel.onUnlock = { Task { await tryUnlock() } }
+        lockModel.onUsePIN = { showingPINPad = true; pinError = nil }
+        lockModel.onSubmitPIN = { verifyPIN($0) }
+        lockModel.onCancelPIN = BiometricService.canAuthenticate
+            ? { showingPINPad = false; pinError = nil } : nil
+    }
+
     private var showLockScreen: Bool {
         guard hasOnboarded, lockEnabled else { return false }
         // Fail OPEN if there's no way to unlock (no biometrics AND no PIN) — a user
@@ -88,10 +118,16 @@ struct AppLockGate<Content: View>: View {
 
     /// Run the opt-in auto-sweep using the PREVIOUS activity timestamp, then stamp
     /// the new one. No-op unless the user enabled auto-wipe (priv-4).
+    ///
+    /// The stamp is skipped when the sweep actually fired. It used to run either
+    /// way, writing to the `UserProfile` the sweep had just deleted — which can
+    /// bring the row back, leaving her name, averages and settings in a store that
+    /// was supposed to look brand new.
     @MainActor
     private func sweepThenRecordActivity() async {
-        await AutoSweepService.checkAndSweep(profile: profiles.first, modelContext: modelContext)
-        AutoSweepService.recordActivity(profile: profiles.first, modelContext: modelContext)
+        let wiped = await AutoSweepService.checkAndSweep(profile: profiles.first, modelContext: modelContext)
+        guard !wiped else { return }
+        AutoSweepService.recordActivity()
     }
 
     private func verifyPIN(_ pin: String) {
@@ -140,7 +176,7 @@ struct AppLockGate<Content: View>: View {
     }
 }
 
-private struct LockScreen: View {
+struct AppLockScreen: View {
     let biometricKind: BiometricKind
     let canAuthenticate: Bool
     let pinAvailable: Bool

@@ -24,6 +24,29 @@ final class WatchBridgeService: NSObject, ObservableObject {
         guard let data = try? JSONEncoder().encode(snapshot) else { return }
         try? WCSession.default.updateApplicationContext(["snapshot": data])
     }
+
+    /// Tell the watch her data is gone.
+    ///
+    /// **Why a wipe has to reach the watch.** The application context is
+    /// *persistent*: WatchConnectivity keeps the last one and redelivers it, so
+    /// clearing the phone's own snapshot leaves the watch still holding — and
+    /// showing — her cycle day, her phase and her next predicted period. A
+    /// "Delete all data" that leaves it on her wrist has not deleted her data. For
+    /// the duress wipe it is worse than a leftover: the promise is that the app
+    /// looks brand new, and the loudest possible contradiction is a watch face
+    /// still counting her cycle.
+    ///
+    /// Stamped with the wipe time rather than a bare flag because
+    /// `updateApplicationContext` is a no-op when the dictionary is unchanged, so
+    /// a second wipe would never be delivered.
+    func pushCleared(at when: Date = .now) {
+        guard WCSession.isSupported(),
+              WCSession.default.activationState == .activated,
+              WCSession.default.isWatchAppInstalled else { return }
+        try? WCSession.default.updateApplicationContext(
+            ["cleared": when.timeIntervalSince1970]
+        )
+    }
 }
 
 extension WatchBridgeService: WCSessionDelegate {

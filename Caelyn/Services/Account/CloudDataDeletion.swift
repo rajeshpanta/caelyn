@@ -103,17 +103,33 @@ enum CloudDataDeletion {
     /// marker is written before the network call, so an interruption is recoverable
     /// rather than invisible.
     static func deleteCloudCopy() async -> Outcome {
+        let defaults = UserDefaults.standard
+
+        // **Her intent is recorded before anything is allowed to fail.**
+        //
+        // The availability check used to come first and return early, so a woman
+        // who asked for her iCloud copy to be destroyed while she had no signal —
+        // on a plane, on the underground, abroad with data off — got a message
+        // saying nothing had been deleted, and that was the end of it. Nothing was
+        // written down, so `resolveOutstandingDeletion` found nothing to resume
+        // and no later launch ever tried again. Her reproductive health history
+        // stayed in iCloud indefinitely, after she had explicitly asked for it to
+        // go, and the only sign was one dismissed message.
+        //
+        // Sync goes off in the same breath, for two reasons. She has asked for the
+        // cloud copy to stop existing, so the mirror must stop feeding it whether
+        // or not the zone can be reached right now. And `resolveOutstandingDeletion`
+        // treats sync still being on as her having changed her mind — it would
+        // clear the pending marker on the next launch and cancel the retry it
+        // exists to perform.
+        defaults.set(true, forKey: pendingKey)
+        defaults.set(false, forKey: Persistence.syncEnabledKey)
+
         let availability = await CloudAccount.availability()
         guard availability == .available else {
-            log.warning("Cloud delete: iCloud unavailable; nothing was deleted.")
+            log.warning("Cloud delete: iCloud unavailable; deferred, pending marker kept.")
             return .unavailable(availability)
         }
-
-        let defaults = UserDefaults.standard
-        defaults.set(true, forKey: pendingKey)
-        // Stop sync before removing the zone, so the mirror is not simultaneously
-        // trying to push the local store back up into it.
-        defaults.set(false, forKey: Persistence.syncEnabledKey)
 
         do {
             let database = CKContainer(identifier: Persistence.cloudKitContainerID).privateCloudDatabase
@@ -212,7 +228,9 @@ extension CloudDataDeletion.Outcome {
         case .nothingToDelete:
             return "There was nothing stored in iCloud. What's on this iPhone is untouched."
         case let .unavailable(availability):
-            return "Nothing was deleted \u{2014} Caelyn couldn't reach iCloud. \(availability.message)"
+            // Honest in both directions: nothing has gone yet, and she does not
+            // have to come back and ask a second time.
+            return "Caelyn couldn't reach iCloud, so your iCloud copy is still there for now \u{2014} it'll be deleted as soon as a connection comes back. Syncing is already switched off. \(availability.message)"
         case .failed:
             return "That didn't finish, so your iCloud copy may still be there. Caelyn will try again next time you open it."
         }

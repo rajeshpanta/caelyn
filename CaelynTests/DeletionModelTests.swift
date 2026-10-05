@@ -127,12 +127,19 @@ final class DeletionModelTests: XCTestCase {
     }
 
     /// iCloud unreachable: calm, accurate, and explicitly not a success.
+    ///
+    /// Asserts the substance rather than one phrase. The copy survives, and she
+    /// has to be told so — but the message now also promises Caelyn will finish
+    /// the job on its own, because it genuinely will: the request is recorded
+    /// before the reachability check and retried at the next launch.
     func testUnavailableICloudIsReportedHonestlyAndNeverAsDeleted() {
         for availability in [CloudAvailability.noAccount, .restricted, .unreachable] {
             let outcome = CloudDataDeletion.Outcome.unavailable(availability)
             XCTAssertFalse(outcome.didDelete)
-            XCTAssertTrue(outcome.message.contains("Nothing was deleted"),
-                          "She must be told plainly that nothing was removed.")
+            XCTAssertTrue(outcome.message.contains("still there"),
+                          "She must be told plainly that her iCloud copy was not removed.")
+            XCTAssertFalse(outcome.message.contains("has been permanently deleted"),
+                           "and never that it was.")
             XCTAssertFalse(outcome.message.contains("CKError"))
             XCTAssertFalse(outcome.message.lowercased().contains("ckaccountstatus"))
         }
@@ -291,7 +298,7 @@ final class DeletionModelTests: XCTestCase {
 
         XCTAssertEqual(entryCount(), 0)
         if let cloudOutcome, !cloudOutcome.didDelete {
-            XCTAssertTrue(cloudOutcome.message.contains("Nothing was deleted")
+            XCTAssertTrue(cloudOutcome.message.contains("still there")
                           || cloudOutcome.message.contains("may still be there"),
                           "A surviving cloud copy must be stated, never glossed over.")
         }
@@ -928,6 +935,95 @@ final class PrivacyCopyTruthfulnessTests: XCTestCase {
                           "No Caelyn server is true in every state and must be said.")
             XCTAssertTrue(copy.contains("nothing for us to hand over")
                           || copy.contains("nothing for Caelyn to hand over"))
+        }
+    }
+}
+
+/// Asking for her iCloud copy to be destroyed must survive having no signal.
+///
+/// **What this protects.** `deleteCloudCopy` checked whether iCloud was reachable
+/// and returned early if it was not — before writing the pending marker. So a
+/// woman who asked for her cloud copy to go while she was on a plane, on the
+/// underground, or abroad with data switched off saw "nothing was deleted" and
+/// that was the end of it. Nothing was written down, `resolveOutstandingDeletion`
+/// found nothing to resume, and no later launch tried again.
+///
+/// Her reproductive health history stayed in iCloud indefinitely after she had
+/// explicitly asked for it to be destroyed, and the only trace of the request was
+/// a message she dismissed.
+@MainActor
+final class OfflineCloudDeletionTests: XCTestCase {
+
+    private let keys = [
+        "caelyn.cloudDeletionPending",
+        "caelyn.cloudDeletedAt",
+        "caelyn.cloudCopyMayExist",
+        Persistence.syncEnabledKey,
+    ]
+
+    override func setUp() {
+        super.setUp()
+        keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
+    }
+    override func tearDown() {
+        keys.forEach { UserDefaults.standard.removeObject(forKey: $0) }
+        super.tearDown()
+    }
+
+    /// The simulator test host has no iCloud account, so `deleteCloudCopy`
+    /// genuinely takes the unavailable path — which is exactly the one under test.
+    func testAskingWithNoConnectionIsRememberedAndRetriedLater() async throws {
+        UserDefaults.standard.set(true, forKey: Persistence.syncEnabledKey)
+
+        let outcome = await CloudDataDeletion.deleteCloudCopy()
+        guard case .unavailable = outcome else {
+            throw XCTSkip("this host can reach iCloud, so the offline path cannot be exercised here")
+        }
+
+        XCTAssertTrue(CloudDataDeletion.deletionIsPending,
+            "she asked for her iCloud copy to be destroyed with no connection, and nothing recorded that she had asked — no launch will ever try again")
+    }
+
+    /// Sync has to stop at the moment she asks, not at the moment the zone is
+    /// actually reachable — otherwise the retry cancels itself.
+    func testSyncStopsEvenWhenTheDeletionCannotBeCompletedYet() async throws {
+        UserDefaults.standard.set(true, forKey: Persistence.syncEnabledKey)
+
+        let outcome = await CloudDataDeletion.deleteCloudCopy()
+        guard case .unavailable = outcome else {
+            throw XCTSkip("this host can reach iCloud")
+        }
+
+        XCTAssertFalse(Persistence.isSyncEnabled,
+            "the mirror kept uploading to a copy she had asked Caelyn to destroy")
+
+        // And with sync off, the launch guard resumes rather than cancelling:
+        // `resolveOutstandingDeletion` reads sync still being on as her having
+        // changed her mind.
+        let resumed = await CloudDataDeletion.resolveOutstandingDeletion()
+        XCTAssertNotNil(resumed, "the pending deletion was dropped instead of retried on the next launch")
+    }
+
+    /// She must not be told it is gone when it is not.
+    func testSheIsNotToldItWasDeleted() {
+        let outcome = CloudDataDeletion.Outcome.unavailable(.unreachable)
+        XCTAssertFalse(outcome.didDelete)
+        XCTAssertFalse(outcome.message.contains("has been permanently deleted"))
+    }
+
+    /// But she must also not be left thinking she has to come back and ask again.
+    func testSheIsToldItWillFinishOnItsOwn() {
+        let message = CloudDataDeletion.Outcome.unavailable(.unreachable).message
+        XCTAssertTrue(message.contains("as soon as a connection comes back"),
+            "she is told nothing happened, with no indication Caelyn will finish the job: \(message)")
+    }
+
+    func testTheMessageStillLeaksNoFrameworkError() {
+        for availability: CloudAvailability in [.noAccount, .restricted, .unreachable] {
+            let message = CloudDataDeletion.Outcome.unavailable(availability).message
+            for banned in ["CKError", "CloudKit", "NSError", "Error Domain"] {
+                XCTAssertFalse(message.contains(banned), "\(availability) leaks \"\(banned)\"")
+            }
         }
     }
 }

@@ -95,6 +95,14 @@ enum SecureWipeService {
         WidgetDataStore.clear()
         WidgetCenter.shared.reloadAllTimelines()
 
+        // 4b. And tell the watch, which does not read that snapshot. Its copy
+        //     arrives over WatchConnectivity, whose application context is
+        //     persistent — so clearing the phone's store left her cycle day and
+        //     next predicted period on her wrist, surviving a relaunch of the
+        //     watch app. A delete that leaves her data on a device she is wearing
+        //     has not deleted her data.
+        WatchBridgeService.shared.pushCleared()
+
         // 5. Remove app-lock secrets and failed-attempt state from the Keychain.
         PINService.clearAll()
 
@@ -102,6 +110,35 @@ enum SecureWipeService {
         //     no readings, but they do record which days carried which kinds of
         //     data — that is residue, and a wipe must not leave residue.
         HealthSyncService.forgetSyncState()
+
+        // 5c. Forget who she is. The Apple user identifier lives in its own
+        //     Keychain item precisely so signing out does not touch her history —
+        //     but this is the opposite operation. "Everything on this iPhone was
+        //     deleted" is not true while the app still knows her account, and for
+        //     the duress wipe an app that opens already signed in is the single
+        //     most visible sign that something was here.
+        AccountIdentityStore.signOut()
+
+        // 5d. Disarm auto-erase. Otherwise the fresh-looking app she is handed
+        //     back has a destruct timer already running on it.
+        AutoSweepSettings.forget()
+
+        // 5e. Files. Three kinds, all of them her history in full:
+        //
+        //     • Exports. `ExportService` writes a CSV or PDF of everything she has
+        //       logged into the temporary directory to hand to the share sheet. iOS
+        //       clears that directory eventually, on its own schedule — so a share
+        //       she started and cancelled can sit there in plaintext long after she
+        //       has asked for everything to be deleted.
+        //     • Preserved stores. When a store cannot be opened,
+        //       `Persistence.preserveStoreAside` renames it rather than discard it,
+        //       which is right — it may be recoverable. It is also a complete
+        //       SQLite copy of her history that nothing deletes and no screen
+        //       offers her.
+        //     • The import ledger. It holds no readings, but it records which days
+        //       carried which fields, which is enough to reconstruct the shape of
+        //       her cycle.
+        removeStoredFiles()
 
         // 6. Reset preference flags so the next onboarding is genuinely fresh.
         let defaults = UserDefaults.standard
@@ -132,5 +169,38 @@ enum SecureWipeService {
         // that she chose to destroy a cloud copy, and it is what stops a later
         // launch quietly rebuilding one.
         return cloudOutcome
+    }
+
+    /// Every file Caelyn has written that could still hold her history.
+    ///
+    /// Exposed for tests, which seed each kind into a scratch directory and check
+    /// it is gone. Failures are swallowed deliberately: a file that cannot be
+    /// removed must not abort a wipe half way and leave the rest behind.
+    static func removeStoredFiles(
+        temporaryDirectory: URL = FileManager.default.temporaryDirectory,
+        applicationSupport: URL? = try? FileManager.default.url(
+            for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+    ) {
+        let fm = FileManager.default
+
+        // Exports: `Caelyn-all-2026-10-05.csv`, `Caelyn-3mo-….pdf`, and so on.
+        if let files = try? fm.contentsOfDirectory(at: temporaryDirectory,
+                                                   includingPropertiesForKeys: nil) {
+            for url in files where url.lastPathComponent.hasPrefix("Caelyn-") {
+                try? fm.removeItem(at: url)
+            }
+        }
+
+        guard let applicationSupport else { return }
+
+        // Preserved stores — `default.store.corrupt-<stamp>` plus its `-shm` and
+        // `-wal` sidecars — and the import ledger, which lives alongside them.
+        if let files = try? fm.contentsOfDirectory(at: applicationSupport,
+                                                   includingPropertiesForKeys: nil) {
+            for url in files where url.lastPathComponent.contains(".corrupt-") {
+                try? fm.removeItem(at: url)
+            }
+        }
+        try? fm.removeItem(at: applicationSupport.appending(path: "CaelynImportLedger.json"))
     }
 }

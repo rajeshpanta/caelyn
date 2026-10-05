@@ -53,16 +53,37 @@ enum PINService {
     // MARK: - Verify
 
     static func verify(_ pin: String, now: Date = .now) -> Verdict {
+        guard let salt = keychainData(Account.salt) else { return .wrong(remaining: maxAttempts) }
+        let candidate = hash(pin, salt: salt)
+
+        // **The duress PIN is checked before the lockout, deliberately.**
+        //
+        // The lockout exists to stop someone brute-forcing their way *into* her
+        // data. The duress PIN is not a way in — it is a way to destroy it. The
+        // two need opposite treatment, and checking the lockout first gave them
+        // the same: five wrong guesses by whoever is holding the phone, and the
+        // emergency wipe was refused for a minute.
+        //
+        // Which is precisely backwards. Someone standing over her typing wrong
+        // PINs is not a side case of this feature, it *is* the feature's whole
+        // scenario — so the one moment the duress PIN is ever typed was the one
+        // moment it would not work. She had been told it would: "entering it
+        // instead of your real PIN silently and permanently erases everything".
+        //
+        // Nothing is weakened by the reorder. A guesser who stumbles onto the
+        // duress PIN destroys the data, which is the outcome she armed it for.
+        if let duress = keychainData(Account.duress), candidate == duress {
+            // Clear the lockout too, so the app she is handed back carries no
+            // trace that anything happened here.
+            resetAttempts()
+            return .duress
+        }
+
         if let until = lockoutUntil(), until > now {
             return .lockedOut(retryAfter: until.timeIntervalSince(now))
         }
-        guard let salt = keychainData(Account.salt) else { return .wrong(remaining: maxAttempts) }
-        let candidate = hash(pin, salt: salt)
         if let primary = keychainData(Account.primary), candidate == primary {
             resetAttempts(); return .correct
-        }
-        if let duress = keychainData(Account.duress), candidate == duress {
-            resetAttempts(); return .duress
         }
         return registerFailure(now: now)
     }

@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 // MARK: - PIN entry pad
 
@@ -201,10 +202,18 @@ struct PINSetupView: View {
 // MARK: - Manage PIN (Settings entry point)
 
 struct PINManageView: View {
+    @Query(sort: \UserProfile.createdAt) private var profiles: [UserProfile]
     @State private var isSet = PINService.isSet
     @State private var hasDuress = PINService.hasDuress
     @State private var showingSetPrimary = false
     @State private var showingSetDuress = false
+
+    /// A duress PIN is only reachable from the lock screen, and there is no lock
+    /// screen with App Lock off. See `PINSettingsPolicy`.
+    private var lockEnabled: Bool { profiles.first?.lockEnabled ?? false }
+    private var canArmDuress: Bool {
+        PINSettingsPolicy.canArmDuressPIN(lockEnabled: lockEnabled, pinIsSet: isSet)
+    }
 
     var body: some View {
         List {
@@ -225,20 +234,36 @@ struct PINManageView: View {
                 Text("A PIN lets you unlock Caelyn without Face ID / Touch ID. It's stored only on this device.")
             }
 
-            if isSet {
-                Section {
-                    if hasDuress {
-                        Button(role: .destructive) { PINService.setDuressPIN(nil); hasDuress = false } label: {
-                            Label("Remove duress PIN", systemImage: "trash")
-                        }
-                    } else {
-                        Button { showingSetDuress = true } label: {
-                            Label("Set a duress PIN", systemImage: "exclamationmark.shield.fill")
-                        }
+            Section {
+                if hasDuress {
+                    Button(role: .destructive) { PINService.setDuressPIN(nil); hasDuress = false } label: {
+                        Label("Remove duress PIN", systemImage: "trash")
                     }
-                } header: {
-                    Text("Duress")
-                } footer: {
+                } else {
+                    // Shown-but-disabled rather than hidden: she came here looking
+                    // for this, and "it isn't here" is a worse answer than "here's
+                    // what it needs" — which the footer supplies.
+                    Button { showingSetDuress = true } label: {
+                        Label("Set a duress PIN", systemImage: "exclamationmark.shield.fill")
+                    }
+                    .disabled(!canArmDuress)
+                }
+
+                // A duress PIN that is armed while the lock is off is the failure
+                // this guard exists to prevent, and she has to be able to see it
+                // from here rather than discover it when it matters.
+                if hasDuress, !lockEnabled {
+                    Text(PINSettingsPolicy.disablingLockWithDuressWarning)
+                        .font(CaelynFont.caption)
+                        .foregroundStyle(CaelynColor.alertRose)
+                }
+            } header: {
+                Text("Duress")
+            } footer: {
+                if let reason = PINSettingsPolicy.duressUnavailableReason(
+                    lockEnabled: lockEnabled, pinIsSet: isSet), !hasDuress {
+                    Text(reason)
+                } else {
                     Text("An optional second PIN that, if entered, silently and permanently erases all Caelyn data. For high-risk situations only.")
                 }
             }

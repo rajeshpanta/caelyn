@@ -654,14 +654,12 @@ final class CaelynUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Confirm your PIN"].waitForExistence(timeout: 3))
         enterPIN("1234", in: app)
         XCTAssertTrue(app.buttons["Change PIN"].waitForExistence(timeout: 6), "Primary PIN should be saved")
-        XCTAssertTrue(app.buttons["Set a duress PIN"].waitForExistence(timeout: 3))
 
-        app.buttons["Set a duress PIN"].tap()
-        XCTAssertTrue(app.staticTexts["Set a duress PIN"].waitForExistence(timeout: 3))
-        enterPIN("4321", in: app)
-        XCTAssertTrue(app.staticTexts["Confirm your PIN"].waitForExistence(timeout: 3))
-        enterPIN("4321", in: app)
-        XCTAssertTrue(app.buttons["Remove duress PIN"].waitForExistence(timeout: 6))
+        // A duress PIN is typed into the lock screen, so it cannot be armed while
+        // App Lock is off — there would be nowhere to enter it, and she would be
+        // holding a wipe that silently never fires. So the lock goes on first.
+        XCTAssertFalse(app.buttons["Set a duress PIN"].isEnabled,
+                       "Arming a duress PIN with App Lock off gives her a wipe that can never be triggered.")
         backToSettings(from: "App PIN", in: app)
 
         let lockToggle = app.switches.matching(NSPredicate(format: "label CONTAINS[c] %@", "lock")).firstMatch
@@ -675,6 +673,18 @@ final class CaelynUITests: XCTestCase {
             enterPIN("1234", in: app)
             XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 3))
         }
+
+        openSetting("App PIN", in: app, expects: "App PIN")
+        let setDuress = app.buttons["Set a duress PIN"]
+        XCTAssertTrue(setDuress.waitForExistence(timeout: 3))
+        XCTAssertTrue(setDuress.isEnabled, "With App Lock on, the duress PIN is reachable and may be armed.")
+        setDuress.tap()
+        XCTAssertTrue(app.staticTexts["Set a duress PIN"].waitForExistence(timeout: 3))
+        enterPIN("4321", in: app)
+        XCTAssertTrue(app.staticTexts["Confirm your PIN"].waitForExistence(timeout: 3))
+        enterPIN("4321", in: app)
+        XCTAssertTrue(app.buttons["Remove duress PIN"].waitForExistence(timeout: 6))
+        backToSettings(from: "App PIN", in: app)
 
         XCUIDevice.shared.press(.home)
         Thread.sleep(forTimeInterval: 2.0)
@@ -706,8 +716,19 @@ final class CaelynUITests: XCTestCase {
 
         let autoErase = app.switches["Auto-erase if inactive"]
         reveal(autoErase, in: app)
-        if autoErase.value as? String != "1" { autoErase.tap() }
-        XCTAssertEqual(autoErase.value as? String, "1")
+        if autoErase.value as? String != "1" {
+            autoErase.tap()
+            // Arming this destroys everything on a timer, with no prompt at the
+            // moment it fires, so it confirms first.
+            let armAutoErase = app.buttons["Turn on auto-erase"]
+            XCTAssertTrue(armAutoErase.waitForExistence(timeout: 5),
+                          "Auto-erase deletes everything unprompted; it must confirm before arming.")
+            armAutoErase.tap()
+        }
+        // Waited for rather than read instantly: the confirmation dismisses with
+        // an animation, and the switch redraws behind it.
+        XCTAssertTrue(waitForSwitch(autoErase, toBe: "1"),
+                      "Arming auto-erase did not turn the switch on.")
 
         let paranoidMode = settingButton("Paranoid Mode", in: app)
         reveal(paranoidMode, in: app)
@@ -771,6 +792,77 @@ final class CaelynUITests: XCTestCase {
         for _ in 0..<20 where !button.isHittable { app.swipeUp() }
         XCTAssertTrue(button.isHittable, "Button is not reachable: \(label)", file: file, line: line)
         button.tap()
+    }
+
+    /// A sheet that was open when Caelyn locked must not stay on screen above the
+    /// lock.
+    ///
+    /// The lock screen is a sibling in a `ZStack` and hides the content behind it
+    /// by setting its opacity to zero. A presented sheet is not behind it: UIKit
+    /// presents it in its own layer above the whole SwiftUI hierarchy, so the
+    /// opacity never reaches it. Anyone who picks up her phone while a sheet was
+    /// open — the day detail with her flow and symptoms on it, the export sheet,
+    /// her history import — reads it over the top of a lock screen that believes
+    /// it is covering everything. Which is the one thing App Lock exists to stop.
+    func testASheetDoesNotStayVisibleAboveTheLockScreen() throws {
+        let app = launchSeeded(extraArguments: ["--ui-test-disable-device-auth"])
+        tapTab("Settings", in: app)
+        openSetting("App PIN", in: app, expects: "App PIN")
+        if app.buttons["Remove PIN"].exists { app.buttons["Remove PIN"].tap() }
+        app.buttons["Set a PIN"].tap()
+        XCTAssertTrue(app.staticTexts["Set a PIN"].waitForExistence(timeout: 3))
+        enterPIN("1234", in: app)
+        XCTAssertTrue(app.staticTexts["Confirm your PIN"].waitForExistence(timeout: 3))
+        enterPIN("1234", in: app)
+        XCTAssertTrue(app.buttons["Change PIN"].waitForExistence(timeout: 6))
+        backToSettings(from: "App PIN", in: app)
+
+        let lockToggle = app.switches.matching(NSPredicate(format: "label CONTAINS[c] %@", "lock")).firstMatch
+        reveal(lockToggle, in: app)
+        if lockToggle.value as? String != "1" {
+            lockToggle.tap()
+            if lockToggle.value as? String != "1" {
+                lockToggle.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+            }
+        }
+        XCTAssertEqual(lockToggle.value as? String, "1")
+        if openPINEntry(in: app) {
+            enterPIN("1234", in: app)
+            XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 3))
+        }
+
+        // Open a sheet that is showing her data, and leave it open.
+        let appearance = settingButton("Appearance", in: app)
+        reveal(appearance, in: app)
+        appearance.tap()
+        XCTAssertTrue(app.staticTexts["Pick how Caelyn looks."].waitForExistence(timeout: 5),
+                      "the appearance sheet should be open")
+
+        XCUIDevice.shared.press(.home)
+        Thread.sleep(forTimeInterval: 2.0)
+        app.activate()
+
+        XCTAssertTrue(app.staticTexts["Caelyn is locked"].waitForExistence(timeout: 6)
+                      || app.staticTexts["Enter PIN"].waitForExistence(timeout: 2),
+                      "Caelyn should be locked after backgrounding")
+        capture("Lock-With-Sheet-Open", app: app)
+
+        // The sheet's own content must be unreachable. If it is still hittable, the
+        // sheet is drawn above the lock and someone holding her phone can read and
+        // use it.
+        XCTAssertFalse(app.staticTexts["Pick how Caelyn looks."].isHittable,
+            "a sheet that was open when Caelyn locked is still on screen above the lock screen")
+        XCTAssertFalse(app.buttons["Done"].isHittable,
+            "the sheet above the lock screen is still interactive")
+    }
+
+    /// Wait for a switch to settle on a value. `element.value` is a one-shot
+    /// snapshot, so reading it straight after a tap that dismisses a dialog races
+    /// the redraw behind the animation.
+    private func waitForSwitch(_ element: XCUIElement, toBe value: String, timeout: TimeInterval = 5) -> Bool {
+        let predicate = NSPredicate(format: "value == %@", value)
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
+        return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
     }
 
     private func launchSeeded(extraArguments: [String] = []) -> XCUIApplication {
