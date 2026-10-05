@@ -95,7 +95,13 @@ struct RootView: View {
                 Text("Storage problem")
                     .font(CaelynFont.subheadline.weight(.semibold))
                     .foregroundStyle(.white)
-                Text("Caelyn couldn't open your saved data and started fresh. Your previous data was kept aside. Back up regularly from Settings → Export.")
+                // "Kept aside" was true and misleading: the old store is renamed
+                // rather than discarded, but nothing in Caelyn can read it back
+                // and no screen offers it to her, so it reads as a promise of
+                // recovery that does not exist. Reading it back is real work and
+                // genuinely worth doing; until it is done, this says what is
+                // actually the case.
+                Text("Caelyn couldn't open your saved data and had to start fresh. The old file is still on this iPhone, but Caelyn can't read it \u{2014} so the entries aren't recoverable from here. Deleting all your data removes it too. Backing up from Settings → Export protects you next time.")
                     .font(CaelynFont.caption)
                     .foregroundStyle(.white.opacity(0.95))
                     .fixedSize(horizontal: false, vertical: true)
