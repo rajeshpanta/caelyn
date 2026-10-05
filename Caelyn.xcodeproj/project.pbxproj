@@ -43,6 +43,7 @@
 		2846948E998ADF99B263839F /* ImportRecordID.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2B4E99DF85004943B43AB7 /* ImportRecordID.swift */; };
 		28EEF7F6239B1E11BAFBDADC /* SecureWipeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF130311725D11BC73F4242 /* SecureWipeService.swift */; };
 		2B4851D91A1CD6DBB6C5296E /* HomeComingUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F217396A66FD507CDBD109BA /* HomeComingUp.swift */; };
+		2CC16A2BDBA58AB9F9E4D91A /* CloudSyncHealthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E13C76A8B37C6CBE5B2EB2 /* CloudSyncHealthTests.swift */; };
 		30B208D9835B5E16A959BE2A /* WidgetDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE228FE95D6CFB5B6AA94AA /* WidgetDataStore.swift */; };
 		30CB3F72A2205298FDF17583 /* PredictionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C1F783DA3E9B4345CA306AC /* PredictionEngine.swift */; };
 		30D0ECE98187C5E88F4B4FEF /* InsightCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00731802B5C8B96D6AC55E9 /* InsightCard.swift */; };
@@ -126,6 +127,7 @@
 		90239874E4D8B802A556F4D2 /* HealthSyncAnchorStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4B6F0C2FFCCFE3AA741B36 /* HealthSyncAnchorStore.swift */; };
 		903D408B317900DB6B1E13B4 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF78CFC55351ED7D33634AA0 /* RootView.swift */; };
 		94EF936F835F61CD2B65D964 /* HomePatternInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 220787509170B408F4B03C6B /* HomePatternInsight.swift */; };
+		96FBFC383BDCE697C515FAF5 /* CloudSyncHealth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50502C140B7BFDCFBD456BF3 /* CloudSyncHealth.swift */; };
 		9793F7ACFFB971F837581A8D /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AFE9A76ACD4C8CB6B8CE0C9 /* OnboardingStep.swift */; };
 		97A3A12A9A56E0E068EBADD4 /* TypicalRanges.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1727D86385E84CE318EA3C08 /* TypicalRanges.swift */; };
 		98C6DBE7A8FE36BC9CF06D81 /* CloudSyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 260A08C2F86FD9290A10F580 /* CloudSyncCoordinator.swift */; };
@@ -331,7 +333,9 @@
 		4CC280D5408ECC6A860AC785 /* ImportLedger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportLedger.swift; sourceTree = "<group>"; };
 		4E98B3962F3C4B33A33C5001 /* PaywallTierCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallTierCard.swift; sourceTree = "<group>"; };
 		4F23086E11B176DC45630965 /* CaelynExportSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynExportSource.swift; sourceTree = "<group>"; };
+		50502C140B7BFDCFBD456BF3 /* CloudSyncHealth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncHealth.swift; sourceTree = "<group>"; };
 		50974342C78D7073C7C2389C /* CaelynWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CaelynWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		50E13C76A8B37C6CBE5B2EB2 /* CloudSyncHealthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSyncHealthTests.swift; sourceTree = "<group>"; };
 		51EC99CA13B2B3BCD725DBE4 /* CaelynWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaelynWatchApp.swift; sourceTree = "<group>"; };
 		51F8759E4F031305F132899D /* DataStatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataStatusCard.swift; sourceTree = "<group>"; };
 		5322159624E05FC0C7C1686B /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
@@ -607,6 +611,7 @@
 				354545D943378E53A1B935B7 /* CaelynTests.swift */,
 				9ECF34E75A972C772CB69E72 /* CivilDayTests.swift */,
 				DF15144FE89140AF906ABB93 /* CloudMigrationConflictTests.swift */,
+				50E13C76A8B37C6CBE5B2EB2 /* CloudSyncHealthTests.swift */,
 				58917566D3D58FBFF324EE38 /* CloudSyncSafetyTests.swift */,
 				5A49053B105434503B1B9DFB /* DailyLogDraftTests.swift */,
 				D19EFCF2E73EA7F840E14E14 /* DayIdentityTests.swift */,
@@ -723,6 +728,7 @@
 				CA40956C4AF13D26E173249C /* CloudDataDeletion.swift */,
 				C5EDF42DE253ADCA22E082DE /* CloudDeletionTombstone.swift */,
 				260A08C2F86FD9290A10F580 /* CloudSyncCoordinator.swift */,
+				50502C140B7BFDCFBD456BF3 /* CloudSyncHealth.swift */,
 				334FC6BEFF52B1724C9C190B /* PersonalName.swift */,
 			);
 			path = Account;
@@ -1154,6 +1160,7 @@
 				BFA0FF4D4ED18E884AC4AF7E /* CaelynTests.swift in Sources */,
 				673CA18872FA40B5F74F2DC2 /* CivilDayTests.swift in Sources */,
 				7A840C305CD88CB88704DBD2 /* CloudMigrationConflictTests.swift in Sources */,
+				2CC16A2BDBA58AB9F9E4D91A /* CloudSyncHealthTests.swift in Sources */,
 				D2D5AB8D5834553A9CF7F06F /* CloudSyncSafetyTests.swift in Sources */,
 				5EFF9DB1A2AAC795A02773D6 /* DailyLogDraftTests.swift in Sources */,
 				BBAEA09BC25E57FAB7D03BE4 /* DayIdentityTests.swift in Sources */,
@@ -1226,6 +1233,7 @@
 				76697E7DE0C3CBE56D5C4D9A /* CloudDataDeletion.swift in Sources */,
 				0A46597A5BA7A78E172EEF3D /* CloudDeletionTombstone.swift in Sources */,
 				98C6DBE7A8FE36BC9CF06D81 /* CloudSyncCoordinator.swift in Sources */,
+				96FBFC383BDCE697C515FAF5 /* CloudSyncHealth.swift in Sources */,
 				7AE2136FA6880159B2EE1994 /* ClueSource.swift in Sources */,
 				036BA33CD4D86A7FBC7EB83A /* Color+Caelyn.swift in Sources */,
 				8365DE6D282CEB140AEA20BE /* ComponentGallery.swift in Sources */,

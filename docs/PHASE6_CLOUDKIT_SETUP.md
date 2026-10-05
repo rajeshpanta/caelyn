@@ -38,7 +38,65 @@ user upgrading**, SwiftData attempts a lightweight migration.
 - Confirm entries appear on a second device signed into the same Apple Account.
 - Confirm that with sync **off**, nothing leaves the device.
 
-## 4. Not yet built: Partner Share
+## 4. Deploy the schema to Production — REQUIRED before every release that adds a field
+
+**This blocks build 16.** CloudKit keeps two completely separate schemas,
+Development and Production. `NSPersistentCloudKitContainer` creates record types
+and fields automatically in **Development only** — a development build talking to
+the Development schema will look perfect. Production never changes on its own.
+
+A field missing from Production fails every export of its record type, and it
+fails *silently from the user's side*: her iCloud account is fine, the mirrored
+store opens fine, and reads and writes work normally because the store is local
+either way. Nothing visible is wrong. Her history simply stops leaving the phone.
+
+`CycleEntry.dayKey` is exactly such a field. It is new in build 16, has never
+shipped, and is not in Production.
+
+**Steps** (icloud.developer.apple.com/dashboard):
+
+1. Pick container **`iCloud.smallpanta-icould.com.caelynperiodtracker`**.
+2. **Schema → Record Types → CD_CycleEntry** in the **Development** environment.
+   Confirm `CD_dayKey` is listed. If it is not, run a development build on a
+   device with sync on and log one entry — that is what creates it.
+3. **Schema → Deploy Schema Changes…** → review the diff → **Deploy**.
+4. Switch the environment selector to **Production** and confirm `CD_dayKey` is
+   now on `CD_CycleEntry`.
+
+Deployment is **additive and irreversible**: a field cannot be removed from
+Production, so deploy only what the release actually ships. Do this *before* the
+build goes to TestFlight or the App Store, not after — a user who opens the app
+first exports nothing and gets no retry notification.
+
+### Verify it actually worked
+
+The app now tells the truth about this rather than assuming. `CloudSyncHealth`
+listens for `NSPersistentCloudKitContainer.eventChangedNotification` and only
+lets the sync card say "backed up" once an **export** has finished successfully.
+So:
+
+- Settings → Account & iCloud, with sync on, should read **"Your history is
+  backed up to your private iCloud. Last updated …"**.
+- If it reads **"Caelyn hasn't managed to finish backing up yet"**, the export is
+  failing — the Production schema is the first thing to check. The real reason is
+  in Console.app, filtered to subsystem
+  `smallpanta-icould.com.caelynperiodtracker`, category `cloudsync`.
+
+### Checking from the command line (optional)
+
+`xcrun cktool` can diff the two environments without the web dashboard, but it
+needs a **management token** that only the account owner can mint: CloudKit
+Console → **Settings → Tokens → Management Tokens → Create Token**. Then:
+
+```sh
+xcrun cktool save-token <token> --type management
+xcrun cktool export-schema \
+  --team-id <TEAM_ID> \
+  --container-id iCloud.smallpanta-icould.com.caelynperiodtracker \
+  --environment production | grep -A20 CD_CycleEntry
+```
+
+## 5. Not yet built: Partner Share
 
 Partner sharing (CKShare-based) is **not** shipped. It builds on this sync
 foundation but is a large, device-only feature; the old fake/disabled Share UI was

@@ -20,6 +20,9 @@ struct AccountView: View {
     @State private var isSignedIn = AccountIdentityStore.isSignedIn
     @State private var availability: CloudAvailability = .unreachable
     @State private var syncOn = Persistence.isSyncEnabled
+    /// Whether anything has actually reached iCloud. `availability` only says she
+    /// is signed in and reachable, which is not the same claim.
+    @ObservedObject private var syncHealth = CloudSyncHealth.shared
 
     @State private var nameDraft = ""
     @State private var isEditingName = false
@@ -242,16 +245,22 @@ struct AccountView: View {
 
     /// What she is told about sync.
     ///
-    /// Reads `Persistence.isSyncActive` — whether the mirrored store actually
-    /// opened — and never the preference alone. Claiming "backed up" while the
-    /// container failed to open would be telling her that her history is safe
-    /// somewhere it is not.
+    /// Three separate facts, and the claim needs all of them. `syncOn` is what she
+    /// asked for. `Persistence.isSyncActive` is whether the mirrored store
+    /// actually opened. `syncHealth` is whether a record has ever successfully
+    /// left the phone — which the first two cannot tell you: CloudKit keeps
+    /// separate Development and Production schemas, and a field missing from
+    /// Production fails every export while the account stays fine and the store
+    /// opens fine. Saying "backed up" on the strength of the first two would be
+    /// telling her that her history is safe somewhere it is not.
     private var statusLine: String {
         guard syncOn else {
             return "Off. Everything stays on this iPhone, exactly as it always has."
         }
-        if Persistence.isSyncActive { return availability.message }
-        return "Waiting to start. \(availability.message)"
+        guard Persistence.isSyncActive else {
+            return "Waiting to start. \(availability.message)"
+        }
+        return syncHealth.state.message(availability: availability)
     }
 
     private func setSync(_ on: Bool) {

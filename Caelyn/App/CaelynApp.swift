@@ -53,6 +53,10 @@ struct CaelynApp: App {
                     await PurchaseService.shared.loadProducts()
                     WatchBridgeService.shared.activate()
                     syncCoordinator?.start()
+                    // Listen before anything is claimed on screen: "backed up" is
+                    // only true once an export has actually succeeded, and the
+                    // events that say so start arriving immediately.
+                    if Persistence.isSyncActive { CloudSyncHealth.shared.start() }
                     await reconcileAppleCredential()
                     // If she deleted her iCloud copy, make sure it stayed deleted.
                     // Covers an interrupted deletion and a mirroring delegate that
