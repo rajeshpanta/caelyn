@@ -274,9 +274,11 @@ enum ImportReconciler {
     private static func dayFromKey(_ dayKey: String, calendar: Calendar) -> Date? {
         let parts = dayKey.split(separator: "-").compactMap { Int($0) }
         guard parts.count == 3 else { return nil }
+        // Gregorian — these strings are `ImportLedger.dayKey` output, which is.
+        let cal = CivilDay.gregorian(calendar)
         var comps = DateComponents()
         comps.year = parts[0]; comps.month = parts[1]; comps.day = parts[2]
-        return calendar.date(from: comps).map { calendar.startOfDay(for: $0) }
+        return cal.date(from: comps).map { cal.startOfDay(for: $0) }
     }
 
     // MARK: - Commit

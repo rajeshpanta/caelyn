@@ -18,40 +18,64 @@ enum CycleStore {
     /// single row, keeping the richest data. Returns how many duplicate rows were
     /// removed (0 in the common case). Cheap to run on every launch.
     ///
-    /// Also backfills `dayKey` for any row written before that property existed.
+    /// Also gives a key to any row that has no usable one: written before `dayKey`
+    /// existed, or keyed by the first version of `CivilDay`, which took the
+    /// device's calendar system along with its time zone and so filed a Thai
+    /// phone's entries under the year 2569.
+    ///
     /// Deliberately done here, as ordinary app code, rather than in a SwiftData
     /// migration stage: deriving a new property's value *from existing data* is no
     /// longer a lightweight migration, and a custom stage would mean a
     /// VersionedSchema and a MigrationPlan for what is one pass over rows this
     /// function already walks at launch.
+    ///
+    /// **This pass gets one chance and must not guess.** The keys it writes are
+    /// permanent, and two earlier versions of it made the day depend on the device
+    /// instead of on the data:
+    ///
+    /// It derived the key from `Calendar.current`, so a woman who happened to
+    /// install the update while abroad had her entire history re-dated to the zone
+    /// she was standing in that morning — every day shifted by one, invisibly and
+    /// unrecoverably. `CivilDay.recoveredKey` reads the day out of the stored
+    /// instant instead, which still carries it, so the answer is the same wherever
+    /// she opens the app.
+    ///
+    /// And it rewrote `date` on every row it kept, to local midnight *here*. On
+    /// the mirrored store 1.3 shipped that is not a local tidy-up: it is a change
+    /// to a record her other devices own, which they then accept and re-emit from
+    /// their own zone, so two devices in different places overwrite each other on
+    /// every launch forever. It also destroyed the only evidence of which day she
+    /// meant — the instant the recovery above depends on. So the instant is now
+    /// left exactly as written; the key is the identity, and `date` is only ever
+    /// set when a row is created.
     @discardableResult
     static func dedupeSameDay(in context: ModelContext, calendar: Calendar = .current) -> Int {
         let all = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
-        var byDay: [Int: CycleEntry] = [:]
         var removed = 0
-        var backfilled = 0
+        var keyed = 0
 
-        // Oldest first so the newest row wins conflicts via `merge`.
+        // Pass one: give every row a usable key. Separate from the merge below so
+        // the whole store is keyed before any two rows are compared — a key
+        // recovered here can land on a day some other row already holds, and that
+        // pair has to be visible to the merge as a pair.
+        for entry in all where !CivilDay.isPlausible(entry.dayKey) {
+            entry.dayKey = CivilDay.recoveredKey(for: entry.date, calendar: calendar)
+            keyed += 1
+        }
+
+        // Pass two: merge same-day rows. Oldest first so the newest row wins
+        // conflicts via `merge`.
+        var byDay: [Int: CycleEntry] = [:]
         for entry in all.sorted(by: { $0.createdAt < $1.createdAt }) {
-            // A row from before `dayKey` existed is keyed to the day it currently
-            // displays as, so nobody's history visibly moves on upgrade.
-            if entry.dayKey == 0 {
-                entry.dayKey = CivilDay.key(for: entry.date, calendar: calendar)
-                backfilled += 1
-            }
-            let key = entry.dayKey
-            if let keeper = byDay[key] {
+            if let keeper = byDay[entry.dayKey] {
                 merge(from: entry, into: keeper)
                 context.delete(entry)
                 removed += 1
             } else {
-                // Keep `date` consistent with the key it is filed under.
-                let normalized = CivilDay.localDate(for: key, calendar: calendar)
-                if entry.date != normalized { entry.date = normalized }
-                byDay[key] = entry
+                byDay[entry.dayKey] = entry
             }
         }
-        if removed > 0 || backfilled > 0 { context.saveOrLog() }
+        if removed > 0 || keyed > 0 { context.saveOrLog() }
         return removed
     }
 
@@ -74,7 +98,9 @@ enum CycleStore {
         // her travel timezone, or a test pinning one. The key computed above is the
         // authority, and `date` is filed to match it.
         created.dayKey = key
-        created.date = CivilDay.localDate(for: key, calendar: calendar)
+        if let normalized = CivilDay.localDate(for: key, calendar: calendar) {
+            created.date = normalized
+        }
         context.insert(created)
         return created
     }

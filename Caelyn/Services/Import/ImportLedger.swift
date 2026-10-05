@@ -92,7 +92,12 @@ final class ImportLedger {
     /// some zone and could slide a row onto the day before. The result is stable
     /// wherever she happens to be.
     nonisolated static func dayKey(_ date: Date, calendar: Calendar = .current) -> String {
-        let parts = calendar.dateComponents([.year, .month, .day], from: date)
+        // Gregorian, not the device's calendar system: this key is persisted and
+        // compared against claims written on earlier launches and other devices.
+        // Under the Buddhist calendar the same day stringifies as "2569-03-05",
+        // which matches nothing already in the ledger, so every previously
+        // imported field would look unclaimed and import again.
+        let parts = CivilDay.gregorian(calendar).dateComponents([.year, .month, .day], from: date)
         return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
     }
 

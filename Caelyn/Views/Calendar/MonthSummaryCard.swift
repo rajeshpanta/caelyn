@@ -10,13 +10,18 @@ struct MonthSummaryCard: View {
 
     private var entriesInMonth: [CycleEntry] {
         let cal = Calendar.current
-        return entries.filter { cal.isDate($0.date, equalTo: month, toGranularity: .month) }
+        // `day`, not `date`: midnight on 1 June in Tokyo is 31 May in New York, so
+        // filtering on the stored instant dropped a day she logged out of its own
+        // month the moment she flew west — and the summary below then reported a
+        // period range a day short at each end.
+        return entries.filter { cal.isDate($0.day(in: cal), equalTo: month, toGranularity: .month) }
     }
 
     private var periodDays: [Date] {
-        entriesInMonth
+        let cal = Calendar.current
+        return entriesInMonth
             .filter { $0.flow != nil && $0.flow != .none }
-            .map(\.date)
+            .map { $0.day(in: cal) }
             .sorted()
     }
 

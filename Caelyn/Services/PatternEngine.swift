@@ -171,7 +171,7 @@ enum PatternEngine {
 
         for entry in entries {
             guard let mood = entry.mood else { continue }
-            let day = CivilDay.localDate(for: entry.dayKey, calendar: calendar)
+            let day = entry.day(in: calendar)
             let isNegative = negativeMoods.contains(mood)
 
             // Find which cycle comes next after this entry (to check if it's pre-period).
@@ -278,7 +278,7 @@ enum PatternEngine {
             let windowStart = calendar.date(byAdding: .day, value: -windowDays, to: cycle.start) ?? cycle.start
 
             let windowEntries = entries.filter {
-                let d = CivilDay.localDate(for: $0.dayKey, calendar: calendar)
+                let d = $0.day(in: calendar)
                 return d >= windowStart && d <= windowEnd
             }
             let symptomsInWindow = Set(windowEntries.flatMap(\.symptoms))
@@ -315,7 +315,7 @@ enum PatternEngine {
         for cycle in cycles {
             guard let nextStart = calendar.date(byAdding: .day, value: cycle.length, to: cycle.start) else { continue }
             for entry in entries {
-                let d = CivilDay.localDate(for: entry.dayKey, calendar: calendar)
+                let d = entry.day(in: calendar)
                 guard d >= cycle.start && d < nextStart else { continue }
                 let lag = calendar.dateComponents([.day], from: d, to: nextStart).day ?? 0
                 guard lag >= 1 && lag <= 14 else { continue }
@@ -462,7 +462,7 @@ enum PatternEngine {
         for cycle in cycles {
             let end = calendar.date(byAdding: .day, value: cycle.periodLength, to: cycle.start) ?? cycle.start
             let periodEntries = entries.filter {
-                let d = CivilDay.localDate(for: $0.dayKey, calendar: calendar)
+                let d = $0.day(in: calendar)
                 return d >= cycle.start && d < end
             }
             pains += periodEntries.compactMap(\.pain)

@@ -146,7 +146,7 @@ enum ImportPlanner {
 
         let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
         var byDay: [Date: CycleEntry] = [:]
-        for entry in entries { byDay[CivilDay.localDate(for: entry.dayKey, calendar: calendar)] = entry }
+        for entry in entries { byDay[entry.day(in: calendar)] = entry }
 
         let decisions = ImportReconciler.plan(
             observations: parsed.observations,
@@ -198,7 +198,7 @@ enum ImportPlanner {
 
         let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
         var byDay: [Date: CycleEntry] = [:]
-        for entry in entries { byDay[CivilDay.localDate(for: entry.dayKey, calendar: calendar)] = entry }
+        for entry in entries { byDay[entry.day(in: calendar)] = entry }
 
         let decisions = ImportReconciler.plan(
             observations: parsed.observations,
@@ -278,7 +278,7 @@ enum ImportPlanner {
         let claims = ledger.claims(inBatch: batchID)
         let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
         var byDay: [Date: CycleEntry] = [:]
-        for entry in entries { byDay[CivilDay.localDate(for: entry.dayKey, calendar: calendar)] = entry }
+        for entry in entries { byDay[entry.day(in: calendar)] = entry }
 
         var decisions: [ImportReconciler.Decision] = []
         for claim in claims {
@@ -302,8 +302,10 @@ enum ImportPlanner {
     private static func dayFromKey(_ dayKey: String, calendar: Calendar) -> Date? {
         let parts = dayKey.split(separator: "-").compactMap { Int($0) }
         guard parts.count == 3 else { return nil }
+        // Gregorian — these strings are `ImportLedger.dayKey` output, which is.
+        let cal = CivilDay.gregorian(calendar)
         var components = DateComponents()
         components.year = parts[0]; components.month = parts[1]; components.day = parts[2]
-        return calendar.date(from: components).map { calendar.startOfDay(for: $0) }
+        return cal.date(from: components).map { cal.startOfDay(for: $0) }
     }
 }

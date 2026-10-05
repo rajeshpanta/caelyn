@@ -30,7 +30,22 @@ final class CycleEntry {
     /// it is the same type in the same space, but it comes from the stored key
     /// rather than from re-truncating an instant, so it cannot drift when she
     /// travels.
-    var day: Date { CivilDay.localDate(for: dayKey) }
+    var day: Date { day(in: .current) }
+
+    /// As `day`, in a given calendar's time zone — for an import running in her
+    /// travel zone, a background health sync, or a test pinning one.
+    ///
+    /// Falls back to truncating the instant when the key names no day: a row
+    /// written before `dayKey` existed and not yet backfilled, or one keyed by the
+    /// first version of `CivilDay`, which took the device's calendar system and so
+    /// wrote year 2569 on a Thai phone. That fallback is exactly what every reader
+    /// computed before `dayKey` existed, so such a row reads as it always has
+    /// rather than as the year 1 — which is a real `Date` that passes every
+    /// reader's filters, and anchored the whole prediction to it.
+    func day(in calendar: Calendar) -> Date {
+        CivilDay.localDate(for: dayKey, calendar: calendar)
+            ?? CivilDay.gregorian(calendar).startOfDay(for: date)
+    }
 
     var flow: FlowLevel?
     var pain: Int?

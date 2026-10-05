@@ -164,7 +164,7 @@ enum CalendarMath {
     ) -> ClosedRange<Date>? {
         let flowDates = entries
             .filter { $0.flow != nil }
-            .map { CivilDay.localDate(for: $0.dayKey, calendar: calendar) }
+            .map { $0.day(in: calendar) }
             .filter { $0 <= calendar.startOfDay(for: today) }   // exclude future-dated flow (stz-014)
             .sorted()
         guard let lastFlow = flowDates.last else { return nil }

@@ -91,7 +91,7 @@ struct HomeView: View {
 
     /// Distinct calendar days she has ever logged — powers the one-week milestone.
     private var loggedDayCount: Int {
-        Set(entries.filter(\.hasContent).map { CivilDay.localDate(for: $0.dayKey) }).count
+        Set(entries.filter(\.hasContent).map { $0.day }).count
     }
 
     /// Days since onboarding — so imported history can't trigger a "one week"
@@ -300,7 +300,7 @@ struct HomeView: View {
     private var periodRecap: PeriodRecap? {
         let cal = Calendar.current
         guard let start = PredictionEngine.mostRecentPeriodStart(from: entries, today: today) else { return nil }
-        let flowDays = Set(entries.filter { $0.flow != nil }.map { CivilDay.localDate(for: $0.dayKey, calendar: cal) })
+        let flowDays = Set(entries.filter { $0.flow != nil }.map { $0.day(in: cal) })
 
         var length = 0
         var cursor = start
@@ -323,7 +323,7 @@ struct HomeView: View {
         }
 
         let periodEntries = entries.filter {
-            let d = CivilDay.localDate(for: $0.dayKey, calendar: cal)
+            let d = $0.day(in: cal)
             return d >= start && d <= lastFlowDay
         }
         let topSymptom = periodEntries

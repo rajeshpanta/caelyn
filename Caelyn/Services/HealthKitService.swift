@@ -462,7 +462,7 @@ enum HealthKitService {
 
         let entries = (try? context.fetch(FetchDescriptor<CycleEntry>())) ?? []
         var byDay: [Date: CycleEntry] = [:]
-        for entry in entries { byDay[CivilDay.localDate(for: entry.dayKey, calendar: calendar)] = entry }
+        for entry in entries { byDay[entry.day(in: calendar)] = entry }
 
         let decisions = ImportReconciler.plan(
             observations: observations,
@@ -604,7 +604,7 @@ enum HealthKitService {
     private static func isCycleStart(for entry: CycleEntry, in entries: [CycleEntry]) -> Bool {
         let cal = Calendar.current
         let prevDay = cal.date(byAdding: .day, value: -1,
-                               to: CivilDay.localDate(for: entry.dayKey, calendar: cal)) ?? entry.date
+                               to: entry.day(in: cal)) ?? entry.date
         return !entries.contains { $0.dayKey == CivilDay.key(for: prevDay, calendar: cal) && $0.flow != nil }
     }
 }

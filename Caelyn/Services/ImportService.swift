@@ -82,7 +82,7 @@ enum ImportService {
 
         // Which days already existed, so "new" and "merged" mean what they used to.
         let existingDays = Set(((try? context.fetch(FetchDescriptor<CycleEntry>())) ?? [])
-            .map { CivilDay.localDate(for: $0.dayKey, calendar: calendar) })
+            .map { $0.day(in: calendar) })
 
         let outcome = ImportPlanner.commit(preview, context: context, ledger: ledger, calendar: calendar)
         guard outcome.succeeded else { throw ImportError.unreadable }

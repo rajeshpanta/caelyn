@@ -48,7 +48,7 @@ private struct CycleHistoryRow: View {
 
     private var cycleEntries: [CycleEntry] {
         entries.filter { entry in
-            let d = CivilDay.localDate(for: entry.dayKey, calendar: cal)
+            let d = entry.day(in: cal)
             guard let end = cal.date(byAdding: .day, value: cycle.length, to: cycle.start) else { return false }
             return d >= cycle.start && d < end
         }

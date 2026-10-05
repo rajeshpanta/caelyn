@@ -118,20 +118,28 @@ enum ImportValues {
     /// Read one value as a calendar day, preferring the literal `yyyy-MM-dd` it
     /// leads with and falling back to the column's detected format.
     static func day(from raw: String, using format: DateFormatter?, calendar: Calendar) -> Date? {
+        // `yyyy-MM-dd` in a file is a Gregorian date — it is what every tracker
+        // exports and what Caelyn exports itself. Reading it in the device's own
+        // calendar system made "2026-03-05" the Buddhist year 2026 on a Thai
+        // phone, which is 1483 in the one the file meant, so an import of her own
+        // backup landed five centuries from the rest of her history.
+        // `formatter(_:calendar:)` above already pins Gregorian; this path has to
+        // agree with it.
+        let cal = CivilDay.gregorian(calendar)
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if let components = isoDayPrefix(trimmed) {
-            guard let date = calendar.date(from: components) else { return nil }
+            guard let date = cal.date(from: components) else { return nil }
             // Reject a rolled-over date: February 30th parses, but it is not a day.
-            let readBack = calendar.dateComponents([.year, .month, .day], from: date)
+            let readBack = cal.dateComponents([.year, .month, .day], from: date)
             guard readBack.year == components.year,
                   readBack.month == components.month,
                   readBack.day == components.day else { return nil }
-            return calendar.startOfDay(for: date)
+            return cal.startOfDay(for: date)
         }
         guard let format else { return nil }
         guard let parsed = format.date(from: trimmed),
               format.string(from: parsed) == trimmed else { return nil }
-        return calendar.startOfDay(for: parsed)
+        return cal.startOfDay(for: parsed)
     }
 
     /// Parse a single ISO-ish date, for formats that carry their own timestamps

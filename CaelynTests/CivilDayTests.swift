@@ -53,7 +53,7 @@ final class CivilDayTests: XCTestCase {
 
     // MARK: - CivilDay itself
 
-    func testAKeyNamesTheSameDayInEveryTimezone() {
+    func testAKeyNamesTheSameDayInEveryTimezone() throws {
         travel(to: "Asia/Tokyo")
         let key = CivilDay.key(for: localDay(2026, 6, 1))
         XCTAssertEqual(key, 20260601)
@@ -61,7 +61,7 @@ final class CivilDayTests: XCTestCase {
         for zone in ["America/New_York", "America/Los_Angeles", "Europe/Berlin",
                      "Pacific/Kiritimati", "Pacific/Midway", "Asia/Kathmandu", "UTC"] {
             travel(to: zone)
-            let back = CivilDay.localDate(for: key)
+            let back = try XCTUnwrap(CivilDay.localDate(for: key), "key \(key) resolved to no day in \(zone)")
             XCTAssertEqual(CivilDay.key(for: back), key, "round trip broke in \(zone)")
             let c = Calendar.current.dateComponents([.year, .month, .day], from: back)
             XCTAssertEqual([c.year, c.month, c.day], [2026, 6, 1], "wrong day in \(zone)")
@@ -85,8 +85,33 @@ final class CivilDayTests: XCTestCase {
 
     /// A row written before `dayKey` existed resolves to nothing rather than to
     /// some arbitrary day, so a missed backfill is loud instead of silent.
+    ///
+    /// This used to assert `.distantPast`, which is the opposite of loud:
+    /// 1 January year 1 is a real `Date` that satisfies every reader's filter, so
+    /// one unkeyed row became the anchor of the whole prediction and the cycle-day
+    /// arithmetic reported numbers in the hundreds of thousands.
     func testAZeroKeyDoesNotPretendToBeADay() {
-        XCTAssertEqual(CivilDay.localDate(for: 0), .distantPast)
+        XCTAssertNil(CivilDay.localDate(for: 0))
+    }
+
+    /// Nor does a key the first version of `CivilDay` could mint: it took the
+    /// device's calendar system as well as its time zone, so a Thai-calendar phone
+    /// wrote year 2569 and a Japanese one year 8.
+    func testAKeyFromTheDeviceCalendarBugDoesNotPretendToBeADay() {
+        XCTAssertNil(CivilDay.localDate(for: 25690305), "Buddhist")
+        XCTAssertNil(CivilDay.localDate(for: 80305), "Japanese")
+        XCTAssertNil(CivilDay.localDate(for: 14470916), "Islamic")
+        XCTAssertNil(CivilDay.localDate(for: 20261305), "month 13")
+        XCTAssertNil(CivilDay.localDate(for: 20260230), "30 February")
+        XCTAssertNotNil(CivilDay.localDate(for: 20240229), "a real leap day must still resolve")
+    }
+
+    /// And an unresolvable key cannot produce a day count, which is what turned
+    /// one unkeyed row into a cycle length of 739,000 days.
+    func testAnUnresolvableKeyYieldsNoDayCount() {
+        XCTAssertEqual(CivilDay.days(from: 0, to: 20260601), 0)
+        XCTAssertEqual(CivilDay.days(from: 20260601, to: 25690305), 0)
+        XCTAssertEqual(CivilDay.days(from: 20260601, to: 20260615), 14, "a real pair still counts")
     }
 
     // MARK: - What she actually experiences
@@ -337,6 +362,7 @@ final class EntryDayDerivationAuditTests: XCTestCase {
         }
 
         var offenders: [String] = []
+        var rawKeyReads: [String] = []
         let files = FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil)!
         for case let url as URL in files where url.pathExtension == "swift" {
             let text = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
@@ -346,14 +372,27 @@ final class EntryDayDerivationAuditTests: XCTestCase {
                       !line.trimmingCharacters(in: .whitespaces).hasPrefix("///") else { continue }
                 let infersFromInstant =
                     (line.contains("inSameDayAs:") && line.contains(".date"))
+                    || (line.contains("isDate(") && line.contains(".date,"))
                     || line.contains("startOfDay(for: entry.date)")
                     || line.contains("startOfDay(for: $0.date)")
                 if infersFromInstant {
                     offenders.append("\(url.lastPathComponent):\(i + 1)")
                 }
+                // A reader must go through `CycleEntry.day(in:)`, which falls back
+                // to the instant when the key names no day. Reading the key
+                // straight through `CivilDay.localDate` reintroduces the hole: an
+                // unkeyed or wrongly-keyed row resolves to nothing, and whatever
+                // the call site then substitutes is a second guess at the same
+                // question. `CycleEntry.swift` is where the fallback lives.
+                if line.contains("CivilDay.localDate(for:"), line.contains(".dayKey"),
+                   url.lastPathComponent != "CycleEntry.swift" {
+                    rawKeyReads.append("\(url.lastPathComponent):\(i + 1)")
+                }
             }
         }
         XCTAssertTrue(offenders.isEmpty,
-            "these work out an entry's day from its stored instant, which drifts the moment she changes timezone — use `entry.dayKey` or `CivilDay.localDate(for:)`: \(offenders)")
+            "these work out an entry's day from its stored instant, which drifts the moment she changes timezone — use `entry.day` or `entry.day(in:)`: \(offenders)")
+        XCTAssertTrue(rawKeyReads.isEmpty,
+            "these resolve a day key without the fallback in `CycleEntry.day(in:)`, so an unkeyed row has no day here — use `entry.day(in:)`: \(rawKeyReads)")
     }
 }
