@@ -19,8 +19,11 @@ settings:
     # Build numbers must rise within a version train. 1.0 is a fresh train (its
     # builds are separate from the 1.0.1 ones), but this stays strictly above the
     # highest number used anywhere so no upload can ever collide. Bump it before
-    # every upload, and keep the widget/watch CFBundleVersion below identical — a
-    # mismatch between the app and its embedded bundles trips ITMS-90473.
+    # every upload — and that is now the ONLY place to bump it. The widget and
+    # watch Info.plists below interpolate $(CURRENT_PROJECT_VERSION) and
+    # $(MARKETING_VERSION) rather than repeating the numbers, because they were
+    # repeated, they drifted (app 16 against bundles 15), and a mismatch between
+    # the app and its embedded bundles trips ITMS-90473 at upload.
     CURRENT_PROJECT_VERSION: 16
     DEVELOPMENT_TEAM: "7T9897GFKH"
   configs:
@@ -179,8 +182,8 @@ targets:
       path: CaelynWidget/Info.plist
       properties:
         CFBundleDisplayName: CaelynWidget
-        CFBundleVersion: "15"
-        CFBundleShortVersionString: "1.3"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
@@ -218,8 +221,8 @@ targets:
       path: CaelynWatch/Info.plist
       properties:
         CFBundleDisplayName: Caelyn
-        CFBundleVersion: "15"
-        CFBundleShortVersionString: "1.3"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
         WKApplication: true
         WKCompanionAppBundleIdentifier: smallpanta-icould.com.caelynperiodtracker
     entitlements:
