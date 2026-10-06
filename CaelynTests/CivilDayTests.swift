@@ -353,13 +353,10 @@ final class CaelynSaysOnlyWhatItKnowsTests: XCTestCase {
 final class EntryDayDerivationAuditTests: XCTestCase {
 
     func testNoEntryLookupInfersTheDayFromItsInstant() throws {
-        let root = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()      // CaelynTests
-            .deletingLastPathComponent()      // repo root
-            .appending(path: "Caelyn")
-        guard FileManager.default.fileExists(atPath: root.path) else {
-            throw XCTSkip("source tree not reachable from this host")
+        guard let repo = RepoSource.root else {
+            throw XCTSkip("source tree not reachable from this host (device run)")
         }
+        let root = repo.appending(path: "Caelyn")
 
         var offenders: [String] = []
         var rawKeyReads: [String] = []

@@ -568,12 +568,7 @@ final class ImportRouteCopyTests: XCTestCase {
     /// Period Tracker instructions went looking for a file picker that was never
     /// going to appear.
     func testTheHealthRouteCopyNeverMentionsAFile() throws {
-        let source = try String(
-            contentsOf: URL(fileURLWithPath: #filePath)
-                .deletingLastPathComponent().deletingLastPathComponent()
-                .appending(path: "Caelyn/Views/Import/BringHistoryView.swift"),
-            encoding: .utf8
-        )
+        let source = try RepoSource.read("Caelyn/Views/Import/BringHistoryView.swift")
         XCTAssertTrue(source.contains("model.isHealthRoute ? \"Choose a different app\" : \"Choose a different file\""),
                       "The empty-state button must match the route.")
         XCTAssertTrue(source.contains("This is read from Apple Health on this iPhone"),
@@ -582,12 +577,7 @@ final class ImportRouteCopyTests: XCTestCase {
 
     /// Whichever route it was, the privacy promise itself is unchanged.
     func testBothRoutesStillPromiseNothingIsUploaded() throws {
-        let source = try String(
-            contentsOf: URL(fileURLWithPath: #filePath)
-                .deletingLastPathComponent().deletingLastPathComponent()
-                .appending(path: "Caelyn/Views/Import/BringHistoryView.swift"),
-            encoding: .utf8
-        )
+        let source = try RepoSource.read("Caelyn/Views/Import/BringHistoryView.swift")
         let count = source.components(separatedBy: "Nothing is uploaded, and Caelyn has no server to upload it to.").count - 1
         XCTAssertEqual(count, 2, "Both route variants must keep the promise.")
     }

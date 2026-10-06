@@ -495,12 +495,7 @@ final class AccountOfferTests: XCTestCase {
 
     /// Settings must still reach it afterwards, whichever way she answered.
     func testSettingsStillOffersTheAccountAfterDeclining() throws {
-        let source = try String(
-            contentsOf: URL(fileURLWithPath: #filePath)
-                .deletingLastPathComponent().deletingLastPathComponent()
-                .appending(path: "Caelyn/Views/Settings/SettingsView.swift"),
-            encoding: .utf8
-        )
+        let source = try RepoSource.read("Caelyn/Views/Settings/SettingsView.swift")
         XCTAssertTrue(source.contains("accountSection"), "Account must have its own Settings section.")
         XCTAssertTrue(source.contains("title: \"Account & iCloud\""))
         // And it must be first — the point of the change.

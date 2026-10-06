@@ -308,13 +308,7 @@ final class DeletionModelTests: XCTestCase {
 
     /// Caelyn requested `.email` through 1.2 and never read it. It is gone.
     func testTheEmailScopeIsNoLongerRequested() throws {
-        let source = try String(
-            contentsOf: URL(fileURLWithPath: #filePath)
-                .deletingLastPathComponent()
-                .deletingLastPathComponent()
-                .appending(path: "Caelyn/Services/Account/AppleSignInService.swift"),
-            encoding: .utf8
-        )
+        let source = try RepoSource.read("Caelyn/Services/Account/AppleSignInService.swift")
         XCTAssertTrue(source.contains("requestedScopes = [.fullName]"),
                       "Caelyn must ask only for the name it actually uses.")
         XCTAssertFalse(source.contains("requestedScopes = [.fullName, .email]"))

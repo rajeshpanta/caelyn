@@ -31,10 +31,7 @@ final class SignInWithAppleComplianceTests: XCTestCase {
     }
 
     private func source(_ relativePath: String) throws -> String {
-        let root = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-        return try String(contentsOf: root.appending(path: relativePath), encoding: .utf8)
+        try RepoSource.read(relativePath)
     }
 
     /// The same file with `///` and `//` lines removed.
