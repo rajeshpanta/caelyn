@@ -88,10 +88,18 @@ enum AutoSweepSettings {
     /// which costs her an auto-erase she must re-arm; the case it refuses is a
     /// device arming itself from somebody else's decision. Losing a destructive
     /// timer is the safer of the two failures.
-    static func adoptProfileSettingIfNeeded(_ profile: UserProfile?) {
+    ///
+    /// **Never with sync on.** A mirrored profile's `autoWipeEnabled` may have
+    /// been set on another device, and its `lastActiveAt` is whichever device was
+    /// used last — so adopting it would arm a spare iPad on the strength of her
+    /// phone's choice and her phone's activity, which is this type's whole reason
+    /// to exist. Only an unsynced profile is certainly this device's own.
+    static func adoptProfileSettingIfNeeded(_ profile: UserProfile?,
+                                            syncEnabled: Bool? = nil) {
         let defaults = UserDefaults.standard
         guard !defaults.bool(forKey: Key.adopted) else { return }
         defaults.set(true, forKey: Key.adopted)
+        guard !(syncEnabled ?? Persistence.isSyncEnabled) else { return }
         guard let profile, profile.autoWipeEnabled else { return }
         isEnabled = true
         afterDays = profile.autoWipeAfterDays
@@ -103,10 +111,20 @@ enum AutoSweepSettings {
 
     /// Part of a wipe: the settings are residue too, and a fresh-looking app must
     /// not arrive with a destruct timer already armed.
+    ///
+    /// The adoption flag survives. Clearing it let a profile that synced back in
+    /// after the wipe re-arm the timer with its old activity stamp — a window
+    /// already elapsed, so the next launch wiped again.
     static func forget() {
         let defaults = UserDefaults.standard
-        for key in [Key.enabled, Key.afterDays, Key.lastActive, Key.adopted] {
+        for key in [Key.enabled, Key.afterDays, Key.lastActive] {
             defaults.removeObject(forKey: key)
         }
+    }
+
+    /// For tests: forget everything, adoption included.
+    static func resetForTesting() {
+        forget()
+        UserDefaults.standard.removeObject(forKey: Key.adopted)
     }
 }

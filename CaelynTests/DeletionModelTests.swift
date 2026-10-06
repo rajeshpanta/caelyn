@@ -1008,7 +1008,9 @@ final class OfflineCloudDeletionTests: XCTestCase {
     /// But she must also not be left thinking she has to come back and ask again.
     func testSheIsToldItWillFinishOnItsOwn() {
         let message = CloudDataDeletion.Outcome.unavailable(.unreachable).message
-        XCTAssertTrue(message.contains("as soon as a connection comes back"),
+        // The retry runs at launch (`resolveOutstandingDeletion`), not on the
+        // network coming back, so that is what she is told.
+        XCTAssertTrue(message.contains("the next time Caelyn starts with a connection"),
             "she is told nothing happened, with no indication Caelyn will finish the job: \(message)")
     }
 

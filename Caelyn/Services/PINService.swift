@@ -32,17 +32,44 @@ enum PINService {
 
     // MARK: - Configure
 
-    static func setPIN(_ pin: String) {
+    /// Set her normal PIN. Refused — returns `false` — when it equals the duress
+    /// PIN.
+    ///
+    /// `verify` checks the duress PIN first, so a normal PIN that matches it is
+    /// not a normal PIN at all: the next ordinary unlock would silently erase
+    /// everything. Enforced here and not only on the setup screen, so no other
+    /// caller can arm that.
+    @discardableResult
+    static func setPIN(_ pin: String) -> Bool {
+        guard !matches(pin, duress: true) else { return false }
         let salt = ensureSalt()
         store(Account.primary, hash(pin, salt: salt))
         resetAttempts()
+        return true
     }
 
-    /// Set or clear the duress PIN (pass nil to remove it).
-    static func setDuressPIN(_ pin: String?) {
-        guard let pin, !pin.isEmpty else { delete(Account.duress); return }
+    /// Set or clear the duress PIN (pass nil to remove it). Refused — returns
+    /// `false` — when it equals her normal PIN, for the same reason as `setPIN`.
+    @discardableResult
+    static func setDuressPIN(_ pin: String?) -> Bool {
+        guard let pin, !pin.isEmpty else { delete(Account.duress); return true }
+        guard !matches(pin, duress: false) else { return false }
         let salt = ensureSalt()
         store(Account.duress, hash(pin, salt: salt))
+        return true
+    }
+
+    /// Whether `pin` is the stored normal (or duress) PIN — with no side effects.
+    ///
+    /// For setup screens checking a collision. `verify` is the wrong tool there:
+    /// it counts a failed attempt for every candidate that is not a match, and
+    /// during a lockout it answers `.lockedOut` instead of saying whether the
+    /// digits match — so a collision check built on it could be talked past.
+    static func matches(_ pin: String, duress: Bool) -> Bool {
+        guard let salt = keychainData(Account.salt),
+              let stored = keychainData(duress ? Account.duress : Account.primary)
+        else { return false }
+        return hash(pin, salt: salt) == stored
     }
 
     static func clearAll() {

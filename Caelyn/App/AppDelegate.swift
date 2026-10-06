@@ -13,6 +13,16 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+        // Before any view reads it: a demo launch starts unlocked, every time.
+        AppLockSettings.resetIfDemoStore()
+        #if DEBUG
+        if CommandLine.arguments.contains(WipeResidue.launchArgument) {
+            MainActor.assumeIsolated { WipeResidue.plant() }
+        }
+        if CommandLine.arguments.contains(WipeResidue.clearArgument) {
+            MainActor.assumeIsolated { WipeResidue.clear() }
+        }
+        #endif
         return true
     }
 

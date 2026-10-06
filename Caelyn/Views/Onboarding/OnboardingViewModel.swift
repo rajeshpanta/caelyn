@@ -95,6 +95,9 @@ final class OnboardingViewModel {
         // name she has already chosen. It is adopted rather than replaced: marked
         // onboarded so she gets into the app, and filled in only where it has
         // nothing of its own to say.
+        // Her answer on this device is this device's lock — whatever a synced
+        // profile says. See `AppLockSettings`.
+        AppLockSettings.setEnabled(enableLock)
         if let existing = (try? modelContext.fetch(FetchDescriptor<UserProfile>()))?
             .sorted(by: { $0.createdAt < $1.createdAt }).first {
             adopt(existing)

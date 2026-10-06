@@ -55,7 +55,7 @@ enum Persistence {
     /// a cloud copy of data that only exists in memory — which is how an App
     /// Store capture ended up saying "because you switched on iCloud sync"
     /// underneath a headline promising it never leaves the phone.
-    static var isDemoStore: Bool {
+    nonisolated static var isDemoStore: Bool {
         CommandLine.arguments.contains("--screenshot-mode")
             || CommandLine.arguments.contains("--screenshot-paywall")
             || CommandLine.arguments.contains("--ui-test-onboarding")

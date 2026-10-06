@@ -150,7 +150,10 @@ final class SignInWithAppleComplianceTests: XCTestCase {
         for file in ["Caelyn/Caelyn.entitlements",
                      "CaelynWidget/CaelynWidget.entitlements",
                      "CaelynWatch/CaelynWatch.entitlements"] {
-            XCTAssertTrue(try source(file).contains(group), "\(file) has a different App Group.")
+            // Read outside the assertion: on a device `source` throws XCTSkip, and
+            // inside `XCTAssertTrue` that skip was reported as a failure instead.
+            let entitlements = try source(file)
+            XCTAssertTrue(entitlements.contains(group), "\(file) has a different App Group.")
         }
     }
 

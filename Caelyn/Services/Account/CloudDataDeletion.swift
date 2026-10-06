@@ -124,6 +124,8 @@ enum CloudDataDeletion {
         // exists to perform.
         defaults.set(true, forKey: pendingKey)
         defaults.set(false, forKey: Persistence.syncEnabledKey)
+        // The copy the last export vouched for is going; stop vouching for it.
+        CloudSyncHealth.shared.forget()
 
         let availability = await CloudAccount.availability()
         guard availability == .available else {
@@ -230,7 +232,7 @@ extension CloudDataDeletion.Outcome {
         case let .unavailable(availability):
             // Honest in both directions: nothing has gone yet, and she does not
             // have to come back and ask a second time.
-            return "Caelyn couldn't reach iCloud, so your iCloud copy is still there for now \u{2014} it'll be deleted as soon as a connection comes back. Syncing is already switched off. \(availability.message)"
+            return "Caelyn couldn't reach iCloud, so your iCloud copy is still there for now \u{2014} it'll be deleted the next time Caelyn starts with a connection. Syncing is already switched off. \(availability.message)"
         case .failed:
             return "That didn't finish, so your iCloud copy may still be there. Caelyn will try again next time you open it."
         }

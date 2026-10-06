@@ -979,6 +979,32 @@ final class CaelynTests: XCTestCase {
         }
     }
 
+    /// The whole wipe, not its parts: plant every kind of residue where the app
+    /// really keeps it, run `wipeEverything`, and require that nothing survives.
+    /// Deleting any one step from the wipe — the file sweep, the sign-out, the
+    /// widget clear, the auto-erase disarm — fails this.
+    func testTheWholeWipeLeavesNothingBehind() async throws {
+        WipeResidue.plant()
+        PINService.setPIN("2468")
+        PINService.setDuressPIN("1357")
+        CloudSyncHealth.shared.ingestForTesting(type: .export, succeeded: true, endDate: .now)
+
+        let planted = WipeResidue.survivors()
+        // Keychain items cannot be written by an unsigned simulator test host; the
+        // files, the App Group and the defaults always can.
+        for expected in ["temp export", "default.store.corrupt-", "CaelynImportLedger.json",
+                         "widget snapshot", "auto-erase"] {
+            XCTAssertTrue(planted.contains { $0.contains(expected) },
+                          "control: \(expected) was not planted, so this test would prove nothing")
+        }
+
+        await SecureWipeService.wipeEverything(modelContext: context)
+
+        XCTAssertEqual(WipeResidue.survivors(), [], "the wipe left these behind")
+        XCTAssertEqual(CloudSyncHealth.shared.state, .waiting,
+            "after a wipe the app still says her history is backed up")
+    }
+
     // MARK: - Phase 5: PIN hashing + auto-sweep window
 
     func testPINHashIsDeterministicAndSaltSensitive() {

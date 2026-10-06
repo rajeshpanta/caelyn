@@ -174,8 +174,15 @@ struct PINSetupView: View {
     private func handle(_ pin: String) {
         switch stage {
         case .enter:
-            if mode == .duress, PINService.verify(pin) == .correct {
+            // The two PINs must never be the same digits. The duress PIN is
+            // checked first on unlock, so a normal PIN equal to it would erase
+            // everything at her next ordinary unlock.
+            if mode == .duress, PINService.matches(pin, duress: false) {
                 error = "Your duress PIN must be different from your normal PIN."
+                return
+            }
+            if mode == .primary, PINService.matches(pin, duress: true) {
+                error = "That's your duress PIN. Choose a different code."
                 return
             }
             firstEntry = pin
@@ -188,9 +195,16 @@ struct PINSetupView: View {
                 stage = .enter
                 return
             }
+            let saved: Bool
             switch mode {
-            case .primary: PINService.setPIN(pin)
-            case .duress:  PINService.setDuressPIN(pin)
+            case .primary: saved = PINService.setPIN(pin)
+            case .duress:  saved = PINService.setDuressPIN(pin)
+            }
+            guard saved else {
+                error = "Your two PINs must be different. Let's try again."
+                firstEntry = ""
+                stage = .enter
+                return
             }
             Haptics.success()
             onDone()
@@ -210,7 +224,8 @@ struct PINManageView: View {
 
     /// A duress PIN is only reachable from the lock screen, and there is no lock
     /// screen with App Lock off. See `PINSettingsPolicy`.
-    private var lockEnabled: Bool { profiles.first?.lockEnabled ?? false }
+    @AppStorage(AppLockSettings.key) private var storedLock: Bool?
+    private var lockEnabled: Bool { storedLock ?? AppLockSettings.adopting(profiles.first) }
     private var canArmDuress: Bool {
         PINSettingsPolicy.canArmDuressPIN(lockEnabled: lockEnabled, pinIsSet: isSet)
     }

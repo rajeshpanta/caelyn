@@ -98,6 +98,22 @@ final class DayIdentityTests: XCTestCase {
             "an ISO date Caelyn itself wrote is read as a different day on a Thai-calendar phone")
     }
 
+    /// Her export is a restore point, so it must write the day she logged — not
+    /// the instant re-read in whatever zone the phone is in on export day.
+    func testAnExportWritesTheDaySheLoggedWhereverSheExportsIt() {
+        travel("Asia/Tokyo")
+        let tokyo = cal("Asia/Tokyo")
+        let march5 = tokyo.date(from: DateComponents(year: 2026, month: 3, day: 5))!
+        let entry = CycleEntry(date: march5)
+        entry.dayKey = CivilDay.key(for: march5, calendar: tokyo)
+        entry.flow = .medium
+
+        travel("America/New_York")
+        let csv = ExportService.generateCSV(entries: [entry], includeNotes: false)
+        XCTAssertTrue(csv.contains("\n2026-03-05,"),
+            "a day logged in Tokyo on 5 March was exported from New York as a different day — and re-importing that file moves it permanently:\n\(csv)")
+    }
+
     // MARK: - Upgrading from 1.3
 
     /// Every 1.3 write path stored local midnight in the zone that wrote it, so the

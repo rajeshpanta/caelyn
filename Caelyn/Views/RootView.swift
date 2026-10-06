@@ -87,6 +87,17 @@ struct RootView: View {
     /// Shown when the live store couldn't open and Caelyn fell back to a fresh /
     /// in-memory store. Tells the user honestly and points them to Export so they
     /// never discover data loss silently (data-inmemory-safety).
+    /// Two failures, two different truths. A fresh store keeps what she logs
+    /// from now on; the in-memory fallback keeps nothing past this session, and
+    /// telling that woman "had to start fresh" lets her log a week into a store
+    /// that evaporates when the app closes.
+    private var storeWarningText: String {
+        if Persistence.storeMode == .inMemory {
+            return "Caelyn couldn't open or create its storage on this iPhone, so anything you log right now will be lost when Caelyn closes. Export from Settings before you close it, then restart your iPhone and open Caelyn again."
+        }
+        return "Caelyn couldn't open your saved data and had to start fresh. The old file is still on this iPhone, but Caelyn can't read it \u{2014} so the entries aren't recoverable from here. Deleting all your data removes it too. Backing up from Settings → Export protects you next time."
+    }
+
     private var storeWarningBanner: some View {
         HStack(alignment: .top, spacing: CaelynSpacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
@@ -101,7 +112,7 @@ struct RootView: View {
                 // recovery that does not exist. Reading it back is real work and
                 // genuinely worth doing; until it is done, this says what is
                 // actually the case.
-                Text("Caelyn couldn't open your saved data and had to start fresh. The old file is still on this iPhone, but Caelyn can't read it \u{2014} so the entries aren't recoverable from here. Deleting all your data removes it too. Backing up from Settings → Export protects you next time.")
+                Text(storeWarningText)
                     .font(CaelynFont.caption)
                     .foregroundStyle(.white.opacity(0.95))
                     .fixedSize(horizontal: false, vertical: true)

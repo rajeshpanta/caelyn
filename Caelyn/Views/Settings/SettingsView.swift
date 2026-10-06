@@ -19,6 +19,8 @@ struct SettingsView: View {
     /// `AutoSweepSettings` is still the authority everywhere outside this view;
     /// this reads the same key.
     @AppStorage(AutoSweepSettings.enabledKey) private var autoEraseOn = false
+    /// This device's App Lock. See `AppLockSettings`.
+    @AppStorage(AppLockSettings.key) private var storedLock: Bool?
     /// Set after Paranoid Mode runs while a mirrored store is still open, so the
     /// one thing it cannot finish this launch is said out loud rather than implied.
     @State private var paranoidRelaunchNotice: String?
@@ -432,8 +434,7 @@ struct SettingsView: View {
                 Button("Cancel", role: .cancel) {}
             case .disableLockWithDuress:
                 Button("Turn off App Lock", role: .destructive) {
-                    profile?.lockEnabled = false
-                    modelContext.saveOrLog()
+                    AppLockSettings.setEnabled(false)
                 }
                 Button("Keep App Lock on", role: .cancel) {}
             case .paranoidMode:
@@ -443,7 +444,7 @@ struct SettingsView: View {
         } message: { which in
             switch which {
             case .armAutoErase:
-                Text("If you don't open Caelyn for \(AutoSweepSettings.afterDays) days, everything you've logged is permanently deleted \u{2014} with no warning and no way to get it back. This only applies to this iPhone.")
+                Text("If you don't open Caelyn for \(AutoSweepSettings.afterDays) days, everything you've logged is permanently deleted \u{2014} with no warning and no way to get it back. " + autoEraseScopeLine)
             case .disableLockWithDuress:
                 Text(PINSettingsPolicy.disablingLockWithDuressWarning)
             case .paranoidMode:
@@ -563,6 +564,15 @@ struct SettingsView: View {
     /// Paranoid Mode: one tap that flips every data-egress and visibility setting
     /// to its most private position (S7). Reversible — each switch can be turned
     /// back on individually.
+    /// Where an auto-erase reaches. The timer runs only on this iPhone, but with
+    /// iCloud sync on, what it deletes is deleted from the mirror too — so "only
+    /// this iPhone" would be the overclaim on the most destructive switch here.
+    private var autoEraseScopeLine: String {
+        Persistence.isSyncActive
+            ? "The timer runs only on this iPhone, but while iCloud sync is on, what it deletes is also deleted from iCloud and your other devices."
+            : "This only applies to this iPhone."
+    }
+
     private func enableParanoidMode() {
         guard let profile else { return }
         // Data egress off. Switching the sync preference off is recorded here, but
@@ -746,7 +756,7 @@ struct SettingsView: View {
 
     private func lockBinding(profile: UserProfile) -> Binding<Bool> {
         Binding(
-            get: { profile.lockEnabled },
+            get: { storedLock ?? AppLockSettings.adopting(profile) },
             set: { newValue in
                 if newValue && !BiometricService.canAuthenticate && !PINService.isSet {
                     lockToggleError = "Set an App PIN or add a passcode in iOS Settings, then try again."
@@ -760,8 +770,7 @@ struct SettingsView: View {
                     privacyConfirm = .disableLockWithDuress
                     return
                 }
-                profile.lockEnabled = newValue
-                modelContext.saveOrLog()
+                AppLockSettings.setEnabled(newValue)
             }
         )
     }

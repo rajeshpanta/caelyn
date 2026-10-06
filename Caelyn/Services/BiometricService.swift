@@ -28,12 +28,17 @@ enum BiometricKind {
 enum BiometricError: Error, LocalizedError {
     case notAvailable
     case userCancelled
+    /// The system withdrew the prompt — typically because the app left the
+    /// foreground. Nobody decided anything, so this must not be read as her
+    /// declining.
+    case systemCancelled
     case failed(String)
 
     var errorDescription: String? {
         switch self {
         case .notAvailable:           return "Biometric authentication isn't available on this device."
-        case .userCancelled:          return "Authentication was cancelled."
+        case .userCancelled,
+             .systemCancelled:        return "Authentication was cancelled."
         case .failed(let reason):     return reason
         }
     }
@@ -87,8 +92,10 @@ enum BiometricService {
         do {
             let success = try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason)
             if !success { throw BiometricError.failed("Authentication failed.") }
-        } catch let laError as LAError where laError.code == .userCancel || laError.code == .systemCancel || laError.code == .appCancel {
+        } catch let laError as LAError where laError.code == .userCancel {
             throw BiometricError.userCancelled
+        } catch let laError as LAError where laError.code == .systemCancel || laError.code == .appCancel {
+            throw BiometricError.systemCancelled
         } catch {
             throw BiometricError.failed(error.localizedDescription)
         }

@@ -36,6 +36,9 @@ struct CaelynApp: App {
                         BringHistoryView(incomingFile: file)
                     }
             }
+            #if DEBUG
+            .overlay(alignment: .top) { WipeResidueReadout() }
+            #endif
             .onOpenURL { url in
                 // Read the bytes now, while the security scope is open, and hold
                 // those instead of the URL — by the time the sheet presents, the
@@ -50,8 +53,10 @@ struct CaelynApp: App {
                         PurchaseService.shared.overridePro(true)
                     }
                 } else {
-                    await PurchaseService.shared.loadProducts()
+                    // Before anything that waits on the network: a wipe at launch
+                    // has to be able to reach the watch.
                     WatchBridgeService.shared.activate()
+                    await PurchaseService.shared.loadProducts()
                     syncCoordinator?.start()
                     // Listen before anything is claimed on screen: "backed up" is
                     // only true once an export has actually succeeded, and the

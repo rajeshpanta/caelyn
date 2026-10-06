@@ -11,6 +11,14 @@ struct AppLockGate<Content: View>: View {
     @State private var errorMessage: String?
     @State private var showingPINPad = false
     @State private var pinError: String?
+    /// Set when a system authentication attempt ends without unlocking — she
+    /// cancelled, or it failed. The system sheet makes the scene inactive, so
+    /// dismissing it returns the scene to `.active`, and without this the gate
+    /// would read that as a fresh return and put the sheet straight back up.
+    /// Cancel would never stick, and "Use PIN instead" — the only way to reach
+    /// her PIN, or a duress PIN — would be reachable only in the second between
+    /// prompts. Cleared by a real trip to the background or by unlocking.
+    @State private var holdAutoPrompt = false
 
     /// Shared with `AppLockWindow`, which draws the lock above presented sheets.
     @State private var lockModel = AppLockModel()
@@ -23,7 +31,18 @@ struct AppLockGate<Content: View>: View {
 
     let content: () -> Content
 
-    private var lockEnabled: Bool { profiles.first?.lockEnabled ?? false }
+    /// This device's lock — device-local, so a toggle on another device cannot
+    /// switch it off and disconnect a duress PIN armed here. `storedLock` is read
+    /// so SwiftUI re-renders when it changes. See `AppLockSettings`.
+    @AppStorage(AppLockSettings.key) private var storedLock: Bool?
+    ///
+    /// Only once she has onboarded. The lock screen already required that, but
+    /// the automatic Face ID prompt did not — so a lock setting that outlived its
+    /// profile (a store that had to start fresh, a test device) put Face ID up
+    /// over "Meet Caelyn", unlocking nothing. Found on a device.
+    private var lockEnabled: Bool {
+        hasOnboarded && (storedLock ?? AppLockSettings.adopting(profiles.first))
+    }
     private var hasOnboarded: Bool { profiles.first?.hasOnboarded ?? false }
 
     /// When there's no biometrics but a PIN exists, go straight to the PIN pad.
@@ -36,6 +55,10 @@ struct AppLockGate<Content: View>: View {
             content()
                 .opacity(showLockScreen ? 0 : 1)
                 .allowsHitTesting(!showLockScreen)
+                // Opacity hides it from the eye only. Without this the whole app
+                // stays in the accessibility tree under the lock window — found
+                // on a device, where a test could see the tab bar while locked.
+                .accessibilityHidden(showLockScreen)
 
             // Still drawn here as well as in the window. The window is what puts
             // the lock above presented sheets, but if there is no scene to attach
@@ -72,6 +95,7 @@ struct AppLockGate<Content: View>: View {
             }
         }
         .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .background { holdAutoPrompt = false }
             if newPhase != .active {
                 // Relock as soon as Caelyn leaves the active foreground. Some
                 // transitions (including app switching and interruptions) can
@@ -82,7 +106,8 @@ struct AppLockGate<Content: View>: View {
                 showingPINPad = false
             } else if newPhase == .active {
                 Task { await sweepThenRecordActivity() }
-                if lockEnabled && !isUnlocked && !attemptingAuth && BiometricService.canAuthenticate {
+                if lockEnabled && !isUnlocked && !attemptingAuth && !holdAutoPrompt
+                    && BiometricService.canAuthenticate {
                     Task { await tryUnlock() }
                 }
             }
@@ -167,10 +192,17 @@ struct AppLockGate<Content: View>: View {
         do {
             try await BiometricService.authenticate(reason: "Unlock Caelyn")
             isUnlocked = true
+            holdAutoPrompt = false
         } catch BiometricError.userCancelled {
-            // user dismissed — leave them at the lock screen
+            // user dismissed — leave them at the lock screen, and keep them there
+            holdAutoPrompt = true
+        } catch BiometricError.systemCancelled {
+            // The prompt was withdrawn because she left the app. That arrives
+            // after the trip to the background, so holding here would swallow
+            // the prompt she is owed when she comes back.
         } catch {
             errorMessage = error.localizedDescription
+            holdAutoPrompt = true
         }
         attemptingAuth = false
     }

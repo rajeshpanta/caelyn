@@ -17,7 +17,7 @@ later phases the narrative is the durable part and the catalogue holds the detai
 
 ---
 
-## Phase 0 — Nothing she wrote is lost, and nothing we said was deleted survives ✅ **complete**
+## Phase 0 — Nothing she wrote is lost, and nothing we said was deleted survives — ✅ **PHASE 0 — COMPLETE** (2026-10-05)
 
 ### Goal
 
@@ -63,9 +63,61 @@ by the user and cannot be undone. Ships alone, with no feature work in the same 
 | 97 | P0 | Preserved corrupt stores accumulated, were never deleted by a wipe, and no screen offers them — while the banner said her data was "kept aside", implying a recovery that does not exist. | 06a7c23 + 5d3325b — residue and copy fixed; **reading a preserved store back is still not implemented** |
 
 Everything above ships together and alone, with no feature work in the same
-build. **One step is not code and is still outstanding:** the CloudKit
-Production schema must carry `CD_dayKey` before build 16 reaches anyone —
-see `PHASE6_CLOUDKIT_SETUP.md` §4.
+build.
+
+### Release gates — 2026-10-05 (device: JOY, iPhone 15 Pro Max, iOS 27.0.1)
+
+**Status: PHASE 0 — COMPLETE.** Every code, production, device, regression and
+release gate below passes. The Production schema could not be deployed with
+`cktool` — Production accepts schema changes only from the CloudKit Console's
+*Deploy Schema Changes* — so the owner deployed it there, and it was then
+verified from the command line.
+
+| Gate | Result |
+|---|---|
+| CloudKit Production schema | ✅ **Deployed and verified.** `cktool export-schema` shows Production identical to Development, including `CD_dayKey` and `CaelynCloudDeletion`; the export is committed as `docs/cloudkit-production-schema.ckdb`, and `CloudKitSchemaTests.testEveryMirroredAttributeIsDeployedToProduction` passes against it. The full schema was generated from the model with `initializeCloudKitSchema` on JOY and was purely additive. Production had been missing **15 attributes, every `_ckAsset` field, `CD_moveReceipt` and the `CaelynCloudDeletion` record type** — not just `dayKey` — several of which shipped in 1.3, so the deploy also unblocks exports for live 1.3 users. |
+| Lock window × Face ID × passcode (device) | ✅ Face ID's sheet renders above the `.alert + 1` lock window and is hittable; after a failed scan iOS offers *Enter Passcode* and the device passcode pad also renders above the lock and can be dismissed; Cancel leaves her on the lock screen; Caelyn's PIN unlocks. |
+| Duress after lockout (device) | ✅ Five wrong PINs → "Too many attempts"; the duress PIN typed into that locked-out pad still wipes and opens on *Meet Caelyn*. Residue planted in the real temp dir, Application Support, App Group and Keychain reads **none** inside the wiping process, and still none 5 s later. A control run proves the reader sees every planted kind. |
+| Full suite, JOY | ✅ Unit 682 / 0 failures (26 skipped: source audits that need the repo, opt-ins). UI 35 / 0 failures (2 skipped: the opt-in forensic pair, run separately). |
+| Full suite, simulator (iPhone 17 Pro Max) | ✅ UI 35 / 0 failures. Unit 682 / 0 failures (2 opt-in skips), schema guard included. |
+| Archive → export → `altool --validate-app` | ✅ 1.3.1 (16) for app, widget and watch; exported IPA is production-signed with CloudKit environment *Production*; `VERIFY SUCCEEDED with no errors`; DEBUG test hooks absent from the Release binary. |
+| Version | ✅ App Store Connect: 1.3 (15) is the live, highest build; no 1.3.1 record and no build 16 exist. 1.3.1 (16) is the correct next release. A 1.3.1 version record must be created in Connect before submitting. |
+
+**Found and fixed during the gates** (each pinned by a test):
+
+- *Face ID cancel re-prompted forever.* Dismissing the system sheet returns the
+  scene to `.active`, which the gate read as a fresh return — Cancel never stuck,
+  so "Use PIN instead" and any duress PIN behind it were reachable only between
+  prompts. Found on JOY. `systemCancel` (she left the app) is now told apart from
+  `userCancel`.
+- *The app stayed in the accessibility tree under the lock* (opacity hides it
+  from the eye only) — now `accessibilityHidden` while locked.
+- *Her normal PIN could become the duress PIN* (P0). "Change PIN" never compared
+  against the duress PIN, and `verify` checks duress first — her next ordinary
+  unlock would have erased everything. Enforced in `PINService` both ways, with a
+  side-effect-free `matches` (the old check used `verify`, which counted
+  failures and answered `.lockedOut` during a lockout).
+- *A synced App Lock toggle disconnected this device's duress PIN.* App Lock is
+  now device-local (`AppLockSettings`), adopted once from the profile so an
+  upgrading user stays locked from the first frame; a wipe cannot reopen
+  adoption.
+- *The unlock prompt fired over onboarding* when a lock setting outlived its
+  profile. Found on JOY.
+- *Auto-erase adopted a mirrored timer on upgrade* (item 131's own scenario) and
+  a wipe re-opened adoption; the arming copy claimed "only this iPhone" while its
+  deletions sync. Fixed; copy now says what syncs.
+- *Exports wrote the instant, not the day* — logged in Tokyo, exported in New
+  York, re-imported a day early, permanently (item 1's promise).
+- *"Backed up … last updated" survived a wipe and a cloud delete*; the sync
+  health tests drove a hand-copied state machine, not the one the app runs.
+- *A wipe at cold launch never reached the watch* — the session was not yet
+  activated and nothing retried. Now persisted and delivered on activation.
+- Copy: the in-memory store fallback now says entries will not be kept; the
+  offline cloud-delete message no longer promises a retry "as soon as a
+  connection comes back" (it runs at the next launch).
+
+**Still deferred, as planned:** reading a preserved store back (item 97); a
+genuinely local-only auto-erase and in-session iCloud detach (Phase 1, item 144).
 
 ### Verification
 

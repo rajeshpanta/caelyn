@@ -1,4 +1,5 @@
 import SwiftData
+import WatchConnectivity
 import XCTest
 @testable import Caelyn
 
@@ -40,6 +41,34 @@ final class DuressPINTests: XCTestCase {
 
         XCTAssertEqual(PINService.verify("9999"), .duress,
             "the duress PIN was refused because someone had already been guessing wrong ones — which is the only circumstance in which it is ever typed. The wipe does not happen, and she has been told it would.")
+    }
+
+    /// Her normal PIN must never become the duress PIN. `verify` checks duress
+    /// first, so changing her PIN to the duress digits would turn every ordinary
+    /// unlock into a silent, total wipe.
+    func testHerNormalPINCanNeverBeTheDuressDigits() {
+        arm()
+        XCTAssertFalse(PINService.setPIN("9999"),
+            "changing her PIN to the duress digits was accepted — her next ordinary unlock erases everything")
+        XCTAssertEqual(PINService.verify("1234"), .correct, "the refused change must leave her real PIN in place")
+    }
+
+    /// And the other way round — including during a lockout, where `verify`
+    /// would have answered `.lockedOut` and let a colliding duress PIN through.
+    func testTheDuressPINCanNeverBeHerNormalDigits() {
+        PINService.setPIN("1234")
+        for _ in 0..<PINService.maxAttempts { _ = PINService.verify("0000") }
+        XCTAssertFalse(PINService.setDuressPIN("1234"),
+            "a duress PIN equal to her normal PIN was armed")
+        XCTAssertFalse(PINService.hasDuress)
+    }
+
+    /// Checking for a collision must not cost her an attempt.
+    func testCheckingForACollisionCountsNoFailedAttempts() {
+        arm()
+        for _ in 0..<(PINService.maxAttempts * 2) { _ = PINService.matches("5555", duress: false) }
+        XCTAssertEqual(PINService.verify("1234"), .correct,
+            "the collision check counted failures and locked her out of her own app")
     }
 
     /// The lockout must still protect the real PIN.
@@ -121,14 +150,14 @@ final class AutoEraseTests: XCTestCase {
     private var context: ModelContext!
 
     override func setUpWithError() throws {
-        AutoSweepSettings.forget()
+        AutoSweepSettings.resetForTesting()
         container = try ModelContainer(
             for: CycleEntry.self, UserProfile.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none))
         context = container.mainContext
     }
     override func tearDownWithError() throws {
-        AutoSweepSettings.forget()
+        AutoSweepSettings.resetForTesting()
         container = nil; context = nil
     }
 
@@ -154,7 +183,7 @@ final class AutoEraseTests: XCTestCase {
     /// A profile arriving from another device must not arm it here.
     func testAProfileArrivingWithAutoEraseOnDoesNotArmThisDevice() {
         // First launch after the handover: adopt runs once, with nothing on.
-        AutoSweepSettings.adoptProfileSettingIfNeeded(nil)
+        AutoSweepSettings.adoptProfileSettingIfNeeded(nil, syncEnabled: false)
         XCTAssertFalse(AutoSweepSettings.isEnabled)
 
         // Now a profile syncs in with it switched on elsewhere.
@@ -163,10 +192,39 @@ final class AutoEraseTests: XCTestCase {
         synced.autoWipeAfterDays = 1
         context.insert(synced)
         context.saveOrLog()
-        AutoSweepSettings.adoptProfileSettingIfNeeded(synced)
+        AutoSweepSettings.adoptProfileSettingIfNeeded(synced, syncEnabled: false)
 
         XCTAssertFalse(AutoSweepSettings.isEnabled,
             "a profile synced from another device armed a destruct timer on this one")
+    }
+
+    /// With sync on, the profile may carry another device's choice and another
+    /// device's activity — the spare-iPad wipe this type exists to prevent.
+    func testAnUpgradeWithSyncOnDoesNotAdoptAMirroredTimer() {
+        let synced = UserProfile()
+        synced.autoWipeEnabled = true
+        synced.autoWipeAfterDays = 30
+        context.insert(synced)
+        context.saveOrLog()
+        AutoSweepSettings.adoptProfileSettingIfNeeded(synced, syncEnabled: true)
+        XCTAssertFalse(AutoSweepSettings.isEnabled,
+            "an upgrading device adopted a destruct timer from the mirrored profile")
+    }
+
+    /// A wipe must not reopen adoption: a profile synced back in afterwards would
+    /// re-arm with a stamp whose window has already run out.
+    func testAWipeDoesNotReopenAdoption() {
+        AutoSweepSettings.adoptProfileSettingIfNeeded(nil, syncEnabled: false)
+        AutoSweepSettings.forget()                     // what a wipe does
+        let returning = UserProfile()
+        returning.autoWipeEnabled = true
+        returning.autoWipeAfterDays = 1
+        returning.lastActiveAt = Date(timeIntervalSince1970: 1_000_000)
+        context.insert(returning)
+        context.saveOrLog()
+        AutoSweepSettings.adoptProfileSettingIfNeeded(returning, syncEnabled: false)
+        XCTAssertFalse(AutoSweepSettings.isEnabled,
+            "a wiped device re-armed itself from a profile that came back, with an elapsed window")
     }
 
     /// But a choice she made before it was device-local has to carry over, or the
@@ -179,7 +237,7 @@ final class AutoEraseTests: XCTestCase {
         context.insert(profile)
         context.saveOrLog()
 
-        AutoSweepSettings.adoptProfileSettingIfNeeded(profile)
+        AutoSweepSettings.adoptProfileSettingIfNeeded(profile, syncEnabled: false)
         XCTAssertTrue(AutoSweepSettings.isEnabled, "her armed auto-erase was silently switched off by the upgrade")
         XCTAssertEqual(AutoSweepSettings.afterDays, 7, "her window length changed")
         XCTAssertEqual(AutoSweepSettings.lastActiveAt, Date(timeIntervalSince1970: 1_000_000),
@@ -187,7 +245,7 @@ final class AutoEraseTests: XCTestCase {
 
         // And she can then turn it off without the profile turning it back on.
         AutoSweepSettings.isEnabled = false
-        AutoSweepSettings.adoptProfileSettingIfNeeded(profile)
+        AutoSweepSettings.adoptProfileSettingIfNeeded(profile, syncEnabled: false)
         XCTAssertFalse(AutoSweepSettings.isEnabled, "turning it off did not stick")
     }
 
@@ -348,5 +406,82 @@ final class WipeResidueTests: XCTestCase {
     func testMissingDirectoriesAreNotAProblem() {
         let gone = scratch.appending(path: "does-not-exist")
         SecureWipeService.removeStoredFiles(temporaryDirectory: gone, applicationSupport: gone)
+    }
+}
+
+/// App Lock belongs to the device in her hand. A synced toggle from another
+/// device must not switch it off — the lock screen is the only place a duress
+/// PIN armed on this device can be typed.
+@MainActor
+final class DeviceLocalLockTests: XCTestCase {
+
+    override func setUp() { super.setUp(); AppLockSettings.resetForTesting() }
+    override func tearDown() { AppLockSettings.resetForTesting(); super.tearDown() }
+
+    /// Upgrading from a build that kept the lock on the profile must not unlock her.
+    func testAnUpgradingUserWithTheLockOnIsStillLocked() {
+        let profile = UserProfile()
+        profile.lockEnabled = true
+        XCTAssertTrue(AppLockSettings.isEnabled(profile: profile),
+            "the upgrade opened an App Lock user's history without asking")
+    }
+
+    /// The case this exists for: she turns the lock off on her iPad, it syncs.
+    func testASyncedLockOffFromAnotherDeviceDoesNotUnlockThisOne() {
+        let profile = UserProfile()
+        profile.lockEnabled = true
+        XCTAssertTrue(AppLockSettings.isEnabled(profile: profile))   // adopted here
+
+        profile.lockEnabled = false                                   // arrives via iCloud
+        XCTAssertTrue(AppLockSettings.isEnabled(profile: profile),
+            "another device switched this phone's lock off — and with it the only place her duress PIN can be typed")
+    }
+
+    /// No profile yet (first launch, mid-onboarding) decides nothing.
+    func testNoProfileDecidesNothing() {
+        XCTAssertFalse(AppLockSettings.isEnabled(profile: nil))
+        XCTAssertNil(UserDefaults.standard.object(forKey: AppLockSettings.key))
+    }
+
+    /// After a wipe, a profile still held on screen — or one syncing back in —
+    /// must not lock the app she was handed back.
+    func testAProfileSeenAfterAWipeCannotRelockTheApp() {
+        let profile = UserProfile()
+        profile.lockEnabled = true
+        XCTAssertTrue(AppLockSettings.isEnabled(profile: profile))
+        AppLockSettings.forget()                                 // what a wipe does
+        XCTAssertFalse(AppLockSettings.isEnabled(profile: profile),
+            "the wiped app re-locked itself from a profile that should no longer count")
+    }
+
+    /// A wipe hands back an app that opens unlocked, like a new install.
+    func testAWipeForgetsTheLock() async throws {
+        AppLockSettings.setEnabled(true)
+        let container = try ModelContainer(for: Persistence.schema,
+                                           configurations: [ModelConfiguration(isStoredInMemoryOnly: true)])
+        await SecureWipeService.wipeEverything(modelContext: container.mainContext)
+        XCTAssertFalse(AppLockSettings.isEnabled(profile: nil))
+    }
+}
+
+/// A wipe has to reach her wrist even when the watch cannot hear it yet.
+@MainActor
+final class WatchClearTests: XCTestCase {
+
+    override func tearDown() {
+        UserDefaults.standard.removeObject(forKey: WatchBridgeService.pendingClearKey)
+        super.tearDown()
+    }
+
+    /// The launch sweep runs before the session activates. The clear used to be
+    /// dropped on the floor; it must be kept and sent when the session is ready.
+    func testAClearTheWatchCannotReceiveYetIsKeptForLater() throws {
+        if WCSession.isSupported(), WCSession.default.activationState == .activated,
+           WCSession.default.isWatchAppInstalled {
+            throw XCTSkip("a reachable watch app takes the clear immediately")
+        }
+        WatchBridgeService.shared.pushCleared(at: Date(timeIntervalSince1970: 42))
+        XCTAssertEqual(UserDefaults.standard.object(forKey: WatchBridgeService.pendingClearKey) as? TimeInterval, 42,
+            "a wipe the watch could not hear yet was forgotten — her cycle stays on her wrist")
     }
 }

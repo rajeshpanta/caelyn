@@ -122,6 +122,7 @@ enum SecureWipeService {
         // 5d. Disarm auto-erase. Otherwise the fresh-looking app she is handed
         //     back has a destruct timer already running on it.
         AutoSweepSettings.forget()
+        AppLockSettings.forget()
 
         // 5e. Files. Three kinds, all of them her history in full:
         //
@@ -164,6 +165,9 @@ enum SecureWipeService {
             defaults.removeObject(forKey: key)
         }
         RatingService.reset()
+        // "Backed up … last updated" is a claim about a copy of her history. After
+        // a wipe there is no history to have backed up.
+        CloudSyncHealth.shared.forget()
 
         // The deletion marker is deliberately NOT cleared here. It is the record
         // that she chose to destroy a cloud copy, and it is what stops a later

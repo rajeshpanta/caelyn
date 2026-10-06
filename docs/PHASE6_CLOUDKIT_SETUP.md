@@ -53,15 +53,46 @@ either way. Nothing visible is wrong. Her history simply stops leaving the phone
 `CycleEntry.dayKey` is exactly such a field. It is new in build 16, has never
 shipped, and is not in Production.
 
-**Steps** (icloud.developer.apple.com/dashboard):
+**It was never only `dayKey`.** Checked with `cktool` on 2026-10-05, Production was
+missing **fifteen** mirrored attributes, several of which already shipped in 1.3:
+`basalTemperature`, `cervicalMucus`, `energyLevel`, `medication`,
+`ovulationTestResult`, `pregnancyTest`, `sexualActivity`, `noteReminderRule`,
+`noteReminderAt` and `dayKey` on `CD_CycleEntry`; `pregnancyDueDate`,
+`postpartumBirthDate`, `birthControlStartDate`, `preferredName` and
+`appleSuggestedName` on `CD_UserProfile`; plus every `_ckAsset` overflow field,
+Core Data's `CD_moveReceipt`, and the whole `CaelynCloudDeletion` record type.
+Development auto-creates a field only when a record **carrying a non-nil value**
+for it is exported, so anything nobody filled in while testing never existed —
+"run a build and log one entry" can never be trusted to create a full schema.
 
-1. Pick container **`iCloud.smallpanta-icould.com.caelynperiodtracker`**.
-2. **Schema → Record Types → CD_CycleEntry** in the **Development** environment.
-   Confirm `CD_dayKey` is listed. If it is not, run a development build on a
-   device with sync on and log one entry — that is what creates it.
-3. **Schema → Deploy Schema Changes…** → review the diff → **Deploy**.
-4. Switch the environment selector to **Production** and confirm `CD_dayKey` is
-   now on `CD_CycleEntry`.
+**Steps:**
+
+1. **Build the whole schema in Development from the model**, on a signed-in
+   device — not by logging entries:
+
+       TEST_RUNNER_CAELYN_INIT_CLOUDKIT_SCHEMA=1 xcodebuild test -scheme Caelyn \
+         -destination 'id=<device>' -allowProvisioningUpdates \
+         -only-testing:CaelynTests/CloudKitSchemaTests/testInitializeDevelopmentSchema
+
+   That runs Apple's `initializeCloudKitSchema` against the real SwiftData model.
+2. Export both environments and confirm the change is **purely additive** — no
+   existing field may change type, because a Production type can never change:
+
+       xcrun cktool export-schema --team-id 7T9897GFKH \
+         --container-id iCloud.smallpanta-icould.com.caelynperiodtracker \
+         --environment development --output-file dev.ckdb    # and production
+
+3. In the CloudKit Console (icloud.developer.apple.com), container
+   **`iCloud.smallpanta-icould.com.caelynperiodtracker`** → Development →
+   **Deploy Schema Changes…** → review → **Deploy**. **`cktool` cannot do this
+   step**: `import-schema` and `validate-schema` both answer "endpoint not
+   applicable in the environment 'production'", even with a management token.
+4. Export Production again; it must now equal Development. Commit that export
+   as `docs/cloudkit-production-schema.ckdb`.
+5. `CloudKitSchemaTests.testEveryMirroredAttributeIsDeployedToProduction` reads
+   that file and fails for any model attribute Production lacks — so adding a
+   property without deploying it fails on the simulator, not in a stranger's
+   iCloud.
 
 Deployment is **additive and irreversible**: a field cannot be removed from
 Production, so deploy only what the release actually ships. Do this *before* the

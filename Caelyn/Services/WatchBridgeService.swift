@@ -22,8 +22,18 @@ final class WatchBridgeService: NSObject, ObservableObject {
               WCSession.default.activationState == .activated,
               WCSession.default.isWatchAppInstalled else { return }
         guard let data = try? JSONEncoder().encode(snapshot) else { return }
-        try? WCSession.default.updateApplicationContext(["snapshot": data])
+        do {
+            try WCSession.default.updateApplicationContext(["snapshot": data])
+            // A delivered snapshot replaces whatever the watch held, so a clear
+            // still waiting to go has nothing left to clear.
+            UserDefaults.standard.removeObject(forKey: Self.pendingClearKey)
+        } catch {}
     }
+
+    /// A wipe the watch has not been told about yet. Persisted, because the wipe
+    /// most likely to miss the watch is the one at cold launch — the inactivity
+    /// sweep runs before the session has activated, and nothing used to retry.
+    static let pendingClearKey = "caelyn.watch.pendingClearAt"
 
     /// Tell the watch her data is gone.
     ///
@@ -40,17 +50,29 @@ final class WatchBridgeService: NSObject, ObservableObject {
     /// `updateApplicationContext` is a no-op when the dictionary is unchanged, so
     /// a second wipe would never be delivered.
     func pushCleared(at when: Date = .now) {
-        guard WCSession.isSupported(),
+        UserDefaults.standard.set(when.timeIntervalSince1970, forKey: Self.pendingClearKey)
+        deliverPendingClear()
+    }
+
+    /// Send a recorded clear if the session can carry it now. Called on every
+    /// wipe and again when the session finishes activating.
+    func deliverPendingClear() {
+        guard let stamp = UserDefaults.standard.object(forKey: Self.pendingClearKey) as? TimeInterval,
+              WCSession.isSupported(),
               WCSession.default.activationState == .activated,
               WCSession.default.isWatchAppInstalled else { return }
-        try? WCSession.default.updateApplicationContext(
-            ["cleared": when.timeIntervalSince1970]
-        )
+        do {
+            try WCSession.default.updateApplicationContext(["cleared": stamp])
+            UserDefaults.standard.removeObject(forKey: Self.pendingClearKey)
+        } catch {}
     }
 }
 
 extension WatchBridgeService: WCSessionDelegate {
-    nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
+    nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        guard activationState == .activated else { return }
+        Task { @MainActor in WatchBridgeService.shared.deliverPendingClear() }
+    }
     nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
     nonisolated func sessionDidDeactivate(_ session: WCSession) {
         WCSession.default.activate()

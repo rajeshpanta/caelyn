@@ -42,15 +42,20 @@ enum ExportService {
     // MARK: - Filter
 
     static func filterEntries(_ entries: [CycleEntry], range: ExportRange, today: Date = .now) -> [CycleEntry] {
-        guard let lookback = range.lookbackDays else { return entries.sorted { $0.date < $1.date } }
+        // Every read below is of `entry.day` — the day she logged, from the stored
+        // key — never `entry.date`. The instant formatted in whatever zone the
+        // phone is in today put a day logged in Tokyo on the previous day when
+        // exported in New York, and re-importing that file (Caelyn calls it a
+        // restore point) filed her whole history a day early, permanently.
+        guard let lookback = range.lookbackDays else { return entries.sorted { $0.day < $1.day } }
         // Normalize to start-of-day before subtracting so the boundary day (whose
         // entry.date is midnight) is always included regardless of the current
         // time of day (plat-13).
         let base = Calendar.current.startOfDay(for: today)
         let cutoff = Calendar.current.date(byAdding: .day, value: -lookback, to: base) ?? base
         return entries
-            .filter { $0.date >= cutoff }
-            .sorted { $0.date < $1.date }
+            .filter { $0.day >= cutoff }
+            .sorted { $0.day < $1.day }
     }
 
     // MARK: - CSV
@@ -74,7 +79,7 @@ enum ExportService {
 
         for entry in entries {
             var fields: [String] = []
-            fields.append(formatter.string(from: entry.date))
+            fields.append(formatter.string(from: entry.day))
             fields.append(entry.flow?.rawValue ?? "")
             fields.append(entry.pain.map(String.init) ?? "")
             fields.append(entry.painTypes.map(\.rawValue).joined(separator: ";"))
@@ -400,7 +405,7 @@ enum ExportService {
             let allSymptoms = entry.symptoms.map(\.displayName)
                 + (entry.loggedCustomSymptoms.isEmpty ? [] : entry.loggedCustomSymptoms)
             let cells = [
-                formatter.string(from: entry.date),
+                formatter.string(from: entry.day),
                 entry.flow?.displayName ?? "—",
                 entry.pain.map { "\($0)/10" } ?? "—",
                 allSymptoms.isEmpty ? "—" : allSymptoms.joined(separator: ", "),
@@ -417,7 +422,7 @@ enum ExportService {
     private static func drawNotes(page: inout PDFPageContext, entries: [CycleEntry], ctx: UIGraphicsPDFRendererContext) {
         let withNotes = entries.compactMap { e -> (Date, String)? in
             guard let note = e.note, !note.isEmpty else { return nil }
-            return (e.date, note)
+            return (e.day, note)
         }
         guard !withNotes.isEmpty else { return }
 

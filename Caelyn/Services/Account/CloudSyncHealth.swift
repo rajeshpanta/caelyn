@@ -82,18 +82,27 @@ final class CloudSyncHealth: ObservableObject {
     private func handle(_ note: Notification) {
         guard let event = note.userInfo?[NSPersistentCloudKitContainer.eventNotificationUserInfoKey]
                 as? NSPersistentCloudKitContainer.Event else { return }
+        ingest(type: event.type, succeeded: event.succeeded, endDate: event.endDate,
+               errorText: event.error?.localizedDescription)
+    }
 
+    /// The whole state machine, in one place. `handle` and the tests both come
+    /// through here, so a test cannot pass against a copy the app does not run.
+    private func ingest(type: NSPersistentCloudKitContainer.EventType,
+                        succeeded: Bool,
+                        endDate: Date?,
+                        errorText: String?) {
         // `endDate == nil` means it has only just started. Worth showing, because
         // a first sync of a long history is not instant, but it decides nothing.
-        guard event.endDate != nil else {
+        guard endDate != nil else {
             if case .backedUp = state {} else { state = .working }
             return
         }
 
-        switch event.type {
+        switch type {
         case .export:
-            if event.succeeded {
-                let finished = event.endDate ?? Date()
+            if succeeded {
+                let finished = endDate ?? Date()
                 UserDefaults.standard.set(finished, forKey: Self.lastExportKey)
                 state = .backedUp(finished)
                 log.info("CloudSync: export finished successfully.")
@@ -101,24 +110,24 @@ final class CloudSyncHealth: ObservableObject {
                 state = .notLeaving
                 // Logged, never shown: a CKError's text is Apple's, not Caelyn's,
                 // and the copy she sees is in `message` below.
-                log.error("CloudSync: export failed — \(event.error?.localizedDescription ?? "no detail", privacy: .public)")
+                log.error("CloudSync: export failed — \(errorText ?? "no detail", privacy: .public)")
             }
 
         case .setup:
             // A setup failure is how a schema that Production does not have tends
             // to surface first, and nothing will export afterwards.
-            if !event.succeeded {
+            if !succeeded {
                 state = .notLeaving
-                log.error("CloudSync: setup failed — \(event.error?.localizedDescription ?? "no detail", privacy: .public)")
+                log.error("CloudSync: setup failed — \(errorText ?? "no detail", privacy: .public)")
             }
 
         case .import:
             // An import says records came *down*, which is not evidence that hers
             // went up, so it cannot promote the state. A failure is still worth
             // saying something about rather than claiming everything is fine.
-            if !event.succeeded {
+            if !succeeded {
                 state = .notLeaving
-                log.error("CloudSync: import failed — \(event.error?.localizedDescription ?? "no detail", privacy: .public)")
+                log.error("CloudSync: import failed — \(errorText ?? "no detail", privacy: .public)")
             }
 
         @unknown default:
@@ -126,27 +135,21 @@ final class CloudSyncHealth: ObservableObject {
         }
     }
 
+    /// Forget the last successful export. Called by everything that destroys the
+    /// copy it vouched for — a wipe, or deleting the iCloud copy — because the
+    /// stamp survives relaunches: turning sync back on afterwards would otherwise
+    /// say "backed up … last updated" about a copy that no longer exists, before
+    /// anything has been exported.
+    func forget() {
+        UserDefaults.standard.removeObject(forKey: Self.lastExportKey)
+        state = .waiting
+    }
+
     /// For tests: drive the state machine without CoreData.
     func ingestForTesting(type: NSPersistentCloudKitContainer.EventType,
                           succeeded: Bool,
                           endDate: Date?) {
-        guard endDate != nil else {
-            if case .backedUp = state {} else { state = .working }
-            return
-        }
-        switch type {
-        case .export:
-            if succeeded {
-                let finished = endDate ?? Date()
-                UserDefaults.standard.set(finished, forKey: Self.lastExportKey)
-                state = .backedUp(finished)
-            } else {
-                state = .notLeaving
-            }
-        case .setup, .import:
-            if !succeeded { state = .notLeaving }
-        @unknown default: break
-        }
+        ingest(type: type, succeeded: succeeded, endDate: endDate, errorText: nil)
     }
 
     /// For tests: forget what a previous launch recorded.

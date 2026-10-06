@@ -37,6 +37,19 @@ final class CaelynUITests: XCTestCase {
                 if byLabel.waitForExistence(timeout: 2) { sheetButton = byLabel; break }
             }
         }
+        // iOS 27 moved the choice to the foot of a three-page list of categories,
+        // as a text cell rather than a button, with nothing in the nav bar. Scroll
+        // to it — it is not hittable until it is on screen.
+        if sheetButton == nil, app.navigationBars["Health Access"].exists {
+            for label in ["Don\u{2019}t Allow", "Don't Allow"] {
+                let cell = app.staticTexts[label]
+                guard cell.exists else { continue }
+                for _ in 0..<12 where !cell.isHittable {
+                    app.swipeUp(velocity: .fast)
+                }
+                if cell.isHittable { sheetButton = cell; break }
+            }
+        }
         guard let button = sheetButton else { return false }
         button.tap()
 
@@ -94,6 +107,24 @@ final class CaelynUITests: XCTestCase {
             onboardingHero.waitForExistence(timeout: 5) || mainHomeTab.waitForExistence(timeout: 5),
             "Expected either onboarding welcome (first launch) or main tab bar (already onboarded) to appear."
         )
+    }
+
+    /// A lock setting that outlives its profile must not put Face ID up over
+    /// onboarding — there is nothing to unlock. Found on a device, where an
+    /// interrupted run left App Lock on and "Meet Caelyn" arrived under a Face ID
+    /// sheet. The flag is forced through the arguments domain.
+    func testOnboardingIsNeverCoveredByAnUnlockPrompt() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--ui-test-onboarding", "-caelyn.lock.enabled", "YES"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Meet Caelyn"].waitForExistence(timeout: 5))
+        Thread.sleep(forTimeInterval: 3)
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let authSheet = springboard.buttons.matching(
+            NSPredicate(format: "label CONTAINS[c] 'Cancel' OR label CONTAINS[c] 'Face ID'")).firstMatch
+        XCTAssertFalse(authSheet.exists, "an unlock prompt covered onboarding, with nothing to unlock")
+        XCTAssertTrue(app.buttons["Let's begin"].isHittable)
+        capture("Onboarding-No-Unlock-Prompt", app: app)
     }
 
     func testOnboardingPrimaryActionsAreReachable() throws {
@@ -983,5 +1014,265 @@ final class CaelynUITests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+}
+
+extension CaelynUITests {
+
+    /// The system authentication sheet must appear *above* the lock window.
+    ///
+    /// **Why this is the riskiest thing in Phase 0.** The lock moved out of the
+    /// view hierarchy and into a `UIWindow` at `.alert + 1` so that it covers
+    /// presented sheets. That is the whole point — but it raises the opposite
+    /// question immediately: if an app window now sits above everything, does it
+    /// also sit above the Face ID / passcode sheet that `LAContext` puts up?
+    ///
+    /// If it does, a woman with App Lock on cannot authenticate: the sheet is
+    /// behind an opaque lock screen, her taps land on the wrong layer, and she is
+    /// shut out of her own history with no route back short of deleting the app.
+    /// The reasoning says this cannot happen — `LAContext` renders out of process
+    /// and SpringBoard composites system UI above every app window regardless of
+    /// level — but the cost of the reasoning being wrong is total, so it is
+    /// checked on real hardware instead.
+    ///
+    /// Device-only: the simulator has no device-owner authentication to present.
+    func testTheSystemAuthSheetAppearsAboveTheLockWindow() throws {
+        #if targetEnvironment(simulator)
+        throw XCTSkip("device-owner authentication cannot be exercised in the simulator")
+        #else
+        let app = launchSeeded()          // no --ui-test-disable-device-auth: real auth
+        addTeardownBlock { Self.disableLockAndPIN(in: app) }
+
+        // A Caelyn PIN first, so there is always a way back in if the system
+        // sheet refuses — this test must not be able to strand the device.
+        tapTab("Settings", in: app)
+        openSetting("App PIN", in: app, expects: "App PIN")
+        if app.buttons["Remove PIN"].exists { app.buttons["Remove PIN"].tap() }
+        app.buttons["Set a PIN"].tap()
+        XCTAssertTrue(app.staticTexts["Set a PIN"].waitForExistence(timeout: 3))
+        enterPIN("1234", in: app)
+        XCTAssertTrue(app.staticTexts["Confirm your PIN"].waitForExistence(timeout: 3))
+        enterPIN("1234", in: app)
+        XCTAssertTrue(app.buttons["Change PIN"].waitForExistence(timeout: 6))
+        backToSettings(from: "App PIN", in: app)
+
+        let lockToggle = app.switches.matching(NSPredicate(format: "label CONTAINS[c] %@", "lock")).firstMatch
+        reveal(lockToggle, in: app)
+        if lockToggle.value as? String != "1" {
+            // Exactly one tap, on the knob — a centre tap lands on the label and
+            // does nothing. A retry tap would land behind the system prompt below
+            // and could switch the lock straight back off.
+            lockToggle.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+        }
+        // The first Face ID use asks iOS's one-time "Allow Caelyn to use Face
+        // ID?" question. While it is up, the app cannot be snapshotted at all —
+        // every query against it hangs for 30 s and the run dies — so it has to
+        // be answered through SpringBoard before the app is touched again.
+        Self.allowFaceIDIfAsked()
+        XCTAssertEqual(lockToggle.value as? String, "1")
+
+        // Background and come back: the gate locks and, because device auth is
+        // available, immediately asks for it.
+        XCUIDevice.shared.press(.home)
+        Thread.sleep(forTimeInterval: 2.0)
+        app.activate()
+
+        // Coming back must prompt by itself. With no enrolled face in view the
+        // scan fails and iOS raises its "Face Not Recognized" sheet — the
+        // system UI whose layering this test exists to check.
+        //
+        // Run it with the phone face-down or nobody in front of it: if Face ID
+        // recognises someone, the app unlocks before there is a sheet to test.
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let cancel = springboard.buttons.matching(
+            NSPredicate(format: "label CONTAINS[c] 'Cancel'")).firstMatch
+        // "Unlocked" means the lock screen has gone — not that some app control
+        // exists, because the app's tree is still there underneath the lock.
+        let lockScreen = app.staticTexts["Caelyn is locked"]
+        XCTAssertTrue(lockScreen.waitForExistence(timeout: 5), "returning did not lock Caelyn")
+        let deadline = Date().addingTimeInterval(20)
+        while Date() < deadline, !cancel.exists, lockScreen.exists {
+            Thread.sleep(forTimeInterval: 0.5)
+        }
+        capture("JOY-SystemAuth-Over-LockWindow", app: app)
+
+        if !lockScreen.exists, !cancel.exists {
+            // The prompt came up over the lock and a face it knows unlocked the
+            // app — the sheet was reachable. The cancel path was not exercised.
+            XCTFail("Face ID recognised a face and unlocked before the cancel path could run; re-run with the phone face-down")
+            return
+        }
+        XCTAssertTrue(cancel.exists,
+            "returning to a locked Caelyn did not raise the system authentication sheet")
+        XCTAssertTrue(cancel.isHittable,
+            "the system authentication sheet is on screen but not reachable — the lock window at .alert + 1 is covering it, and App Lock users cannot get into their own history")
+
+        // The passcode fallback: `.deviceOwnerAuthentication` must offer her
+        // device passcode once Face ID has failed, and that pad must also come
+        // up above the lock window. Her passcode is never typed here.
+        let tryAgain = springboard.buttons.matching(
+            NSPredicate(format: "label CONTAINS[c] 'Try Face ID Again'")).firstMatch
+        let enterPasscode = springboard.buttons.matching(
+            NSPredicate(format: "label CONTAINS[c] 'Enter Passcode'")).firstMatch
+        if !enterPasscode.exists, tryAgain.exists {
+            tryAgain.tap()
+            let deadline = Date().addingTimeInterval(15)
+            while Date() < deadline, !enterPasscode.exists, lockScreen.exists {
+                Thread.sleep(forTimeInterval: 0.5)
+            }
+        }
+        XCTAssertTrue(enterPasscode.exists,
+            "after Face ID failed, iOS offered no passcode fallback over the lock")
+        capture("JOY-Passcode-Offered", app: app)
+        enterPasscode.tap()
+        let passcodePad = springboard.descendants(matching: .any).matching(
+            NSPredicate(format: "label CONTAINS[c] 'Passcode'")).firstMatch
+        XCTAssertTrue(passcodePad.waitForExistence(timeout: 5),
+            "the device passcode pad did not appear")
+        Thread.sleep(forTimeInterval: 1.0)
+        capture("JOY-Passcode-Over-LockWindow", app: app)
+        XCTAssertTrue(cancel.waitForExistence(timeout: 3) && cancel.isHittable,
+            "the passcode pad is up but cannot be dismissed")
+        cancel.tap()
+
+        // Cancel has to stick. Dismissing the sheet returns the scene to active,
+        // and the gate once read that as a fresh return and put the sheet
+        // straight back up — leaving "Use PIN instead", and any duress PIN
+        // behind it, reachable only between prompts.
+        Thread.sleep(forTimeInterval: 4.0)
+        capture("JOY-After-Cancel", app: app)
+        XCTAssertFalse(cancel.exists,
+            "cancelling the system sheet re-prompted at once — she can never get to her PIN")
+        XCTAssertTrue(app.staticTexts["Caelyn is locked"].exists,
+            "after Cancel she must be left on Caelyn's lock screen")
+
+        // Whatever happened, she must be able to get back in.
+        XCTAssertTrue(openPINEntry(in: app), "the lock screen offered no way back in")
+        enterPIN("1234", in: app)
+        XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 8),
+                      "Caelyn's own PIN did not unlock the app")
+        #endif
+    }
+
+    /// The duress PIN must still wipe after the lockout has engaged, and the real
+    /// wipe — reached the way she reaches it — must leave nothing on the device.
+    ///
+    /// Opt-in and device-only, because it plants residue in the real Keychain and
+    /// containers. Read the device afterwards with
+    /// `CaelynTests/WipeForensicsTests` (`CAELYN_WIPE_FORENSICS=survivors-must-be-empty`).
+    func testDuressWipeAfterLockoutLeavesNothingOnDevice() throws {
+        guard ProcessInfo.processInfo.environment["CAELYN_DEVICE_FORENSICS"] == "1" else {
+            throw XCTSkip("plants residue in the real Keychain; opt in with CAELYN_DEVICE_FORENSICS=1")
+        }
+        let app = launchSeeded(extraArguments: ["--ui-test-disable-device-auth", "--ui-test-plant-residue"])
+
+        tapTab("Settings", in: app)
+        openSetting("App PIN", in: app, expects: "App PIN")
+        if app.buttons["Remove PIN"].exists { app.buttons["Remove PIN"].tap() }
+        app.buttons["Set a PIN"].tap()
+        XCTAssertTrue(app.staticTexts["Set a PIN"].waitForExistence(timeout: 3))
+        enterPIN("1234", in: app)
+        XCTAssertTrue(app.staticTexts["Confirm your PIN"].waitForExistence(timeout: 3))
+        enterPIN("1234", in: app)
+        // If App Lock was already on, a PIN is now a way in, so Caelyn locks.
+        if openPINEntry(in: app) { enterPIN("1234", in: app) }
+        XCTAssertTrue(app.buttons["Change PIN"].waitForExistence(timeout: 6))
+        backToSettings(from: "App PIN", in: app)
+
+        let lockToggle = app.switches.matching(NSPredicate(format: "label CONTAINS[c] %@", "lock")).firstMatch
+        reveal(lockToggle, in: app)
+        if lockToggle.value as? String != "1" {
+            lockToggle.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
+        }
+        XCTAssertEqual(lockToggle.value as? String, "1")
+        if openPINEntry(in: app) {
+            enterPIN("1234", in: app)
+            XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 3))
+        }
+
+        openSetting("App PIN", in: app, expects: "App PIN")
+        app.buttons["Set a duress PIN"].tap()
+        XCTAssertTrue(app.staticTexts["Set a duress PIN"].waitForExistence(timeout: 3))
+        enterPIN("4321", in: app)
+        XCTAssertTrue(app.staticTexts["Confirm your PIN"].waitForExistence(timeout: 3))
+        enterPIN("4321", in: app)
+        XCTAssertTrue(app.buttons["Remove duress PIN"].waitForExistence(timeout: 6))
+        backToSettings(from: "App PIN", in: app)
+
+        XCUIDevice.shared.press(.home)
+        Thread.sleep(forTimeInterval: 2.0)
+        app.activate()
+        XCTAssertTrue(openPINEntry(in: app), "backgrounding should re-lock Caelyn")
+
+        // Whoever is holding her phone burns through every attempt.
+        for _ in 0..<5 { enterPIN("0000", in: app) }
+        let lockedOut = app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS[c] 'Too many attempts'")).firstMatch
+        XCTAssertTrue(lockedOut.waitForExistence(timeout: 3), "five wrong PINs should engage the lockout")
+        capture("JOY-Duress-After-Lockout", app: app)
+
+        // The scenario the duress PIN exists for: it must still wipe.
+        enterPIN("4321", in: app)
+        XCTAssertTrue(app.staticTexts["Meet Caelyn"].waitForExistence(timeout: 15),
+                      "the duress PIN was refused by the lockout — the one moment it is ever typed")
+        XCTAssertFalse(app.buttons["Home"].exists)
+        XCTAssertFalse(lockedOut.exists, "the app handed back still shows the lockout")
+        capture("JOY-Duress-Wipe-First-Launch", app: app)
+
+        // What the wipe left on this device, read inside the process that wiped —
+        // once it has finished, and again later, so nothing may re-arm itself.
+        let readout = app.staticTexts["UIA.WipeResidue.Survivors"]
+        XCTAssertTrue(readout.waitForExistence(timeout: 5))
+        let settled = NSPredicate(format: "label == 'none'")
+        expectation(for: settled, evaluatedWith: readout)
+        waitForExpectations(timeout: 15)
+        Thread.sleep(forTimeInterval: 5)
+        XCTAssertEqual(readout.label, "none", "residue reappeared after the wipe: \(readout.label)")
+        capture("JOY-Duress-Wipe-Residue-None", app: app)
+    }
+
+    /// Control for the forensics: plant the residue and do nothing else, so the
+    /// forensic reader can be shown to see every kind. Opt-in, device-only.
+    func testPlantWipeResidueOnly() throws {
+        guard ProcessInfo.processInfo.environment["CAELYN_DEVICE_FORENSICS"] == "control" else {
+            throw XCTSkip("forensics control; opt in with CAELYN_DEVICE_FORENSICS=control")
+        }
+        let app = launchSeeded(extraArguments: ["--ui-test-plant-residue"])
+        let readout = app.staticTexts["UIA.WipeResidue.Survivors"]
+        XCTAssertTrue(readout.waitForExistence(timeout: 5))
+        Thread.sleep(forTimeInterval: 1.5)
+        for planted in ["temp export", "default.store.corrupt-", "CaelynImportLedger.json",
+                        "Apple user ID", "widget snapshot", "auto-erase"] {
+            XCTAssertTrue(readout.label.contains(planted),
+                "control: planted \(planted) is not detected, so a clean reading would prove nothing — \(readout.label)")
+        }
+        capture("JOY-Residue-Control", app: app)
+        // Leave the device as found: the plant put a fake Apple identity in the
+        // real Keychain and armed auto-erase.
+        app.terminate()
+        let cleanup = XCUIApplication()
+        cleanup.launchArguments = ["--screenshot-mode", "--ui-test-clear-residue"]
+        cleanup.launch()
+        XCTAssertTrue(cleanup.buttons["Home"].waitForExistence(timeout: 10))
+        cleanup.terminate()
+    }
+
+    /// Answer iOS's one-time Face ID permission prompt, if it is showing.
+    private static func allowFaceIDIfAsked() {
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let allow = springboard.buttons["Allow"]
+        if allow.waitForExistence(timeout: 4) { allow.tap() }
+    }
+
+    /// Leave the device as we found it: no lock, no PIN.
+    private static func disableLockAndPIN(in app: XCUIApplication) {
+        guard app.state == .runningForeground else { return }
+        let lockToggle = app.switches.matching(NSPredicate(format: "label CONTAINS[c] %@", "lock")).firstMatch
+        if lockToggle.exists, lockToggle.value as? String == "1" { lockToggle.tap() }
+        let pinRow = app.buttons.matching(NSPredicate(format: "label CONTAINS[c] %@", "App PIN")).firstMatch
+        if pinRow.exists {
+            pinRow.tap()
+            if app.buttons["Remove PIN"].waitForExistence(timeout: 3) { app.buttons["Remove PIN"].tap() }
+        }
     }
 }
