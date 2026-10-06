@@ -78,6 +78,16 @@ enum AutoSweepSettings {
     /// Only ever copies *on* — a profile arriving from another device cannot use
     /// this to switch auto-erase off here, and cannot switch it on either, because
     /// it runs once and then never again.
+    ///
+    /// **A missing profile deliberately burns the one chance.** It would be easy
+    /// to wait for a profile to show up instead, and that is the wrong default:
+    /// on a fresh install the profile arrives *from iCloud*, carrying a setting
+    /// she armed on a different phone — and adopting it here is exactly the
+    /// cross-device wipe this type exists to prevent. The case this gives up on
+    /// is an upgrading device whose local profile somehow is not loaded yet,
+    /// which costs her an auto-erase she must re-arm; the case it refuses is a
+    /// device arming itself from somebody else's decision. Losing a destructive
+    /// timer is the safer of the two failures.
     static func adoptProfileSettingIfNeeded(_ profile: UserProfile?) {
         let defaults = UserDefaults.standard
         guard !defaults.bool(forKey: Key.adopted) else { return }

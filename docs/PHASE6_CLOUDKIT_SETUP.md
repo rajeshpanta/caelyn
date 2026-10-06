@@ -96,7 +96,46 @@ xcrun cktool export-schema \
   --environment production | grep -A20 CD_CycleEntry
 ```
 
-## 5. Not yet built: Partner Share
+## 5. Exporting and validating a build (two traps that cost an hour each)
+
+**Automatic signing picks the wrong profile.** `-exportArchive` with
+`signingStyle: automatic` reaches for an auto-generated *iOS Team Store
+Provisioning Profile*, which carries neither Push Notifications nor Sign In with
+Apple, and fails with three capability errors that look like the App ID is
+misconfigured. It is not — the correct profiles already exist. Export manually
+and name them:
+
+```xml
+<key>signingStyle</key><string>manual</string>
+<key>signingCertificate</key><string>Apple Distribution</string>
+<key>provisioningProfiles</key>
+<dict>
+  <key>smallpanta-icould.com.caelynperiodtracker</key><string>Caelyn 1.3 AppStore App</string>
+  <key>smallpanta-icould.com.caelynperiodtracker.widget</key><string>Caelyn 1.3 AppStore Widget</string>
+  <key>smallpanta-icould.com.caelynperiodtracker.watchapp</key><string>Caelyn 1.3 AppStore Watch</string>
+</dict>
+```
+
+(The ASC API key does not rescue the automatic path: its role has no access to
+cloud-managed distribution certificates, which is a separate error again.)
+
+**An approved version train is closed.** A version that has shipped accepts no
+further builds, at any build number. The archive and the export both succeed —
+only validation refuses, with `90186` *"the train version 'X' is closed for new
+build submissions"* and `90062` *"must contain a higher version than the
+previously approved version"*. Bump `MARKETING_VERSION`, not just
+`CURRENT_PROJECT_VERSION`.
+
+So **always validate before uploading**:
+
+```sh
+xcrun altool --validate-app -f /tmp/caelyn-export/Caelyn.ipa --type ios \
+  --apiKey UJ7WBMA5H5 --apiIssuer <issuer-id>
+```
+
+Expect `VERIFY SUCCEEDED with no errors`.
+
+## 6. Not yet built: Partner Share
 
 Partner sharing (CKShare-based) is **not** shipped. It builds on this sync
 foundation but is a large, device-only feature; the old fake/disabled Share UI was

@@ -59,7 +59,18 @@ enum CycleStore {
         // recovered here can land on a day some other row already holds, and that
         // pair has to be visible to the merge as a pair.
         for entry in all where !CivilDay.isPlausible(entry.dayKey) {
-            entry.dayKey = CivilDay.recoveredKey(for: entry.date, calendar: calendar)
+            let recovered = CivilDay.recoveredKey(for: entry.date, calendar: calendar)
+            // Only write when recovery can actually say something better. If the
+            // stored instant is itself unusable — a date outside 1900-2200, which
+            // no real logging produces — there is no answer to be had, and
+            // re-assigning the same key on every launch is a write and a save for
+            // nothing. (SwiftData does not dirty an object on an identical
+            // assignment, so this is wasted work rather than a CloudKit export;
+            // it is skipped because it is pointless, not because it was harmful.)
+            // `CycleEntry.day(in:)` already reads such a row by truncating its
+            // instant, which is what every reader did before `dayKey` existed.
+            guard recovered != entry.dayKey else { continue }
+            entry.dayKey = recovered
             keyed += 1
         }
 

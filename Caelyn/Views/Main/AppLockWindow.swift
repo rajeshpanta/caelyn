@@ -57,6 +57,10 @@ final class AppLockWindow {
     private init() {}
 
     private var window: UIWindow?
+    /// The model the live window was built around. A window hosting a *different*
+    /// model than the gate is now driving would render state nobody updates —
+    /// buttons that do nothing on a screen she cannot get past.
+    private weak var hostedModel: AppLockModel?
 
     /// Whether the window is currently carrying the lock. The gate reads this to
     /// decide whether its own copy still needs to draw.
@@ -66,8 +70,16 @@ final class AppLockWindow {
     /// was available and the caller's in-hierarchy lock is doing the job.
     @discardableResult
     func present(model: AppLockModel) -> Bool {
-        if window != nil { return true }
         guard let scene = Self.activeScene() else { return false }
+
+        // Reuse only a window that is still attached to this scene and still
+        // bound to this model. A window whose scene has gone away is invisible
+        // while `isPresenting` still reads true, which would leave the gate
+        // suppressing its own lock and nothing covering the app at all.
+        if let existing = window {
+            if existing.windowScene === scene, hostedModel === model { return true }
+            dismiss()
+        }
 
         let host = UIHostingController(rootView: AppLockOverlay(model: model))
         host.view.backgroundColor = UIColor(CaelynColor.backgroundCream)
@@ -84,6 +96,7 @@ final class AppLockWindow {
         window.isHidden = false
 
         self.window = window
+        self.hostedModel = model
         isPresenting = true
         return true
     }
@@ -92,6 +105,7 @@ final class AppLockWindow {
         window?.isHidden = true
         window?.rootViewController = nil
         window = nil
+        hostedModel = nil
         isPresenting = false
     }
 

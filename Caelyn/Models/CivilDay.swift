@@ -129,8 +129,16 @@ enum CivilDay {
     /// which is what a row from a sideways import or a hand-edited store looks
     /// like. There is no better evidence available for those.
     static func recoveredKey(for date: Date, calendar: Calendar = .current) -> Int {
+        // `Int(_:)` traps on a non-finite Double, and this runs at launch over
+        // every row in her store — so a single corrupt timestamp would not be a
+        // bad day key, it would be an app that cannot start.
+        let interval = date.timeIntervalSince1970
+        guard interval.isFinite, abs(interval) < 1e12 else {
+            return key(for: date, calendar: calendar)
+        }
+
         let legal = -12 * 3_600 ... 14 * 3_600
-        let seconds = Int(date.timeIntervalSince1970.rounded())
+        let seconds = Int(interval.rounded())
         let remainder = ((-seconds) % 86_400 + 86_400) % 86_400
 
         // Offsets differ by a whole day, so at most two can be legal — and both

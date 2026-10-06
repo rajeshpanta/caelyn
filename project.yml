@@ -13,9 +13,18 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    # 1.3 — the account and private iCloud sync release. 1.0, 1.1 and 1.2 are
-    # all live; build 13 was the 1.2 upload, so this train starts at 14.
-    MARKETING_VERSION: "1.3"
+    # 1.3.1 — the Phase 0 correctness release: day identity, the three wipes,
+    # the duress PIN, and honest sync status. No new features.
+    #
+    # It is 1.3.1 rather than another 1.3 build because **an approved version
+    # train is closed**. 1.3 build 15 shipped, so App Store Connect refuses any
+    # further 1.3 upload outright — `altool --validate-app` returns 90186
+    # ("the train version '1.3' is closed for new build submissions") and 90062
+    # ("must contain a higher version than the previously approved version").
+    # The archive builds and exports perfectly in that state; the refusal only
+    # appears at validation, which is why it is worth validating before an
+    # upload rather than discovering it during one.
+    MARKETING_VERSION: "1.3.1"
     # Build numbers must rise within a version train. 1.0 is a fresh train (its
     # builds are separate from the 1.0.1 ones), but this stays strictly above the
     # highest number used anywhere so no upload can ever collide. Bump it before

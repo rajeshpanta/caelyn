@@ -295,3 +295,106 @@ final class PersistedDayStringTests: XCTestCase {
         }
     }
 }
+
+/// The launch pass runs over every row in her store before anything is drawn.
+/// A trap or a loop there is not a bad value — it is an app that will not open,
+/// or one that writes to iCloud on every launch for the rest of its life.
+@MainActor
+final class LaunchPassRobustnessTests: XCTestCase {
+
+    private var container: ModelContainer!
+    private var context: ModelContext!
+
+    override func setUpWithError() throws {
+        container = try ModelContainer(
+            for: CycleEntry.self, UserProfile.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none))
+        context = container.mainContext
+    }
+    override func tearDownWithError() throws { container = nil; context = nil }
+
+    /// `Int(_:)` traps on a non-finite Double, so one corrupt timestamp in the
+    /// store would crash the launch rather than produce a wrong day.
+    func testACorruptTimestampDoesNotTrap() {
+        for interval in [Double.nan, .infinity, -.infinity, 1e300, -1e300] {
+            let key = CivilDay.recoveredKey(for: Date(timeIntervalSince1970: interval))
+            XCTAssertNotNil(key, "recovering a day from \(interval) should return something, not trap")
+        }
+    }
+
+    func testACorruptTimestampSurvivesTheWholeLaunchPass() {
+        let e = CycleEntry(date: Date())
+        e.date = Date(timeIntervalSince1970: .nan)
+        e.dayKey = 0
+        e.flow = .medium
+        context.insert(e)
+        context.saveOrLog()
+
+        CycleStore.dedupeSameDay(in: context)   // must not trap
+        XCTAssertEqual((try? context.fetch(FetchDescriptor<CycleEntry>()))?.count, 1)
+    }
+
+    /// A row whose instant is itself unusable has no recoverable day, so the pass
+    /// cannot improve it. What it must not do is let that row wander: the key has
+    /// to settle on one value and stay there, launch after launch, wherever she
+    /// is.
+    ///
+    /// (The guard in `dedupeSameDay` also skips a pointless write and save for
+    /// such a row. That is worth doing, but it is not what this test proves —
+    /// assigning an identical value does not dirty the object, so the save is a
+    /// no-op either way and no assertion here can tell the two apart.)
+    func testAnUnrecoverableRowSettlesOnOneKeyAndStaysThere() {
+        let ancient = Date(timeIntervalSince1970: -30_000_000_000)   // ~year 1019
+        let e = CycleEntry(date: ancient)
+        e.date = ancient
+        e.dayKey = 0
+        e.flow = .medium
+        context.insert(e)
+        context.saveOrLog()
+
+        let original = NSTimeZone.default
+        defer { NSTimeZone.default = original }
+
+        CycleStore.dedupeSameDay(in: context)
+        let settled = (try? context.fetch(FetchDescriptor<CycleEntry>()))?.first?.dayKey
+
+        for zone in ["Asia/Tokyo", "America/Los_Angeles", "Pacific/Kiritimati", "UTC"] {
+            NSTimeZone.default = TimeZone(identifier: zone)!
+            CycleStore.dedupeSameDay(in: context)
+            XCTAssertEqual((try? context.fetch(FetchDescriptor<CycleEntry>()))?.first?.dayKey, settled,
+                "a row the pass cannot key moved when the launch pass ran in \(zone)")
+            XCTAssertEqual((try? context.fetch(FetchDescriptor<CycleEntry>()))?.first?.date, ancient,
+                "and its instant must never be rewritten")
+        }
+    }
+
+    /// And such a row still reads as the day it has always read as.
+    func testAnUnrecoverableRowStillResolvesToItsOwnInstant() {
+        let ancient = Date(timeIntervalSince1970: -30_000_000_000)
+        let e = CycleEntry(date: ancient)
+        e.date = ancient
+        e.dayKey = 0
+        context.insert(e)
+        context.saveOrLog()
+        CycleStore.dedupeSameDay(in: context)
+
+        let cal = Calendar(identifier: .gregorian)
+        XCTAssertEqual(e.day(in: cal), cal.startOfDay(for: ancient),
+            "a row the pass could not key must still read as the day its instant falls on")
+    }
+
+    /// An ordinary store must not be written to at all once it is keyed.
+    func testASettledStoreIsNeverWrittenToAgain() {
+        for i in 0..<5 {
+            let e = CycleStore.entry(
+                for: Calendar.current.date(byAdding: .day, value: i,
+                    to: Date(timeIntervalSince1970: 1_780_000_000))!, in: context)
+            e.flow = .medium
+        }
+        context.saveOrLog()
+        CycleStore.dedupeSameDay(in: context)
+        XCTAssertFalse(context.hasChanges, "the first pass over an already-keyed store changed something")
+        CycleStore.dedupeSameDay(in: context)
+        XCTAssertFalse(context.hasChanges, "a second pass changed something")
+    }
+}
